@@ -53,7 +53,7 @@ export function AuthForm() {
             Welcome to Geiger
           </h1>
           <p className="text-zinc-500 font-medium text-lg">
-            The new way to build software
+            The better way to manage work.
           </p>
         </div>
 

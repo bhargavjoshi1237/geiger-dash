@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Box, Zap, Share2, Layers, Cpu, Globe } from "lucide-react";
+import { ArrowRight, Box, Zap, Share2, Layers, Cpu, Globe, Workflow, ShieldCheck, Network, Database, Check } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
 import HeroCanvas from "@/components/hero-canvas/HeroCanvas";
+import { MegaMenu } from "@/components/mega-menu";
 
 export default async function Home() {
   const supabase =  await createClient();
@@ -22,11 +23,7 @@ export default async function Home() {
             </div>
             <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
           </div>
-          <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium text-zinc-400">
-            <Link href="#features" className="hover:text-zinc-100 transition-colors">Features</Link>
-            <Link href="#about" className="hover:text-zinc-100 transition-colors">About</Link>
-            <Link href="#" className="hover:text-zinc-100 transition-colors">Pricing</Link>
-          </nav>
+          <MegaMenu />
           <div className="flex items-center gap-4">
             {userId ? (
               <>
@@ -128,64 +125,109 @@ export default async function Home() {
         </section>
 
         <section id="features" className="py-32 px-6 relative bg-zinc-950">
-          <div className="container mx-auto max-w-6xl">
+          <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-24">
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">Everything you need.</h2>
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">The Complete Suite.</h2>
               <p className="text-zinc-400 max-w-2xl mx-auto text-lg">
-                Built for speed and extensibility. Geiger adapts to your workflow, not the other way around.
+                Built for speed and extensibility. A collection of powerful tools designed to adapt to your workflow with a unified stealth design.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {[
-                {
-                  icon: <Box className="w-6 h-6" />,
-                  title: "Infinite Canvas",
-                  desc: "A boundless space for your ideas. Zoom in for details, zoom out for the big picture.",
-                  color: "bg-blue-500/10 text-blue-400"
-                },
-                {
-                  icon: <Zap className="w-6 h-6" />,
-                  title: "Real-time Sync",
-                  desc: "Collaborate with your team seamlessly. Changes reflect instantly across all devices.",
-                   color: "bg-yellow-500/10 text-yellow-400"
-                },
-                {
-                  icon: <Layers className="w-6 h-6" />,
-                  title: "Version History",
-                  desc: "Never lose a thought. Time travel through your workspace's evolution with ease.",
-                   color: "bg-green-500/10 text-green-400"
-                },
-                {
-                  icon: <Share2 className="w-6 h-6" />,
-                  title: "Easy Sharing",
-                  desc: "Share your workspace with a single link. Control permissions and access levels.",
-                   color: "bg-purple-500/10 text-purple-400"
-                },
-                {
-                  icon: <Cpu className="w-6 h-6" />,
-                  title: "High Performance",
-                  desc: "Engineered for speed. Handles complex diagrams and thousands of nodes without lag.",
-                   color: "bg-red-500/10 text-red-400"
-                },
-                {
-                  icon: <Globe className="w-6 h-6" />,
-                  title: "Cloud Native",
-                  desc: "Access your work from anywhere. Your data is secure and always available.",
-                   color: "bg-cyan-500/10 text-cyan-400"
-                }
-              ].map((feature, i) => (
-                <div key={i} className="flex gap-8 p-8 rounded-2xl bg-zinc-900/20">
-                  <div className="flex items-center justify-center">
-                    {feature.icon}
+            <div className="flex flex-col gap-8">
+              {/* Geiger Flow */}
+              <div className="flex flex-col md:flex-row gap-8 p-8 md:p-12 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <Workflow className="w-8 h-8 text-zinc-300" />
                   </div>
-                 <div className="">
-                  <h3 className="text-xl font-bold mb-3 text-zinc-100">{feature.title}</h3>
-                  <p className="text-zinc-400 leading-relaxed font-light">
-                    {feature.desc}
-                  </p>
-                 </div>
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-2xl font-bold mb-4 text-zinc-100 flex items-center gap-3">
+                    Geiger Flow
+                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 tracking-wide uppercase">Flagship</span>
+                  </h3>
+                  <p className="text-zinc-400 text-lg leading-relaxed font-light mb-8">
+                    Lightweight creative project manager featuring Kanban and Timeline views. Manage processes, stage tasks, track milestones, and engage in node-level discussions.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6">
+                    {[
+                      "Kanban Board",
+                      "Assignable / Task Nodes",
+                      "Version Control (Board Level)",
+                      "On-Node Comments",
+                      "Section of Nodes",
+                      "Global Board Search",
+                      "AI Node Summarization",
+                      "Offline Use Opt-In",
+                      "Multi-Workspace",
+                      "Programmable Nodes",
+                      "Permission Based Access",
+                      "LLM Chat Drawer"
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3 text-sm text-zinc-400">
+                        <div className="w-5 h-5 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center sm:shrink-0">
+                          <Check className="w-3 h-3 text-zinc-300" />
+                        </div>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Geiger Notes */}
+                <div className="flex flex-col gap-6 p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-800/50 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <Zap className="w-7 h-7 text-zinc-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 text-zinc-100">Geiger Notes</h3>
+                    <p className="text-zinc-400 leading-relaxed font-light">
+                      Visual boards for creative brainstorming and early-stage ideation. Collaborate in real-time on an infinite canvas designed for speed.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Geiger DAM */}
+                <div className="flex flex-col gap-6 p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-800/50 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <Layers className="w-7 h-7 text-zinc-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 text-zinc-100">Geiger DAM</h3>
+                    <p className="text-zinc-400 leading-relaxed font-light">
+                      Digital Assets Manager offering secure storage, metadata tagging, usage tracking, permission access, CDN configuration, and detailed analytics.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Geiger Grey */}
+                <div className="flex flex-col gap-6 p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-800/50 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <Network className="w-7 h-7 text-zinc-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 text-zinc-100">Geiger Grey</h3>
+                    <p className="text-zinc-400 leading-relaxed font-light">
+                      Knowledge Graph showcased primarily for Geiger Notes. Seamlessly import, export, and visualize complex data relationships securely.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Geiger Enterprise */}
+                <div className="flex flex-col gap-6 p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-800/50 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <ShieldCheck className="w-7 h-7 text-zinc-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 text-zinc-100">Geiger Enterprise</h3>
+                    <p className="text-zinc-400 leading-relaxed font-light">
+                      Self-hosted deployment with domain configuration, comprehensive admin controls, role-based access, SSO, activity logs, and automated backups.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
@@ -231,7 +273,65 @@ export default async function Home() {
              </div>
         </section>
       </main>
-      <div className="mt-10 flex justify-center"><h1 className="text-[13vw] font-bold text-gray-900/5 dark:text-white/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
+      
+      {/* Footer */}
+      <footer className="w-full border-t border-zinc-800/50 bg-zinc-950 pt-16 pb-8 relative z-10 px-6">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+            <div className="col-span-2 md:col-span-4 lg:col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
+                </div>
+                <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
+              </div>
+              <p className="text-zinc-500 text-sm max-w-sm">
+                Built for speed and extensibility. Geiger is the stealth workspace for high-performance teams.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-zinc-100 mb-4">Products</h4>
+              <ul className="space-y-3">
+                <li><Link href="/flow" className="hover:text-zinc-100 transition-colors">Geiger Flow</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Geiger Notes</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Geiger DAM</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Geiger Grey</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Geiger Enterprise</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-zinc-100 mb-4">Resources</h4>
+              <ul className="flex flex-col gap-3 text-sm text-zinc-400">
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Documentation</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Help Center</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Community</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Contact Support</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-zinc-100 mb-4">Company</h4>
+              <ul className="flex flex-col gap-3 text-sm text-zinc-400">
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">About</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Careers</Link></li>
+                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Legal</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-zinc-800/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+            <p>&copy; {new Date().getFullYear()} Geiger Studios. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link href="#" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link>
+              <Link href="#" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <div className="mt-10 flex justify-center"><h1 className="text-[13vw] font-bold text-zinc-100/10 dark:text-white/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
+      
     </div>
   );
 }
