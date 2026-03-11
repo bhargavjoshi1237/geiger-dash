@@ -26,6 +26,14 @@ const nextConfig = {
         source: "/flow/:path*",
         destination: "https://geigerflow.vercel.app/flow/:path*",
       },
+      {
+        source: "/canvas",
+        destination: "https://geigercanvas.vercel.app/",
+      },
+      {
+        source: "/canvas/:path*",
+        destination: "https://geigercanvas.vercel.app/:path*",
+      },
     ];
   },
 };
