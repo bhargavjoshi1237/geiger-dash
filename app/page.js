@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, Box, Zap, Share2, Layers, Cpu, Globe, Workflow, ShieldCheck, Network, Database, Check, Terminal, Github, Figma, Code2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import { LogoutButton } from "@/components/logout-button";
 import HeroCanvas from "@/components/hero-canvas/HeroCanvas";
-import { MegaMenu } from "@/components/mega-menu";
+import { Header } from "@/components/header";
+import  Footer from "@/components/footer";
 
 export default async function Home() {
-  const supabase =  await createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -16,38 +16,7 @@ export default async function Home() {
     <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       
-      {/* HEADER: Original Theme */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={24} height={24} />
-            </div>
-            <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
-          </div>
-          <MegaMenu />
-          <div className="flex items-center gap-4">
-            {userId ? (
-              <>
-                <Link
-                  href={`/notes/${userId}/home`}
-                  className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <LogoutButton />
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="relative z-10 flex-1 flex flex-col pt-20">
         <section className="relative py-20 px-6 overflow-hidden">
@@ -60,7 +29,7 @@ export default async function Home() {
               v1.0 is now live
             </div>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-600 animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-both drop-shadow-2xl">
-              Build your ideas <br />
+              Build the ideas <br />
               <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-300 to-emerald-400">Scale to millions</span>
             </h1>          
             <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-light animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 fill-mode-both">
@@ -387,63 +356,7 @@ export default async function Home() {
         </section>
       </main>
       
-      {/* FOOTER: Geiger Original */}
-      <footer className="w-full border-t border-zinc-800/50 bg-zinc-950 pt-16 pb-8 relative z-30 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-4 lg:col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-6 h-6 flex items-center justify-center">
-                  <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
-                </div>
-                <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
-              </div>
-              <p className="text-zinc-500 text-sm max-w-sm">
-                Built for speed and extensibility. Geiger is the stealth workspace for teams.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-zinc-100 mb-4">Products</h4>
-              <ul className="space-y-3">
-                <li><Link href="/flow" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Flow</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Notes</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger DAM</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Grey</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Enterprise</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-zinc-100 mb-4">Resources</h4>
-              <ul className="flex flex-col gap-3 text-sm text-zinc-400">
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Documentation</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Community</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Contact Support</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-zinc-100 mb-4">Company</h4>
-              <ul className="flex flex-col gap-3 text-sm text-zinc-400">
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">About</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Blog</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Careers</Link></li>
-                <li><Link href="#" className="hover:text-zinc-100 transition-colors">Legal</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-8 border-t border-zinc-800/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
-            <p>&copy; {new Date().getFullYear()} Geiger Studios. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link href="#" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
-      <div className="mt-10 flex justify-center  relative z-0"><h1 className="text-[13vw] font-bold text-zinc-100/5 dark:text-white/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
+      <Footer />
     </div>
   );
 }

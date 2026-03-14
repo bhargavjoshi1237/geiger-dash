@@ -15,7 +15,7 @@ export function MegaMenu() {
             {/* Left Section */}
             <div className="flex-1">
               <h3 className="text-zinc-400 text-xs font-semibold mb-4 uppercase tracking-wider">
-                Features
+                Products
               </h3>
               <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
@@ -64,7 +64,7 @@ export function MegaMenu() {
                 href="#features"
                 className="inline-flex items-center justify-center gap-2 w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-xl text-sm font-medium transition-colors"
               >
-                Browse all features
+                Browse All Products
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -75,26 +75,31 @@ export function MegaMenu() {
                 Explore more
               </h3>
               <div className="flex flex-col gap-2">
-                {[
-                  "Templates & Guides",
-                  "Integrations",
-                  "Security & Privacy",
-                ].map((item, i) => (
-                  <Link
-                    href="#"
-                    key={i}
-                    className="py-3 px-4 bg-zinc-800/30 hover:bg-zinc-800 rounded-xl text-sm text-zinc-300 hover:text-zinc-100 transition-colors"
-                  >
-                    {item}
-                  </Link>
-                ))}
+                <Link
+                  href="/changelog"
+                  className="py-3 px-4 bg-zinc-800/30 hover:bg-zinc-800 rounded-xl text-sm text-zinc-300 hover:text-zinc-100 transition-colors"
+                >
+                  Change Logs
+                </Link>
+                <Link
+                  href="/blog"
+                  className="py-3 px-4 bg-zinc-800/30 hover:bg-zinc-800 rounded-xl text-sm text-zinc-300 hover:text-zinc-100 transition-colors"
+                >
+                  Blogs
+                </Link>
+                <Link
+                  href="#"
+                  className="py-3 px-4 bg-zinc-800/30 hover:bg-zinc-800 rounded-xl text-sm text-zinc-300 hover:text-zinc-100 transition-colors"
+                >
+                  Github Repository
+                </Link>
               </div>
             </div>
             <div className="w-px bg-zinc-800" /> {/* Divider */}
             {/* Right Section */}
             <div className="w-56">
               <h3 className="text-zinc-400 text-xs font-semibold mb-4 uppercase tracking-wider">
-                Discover
+                Host
               </h3>
               <Link
                 href="#"
@@ -106,8 +111,7 @@ export function MegaMenu() {
                       Geiger v1.0
                     </h4>
                     <p className="text-xs text-zinc-400 line-clamp-2">
-                      Experience the stealth workspace for high-performance
-                      teams.
+                     Self Host Geiger on your own infrastructure and take full control of your data and privacy.
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center group-hover/card:scale-110 transition-transform">
@@ -120,13 +124,7 @@ export function MegaMenu() {
         </div>
       </div>
 
-      <Link
-        href="#about"
-        className="hover:text-zinc-100 transition-colors py-6"
-      >
-        About
-      </Link>
-      <Link href="#" className="hover:text-zinc-100 transition-colors py-6">
+      <Link href="/pricing" className="hover:text-zinc-100 transition-colors py-6">
         Pricing
       </Link>
     </nav>
