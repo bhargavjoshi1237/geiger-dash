@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Box, Zap, Layers, Cpu } from "lucide-react";
+import { ArrowRight, Box, Zap, Layers, Cpu, ContainerIcon, LucideComponent } from "lucide-react";
 
 export function MegaMenu() {
   return (
@@ -21,7 +21,7 @@ export function MegaMenu() {
                 {[
                   {
                     icon: (
-                      <Box className="w-8 h-8 text-zinc-300 group-hover/item:text-zinc-100 transition-colors" />
+                      <ContainerIcon className="w-8 h-8 text-zinc-300 group-hover/item:text-zinc-100 transition-colors" />
                     ),
                     label: "Geiger Flow",
                     href: "/flow",
@@ -41,7 +41,7 @@ export function MegaMenu() {
                   },
                   {
                     icon: (
-                      <Cpu className="w-8 h-8 text-zinc-300 group-hover/item:text-zinc-100 transition-colors" />
+                      <LucideComponent className="w-8 h-8 text-zinc-300 group-hover/item:text-zinc-100 transition-colors" />
                     ),
                     label: "Geiger Grey",
                   },
