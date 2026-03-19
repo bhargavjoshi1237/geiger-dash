@@ -14,7 +14,7 @@ The automation runs a people-first content pipeline:
 
 ## Setup
 
-1. Run `database/init/blog_automation.sql` in the Supabase SQL editor.
+1. Run `npm run db:push` to apply `supabase/migrations/20260718044509_blog_automation.sql`.
 2. Configure the variables documented in `.env.example`.
 3. Set `BLOG_AUTOMATION_ENABLED=true` after testing a manual run.
 4. Keep `BLOG_AUTOMATION_AUTO_PUBLISH=false` until editorial output is trusted.
