@@ -22,7 +22,7 @@ export async function login(formData) {
   revalidatePath('/', 'layout')
   
   if (user) {
-    redirect(`/notes/${user.id}/home`)
+    redirect('/notes')
   } else {
     redirect('/')
   }
