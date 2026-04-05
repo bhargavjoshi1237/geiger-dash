@@ -36,11 +36,11 @@ const nextConfig = {
       },
       {
         source: "/canvas",
-        destination: "https://geigercanvas.vercel.app/",
+        destination: "https://geigercanvas.vercel.app/canvas",
       },
       {
         source: "/canvas/:path*",
-        destination: "https://geigercanvas.vercel.app/:path*",
+        destination: "https://geigercanvas.vercel.app/canvas/:path*",
       },
     ];
   },
