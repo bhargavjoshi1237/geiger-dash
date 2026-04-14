@@ -117,7 +117,7 @@ npm run db:push                       # apply everything pending
 npm run db:seed                       # re-runnable data
 ```
 
-See [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) before writing any DDL.
+See [`MIGRATION_CONVENTIONS.md`](conventions/MIGRATION_CONVENTIONS.md) before writing any DDL.
 
 Email templates have their own commands:
 
@@ -183,10 +183,10 @@ Adding a new product to the suite means adding its rewrite pair to `lib/product-
 
 This codebase follows a consistent set of patterns. Read these before contributing:
 
-- [`MODULE_CONVENTIONS.md`](MODULE_CONVENTIONS.md) — how to build a workspace screen
-- [`SUPABASE_CONVENTIONS.md`](SUPABASE_CONVENTIONS.md) — the data-layer playbook
-- [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) — schema changes and `@geiger/orm`
-- [`crafting.md`](crafting.md) — UI craft and quality bar
+- [`MODULE_CONVENTIONS.md`](conventions/MODULE_CONVENTIONS.md) — how to build a workspace screen
+- [`SUPABASE_CONVENTIONS.md`](conventions/SUPABASE_CONVENTIONS.md) — the data-layer playbook
+- [`MIGRATION_CONVENTIONS.md`](conventions/MIGRATION_CONVENTIONS.md) — schema changes and `@geiger/orm`
+- [`crafting.md`](conventions/crafting.md) — UI craft and quality bar
 - [`docs/blog-automation.md`](docs/blog-automation.md) — how the blog automation job works
 
 ## The Geiger suite
