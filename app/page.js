@@ -8,6 +8,8 @@ import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
 import LandingCanvasShowcase from "@/components/canvas-playground/LandingCanvasShowcase";
 import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
+import ChangeLogComponent from "@/components/change_log_component";
+import BlogComponent from "@/components/blog_component";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -54,7 +56,15 @@ export default async function Home() {
             </div>
           </div>
 
-    
+        <div className="flex flex-col gap-20">
+
+         <ChangeLogComponent />
+        
+        <BlogComponent />
+
+        </div>
+
+
         <section className="py-32 px-6 relative overflow-hidden z-20">
              <div className="container mx-auto text-center relative z-10 flex flex-col items-center">
                 <h3 className="text-sm font-semibold text-zinc-500 tracking-widest uppercase mb-4">Open source from day one</h3>
