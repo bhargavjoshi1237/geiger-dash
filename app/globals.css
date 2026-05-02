@@ -134,3 +134,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+.excalidraw .sidebar-trigger {
+  display: none !important;
+}
+
+.excalidraw.theme--dark {
+  --color-primary: #ffffff;
+  --color-primary-darker: #e5e5e5;
+  --color-primary-darkest: #a3a3a3;
+
+  --app-background-color: #161616;
+  --bg-color: #161616;
+
+  --color-surface-lowest: #161616;
+  --color-surface-low: #1a1a1a;
+  --color-surface-high: #242424;
+  --color-surface-highest: #2a2a2a;
+
+  --island-bg-color: #202020;
+
+  --color-gray-1: #202020;
+  --color-gray-2: #242424;
+  --color-gray-3: #2a2a2a;
+  --color-gray-4: #2e2e2e;
+  --color-gray-5: #333333;
+  --color-gray-6: #474747;
+  --color-gray-7: #737373;
+  --color-gray-8: #a3a3a3;
+  --color-gray-9: #ffffff;
+
+  --text-primary-color: #ffffff;
+  --text-secondary-color: #a3a3a3;
+}

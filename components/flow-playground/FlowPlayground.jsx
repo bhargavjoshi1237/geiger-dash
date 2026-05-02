@@ -4,20 +4,30 @@ import React, { useState, useCallback, useMemo } from "react";
 import { ProjectSidebar } from "./sidebar/projects/project_sidebar";
 import { ProjectTopbar } from "./topbar/projects/topbar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { ProjectDetailsScreen } from "./screens/projects/overview/project_details";
-import { WorkflowsScreen } from "./screens/projects/issues/workflows";
-import { ObjectivesScreen } from "./screens/projects/objectives/objectives_screen";
-import { TasksScreen } from "./screens/projects/tasks/tasks_screen";
-import { GoalsScreen } from "./screens/projects/goals/goals_screen";
-import { TeamScreen } from "./screens/projects/team/team";
-import { MilestonesScreen } from "./screens/projects/milestones/milestones_screen";
-import { ProjectionsScreen } from "./screens/projects/projections/projections_screen";
-import { SecurityScreen } from "./screens/projects/security/security_screen";
-import { SettingsScreen } from "./screens/projects/settings/settings_screen";
-import { VaultScreen } from "./screens/projects/vault/vault_screen";
-import { LogsScreen } from "./screens/projects/logs/logs_screen";
-import { AssetsScreen } from "./screens/projects/assets/assets_screen";
-import { PlanningScreen } from "./screens/projects/planning/planning_screen";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const LoadingScreen = () => (
+  <div className="h-full w-full flex items-center justify-center text-zinc-500">
+    <Loader2 className="w-8 h-8 animate-spin" />
+  </div>
+);
+
+const ProjectDetailsScreen = dynamic(() => import("./screens/projects/overview/project_details").then((mod) => mod.ProjectDetailsScreen), { loading: LoadingScreen });
+const WorkflowsScreen = dynamic(() => import("./screens/projects/issues/workflows").then((mod) => mod.WorkflowsScreen), { loading: LoadingScreen });
+const ObjectivesScreen = dynamic(() => import("./screens/projects/objectives/objectives_screen").then((mod) => mod.ObjectivesScreen), { loading: LoadingScreen });
+const TasksScreen = dynamic(() => import("./screens/projects/tasks/tasks_screen").then((mod) => mod.TasksScreen), { loading: LoadingScreen });
+const GoalsScreen = dynamic(() => import("./screens/projects/goals/goals_screen").then((mod) => mod.GoalsScreen), { loading: LoadingScreen });
+const TeamScreen = dynamic(() => import("./screens/projects/team/team").then((mod) => mod.TeamScreen), { loading: LoadingScreen });
+const MilestonesScreen = dynamic(() => import("./screens/projects/milestones/milestones_screen").then((mod) => mod.MilestonesScreen), { loading: LoadingScreen });
+const ProjectionsScreen = dynamic(() => import("./screens/projects/projections/projections_screen").then((mod) => mod.ProjectionsScreen), { loading: LoadingScreen });
+const SecurityScreen = dynamic(() => import("./screens/projects/security/security_screen").then((mod) => mod.SecurityScreen), { loading: LoadingScreen });
+const SettingsScreen = dynamic(() => import("./screens/projects/settings/settings_screen").then((mod) => mod.SettingsScreen), { loading: LoadingScreen });
+const VaultScreen = dynamic(() => import("./screens/projects/vault/vault_screen").then((mod) => mod.VaultScreen), { loading: LoadingScreen });
+const LogsScreen = dynamic(() => import("./screens/projects/logs/logs_screen").then((mod) => mod.LogsScreen), { loading: LoadingScreen });
+const AssetsScreen = dynamic(() => import("./screens/projects/assets/assets_screen").then((mod) => mod.AssetsScreen), { loading: LoadingScreen });
+const PlanningScreen = dynamic(() => import("./screens/projects/planning/planning_screen").then((mod) => mod.PlanningScreen), { loading: LoadingScreen });
+
 import { ProjectProvider } from "./context/project-context-demo";
 import { BannerProvider } from "./context/banner-context";
 import { settingsNav } from "./sidebar/projects/sidebar_data";

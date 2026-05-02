@@ -5,7 +5,9 @@ import HeroCanvas from "@/components/hero-canvas/HeroCanvas";
 import { Header } from "@/components/header";
 import  Footer from "@/components/footer";
 import Section from "@/components/section";
-import Showcase from "@/components/showcase";
+import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
+import LandingCanvasShowcase from "@/components/canvas-playground/LandingCanvasShowcase";
+import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -39,9 +41,18 @@ export default async function Home() {
         </section>       
           <Section  />
        
-{/*     
-    <Showcase  /> */}
+          <div className="my-20 mx-auto w-[80%] max-w-7xl space-y-20">
+            <LandingBoardShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Start Board Playground" />
+            <LandingCanvasShowcase ctaHref={userId ? `/canvas/${userId}/home` : "/login"} ctaLabel="Explore Geiger Canvas" />
+          </div>
 
+          <div className="h-[900px] ml-auto mr-auto mb-20 w-[80%] relative rounded-sm bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-00a586c62c8782e65c0a.jpg&w=1920&q=70')"}}>
+            <div className="absolute inset-0 flex flex-col mx-10 mt-14 mb-18">
+              <div className="flex-1 relative h-full w-full rounded-lg overflow-hidden border border-[#313131] shadow-2xl bg-[#161616]">
+                  <ClientAssetsPlayground />
+              </div>
+            </div>
+          </div>
 
     
         <section className="py-32 px-6 relative overflow-hidden z-20">
