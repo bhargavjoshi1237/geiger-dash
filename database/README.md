@@ -101,6 +101,7 @@ All tables have RLS enabled with the following policies:
    ```sql
    -- Execute database/init/changelog.sql
    -- Execute database/init/blog.sql
+   -- Execute database/init/storage_policies.sql
    ```
 
 2. **Verify tables were created:**

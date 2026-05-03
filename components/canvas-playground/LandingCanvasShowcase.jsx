@@ -4,7 +4,7 @@ import CanvasPlaygroundEditor from "./excalidraw/CanvasPlaygroundEditor";
 
 export default function LandingCanvasShowcase({ ctaHref, ctaLabel }) {
   return (
-    <section className="rounded-sm border border-[#212121] bg-[#161616] p-6 md:p-8 xl:p-10 mt-20">
+    <section className="rounded-sm border border-[#212121] bg-[#161616] px-6 py-0 md:p-8 xl:p-10 mt-20">
       <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
         
         {/* Left Content - Mockup Window */}

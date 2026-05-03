@@ -4,7 +4,7 @@ import BoardPlaygroundCanvas from "@/components/notes-playground/internal/canvas
 
 export default function LandingBoardShowcase({ ctaHref, ctaLabel }) {
   return (
-    <section className="rounded-sm border border-[#212121] bg-[#161616] p-6 md:p-8  xl:p-10">
+    <section className="rounded-sm border border-[#212121] bg-[#161616] px-6 py-0 md:p-8 xl:p-10">
       <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
         <div className="w-full lg:w-[30%] flex flex-col items-start justify-center space-y-6">

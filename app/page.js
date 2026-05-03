@@ -7,6 +7,7 @@ import  Footer from "@/components/footer";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
 import LandingCanvasShowcase from "@/components/canvas-playground/LandingCanvasShowcase";
+import CollaboratorTabsShowcase from "@/components/canvas-playground/CollaboratorTabsShowcase";
 import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
@@ -62,6 +63,13 @@ export default async function Home() {
         
         <BlogComponent />
 
+        <div className="mx-auto w-[80%] max-w-7xl">
+          <CollaboratorTabsShowcase
+            ctaHref={userId ? `/notes/${userId}/home` : "/login"}
+            ctaLabel="Open Collaborator Dialogue"
+          />
+        </div>
+
         </div>
 
 
@@ -69,20 +77,23 @@ export default async function Home() {
              <div className="container mx-auto text-center relative z-10 flex flex-col items-center">
                 <h3 className="text-sm font-semibold text-zinc-500 tracking-widest uppercase mb-4">Open source from day one</h3>
                 <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-500 drop-shadow-lg">
-                    Build in a weekend, <br className="hidden md:block"/><span className="text-zinc-300">scale to millions</span>
+                   TRY GEIGER NOW
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
+                  <Link
+            href="/"
+            className="inline-flex items-center gap-2 h-10 px-6 rounded-full bg-zinc-100 text-zinc-950 font-medium hover:bg-white transition-colors"
+          >
+           Login To The Studio
+            <ArrowRight className="h-4 w-4" />
+          </Link>
                     <Link
-                    href={userId ? `/notes/${userId}/home` : "/login"}
-                    className="inline-flex h-14 w-full px-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 font-bold text-lg hover:bg-white transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 duration-200"
-                    >
-                    Start                    </Link>
-                    <Link
-                    href="#"
-                    className="inline-flex h-14 w-full px-8 items-center justify-center rounded-full bg-zinc-900/80 border border-zinc-800 text-zinc-300 font-medium text-lg hover:bg-zinc-800 transition-colors backdrop-blur-sm"
-                    >
-                    Request a demo
-                    </Link>
+            href="/"
+            className="inline-flex items-center gap-2 h-10 px-6 rounded-full bg-zinc-100 text-zinc-950 font-medium hover:bg-white transition-colors"
+          >
+           Contact Sales
+            <ArrowRight className="h-4 w-4" />
+          </Link>
                 </div>
              </div>
         </section>

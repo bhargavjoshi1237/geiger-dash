@@ -196,9 +196,16 @@ export default async function BlogPostPage({ params }) {
 
           {/* Article Content */}
           <div className="prose prose-invert prose-zinc max-w-none mb-12">
-            <div 
-              className="text-zinc-300 leading-relaxed whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: post.content.split('\n').map(line => line.trim()).join('<br />') }}
+            <div
+              className="text-zinc-300 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: /<[^>]+>/.test(post.content || '')
+                  ? post.content
+                  : String(post.content || '')
+                      .split('\n')
+                      .map((line) => line.trim())
+                      .join('<br />'),
+              }}
             />
           </div>
 

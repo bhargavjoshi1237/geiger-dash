@@ -13,7 +13,8 @@ export default function Footer() {
               <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
             </div>
             <p className="text-zinc-500 text-sm max-w-sm">
-              Built for speed and extensibility. Geiger is the stealth workspace for teams.
+              Built to Manage. Designed to Create.
+              <br /> Turn your ideas into something real with a single suite that combines solid management tools and easy-to-use creative features.
             </p>
           </div>
           
