@@ -40,13 +40,13 @@ function CollaboratorWindow({ title, activeTab, className = "", children }) {
 
 export default function CollaboratorTabsShowcase({ ctaHref, ctaLabel }) {
   return (
-    <section className="rounded-sm border border-[#212121] bg-[#161616] p-6 md:p-8 xl:p-10">
+    <section className="rounded-sm border border-[#212121] bg-[#161616] p-4 sm:p-6 md:p-8 xl:p-10">
       <div className="grid items-center gap-12 lg:grid-cols-[0.36fr_0.64fr]">
         <div className="space-y-5">
-          <h3 className="text-3xl font-semibold leading-snug text-[#f5f5f5]">
+          <h3 className="text-2xl font-semibold leading-snug text-[#f5f5f5] sm:text-3xl">
             Collaborator dialogue tabs, side by side.
           </h3>
-          <p className="text-lg text-[#bcbcbc]">
+          <p className="text-base text-[#bcbcbc] sm:text-lg">
             A layered preview of Host, Members, Join, and Merge in the same
             geiger-notes style dialogue.
           </p>
@@ -61,7 +61,7 @@ export default function CollaboratorTabsShowcase({ ctaHref, ctaLabel }) {
 
         <div className="rounded-xl border border-[#2f2f2f] bg-[#101010] p-3">
           <div
-            className="relative h-[520px] overflow-hidden rounded-lg border border-[#2b2b2b] bg-cover bg-center bg-no-repeat p-4 md:h-[580px] md:p-6"
+            className="relative h-[420px] overflow-hidden rounded-lg border border-[#2b2b2b] bg-cover bg-center bg-no-repeat p-3 sm:h-[520px] sm:p-4 md:h-[580px] md:p-6"
             style={{
               backgroundImage:
                 "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Finternal-brand%2Finternal-brand-023-3291bb4c.jpg&w=1920&q=70')",
@@ -71,7 +71,7 @@ export default function CollaboratorTabsShowcase({ ctaHref, ctaLabel }) {
             <CollaboratorWindow
               title="geiger-notes/collaborate"
               activeTab="Host"
-              className="absolute left-4 top-5 z-10 w-[72%] md:left-8 md:top-8"
+              className="absolute left-3 top-3 z-10 w-[84%] sm:left-4 sm:top-5 sm:w-[72%] md:left-8 md:top-8"
             >
               <div className="space-y-3">
                 <p className="text-[10px] uppercase tracking-[0.14em] text-[#707070]">
@@ -94,7 +94,7 @@ export default function CollaboratorTabsShowcase({ ctaHref, ctaLabel }) {
             <CollaboratorWindow
               title="geiger-notes/collaborate"
               activeTab="Members"
-              className="absolute bottom-5 right-3 z-20 w-[80%] md:bottom-8 md:right-8"
+              className="absolute right-3 bottom-3 z-20 w-[90%] sm:bottom-5 sm:w-[80%] md:right-8 md:bottom-8"
             >
               <div className="space-y-2">
                 {[

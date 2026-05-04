@@ -26,12 +26,12 @@ export default async function ChangeLogComponent() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-[75%] px-5">
+      <div className="w-full max-w-7xl px-4 sm:px-6">
         <p className="text-2xl">Change Log</p>
       </div>
-      <div className="flex gap-4 items-center justify-center py-4 flex-wrap">
+      <div className="flex w-full max-w-7xl flex-wrap items-stretch justify-center gap-4 px-4 py-4 sm:px-6">
         {(changelogs || []).map((entry) => (
-          <Link key={entry.id} href="/changelog" className="block">
+          <Link key={entry.id} href="/changelog" className="block w-full sm:w-auto">
             <ChangelogWidget date={formatReleaseDate(entry.release_date)} title={entry.title} />
           </Link>
         ))}
@@ -39,7 +39,7 @@ export default async function ChangeLogComponent() {
           <p className="text-sm text-zinc-400">No changelog entries published yet.</p>
         )}
       </div>
-      <div className="w-[75%] px-5">
+      <div className="w-full max-w-7xl px-4 sm:px-6">
         <Link href="/changelog" className="mt-12 text-white hover:underline">
           See what is new in Geiger Studio -&gt;
         </Link>

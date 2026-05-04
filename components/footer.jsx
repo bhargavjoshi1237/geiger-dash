@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-6 h-6 flex items-center justify-center">
-                <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
+                <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
               </div>
               <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
             </div>
@@ -32,7 +33,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-zinc-100 mb-4">Resources</h4>
             <ul className="flex flex-col gap-3 text-sm text-zinc-400">
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Documentation</Link></li>
+              <li><Link href="/docs" className="hover:text-zinc-100 transition-colors">Documentation</Link></li>
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">Help Center</Link></li>
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">Community</Link></li>
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">Contact Support</Link></li>
@@ -43,7 +44,7 @@ export default function Footer() {
             <h4 className="font-bold text-zinc-100 mb-4">Company</h4>
             <ul className="flex flex-col gap-3 text-sm text-zinc-400">
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">About</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Blog</Link></li>
+              <li><Link href="/blog" className="hover:text-zinc-100 transition-colors">Blog</Link></li>
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">Careers</Link></li>
               <li><Link href="#" className="hover:text-zinc-100 transition-colors">Legal</Link></li>
             </ul>

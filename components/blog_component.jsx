@@ -26,10 +26,10 @@ export default async function BlogComponent() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-[75%] px-5">
+      <div className="w-full max-w-7xl px-4 sm:px-6">
         <p className="text-2xl">Stay on the frontier</p>
       </div>
-      <div className="flex flex-nowrap gap-4 items-stretch justify-center py-6 w-[73%] overflow-x-auto">
+      <div className="grid w-full max-w-7xl grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
         {(posts || []).map((post) => (
           <BlogWidget
             key={post.id}
@@ -44,7 +44,7 @@ export default async function BlogComponent() {
                 alt={post.title}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 90vw, 30vw"
+                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw"
               />
             </div>
           </BlogWidget>
@@ -53,7 +53,7 @@ export default async function BlogComponent() {
           <p className="text-sm text-zinc-400">No blog posts published yet.</p>
         )}
       </div>
-      <div className="w-[75%] px-5">
+      <div className="w-full max-w-7xl px-4 sm:px-6">
         <Link href="/blog" className="mt-12 text-white hover:underline">
           Explore all blog posts -&gt;
         </Link>
