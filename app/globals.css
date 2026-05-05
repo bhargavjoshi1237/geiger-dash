@@ -167,3 +167,12 @@
   --text-primary-color: #ffffff;
   --text-secondary-color: #a3a3a3;
 }
+
+.docs-scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.docs-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

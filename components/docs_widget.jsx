@@ -1,753 +1,451 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import {
-  ArrowRight,
-  Blocks,
-  Briefcase,
-  Cloud,
+  Bot,
+  Box,
+  ChevronRight,
+  CircleDollarSign,
+  Clipboard,
   Code2,
-  Database,
-  FileText,
-  KeyRound,
-  ListChecks,
-  MonitorCog,
-  Network,
-  Package,
+  Command,
+  GitPullRequestArrow,
+  Mail,
+  MessageSquareText,
   Rocket,
+  Search,
   ShieldCheck,
   Sparkles,
-  Workflow,
+  WandSparkles,
 } from "lucide-react";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Kbd } from "@/components/ui/kbd";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
-const quickLinks = [
+const navigation = [
+  {
+    title: "Get Started",
+    links: [
+      { label: "Welcome", active: true },
+      { label: "Quickstart" },
+      { label: "Plans & Pricing", chevron: true },
+      { label: "Changelog" },
+    ],
+  },
+  {
+    title: "Agent",
+    links: [
+      { label: "Overview" },
+      { label: "Agents Window" },
+      { label: "Agent Review" },
+      { label: "Planning" },
+      { label: "Prompting" },
+      { label: "Debugging" },
+      { label: "Tools", chevron: true },
+      { label: "Security" },
+    ],
+  },
+  {
+    title: "Customizing",
+    links: [
+      { label: "Plugins" },
+      { label: "Rules" },
+      { label: "Skills" },
+      { label: "Subagents" },
+      { label: "Hooks" },
+      { label: "MCP" },
+    ],
+  },
+  {
+    title: "Cloud Agents",
+    links: [
+      { label: "Overview" },
+      { label: "Setup" },
+      { label: "Capabilities" },
+      { label: "My Machines" },
+      { label: "Self-Hosted Pool" },
+      { label: "Bugbot" },
+    ],
+  },
+];
+
+const startCards = [
   {
     icon: Rocket,
-    title: "Get Started",
-    description: "Install Geiger, onboard your workspace, and ship your first project in minutes.",
+    title: "Get started",
+    body: "Go from install to your first useful change in Geiger",
     href: "#get-started",
   },
   {
-    icon: ListChecks,
-    title: "Changelog",
-    description: "Track product updates, release notes, and migration guidance for each release.",
-    href: "/changelog",
-  },
-  {
-    icon: Code2,
-    title: "CLI",
-    description: "Use Geiger from your terminal for scripting, automation, and CI workflows.",
-    href: "#cli-reference",
+    icon: CircleDollarSign,
+    title: "Plans & Pricing",
+    body: "Compare plans, usage pools, and team pricing",
+    href: "/pricing",
   },
   {
     icon: Sparkles,
-    title: "Concepts",
-    description: "Understand projects, canvases, assets, automations, and team governance.",
-    href: "#concepts",
-  },
-  {
-    icon: Package,
-    title: "Suite Products",
-    description: "Explore Geiger Flow, Notes, DAM, Grey, and Dash with practical workflows.",
-    href: "#products",
-  },
-  {
-    icon: Briefcase,
-    title: "Plans",
-    description: "Compare Starter, Pro, Team, and Enterprise plans and included limits.",
-    href: "#plans",
-  },
-  {
-    icon: Network,
-    title: "Integrations",
-    description: "Connect external tools, ingest data, and set up approval and sync flows.",
-    href: "#integrations",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Security",
-    description: "Review auth, permissions, audit controls, retention policies, and compliance.",
-    href: "#security",
+    title: "Changelog",
+    body: "Stay up to date with the latest features and improvements",
+    href: "/changelog",
   },
 ];
 
-const sidebarSections = [
-  {
-    title: "Get Started",
-    links: [
-      { label: "Welcome", href: "#welcome" },
-      { label: "Quickstart", href: "#get-started" },
-      { label: "Workspace Setup", href: "#workspace-setup" },
-    ],
-  },
-  {
-    title: "Core",
-    links: [
-      { label: "Concepts", href: "#concepts" },
-      { label: "Suite Architecture", href: "#suite-architecture" },
-      { label: "Products", href: "#products" },
-    ],
-  },
-  {
-    title: "Plans and Billing",
-    links: [
-      { label: "Plans", href: "#plans" },
-      { label: "Usage and Limits", href: "#usage" },
-      { label: "Billing FAQ", href: "#billing-faq" },
-    ],
-  },
-  {
-    title: "Build and Operate",
-    links: [
-      { label: "CLI", href: "#cli-reference" },
-      { label: "Integrations", href: "#integrations" },
-      { label: "Deployment", href: "#deployment" },
-      { label: "Troubleshooting", href: "#troubleshooting" },
-    ],
-  },
-  {
-    title: "Reference",
-    links: [
-      { label: "Security", href: "#security" },
-      { label: "Governance", href: "#governance" },
-      { label: "Support", href: "#support" },
-    ],
-  },
+const rightLinks = ["Start here", "What you can do with Geiger", "Products", "More resources"];
+const actionLinks = [
+  { icon: Clipboard, label: "Copy page" },
+  { icon: Mail, label: "Share feedback" },
+  { icon: MessageSquareText, label: "Explain more" },
 ];
 
-const planRows = [
-  {
-    feature: "Seats included",
-    starter: "1",
-    pro: "5",
-    team: "Unlimited",
-    enterprise: "Unlimited",
-  },
-  {
-    feature: "Active projects",
-    starter: "5",
-    pro: "Unlimited",
-    team: "Unlimited",
-    enterprise: "Unlimited",
-  },
-  {
-    feature: "Automation runs / month",
-    starter: "100",
-    pro: "5,000",
-    team: "25,000",
-    enterprise: "Custom",
-  },
-  {
-    feature: "Asset storage",
-    starter: "1 GB",
-    pro: "100 GB",
-    team: "1 TB",
-    enterprise: "Custom",
-  },
-  {
-    feature: "Version history",
-    starter: "7 days",
-    pro: "30 days",
-    team: "90 days",
-    enterprise: "Custom retention",
-  },
-  {
-    feature: "SSO and SCIM",
-    starter: "No",
-    pro: "No",
-    team: "SSO",
-    enterprise: "SSO + SCIM",
-  },
-];
-
-function PlaceholderImage({ label }) {
+function DocsTopBar() {
   return (
-    <Card className="bg-zinc-900/60 border-zinc-800">
-      <CardContent className="p-3">
-        <Image
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/docs-placeholder.svg`}
-          alt={`${label} placeholder`}
-          width={1200}
-          height={630}
-          className="h-44 w-full rounded-lg border border-zinc-800 object-cover"
-        />
-        <p className="mt-2 text-xs text-zinc-500">{label} (replace with final product image)</p>
-      </CardContent>
-    </Card>
+    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#2a2a2a] bg-[#161616] text-white">
+      <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="flex h-full min-w-0 items-center gap-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded">
+              <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="h-5 w-5" />
+            </span>
+            <span className="hidden border-l border-[#333333] pl-3 text-sm font-semibold text-white sm:block">
+              Geiger Docs
+            </span>
+          </Link>
+
+          <nav className="hidden h-full items-center gap-6 text-sm text-[#a3a3a3] md:flex">
+            {["Docs", "API", "Learn", "Help"].map((item) => (
+              <Link
+                key={item}
+                href={item === "Docs" ? "/docs" : "#"}
+                className={`flex h-full items-center border-b-2 transition-colors ${
+                  item === "Docs"
+                    ? "border-white text-white"
+                    : "border-transparent hover:text-white"
+                }`}
+              >
+                {item}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        <div className="hidden flex-1 justify-center lg:flex">
+          <div className="group flex h-8 w-full max-w-[430px] items-center gap-2 rounded-md border border-[#2a2a2a] bg-[#242424] px-3 text-sm text-[#a3a3a3] shadow-sm transition-colors hover:border-[#474747]">
+            <Search className="h-4 w-4" />
+            <span className="flex-1">Search docs...</span>
+            <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3] transition-colors group-hover:bg-[#2a2a2a] group-hover:text-white">
+              <Command className="mr-0.5 inline h-3 w-3" />K
+            </kbd>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="hidden h-8 items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#242424] px-3 text-sm text-[#a3a3a3] transition-colors hover:border-[#474747] hover:text-white md:flex">
+            <span>Ask AI</span>
+            <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3]">
+              Cmd I
+            </kbd>
+          </button>
+          <Link
+            href="/login"
+            className="hidden h-8 items-center rounded-full border border-transparent px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:bg-[#2a2a2a] hover:text-white sm:flex"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="#download"
+            className="h-8 rounded-full bg-white px-4 text-sm font-medium leading-8 text-black transition-colors hover:bg-[#e5e5e5]"
+          >
+            Download
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function LeftSidebar() {
+  return (
+    <aside className="docs-scrollbar-hidden fixed bottom-0 left-0 top-14 hidden w-[280px] overflow-y-auto border-r border-[#2a2a2a] bg-[#161616] px-6 py-6 lg:block">
+      <nav className="space-y-8">
+        {navigation.map((section) => (
+          <div key={section.title}>
+            <p className="mb-2 text-sm text-[#a3a3a3]">{section.title}</p>
+            <div className="space-y-2">
+              {section.links.map((link) => (
+                <Link
+                  href="#"
+                  key={`${section.title}-${link.label}`}
+                  className={`flex items-center justify-between text-[15px] font-semibold leading-5 transition-colors ${
+                    link.active ? "text-white" : "text-white hover:text-[#a3a3a3]"
+                  }`}
+                >
+                  <span>{link.label}</span>
+                  {link.chevron ? <ChevronRight className="h-3.5 w-3.5 text-[#a3a3a3]" /> : null}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+function RightSidebar() {
+  return (
+    <aside className="docs-scrollbar-hidden fixed bottom-0 right-0 top-14 hidden w-[280px] overflow-y-auto bg-[#161616] px-6 py-8 xl:block">
+      <div className="pl-3">
+        <div className="space-y-4 text-sm">
+          {rightLinks.map((link, index) => (
+            <Link
+              key={link}
+              href={index === 0 ? "#start-here" : "#"}
+              className={`block transition-colors hover:text-zinc-100 ${
+                index === 0 ? "text-[#a3a3a3]" : "text-[#737373]"
+              }`}
+            >
+              {link}
+            </Link>
+          ))}
+        </div>
+
+        <div className="my-5 h-px w-full bg-[#2a2a2a]" />
+
+        <div className="space-y-4">
+          {actionLinks.map((action) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.label}
+                className="flex items-center gap-2 text-sm text-[#737373] transition-colors hover:text-white"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{action.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function ProductPreview() {
+  const fileRows = [
+    ["Cargo.toml", "+6", "-3"],
+    ["flags.rs", "+6", "-3"],
+    ["args.rs", "+7", "-2"],
+  ];
+
+  return (
+    <div className="relative mt-10 aspect-[704/411] overflow-hidden rounded-lg border border-[#2a2a2a] bg-[#202020] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+      <div className="absolute inset-0 bg-[linear-gradient(145deg,#2e2e2e_0%,#242424_42%,#1a1a1a_68%,#161616_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_38%)]" />
+      <div className="absolute inset-x-[5.5%] top-[9.2%] h-[82%] rounded-md border border-[#e5e5e5] bg-white shadow-2xl">
+        <div className="flex h-7 items-center justify-between border-b border-[#e5e5e5] bg-white px-2.5 text-[8px] text-[#a3a3a3]">
+          <div className="flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
+            <span className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
+            <span className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="rounded bg-[#f3f4f6] px-1.5 py-0.5">Agent</span>
+            <span>IDE</span>
+          </div>
+          <div className="flex gap-1">
+            <span className="h-1.5 w-5 rounded-sm border border-zinc-300" />
+            <span className="h-1.5 w-5 rounded-sm border border-zinc-300" />
+          </div>
+        </div>
+
+        <div className="grid h-[calc(100%-1.75rem)] grid-cols-[43%_57%] bg-[#f9fafb] text-[#525252]">
+          <div className="border-r border-[#e5e5e5] p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="truncate text-[10px] font-semibold text-[#171717]">Add validation for release flags</p>
+              <button className="rounded bg-[#f3f4f6] px-2 py-1 text-[7px] font-semibold text-[#525252]">Create PR</button>
+            </div>
+            <div className="mb-3 grid grid-cols-3 gap-2">
+              {["Composer", "Planning next", "Sonnet 4.5"].map((item) => (
+                <div key={item} className="rounded border border-[#e5e5e5] bg-white p-1.5">
+                  <p className="text-[6px] text-[#a3a3a3]">{item}</p>
+                  <p className="mt-1 text-[8px] text-emerald-600">+17 -9</p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded border border-[#e5e5e5] bg-white p-2">
+              <p className="text-[8px] font-medium text-[#171717]">All tests pass and binary builds successfully.</p>
+              <p className="mt-1 text-[7px] leading-3 text-[#737373]">
+                The agent reviewed usage patterns and updated the command parser with focused changes.
+              </p>
+            </div>
+            <div className="mt-3 rounded border border-[#e5e5e5] bg-white">
+              <div className="border-b border-[#e5e5e5] px-2 py-1 text-[7px] font-semibold text-[#737373]">3 files edited</div>
+              {fileRows.map(([file, add, remove]) => (
+                <div key={file} className="flex justify-between px-2 py-1 text-[7px] text-[#525252]">
+                  <span>{file}</span>
+                  <span>
+                    <span className="text-emerald-600">{add}</span> <span className="text-rose-500">{remove}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute bottom-4 left-5 right-[59%] rounded-md border border-[#e5e5e5] bg-white px-2 py-1.5 text-[7px] text-[#737373]">
+              Plan, @ for contexts, / for commands
+            </div>
+          </div>
+
+          <div className="p-3 font-mono">
+            <div className="mb-2 flex items-center justify-between text-[7px] text-[#737373]">
+              <span>Review: Add release flag support</span>
+              <button className="rounded bg-[#171717] px-2 py-1 text-[7px] font-semibold text-white">Apply All</button>
+            </div>
+            <div className="space-y-1 text-[7px] leading-3">
+              {[
+                ["-", "pub enum Flag {", "bg-rose-100 text-rose-800"],
+                ["+", "    Help,", "bg-emerald-100 text-emerald-800"],
+                ["+", "    Version,", "bg-emerald-100 text-emerald-800"],
+                ["+", "    Release,", "bg-emerald-100 text-emerald-800"],
+                ["", "}", "text-zinc-500"],
+                ["", "", "text-zinc-500"],
+                ["-", "arg!(\"--version\")", "bg-rose-100 text-rose-800"],
+                ["+", "arg!(\"--release\")", "bg-emerald-100 text-emerald-800"],
+                ["+", ".help(\"Generate release notes\")", "bg-emerald-100 text-emerald-800"],
+                ["", "", "text-zinc-500"],
+                ["-", "pub struct SearchConfig {", "bg-rose-100 text-rose-800"],
+                ["+", "pub struct ReleaseConfig {", "bg-emerald-100 text-emerald-800"],
+                ["+", "    pub verbose: bool,", "bg-emerald-100 text-emerald-800"],
+              ].map(([marker, code, color], index) => (
+                <div key={`${code}-${index}`} className={`grid grid-cols-[18px_1fr] rounded-sm px-1 ${color}`}>
+                  <span>{marker}</span>
+                  <span>{code || "\u00a0"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StartCard({ item }) {
+  const Icon = item.icon;
+
+  return (
+    <Link
+      href={item.href}
+      className="group min-h-[160px] rounded border border-[#2a2a2a] bg-[#202020] transition-colors hover:border-[#474747]"
+    >
+      <div className="flex h-12 items-center gap-3 border-b border-[#2a2a2a] px-4">
+        <Icon className="h-4 w-4 text-[#a3a3a3]" />
+        <span className="text-sm font-semibold text-white">{item.title}</span>
+      </div>
+      <p className="px-4 pt-4 text-[15px] font-semibold leading-6 text-white">{item.body}</p>
+    </Link>
+  );
+}
+
+function ContentSection({ id, eyebrow, title, children }) {
+  return (
+    <section id={id} className="pt-12">
+      <p className="mb-3 text-sm text-[#a3a3a3]">{eyebrow}</p>
+      <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#a3a3a3]">{children}</div>
+    </section>
   );
 }
 
 export default function DocsWidget() {
   return (
-    <section className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
-      <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge className="bg-zinc-500/15 text-zinc-300 border-zinc-700">Documentation</Badge>
-          <Badge variant="outline" className="border-zinc-700 text-zinc-400">
-            Updated for Geiger Suite v1
-          </Badge>
-        </div>
-        <h1 id="welcome" className="text-4xl font-bold tracking-tight text-zinc-100 md:text-5xl">
-          Geiger Docs
-        </h1>
-        <p className="max-w-4xl text-zinc-400">
-          Learn how to plan, create, collaborate, and ship with the full Geiger suite. This documentation mirrors the
-          structure of modern product docs while staying native to Geiger workflows and UI.
-        </p>
-      </div>
+    <>
+      <DocsTopBar />
+      <LeftSidebar />
+      <RightSidebar />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {quickLinks.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.title} href={item.href}>
-              <Card className="h-full border-zinc-800 bg-zinc-900/50 transition-colors hover:border-zinc-700">
-                <CardHeader className="pb-3">
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md border border-zinc-700 bg-zinc-800/60">
-                    <Icon className="h-4 w-4 text-zinc-300" />
-                  </div>
-                  <CardTitle className="text-lg text-zinc-100">{item.title}</CardTitle>
-                  <CardDescription className="text-zinc-400">{item.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
-
-      <Card className="mt-6 border-zinc-800 bg-zinc-900/50 lg:hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base text-zinc-200">Browse Documentation</CardTitle>
-          <CardDescription>Jump to any section quickly on mobile.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Accordion type="single" collapsible>
-            {sidebarSections.map((section) => (
-              <AccordionItem key={section.title} value={section.title}>
-                <AccordionTrigger className="py-3 text-zinc-300">{section.title}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-1">
-                    {section.links.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="block rounded-md px-2 py-1.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+      <main className="min-h-screen bg-[#161616] pt-14 lg:pl-[280px] xl:pr-[280px]">
+        <div className="mx-auto w-full max-w-[704px] px-5 py-9 sm:px-0">
+          <div className="docs-scrollbar-hidden mb-6 flex gap-2 overflow-x-auto pb-2 lg:hidden">
+            {navigation.flatMap((section) => section.links.slice(0, 3)).map((link) => (
+              <Link
+                href="#"
+                key={`mobile-${link.label}`}
+                className={`shrink-0 rounded-full border border-[#2a2a2a] px-3 py-1.5 text-sm ${
+                  link.active ? "bg-white text-black" : "bg-[#202020] text-[#a3a3a3]"
+                }`}
+              >
+                {link.label}
+              </Link>
             ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+          </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)] 2xl:grid-cols-[260px_minmax(0,1fr)_220px]">
-        <aside className="hidden xl:block">
-          <Card className="sticky top-24 border-zinc-800 bg-zinc-900/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm uppercase tracking-wider text-zinc-400">Navigation</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ScrollArea className="h-[66vh] pr-3">
-                <div className="space-y-5">
-                  {sidebarSections.map((section) => (
-                    <div key={section.title}>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">{section.title}</p>
-                      <div className="space-y-1">
-                        {section.links.map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            className="block rounded-md px-2 py-1.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                          >
-                            {link.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </aside>
+          <article>
+            <p className="mb-3 text-sm text-[#a3a3a3]">Get Started</p>
+            <h1 className="text-[34px] font-semibold leading-tight tracking-tight text-white sm:text-[36px]">
+              Geiger Documentation
+            </h1>
+            <p className="mt-9 max-w-[690px] text-[15px] font-semibold leading-6 text-white">
+              Geiger is an AI workspace and delivery system. Use it to understand your projects, plan and build
+              features, review changes, and work with the tools your team already uses.
+            </p>
 
-        <article className="space-y-8">
-          <Card id="get-started" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Get Started</CardTitle>
-              <CardDescription>Install Geiger, connect your workspace, and launch your first project.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">1. Install and sign in</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Install Geiger Desktop and sign in with your workspace identity provider.
-                  </CardContent>
-                </Card>
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">2. Create your workspace</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Invite teammates, set environment defaults, and configure your project templates.
-                  </CardContent>
-                </Card>
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">3. Ship your first flow</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Use Geiger Flow to scope tasks, sync assets, and move work through approval stages.
-                  </CardContent>
-                </Card>
-              </div>
-              <PlaceholderImage label="Getting started overview" />
-              <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-400">
-                Helpful shortcuts:
-                <Kbd>Ctrl</Kbd>
-                <Kbd>Shift</Kbd>
-                <Kbd>J</Kbd>
-                opens workspace settings.
-              </div>
-            </CardContent>
-          </Card>
+            <ProductPreview />
 
-          <Card id="workspace-setup" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Workspace Setup</CardTitle>
-              <CardDescription>Recommended setup for teams onboarding to Geiger for the first time.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-zinc-300">
-              <p>Start with one workspace per organization and one project per product initiative.</p>
-              <p>Assign roles early: workspace admins, project owners, editors, and reviewers.</p>
-              <p>
-                Connect your core systems first: identity provider, storage destination, and issue tracking source.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card id="concepts" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Core Concepts</CardTitle>
-              <CardDescription>Understand the objects and workflows that power Geiger.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              {[
-                {
-                  icon: Workflow,
-                  title: "Projects",
-                  text: "A project is the central unit where planning, notes, assets, approvals, and releases converge.",
-                },
-                {
-                  icon: Blocks,
-                  title: "Nodes",
-                  text: "Nodes represent tasks, docs, media, comments, and automations connected across your lifecycle.",
-                },
-                {
-                  icon: Database,
-                  title: "Data Rooms",
-                  text: "Data Rooms store structured artifacts and metrics used by planning, reporting, and audit workflows.",
-                },
-                {
-                  icon: KeyRound,
-                  title: "Permissions",
-                  text: "Permissions control who can view, edit, approve, publish, and export across every module.",
-                },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Card key={item.title} className="border-zinc-800 bg-zinc-950/40">
-                    <CardHeader className="pb-2">
-                      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-800/60">
-                        <Icon className="h-4 w-4 text-zinc-300" />
-                      </div>
-                      <CardTitle className="text-base">{item.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-zinc-400">{item.text}</CardContent>
-                  </Card>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          <Card id="suite-architecture" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Suite Architecture</CardTitle>
-              <CardDescription>How Geiger products interact in an end-to-end delivery flow.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 md:grid-cols-5">
-                {["Flow", "Notes", "DAM", "Grey", "Dash"].map((name) => (
-                  <Card key={name} className="border-zinc-800 bg-zinc-950/40">
-                    <CardContent className="p-4 text-center text-sm font-semibold text-zinc-200">Geiger {name}</CardContent>
-                  </Card>
+            <section id="start-here" className="pt-[68px]">
+              <h2 className="text-2xl font-semibold tracking-tight text-white">Start here</h2>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {startCards.map((item) => (
+                  <StartCard key={item.title} item={item} />
                 ))}
               </div>
-              <p className="text-sm text-zinc-400">
-                Typical sequence: scope work in Flow, create and iterate in Notes, store and govern media in DAM,
-                automate and assist in Grey, then monitor progress and outcomes in Dash.
+            </section>
+
+            <ContentSection id="get-started" eyebrow="Start here" title="What you can do with Geiger">
+              <p>
+                Start with a workspace, connect your project sources, and let the agent collect enough context to plan
+                a useful change. From there, Geiger can draft implementation steps, update project assets, and prepare a
+                reviewable change set.
               </p>
-            </CardContent>
-          </Card>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  [Bot, "Ask questions across your workspace"],
+                  [GitPullRequestArrow, "Review and apply proposed changes"],
+                  [Code2, "Generate implementation plans"],
+                  [ShieldCheck, "Keep permissions and approvals visible"],
+                ].map(([Icon, text]) => (
+                  <div key={text} className="flex items-center gap-3 rounded border border-[#2a2a2a] bg-[#202020] p-3">
+                    <Icon className="h-4 w-4 text-[#a3a3a3]" />
+                    <span className="text-sm font-medium text-white">{text}</span>
+                  </div>
+                ))}
+              </div>
+            </ContentSection>
 
-          <Card id="products" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Products</CardTitle>
-              <CardDescription>Detailed guidance for each product inside the Geiger suite.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="flow" className="w-full">
-                <div className="mb-4 overflow-x-auto pb-1">
-                  <TabsList className="min-w-max bg-zinc-800 text-zinc-400">
-                    <TabsTrigger value="flow">Flow</TabsTrigger>
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
-                    <TabsTrigger value="dam">DAM</TabsTrigger>
-                    <TabsTrigger value="grey">Grey</TabsTrigger>
-                    <TabsTrigger value="dash">Dash</TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <TabsContent value="flow" className="space-y-4">
-                  <p className="text-sm text-zinc-400">
-                    Geiger Flow is your planning and execution layer for roadmaps, milestones, dependencies, and
-                    delivery tracking.
-                  </p>
-                  <PlaceholderImage label="Geiger Flow board and timeline" />
-                </TabsContent>
-
-                <TabsContent value="notes" className="space-y-4">
-                  <p className="text-sm text-zinc-400">
-                    Geiger Notes provides an infinite collaborative canvas for brainstorming, diagrams, and design
-                    docs.
-                  </p>
-                  <PlaceholderImage label="Geiger Notes collaborative canvas" />
-                </TabsContent>
-
-                <TabsContent value="dam" className="space-y-4">
-                  <p className="text-sm text-zinc-400">
-                    Geiger DAM centralizes media ingestion, metadata enrichment, approvals, and distribution control.
-                  </p>
-                  <PlaceholderImage label="Geiger DAM asset library and metadata panel" />
-                </TabsContent>
-
-                <TabsContent value="grey" className="space-y-4">
-                  <p className="text-sm text-zinc-400">
-                    Geiger Grey delivers AI assistance for drafting, search, automation orchestration, and workflow
-                    summarization.
-                  </p>
-                  <PlaceholderImage label="Geiger Grey assistant workspace" />
-                </TabsContent>
-
-                <TabsContent value="dash" className="space-y-4">
-                  <p className="text-sm text-zinc-400">
-                    Geiger Dash is the command surface for portfolio-level health, usage visibility, and governance
-                    reporting.
-                  </p>
-                  <PlaceholderImage label="Geiger Dash operations and analytics view" />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-
-          <Card id="plans" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Plans and Pricing</CardTitle>
-              <CardDescription>Plan matrix for the full Geiger suite.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Feature</TableHead>
-                    <TableHead>Starter</TableHead>
-                    <TableHead>Pro</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Enterprise</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {planRows.map((row) => (
-                    <TableRow key={row.feature}>
-                      <TableCell className="font-medium text-zinc-200">{row.feature}</TableCell>
-                      <TableCell className="text-zinc-400">{row.starter}</TableCell>
-                      <TableCell className="text-zinc-300">{row.pro}</TableCell>
-                      <TableCell className="text-zinc-300">{row.team}</TableCell>
-                      <TableCell className="text-zinc-300">{row.enterprise}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          <Card id="usage" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Usage and Limits</CardTitle>
-              <CardDescription>How usage is calculated across projects and products.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-zinc-400">
-              <p>Usage rolls up by workspace and breaks down by product, team, and environment.</p>
-              <p>Automation and AI actions meter separately from storage and active collaboration sessions.</p>
-              <p>Daily and monthly summaries are available in Dash and exportable through CSV and API.</p>
-            </CardContent>
-          </Card>
-
-          <Card id="cli-reference" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">CLI Reference</CardTitle>
-              <CardDescription>Run Geiger workflows from local terminals and CI pipelines.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Card className="border-zinc-800 bg-zinc-950/40">
-                <CardContent className="space-y-2 p-4 font-mono text-xs text-zinc-300">
-                  <p>geiger login</p>
-                  <p>geiger project create --name &quot;Q3 Launch&quot;</p>
-                  <p>geiger flow import ./tasks.csv</p>
-                  <p>geiger notes export --project q3-launch --format pdf</p>
-                </CardContent>
-              </Card>
-              <p className="text-sm text-zinc-400">
-                CLI supports non-interactive tokens, environment profiles, and deployment-safe dry runs.
+            <ContentSection id="products" eyebrow="Products" title="Core surfaces">
+              <p>
+                Geiger Docs covers the dashboard, project planning, notes canvas, asset workflows, AI agents, and cloud
+                execution. Each guide focuses on the shortest path from setup to a working team workflow.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card id="integrations" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Integrations</CardTitle>
-              <CardDescription>Connect your existing stack and keep systems in sync.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              {[
-                { icon: FileText, title: "Knowledge", text: "Confluence, Notion, and internal docs for contextual assistance." },
-                { icon: Cloud, title: "Storage", text: "S3-compatible buckets and cloud object stores for approved assets." },
-                { icon: MonitorCog, title: "Issue Tracking", text: "Jira and Linear sync for task status, assignees, and milestones." },
-                { icon: Network, title: "Webhooks", text: "Custom outbound and inbound events for approvals, publishes, and audits." },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Card key={item.title} className="border-zinc-800 bg-zinc-950/40">
-                    <CardHeader className="pb-2">
-                      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-800/60">
-                        <Icon className="h-4 w-4 text-zinc-300" />
-                      </div>
-                      <CardTitle className="text-base">{item.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-zinc-400">{item.text}</CardContent>
-                  </Card>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          <Card id="deployment" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Deployment and Self Hosting</CardTitle>
-              <CardDescription>Run Geiger in managed cloud or self-hosted environments.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-zinc-400">
-              <p>Managed cloud is recommended for fastest onboarding and automatic upgrades.</p>
-              <p>Self-hosted mode supports private networking, dedicated storage, and custom retention policies.</p>
-              <p>Enterprise deployments can add private routing and customer-managed keys.</p>
-            </CardContent>
-          </Card>
-
-          <Card id="security" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Security and Compliance</CardTitle>
-              <CardDescription>Baseline controls and hardening guidance for regulated teams.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-zinc-400">
-              <p>Role-based permissions across workspace, project, and item scopes.</p>
-              <p>Optional SSO, audit logs, environment separation, and configurable retention windows.</p>
-              <p>Compliance-ready controls for data residency, exports, and legal hold workflows.</p>
-            </CardContent>
-          </Card>
-
-          <Card id="governance" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Governance Playbooks</CardTitle>
-              <CardDescription>Extra operational docs for scale, controls, and review discipline.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Review Gates</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Define mandatory approvals for legal, security, and brand before publish.
-                  </CardContent>
-                </Card>
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Lifecycle Labels</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Standardize statuses across planning, production, review, and archived work.
-                  </CardContent>
-                </Card>
-                <Card className="border-zinc-800 bg-zinc-950/40">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Retention Policies</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-zinc-400">
-                    Apply product-specific retention defaults and exceptions by team or project type.
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card id="troubleshooting" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Troubleshooting</CardTitle>
-              <CardDescription>Common issues and quick fixes.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible>
-                <AccordionItem value="sync">
-                  <AccordionTrigger>Assets are not syncing to DAM destination</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Check storage credentials, verify webhook delivery, and confirm destination policy allows write
-                    operations from your Geiger workspace.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="roles">
-                  <AccordionTrigger>Users cannot edit projects after invite</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Ensure the user has a project role above viewer and confirm inherited workspace restrictions are not
-                    overriding project-level access.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="automation">
-                  <AccordionTrigger>Automation jobs are delayed</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Review concurrency limits, queue volume in Dash, and retry policy configuration for the affected
-                    environment.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-
-          <Card id="billing-faq" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Billing FAQ</CardTitle>
-              <CardDescription>Plan, invoicing, and subscription lifecycle answers.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible>
-                <AccordionItem value="upgrade">
-                  <AccordionTrigger>Can we change plans mid-cycle?</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Yes. Upgrades apply immediately and prorate automatically. Downgrades take effect on renewal.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="invoice">
-                  <AccordionTrigger>Do you support annual invoicing?</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Team and Enterprise plans support annual billing and consolidated invoicing with finance contacts.
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="trial">
-                  <AccordionTrigger>Is trial usage counted toward paid usage?</AccordionTrigger>
-                  <AccordionContent className="text-zinc-400">
-                    Trial quotas are isolated. Paid usage meters begin when your workspace starts a paid plan.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-
-          <Card id="support" className="border-zinc-800 bg-zinc-900/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-zinc-100">Support</CardTitle>
-              <CardDescription>For account and billing help, contact the Geiger support team.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-3">
-                <Button className="bg-zinc-100 text-zinc-950 hover:bg-zinc-200">Contact Support</Button>
-                <Button variant="outline" className="border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-800">
-                  Open Community Forum
-                </Button>
-              </div>
-              <Separator className="bg-zinc-800" />
-              <p className="text-sm text-zinc-500">Was this page helpful? Yes / No</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-zinc-800 bg-zinc-900/50">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-6">
-              <div>
-                <p className="text-sm text-zinc-400">Need release-by-release updates?</p>
-                <p className="font-semibold text-zinc-200">Follow the changelog and roadmap updates.</p>
-              </div>
-              <Link href="/changelog">
-                <Button className="bg-zinc-100 text-zinc-950 hover:bg-zinc-200">
-                  Open Changelog
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </article>
-
-        <aside className="hidden 2xl:block">
-          <Card className="sticky top-24 border-zinc-800 bg-zinc-900/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm uppercase tracking-wider text-zinc-400">On This Page</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ScrollArea className="h-[66vh] pr-2">
-                <div className="space-y-2 text-sm">
-                  {[
-                    ["Get Started", "#get-started"],
-                    ["Workspace Setup", "#workspace-setup"],
-                    ["Concepts", "#concepts"],
-                    ["Suite Architecture", "#suite-architecture"],
-                    ["Products", "#products"],
-                    ["Plans", "#plans"],
-                    ["Usage and Limits", "#usage"],
-                    ["CLI", "#cli-reference"],
-                    ["Integrations", "#integrations"],
-                    ["Deployment", "#deployment"],
-                    ["Security", "#security"],
-                    ["Governance", "#governance"],
-                    ["Troubleshooting", "#troubleshooting"],
-                    ["Billing FAQ", "#billing-faq"],
-                    ["Support", "#support"],
-                  ].map(([label, href]) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className="block rounded-md px-2 py-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                    >
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  [Box, "Dash"],
+                  [WandSparkles, "Grey"],
+                  [Rocket, "Flow"],
+                ].map(([Icon, label]) => (
+                  <Link
+                    href="#"
+                    key={label}
+                    className="flex items-center justify-between rounded border border-[#2a2a2a] bg-[#202020] p-4 text-sm font-semibold text-white transition-colors hover:border-[#474747]"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-[#a3a3a3]" />
                       {label}
-                    </Link>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
-    </section>
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-[#737373]" />
+                  </Link>
+                ))}
+              </div>
+            </ContentSection>
+          </article>
+        </div>
+      </main>
+    </>
   );
 }
