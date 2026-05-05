@@ -29,9 +29,9 @@ export default async function ChangeLogComponent() {
       <div className="w-full max-w-7xl px-4 sm:px-6">
         <p className="text-2xl">Change Log</p>
       </div>
-      <div className="flex w-full max-w-7xl flex-wrap items-stretch justify-center gap-4 px-4 py-4 sm:px-6">
-        {(changelogs || []).map((entry) => (
-          <Link key={entry.id} href="/changelog" className="block w-full sm:w-auto">
+      <div className="grid w-full max-w-7xl grid-cols-1 items-stretch gap-4 px-4 py-4 sm:px-6 md:grid-cols-3">
+        {(changelogs || []).slice(0, 3).map((entry) => (
+          <Link key={entry.id} href="/changelog" className="block h-full w-full">
             <ChangelogWidget date={formatReleaseDate(entry.release_date)} title={entry.title} />
           </Link>
         ))}

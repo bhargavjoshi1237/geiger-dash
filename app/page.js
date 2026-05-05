@@ -10,6 +10,7 @@ import CollaboratorTabsShowcase from "@/components/canvas-playground/Collaborato
 import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
+import TrustedByComponent from "@/components/trusted_by_component";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -43,14 +44,19 @@ export default async function Home() {
         </section>
 
         <Section />
+        
+        <div className="mt-22 mb-10 w-full">
+          <TrustedByComponent />
+        </div>
 
         <div className="mx-auto my-10 w-full max-w-7xl space-y-8 px-4 sm:my-20 sm:space-y-20 sm:px-6">
           <LandingBoardShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Start Board Playground" />
           <LandingCanvasShowcase ctaHref={userId ? `/canvas/${userId}/home` : "/login"} ctaLabel="Explore Geiger Canvas" />
+          <CollaboratorTabsShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Open Collaborator Dialogue"/>
         </div>
 
         <div
-          className="relative mx-auto mb-12 h-[520px] w-full max-w-7xl rounded-sm bg-cover bg-center bg-no-repeat px-3 py-3 sm:mb-20 sm:h-[700px] sm:px-6 sm:py-8 lg:h-[900px]"
+          className="relative mx-auto mb-12 h-[520px] w-full max-w-[85%] rounded-sm bg-cover bg-center bg-no-repeat px-3 py-3 sm:mb-20 sm:h-[700px] sm:px-6 sm:py-8 lg:h-[900px]"
           style={{
             backgroundImage:
               "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-00a586c62c8782e65c0a.jpg&w=1920&q=70')",
@@ -66,14 +72,13 @@ export default async function Home() {
         <div className="flex flex-col gap-10 sm:gap-20">
           <ChangeLogComponent />
 
+
+
+
+          
           <BlogComponent />
 
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-            <CollaboratorTabsShowcase
-              ctaHref={userId ? `/notes/${userId}/home` : "/login"}
-              ctaLabel="Open Collaborator Dialogue"
-            />
-          </div>
+         
         </div>
 
         <section className="relative z-20 overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
