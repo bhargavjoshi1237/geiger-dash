@@ -12,8 +12,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Geiger Studio - Home",
-  description: "Geiger Studio Dashboard",
+  metadataBase: new URL("https://geiger.studio"),
+  title: {
+    default: "Geiger Studios",
+    template: "%s | Geiger Studios",
+  },
+  description: "Geiger Studios is a suite of tools for teams to plan, create, and collaborate. Built to Manage. Designed to Create",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Geiger Studios",
+    description: "Geiger Studios is a suite of tools for teams to plan, create, and collaborate. Built to Manage. Designed to Create",
+    url: "https://geiger.studio/",
+    siteName: "Geiger Studios",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {

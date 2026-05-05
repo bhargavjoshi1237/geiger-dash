@@ -12,6 +12,13 @@ import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Geiger Studios",
+  url: "https://geiger.studio/",
+};
+
 export default async function Home() {
   const supabase = await createClient();
   const {
@@ -21,6 +28,10 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
       <Header />
