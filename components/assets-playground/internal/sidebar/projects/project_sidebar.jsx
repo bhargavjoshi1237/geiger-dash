@@ -34,6 +34,7 @@ export function ProjectSidebar({
   return (
     <Sidebar
       collapsible="icon"
+      mobileMode="inline"
       className="bg-sidebar border-r border-sidebar-border text-sidebar-foreground"
     >
       <SidebarContent className="space-y-2 relative flex-1 overflow-hidden bg-sidebar">

@@ -1,46 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Check, X, Zap, Crown, Diamond, HelpCircle, Sparkles } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import { LogoutButton } from "@/components/logout-button";
-import { MegaMenu } from "@/components/mega-menu";
+import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Footer from "@/components/footer";
-
-const pricingPlans = [
-  {
-    name: "Starter",
-    price: "2.99",
-    description: "Perfect for passion projects & simple websites",
-    icon: Zap,
-    cta: "Get Started",
-    popular: false
-  },
-  {
-    name: "Pro",
-    price: "4.99",
-    description: "Most Popular - For production applications with the power to scale",
-    icon: Crown,
-    cta: "Start Free Trial",
-    popular: true
-  },
-  {
-    name: "Team",
-    price: "9.99",
-    description: "For large teams with advanced collaboration needs",
-    icon: Diamond,
-    cta: "Start Free Trial",
-    popular: false
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    description: "For large-scale applications with dedicated support",
-    icon: Diamond,
-    cta: "Contact Sales",
-    popular: false
-  }
-];
+import { PlanCards } from "@/components/pricing/plan_cards";
 
 const featureCategories = [
   {
@@ -133,124 +98,27 @@ const faqs = [
 export default async function PricingPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const ctaHref = user ? `/notes/${user.id}/home` : "/login";
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#161616] text-[#e7e7e7] font-sans">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#333333_1px,transparent_1px),linear-gradient(to_bottom,#333333_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-      
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#333333] bg-[#161616]/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 h-14 flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={24} height={24} />
-              </div>
-              <span className="font-bold text-lg tracking-tight text-[#e7e7e7]">Geiger Studios</span>
-            </Link>
-          </div>
-          <MegaMenu />
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <Link
-                  href={`/notes/${user.id}/home`}
-                  className="text-sm text-[#a3a3a3] hover:text-[#e7e7e7] transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <LogoutButton />
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm text-[#a3a3a3] hover:text-[#e7e7e7] transition-colors"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* MAIN CONTENT */}
-      <main className="relative z-10 pt-20 pb-16 px-4 mt-28">
+      <main className="relative z-10 pt-20 pb-16 px-4 sm:px-6">
         <div className="w-full lg:w-[75%] mx-auto">
           {/* Page Header */}
           <div className="text-center mb-24">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-b from-[#e7e7e7] to-[#a3a3a3] bg-clip-text text-transparent">
-              Predictable pricing, designed to scale
+             Pricing
             </h1>
-            <p className="text-base text-[#a3a3a3] max-w-2xl mx-auto leading-relaxed">
+            {/* <p className="text-base text-[#a3a3a3] max-w-2xl mx-auto leading-relaxed">
               Start building for free, collaborate with your team, then scale to millions of users
-            </p>
+            </p> */}
           </div>
 
-          {/* Compact Plan Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-            {pricingPlans.map((plan, index) => {
-              const Icon = plan.icon;
-              return (
-                <div 
-                  key={index}
-                  className={`relative group ${index === 1 ? 'lg:-mt-4 lg:mb-4' : ''}`}
-                >
-                  {/* Card */}
-                  <div 
-                    className={`relative bg-gradient-to-br from-[#1a1a1a] to-[#1e1e1e] border rounded-2xl overflow-hidden transition-all duration-300 ${
-                      plan.popular 
-                        ? 'border-zinc-500 shadow-2xl shadow-zinc-500/20' 
-                        : 'border-[#333333] hover:border-[#474747]'
-                    }`}
-                  >
-                    {plan.popular && (
-                      <div className="absolute top-0 left-0 right-0 py-1.5 px-4 text-xs font-semibold text-center bg-gradient-to-r from-zinc-500/20 via-purple-500/20 to-emerald-500/20 border-b border-zinc-500/30 flex items-center justify-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Most Popular
-                      </div>
-                    )}
-                    
-                    <div className={`pt-8 pb-6 px-6 ${plan.popular ? 'pt-12' : ''}`}>
-                      {/* Plan Name */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-[#e7e7e7]">{plan.name}</h3>
-                        <Icon className={`w-5 h-5 ${plan.popular ? 'text-zinc-400' : 'text-[#737373]'}`} />
-                      </div>
-                      
-                      {/* Price */}
-                      <div className="mb-3">
-                        {plan.price === "Custom" ? (
-                          <div className="text-2xl font-bold text-[#e7e7e7]">Custom</div>
-                        ) : (
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-[#e7e7e7]">${plan.price}</span>
-                            <span className="text-sm text-[#737373]">/month</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Description */}
-                      <p className="text-xs text-[#a3a3a3] mb-6 leading-relaxed min-h-[32px]">
-                        {plan.description.split(' - ')[1] || plan.description}
-                      </p>
-                      
-                      {/* CTA Button */}
-                      <Link
-                        href={user ? `/notes/${user.id}/home` : "/login"}
-                        className={`block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                          plan.popular
-                            ? 'bg-[#474747] hover:bg-[#5a5a5a] text-[#e7e7e7] shadow-lg'
-                            : 'bg-[#2a2a2a] hover:bg-[#333333] text-[#a3a3a3]'
-                        }`}
-                      >
-                        {plan.cta}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <PlanCards ctaHref={ctaHref} />
 
           {/* Compare Plans Section */}
           <div className="mb-16">

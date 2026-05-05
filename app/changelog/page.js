@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Box, Zap, Layers, Cpu, Calendar, Tag, Sparkles, Bug, Wrench, AlertCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
-import { LogoutButton } from "@/components/logout-button";
-import { MegaMenu } from "@/components/mega-menu";
+import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import  Footer from "@/components/footer";
@@ -32,7 +31,6 @@ const typeIcons = {
 
 export default async function ChangelogPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch changelogs with their items
   const { data: changelogs } = await supabase
@@ -50,44 +48,10 @@ export default async function ChangelogPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-      
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center">
-                <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={24} height={24} />
-              </div>
-              <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
-            </Link>
-          </div>
-          <MegaMenu />
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <Link
-                  href={`/notes/${user.id}/home`}
-                  className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <LogoutButton />
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* MAIN CONTENT */}
-      <main className="relative z-10 pt-32 pb-20 px-6 mt-18">
+      <main className="relative z-10 pt-20 pb-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           {/* Page Header */}
           <div className="text-center mb-16 ">

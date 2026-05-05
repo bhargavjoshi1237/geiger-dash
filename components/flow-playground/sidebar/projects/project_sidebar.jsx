@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Sidebar,
   SidebarContent,
@@ -31,9 +32,11 @@ function MobileSidebarHeader() {
       <div className="flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded flex items-center justify-center shrink-0">
-            <img
+            <Image
               src="/logo1.svg"
               alt=""
+              width={20}
+              height={20}
               className="w-5 h-5"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
@@ -74,6 +77,7 @@ export function ProjectSidebar({
   return (
     <Sidebar
       collapsible="icon"
+      mobileMode="inline"
       className="bg-sidebar border-r border-sidebar-border text-sidebar-foreground"
     >
       <MobileSidebarHeader />

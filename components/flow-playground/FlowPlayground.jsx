@@ -95,7 +95,7 @@ export function FlowPlayground() {
                 <ProjectSidebar activeTab={currentTab} onTabChange={setCurrentTab} />
                 <SidebarInset className="flex-1 flex flex-col h-full bg-transparent overflow-hidden relative border-none">
                   <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#161616] blur-[120px] pointer-events-none rounded-full"></div>
-                  <main className="flex-1 overflow-y-auto p-4 md:p-8 relative z-10 w-full min-w-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <main className="relative z-10 flex-1 w-full min-w-0 overflow-y-auto px-2 py-3 sm:px-3 sm:py-4 md:p-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {renderScreen()}
                   </main>
                 </SidebarInset>

@@ -129,6 +129,7 @@ function Sidebar({
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
+  mobileMode = "sheet",
   className,
   children,
   ...props
@@ -151,6 +152,37 @@ function Sidebar({
   }
 
   if (isMobile) {
+    if (mobileMode === "inline") {
+      return (
+        <>
+          {openMobile && (
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              onClick={() => setOpenMobile(false)}
+              className="absolute inset-0 z-40 bg-black/45 md:hidden"
+            />
+          )}
+          <div
+            data-sidebar="sidebar"
+            data-slot="sidebar"
+            data-mobile="true"
+            className={cn(
+              "absolute inset-y-0 left-0 z-50 w-(--sidebar-width) border-r border-sidebar-border bg-[#191919] text-sidebar-foreground p-0 transition-transform duration-200 ease-linear md:hidden",
+              openMobile ? "translate-x-0" : "-translate-x-full",
+              className,
+            )}
+            style={{
+              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+            }}
+            {...props}
+          >
+            <div className="flex h-full w-full flex-col">{children}</div>
+          </div>
+        </>
+      );
+    }
+
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
@@ -514,9 +546,7 @@ function SidebarMenuBadge({ className, ...props }) {
 }
 
 function SidebarMenuSkeleton({ className, showIcon = false, ...props }) {
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
-  }, []);
+  const width = React.useMemo(() => "72%", []);
 
   return (
     <div

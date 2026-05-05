@@ -22,7 +22,7 @@ export default async function ChangeLogComponent() {
     .from("dash_changelog")
     .select("id, title, release_date")
     .order("release_date", { ascending: false })
-    .limit(4);
+    .limit(3);
 
   return (
     <div className="w-full flex flex-col items-center">

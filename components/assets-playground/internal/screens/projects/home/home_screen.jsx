@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useProject } from "@/components/assets-playground/context/project-context";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -234,31 +233,22 @@ function QuickActionCard({ icon: Icon, label, description }) {
   );
 }
 
-export function HomeScreen({ id }) {
-  const { project, loading } = useProject();
-  const projectName = project?.name && !loading ? project.name : null;
-
+export function HomeScreen() {
   return (
-    <div className="flex flex-col gap-8 w-full pb-12">
-      <div className="flex items-start justify-between">
+    <div className="flex w-full flex-col gap-6 pb-8 sm:gap-8 sm:pb-12">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            {loading ? (
-              <div className="h-7 w-48 rounded-md bg-[#2a2a2a] animate-pulse" />
-            ) : (
-              <h1 className="text-xl font-semibold text-white tracking-tight">
-                {projectName ? `${projectName} Overview` : "Project Overview"}
-              </h1>
-            )}
+            <h1 className="text-lg font-semibold tracking-tight text-white sm:text-xl">Geiger Assets</h1>
             <Badge variant="secondary" className="text-[10px] font-medium bg-[#2a2a2a] text-[#737373] border border-[#333333] hover:bg-[#2a2a2a]">
               Active
             </Badge>
           </div>
-          <p className="text-sm text-[#525252]">
+          <p className="text-xs text-[#525252] sm:text-sm">
             Monitor your project assets, activity, and team performance
           </p>
         </div>
-        <Button className="bg-white text-black hover:bg-[#e5e5e5] text-sm h-9 gap-2 rounded-lg">
+        <Button className="h-9 w-full gap-2 rounded-lg bg-white text-sm text-black hover:bg-[#e5e5e5] sm:w-auto">
           <UploadCloud className="w-4 h-4" />
           Upload
         </Button>
@@ -270,7 +260,7 @@ export function HomeScreen({ id }) {
         ))}
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-7 flex flex-col gap-6">
           <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
@@ -332,7 +322,7 @@ export function HomeScreen({ id }) {
               <Sparkles className="w-4 h-4 text-[#737373]" />
               <h2 className="text-sm font-medium text-white">Quick Actions</h2>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {quickActions.map((action) => (
                 <QuickActionCard key={action.label} {...action} />
               ))}

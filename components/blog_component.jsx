@@ -16,13 +16,14 @@ function getRandomPlaceholder() {
 
 export default async function BlogComponent() {
   const supabase = await createClient();
+  const latestPostsLimit = 3;
 
   const { data: posts } = await supabase
     .from("dash_blog_posts")
     .select("id, title, excerpt, slug, featured_image")
     .eq("is_published", true)
     .order("published_at", { ascending: false })
-    .limit(3);
+    .limit(latestPostsLimit);
 
   return (
     <div className="w-full flex flex-col items-center">

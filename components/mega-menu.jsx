@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,25 +18,25 @@ export function MegaMenu({ userId }) {
   const products = [
     {
       icon: ContainerIcon,
-      label: "Geiger Flow",
+      label: "Flow",
       description: "Plan and track work.",
       href: "/flow",
     },
     {
       icon: Zap,
-      label: "Geiger Notes",
+      label: "Notes",
       description: "Write and collaborate.",
       href: "/notes",
     },
     {
       icon: Layers,
-      label: "Geiger DAM",
+      label: "DAM",
       description: "Manage your media.",
       href: "#",
     },
     {
       icon: Cpu,
-      label: "Geiger Grey",
+      label: "Grey",
       description: "AI workspace tools.",
       href: "#",
     },
@@ -115,9 +116,12 @@ export function MegaMenu({ userId }) {
               <span className="sr-only">Open Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="h-dvh overflow-y-auto border-zinc-800 bg-zinc-950 text-zinc-100">
+          <SheetContent side="top" className="max-h-[85dvh] overflow-y-auto border-zinc-800 bg-zinc-950 text-zinc-100">
             <SheetHeader className="border-b border-zinc-800 pb-4">
-              <SheetTitle>Geiger Navigation</SheetTitle>
+              <div className="flex items-center gap-2">
+                <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Geiger logo" width={18} height={18} />
+                <SheetTitle className="mt-0.5">Geiger Studio</SheetTitle>
+              </div>
               <SheetDescription className="text-zinc-500">
                 Browse products, resources, and pricing.
               </SheetDescription>
@@ -126,23 +130,22 @@ export function MegaMenu({ userId }) {
             <div className="space-y-6 px-4 pb-6">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Products</p>
-                {products.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <SheetClose asChild key={item.label}>
-                      <Link
-                        href={item.href}
-                        className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-200"
-                      >
-                        <Icon className="h-4 w-4 text-zinc-400" />
-                        <div>
-                          <p>{item.label}</p>
-                          <p className="text-xs text-zinc-500">{item.description}</p>
-                        </div>
-                      </Link>
-                    </SheetClose>
-                  );
-                })}
+                <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                  {products.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <SheetClose asChild key={item.label}>
+                        <Link
+                          href={item.href}
+                          className="flex min-w-[86px] flex-col items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-2 py-3 text-center text-xs text-zinc-200"
+                        >
+                          <Icon className="h-4 w-4 text-zinc-400" />
+                          <p className="leading-tight">{item.label}</p>
+                        </Link>
+                      </SheetClose>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -151,7 +154,7 @@ export function MegaMenu({ userId }) {
                   <SheetClose asChild key={item.label}>
                     <Link
                       href={item.href}
-                      className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-200"
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-zinc-200"
                     >
                       {item.label}
                       <ArrowRight className="h-4 w-4 text-zinc-500" />
@@ -160,23 +163,25 @@ export function MegaMenu({ userId }) {
                 ))}
               </div>
 
-              <SheetClose asChild>
-                <Link
-                  href="/pricing"
-                  className="inline-flex w-full items-center justify-center rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900"
-                >
-                  View Pricing
-                </Link>
-              </SheetClose>
+              <div className="space-y-2">
+                <SheetClose asChild>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex w-full items-center justify-center rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900"
+                  >
+                    View Pricing
+                  </Link>
+                </SheetClose>
 
-              <SheetClose asChild>
-                <Link
-                  href={userId ? `/notes/${userId}/home` : "/login"}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-700 bg-transparent px-4 py-2 text-sm font-medium text-zinc-100"
-                >
-                  {userId ? "Open Dashboard" : "Sign In"}
-                </Link>
-              </SheetClose>
+                <SheetClose asChild>
+                  <Link
+                    href={userId ? `/notes/${userId}/home` : "/login"}
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-700 bg-transparent px-4 py-2 text-sm font-medium text-zinc-100"
+                  >
+                    {userId ? "Open Dashboard" : "Sign In"}
+                  </Link>
+                </SheetClose>
+              </div>
             </div>
           </SheetContent>
         </Sheet>

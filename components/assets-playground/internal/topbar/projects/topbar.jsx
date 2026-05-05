@@ -6,11 +6,13 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useProject } from "@/components/assets-playground/context/project-context";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationsDropdown } from "../dialogue/notifications_dropdown";
+import { useIsMobile } from "@/lib/hooks/use-mobile";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export function ProjectTopbar() {
   const { project } = useProject();
+  const isMobile = useIsMobile();
   return (
     <header className="h-14 px-4 flex items-center justify-between border-b border-[#2a2a2a] bg-[#161616] text-white z-20 w-full shrink-0">
       <div className="flex items-center gap-3">
@@ -62,15 +64,19 @@ export function ProjectTopbar() {
             <button className="w-8 h-8 rounded-full border border-transparent hover:bg-[#2a2a2a] hidden sm:flex items-center justify-center transition-colors text-[#a3a3a3] hover:text-white">
               <HelpCircle className="w-[18px] h-[18px]" strokeWidth={2} />
             </button>
-            <NotificationsDropdown>
-              <button className="w-8 h-8 rounded-full border border-transparent hover:bg-[#2a2a2a] flex items-center justify-center transition-colors text-[#a3a3a3] hover:text-white relative">
-                <Bell className="w-[18px] h-[18px]" strokeWidth={2} />
-                <div className="absolute top-[6px] right-[7px] w-2 h-2 rounded-full bg-[#3b82f6] border border-[#161616]"></div>
-              </button>
-            </NotificationsDropdown>
-            <button className="w-8 h-8 rounded-full border border-[#333333] hover:border-[#474747] overflow-hidden ml-1 transition-colors">
-              <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"></div>
-            </button>
+            {!isMobile && (
+              <>
+                <NotificationsDropdown>
+                  <button className="w-8 h-8 rounded-full border border-transparent hover:bg-[#2a2a2a] flex items-center justify-center transition-colors text-[#a3a3a3] hover:text-white relative">
+                    <Bell className="w-[18px] h-[18px]" strokeWidth={2} />
+                    <div className="absolute top-[6px] right-[7px] w-2 h-2 rounded-full bg-[#3b82f6] border border-[#161616]"></div>
+                  </button>
+                </NotificationsDropdown>
+                <button className="w-8 h-8 rounded-full border border-[#333333] hover:border-[#474747] overflow-hidden ml-1 transition-colors">
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"></div>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
