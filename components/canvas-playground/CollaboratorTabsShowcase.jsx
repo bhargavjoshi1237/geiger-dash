@@ -44,11 +44,10 @@ export default function CollaboratorTabsShowcase({ ctaHref, ctaLabel }) {
       <div className="grid items-center gap-12 lg:grid-cols-[0.36fr_0.64fr]">
         <div className="space-y-5">
           <h3 className="text-2xl font-semibold leading-snug text-[#f5f5f5] sm:text-3xl">
-            Collaborator dialogue tabs, side by side.
+            Collaborate in Real-Time to Pplan & Execute.
           </h3>
           <p className="text-base text-[#bcbcbc] sm:text-lg">
-            A layered preview of Host, Members, Join, and Merge in the same
-            geiger-notes style dialogue.
+            Invite your team to collaborate in real-time, ensuring everyone stays aligned while you plan and execute together.
           </p>
           <Link
             href={ctaHref}

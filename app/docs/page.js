@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-[#161616] text-white">
+    <div className="min-h-screen bg-[#161616] font-sans text-white antialiased selection:bg-[#333333] selection:text-white">
       <DocsWidget />
     </div>
   );

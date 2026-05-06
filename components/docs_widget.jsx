@@ -97,19 +97,19 @@ const actionLinks = [
 
 function DocsTopBar() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#2a2a2a] bg-[#161616] text-white">
+    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#2a2a2a] bg-[#161616]/95 text-white backdrop-blur">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex h-full min-w-0 items-center gap-6">
           <Link href="/" className="flex min-w-0 items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded">
-              <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="h-5 w-5" />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md  ">
+            <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="h-5 w-5" />
             </span>
             <span className="hidden border-l border-[#333333] pl-3 text-sm font-semibold text-white sm:block">
               Geiger Docs
             </span>
           </Link>
 
-          <nav className="hidden h-full items-center gap-6 text-sm text-[#a3a3a3] md:flex">
+          <nav className="hidden h-full items-center gap-6 text-sm font-medium text-[#a3a3a3] md:flex">
             {["Docs", "API", "Learn", "Help"].map((item) => (
               <Link
                 key={item}
@@ -127,7 +127,7 @@ function DocsTopBar() {
         </div>
 
         <div className="hidden flex-1 justify-center lg:flex">
-          <div className="group flex h-8 w-full max-w-[430px] items-center gap-2 rounded-md border border-[#2a2a2a] bg-[#242424] px-3 text-sm text-[#a3a3a3] shadow-sm transition-colors hover:border-[#474747]">
+          <div className="group flex h-8 w-full max-w-[430px] items-center gap-2 rounded-md border border-[#2a2a2a] bg-[#202020] px-3 text-sm text-[#a3a3a3] shadow-sm transition-colors hover:border-[#474747] hover:bg-[#242424]">
             <Search className="h-4 w-4" />
             <span className="flex-1">Search docs...</span>
             <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3] transition-colors group-hover:bg-[#2a2a2a] group-hover:text-white">
@@ -137,7 +137,7 @@ function DocsTopBar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden h-8 items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#242424] px-3 text-sm text-[#a3a3a3] transition-colors hover:border-[#474747] hover:text-white md:flex">
+          <button className="hidden h-8 items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#202020] px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:border-[#474747] hover:bg-[#242424] hover:text-white md:flex">
             <span>Ask AI</span>
             <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3]">
               Cmd I
@@ -145,13 +145,13 @@ function DocsTopBar() {
           </button>
           <Link
             href="/login"
-            className="hidden h-8 items-center rounded-full border border-transparent px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:bg-[#2a2a2a] hover:text-white sm:flex"
+            className="hidden h-8 items-center rounded-md border border-transparent px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:bg-[#2a2a2a] hover:text-white sm:flex"
           >
             Sign in
           </Link>
           <Link
             href="#download"
-            className="h-8 rounded-full bg-white px-4 text-sm font-medium leading-8 text-black transition-colors hover:bg-[#e5e5e5]"
+            className="h-8 rounded-md bg-white px-4 text-sm font-medium leading-8 text-black transition-colors hover:bg-[#e5e5e5]"
           >
             Download
           </Link>
@@ -167,14 +167,14 @@ function LeftSidebar() {
       <nav className="space-y-8">
         {navigation.map((section) => (
           <div key={section.title}>
-            <p className="mb-2 text-sm text-[#a3a3a3]">{section.title}</p>
-            <div className="space-y-2">
+            <p className="mb-3 text-xs font-medium uppercase text-[#737373]">{section.title}</p>
+            <div className="space-y-1">
               {section.links.map((link) => (
                 <Link
                   href="#"
                   key={`${section.title}-${link.label}`}
-                  className={`flex items-center justify-between text-[15px] font-semibold leading-5 transition-colors ${
-                    link.active ? "text-white" : "text-white hover:text-[#a3a3a3]"
+                  className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium leading-5 transition-colors ${
+                    link.active ? "bg-[#202020] text-white" : "text-[#a3a3a3] hover:bg-[#202020] hover:text-white"
                   }`}
                 >
                   <span>{link.label}</span>
@@ -192,13 +192,14 @@ function LeftSidebar() {
 function RightSidebar() {
   return (
     <aside className="docs-scrollbar-hidden fixed bottom-0 right-0 top-14 hidden w-[280px] overflow-y-auto bg-[#161616] px-6 py-8 xl:block">
-      <div className="pl-3">
+      <div className="border-l border-[#2a2a2a] pl-5">
+        <p className="mb-4 text-xs font-medium uppercase text-[#737373]">On this page</p>
         <div className="space-y-4 text-sm">
           {rightLinks.map((link, index) => (
             <Link
               key={link}
               href={index === 0 ? "#start-here" : "#"}
-              className={`block transition-colors hover:text-zinc-100 ${
+              className={`block transition-colors hover:text-white ${
                 index === 0 ? "text-[#a3a3a3]" : "text-[#737373]"
               }`}
             >
@@ -215,7 +216,7 @@ function RightSidebar() {
             return (
               <button
                 key={action.label}
-                className="flex items-center gap-2 text-sm text-[#737373] transition-colors hover:text-white"
+                className="flex items-center gap-2 text-sm font-medium text-[#737373] transition-colors hover:text-white"
               >
                 <Icon className="h-3.5 w-3.5" />
                 <span>{action.label}</span>
@@ -260,7 +261,7 @@ function ProductPreview() {
           <div className="border-r border-[#e5e5e5] p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="truncate text-[10px] font-semibold text-[#171717]">Add validation for release flags</p>
-              <button className="rounded bg-[#f3f4f6] px-2 py-1 text-[7px] font-semibold text-[#525252]">Create PR</button>
+              <button className="rounded border border-[#e5e5e5] bg-[#f3f4f6] px-2 py-1 text-[7px] font-semibold text-[#525252]">Create PR</button>
             </div>
             <div className="mb-3 grid grid-cols-3 gap-2">
               {["Composer", "Planning next", "Sonnet 4.5"].map((item) => (
@@ -287,7 +288,7 @@ function ProductPreview() {
                 </div>
               ))}
             </div>
-            <div className="absolute bottom-4 left-5 right-[59%] rounded-md border border-[#e5e5e5] bg-white px-2 py-1.5 text-[7px] text-[#737373]">
+            <div className="absolute bottom-4 left-5 right-[59%] rounded-md border border-[#e5e5e5] bg-white px-2 py-1.5 text-[7px] text-[#737373] shadow-sm">
               Plan, @ for contexts, / for commands
             </div>
           </div>
@@ -332,13 +333,13 @@ function StartCard({ item }) {
   return (
     <Link
       href={item.href}
-      className="group min-h-[160px] rounded border border-[#2a2a2a] bg-[#202020] transition-colors hover:border-[#474747]"
+      className="group min-h-[160px] rounded-md border border-[#2a2a2a] bg-[#202020] transition-colors hover:border-[#474747] hover:bg-[#242424]"
     >
       <div className="flex h-12 items-center gap-3 border-b border-[#2a2a2a] px-4">
         <Icon className="h-4 w-4 text-[#a3a3a3]" />
         <span className="text-sm font-semibold text-white">{item.title}</span>
       </div>
-      <p className="px-4 pt-4 text-[15px] font-semibold leading-6 text-white">{item.body}</p>
+      <p className="px-4 pt-4 text-[15px] font-medium leading-6 text-[#e5e5e5]">{item.body}</p>
     </Link>
   );
 }
@@ -347,7 +348,7 @@ function ContentSection({ id, eyebrow, title, children }) {
   return (
     <section id={id} className="pt-12">
       <p className="mb-3 text-sm text-[#a3a3a3]">{eyebrow}</p>
-      <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      <h2 className="text-2xl font-semibold text-white">{title}</h2>
       <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#a3a3a3]">{children}</div>
     </section>
   );
@@ -360,14 +361,16 @@ export default function DocsWidget() {
       <LeftSidebar />
       <RightSidebar />
 
-      <main className="min-h-screen bg-[#161616] pt-14 lg:pl-[280px] xl:pr-[280px]">
+      <main className="min-h-screen bg-[#161616] pt-14 text-white lg:pl-[280px] xl:pr-[280px]">
         <div className="mx-auto w-full max-w-[704px] px-5 py-9 sm:px-0">
           <div className="docs-scrollbar-hidden mb-6 flex gap-2 overflow-x-auto pb-2 lg:hidden">
-            {navigation.flatMap((section) => section.links.slice(0, 3)).map((link) => (
+            {navigation.flatMap((section) =>
+              section.links.slice(0, 3).map((link) => ({ ...link, section: section.title })),
+            ).map((link) => (
               <Link
                 href="#"
-                key={`mobile-${link.label}`}
-                className={`shrink-0 rounded-full border border-[#2a2a2a] px-3 py-1.5 text-sm ${
+                key={`mobile-${link.section}-${link.label}`}
+                className={`shrink-0 rounded-md border border-[#2a2a2a] px-3 py-1.5 text-sm font-medium ${
                   link.active ? "bg-white text-black" : "bg-[#202020] text-[#a3a3a3]"
                 }`}
               >
@@ -377,11 +380,11 @@ export default function DocsWidget() {
           </div>
 
           <article>
-            <p className="mb-3 text-sm text-[#a3a3a3]">Get Started</p>
-            <h1 className="text-[34px] font-semibold leading-tight tracking-tight text-white sm:text-[36px]">
+            <p className="mb-3 text-sm font-medium text-[#a3a3a3]">Get Started</p>
+            <h1 className="text-[34px] font-semibold leading-tight text-white sm:text-[36px]">
               Geiger Documentation
             </h1>
-            <p className="mt-9 max-w-[690px] text-[15px] font-semibold leading-6 text-white">
+            <p className="mt-9 max-w-[690px] text-[15px] font-medium leading-6 text-[#e5e5e5]">
               Geiger is an AI workspace and delivery system. Use it to understand your projects, plan and build
               features, review changes, and work with the tools your team already uses.
             </p>
@@ -389,7 +392,7 @@ export default function DocsWidget() {
             <ProductPreview />
 
             <section id="start-here" className="pt-[68px]">
-              <h2 className="text-2xl font-semibold tracking-tight text-white">Start here</h2>
+              <h2 className="text-2xl font-semibold text-white">Start here</h2>
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 {startCards.map((item) => (
                   <StartCard key={item.title} item={item} />
@@ -410,9 +413,9 @@ export default function DocsWidget() {
                   [Code2, "Generate implementation plans"],
                   [ShieldCheck, "Keep permissions and approvals visible"],
                 ].map(([Icon, text]) => (
-                  <div key={text} className="flex items-center gap-3 rounded border border-[#2a2a2a] bg-[#202020] p-3">
+                  <div key={text} className="flex items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#202020] p-3 transition-colors hover:border-[#474747] hover:bg-[#242424]">
                     <Icon className="h-4 w-4 text-[#a3a3a3]" />
-                    <span className="text-sm font-medium text-white">{text}</span>
+                    <span className="text-sm font-medium text-[#e5e5e5]">{text}</span>
                   </div>
                 ))}
               </div>
@@ -432,7 +435,7 @@ export default function DocsWidget() {
                   <Link
                     href="#"
                     key={label}
-                    className="flex items-center justify-between rounded border border-[#2a2a2a] bg-[#202020] p-4 text-sm font-semibold text-white transition-colors hover:border-[#474747]"
+                    className="flex items-center justify-between rounded-md border border-[#2a2a2a] bg-[#202020] p-4 text-sm font-semibold text-[#e5e5e5] transition-colors hover:border-[#474747] hover:bg-[#242424] hover:text-white"
                   >
                     <span className="flex items-center gap-2">
                       <Icon className="h-4 w-4 text-[#a3a3a3]" />

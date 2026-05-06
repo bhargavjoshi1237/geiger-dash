@@ -35,7 +35,7 @@ export function ProjectTopbar() {
           </div>
           <div className="flex items-center gap-1 cursor-pointer group group-data-[collapsible=icon]:hidden md:border-l md:border-[#333333] pl-2 hidden sm:flex">
             <span className="text-white font-semibold text-sm ml-1 truncate max-w-[150px] md:max-w-xs">
-              {project?.name || "Geiger Studio"}
+              {project?.name || "Geiger Assets"}
             </span>
           </div>
         </div>

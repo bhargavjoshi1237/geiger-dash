@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GitBranch, Github } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
@@ -61,9 +61,9 @@ export default async function Home() {
         </div>
 
         <div className="mx-auto my-10 w-full max-w-7xl space-y-8 px-4 sm:my-20 sm:space-y-20 sm:px-6">
-          <LandingBoardShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Start Board Playground" />
-          <LandingCanvasShowcase ctaHref={userId ? `/canvas/${userId}/home` : "/login"} ctaLabel="Explore Geiger Canvas" />
-          <CollaboratorTabsShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Open Collaborator Dialogue"/>
+          <LandingBoardShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Checkout Notes" />
+          <LandingCanvasShowcase ctaHref={userId ? `/canvas/${userId}/home` : "/login"} ctaLabel="Checkout Canvas" />
+          <CollaboratorTabsShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Checkout Flow"/>
         </div>
 
         <div
@@ -104,8 +104,7 @@ export default async function Home() {
               <Link
                 href="/"
                 className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:w-auto"
-              >
-                Login To The Studio
+              > Studio
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link

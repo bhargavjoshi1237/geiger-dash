@@ -15,7 +15,7 @@ export const useProject = () => {
 // Mock project data
 const DEMO_PROJECT = {
   id: "demo-project-123",
-  name: "Geiger Flow Demo",
+  name: "Geiger Flow",
   description: "A comprehensive project management demo showcasing Geiger Flow's capabilities",
   status: "active",
   created_at: "2026-01-15T10:00:00Z",

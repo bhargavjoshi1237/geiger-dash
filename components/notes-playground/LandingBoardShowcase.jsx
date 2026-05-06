@@ -10,10 +10,10 @@ export default function LandingBoardShowcase({ ctaHref, ctaLabel }) {
         <div className="w-full lg:w-[30%] flex flex-col items-start justify-center space-y-6">
           <div className="space-y-4">
             <h3 className="text-2xl leading-snug font-semibold text-[#f5f5f5] sm:text-3xl">
-              Agents turn ideas into code
+              Notes turn ideas into Plans
             </h3>
             <p className="text-base text-[#bcbcbc] sm:text-lg">
-              Accelerate development by handing off tasks to Cursor, while you focus on making decisions.
+              Accelerate execution by turning your ideas into actionable plans. while you focus on making decisions.
             </p>
           </div>
 
