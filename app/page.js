@@ -19,12 +19,33 @@ const websiteJsonLd = {
   url: "https://geiger.studio/",
 };
 
+const showcaseBackgroundImages = [
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-00a586c62c8782e65c0a.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Finternal-brand%2Finternal-brand-023-3291bb4c.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-0ec1f3ba625f482c9dc3.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-85923e7fafe00c9c0d1f.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-8e2e88cff7f33224ddd7.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-0a66efa21dd4b7e6c526.jpg&w=1920&q=70",
+  "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca23250c.jpg&w=1920&q=70",
+];
+
+function getRandomShowcaseBackgrounds(count) {
+  const shuffledImages = [...showcaseBackgroundImages].sort(() => Math.random() - 0.5);
+
+  return Array.from(
+    { length: count },
+    (_, index) => shuffledImages[index % shuffledImages.length],
+  );
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const userId = user?.id;
+  const [notesShowcaseBg, canvasShowcaseBg, flowShowcaseBg] =
+    getRandomShowcaseBackgrounds(3);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
@@ -61,9 +82,21 @@ export default async function Home() {
         </div>
 
         <div className="mx-auto my-10 w-full max-w-7xl space-y-8 px-4 sm:my-20 sm:space-y-20 sm:px-6">
-          <LandingBoardShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Checkout Notes" />
-          <LandingCanvasShowcase ctaHref={userId ? `/canvas/${userId}/home` : "/login"} ctaLabel="Checkout Canvas" />
-          <CollaboratorTabsShowcase ctaHref={userId ? `/notes/${userId}/home` : "/login"} ctaLabel="Checkout Flow"/>
+          <LandingBoardShowcase
+            backgroundImage={notesShowcaseBg}
+            ctaHref={userId ? `/notes/${userId}/home` : "/login"}
+            ctaLabel="Checkout Notes"
+          />
+          <LandingCanvasShowcase
+            backgroundImage={canvasShowcaseBg}
+            ctaHref={userId ? `/canvas/${userId}/home` : "/login"}
+            ctaLabel="Checkout Canvas"
+          />
+          <CollaboratorTabsShowcase
+            backgroundImage={flowShowcaseBg}
+            ctaHref={userId ? `/notes/${userId}/home` : "/login"}
+            ctaLabel="Checkout Flow"
+          />
         </div>
 
         <div

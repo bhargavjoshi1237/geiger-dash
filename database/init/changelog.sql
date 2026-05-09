@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.dash_changelog (
   product TEXT NOT NULL CHECK (product IN ('geiger-flow', 'geiger-notes', 'geiger-dash', 'geiger-dam', 'geiger-grey')),
   release_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   CONSTRAINT dash_changelog_pkey PRIMARY KEY (id)

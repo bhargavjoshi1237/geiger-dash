@@ -49,6 +49,23 @@ function sanitizeObjectPath(pathValue) {
   return String(pathValue || '').trim().replace(/^\/+/, '')
 }
 
+function sanitizeRelativeFolder(pathValue) {
+  return String(pathValue || '')
+    .split('/')
+    .map((part) => slugify(part))
+    .filter(Boolean)
+    .join('/')
+}
+
+function sanitizeFileName(value) {
+  return String(value || 'image')
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9.]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 function toActionErrorMessage(error, fallbackMessage) {
   const message = String(error?.message || '').trim()
   const lower = message.toLowerCase()
@@ -108,6 +125,171 @@ async function resolveImageUrl({
 function ensureAuthUser(user) {
   if (!user) {
     redirect('/login')
+  }
+}
+
+async function listStorageFolder(supabase, bucket, prefix) {
+  const { data, error } = await supabase.storage.from(bucket).list(prefix, {
+    limit: 100,
+    offset: 0,
+    sortBy: { column: 'updated_at', order: 'desc' },
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return (data || []).reduce(
+    (acc, entry) => {
+      const objectPath = `${prefix}/${entry.name}`.replace(/^\/+/, '')
+
+      if (!entry.id) {
+        acc.folders.push({
+          name: entry.name,
+          path: objectPath,
+          updatedAt: entry.updated_at || entry.created_at || '',
+        })
+        return acc
+      }
+
+      if (entry.name === '.keep') {
+        return acc
+      }
+
+      acc.media.push({
+        bucket,
+        path: objectPath,
+        name: entry.name,
+        size: entry.metadata?.size || 0,
+        mimeType: entry.metadata?.mimetype || entry.metadata?.mimeType || '',
+        updatedAt: entry.updated_at || entry.created_at || '',
+        publicUrl: buildPublicObjectUrl(bucket, objectPath),
+      })
+      return acc
+    },
+    { folders: [], media: [] }
+  )
+}
+
+export async function listStudioMediaAction(contentType = 'blog', folderPath = '') {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  ensureAuthUser(user)
+
+  const bucket = 'pfp'
+  const selectedType = ['blog', 'changelog'].includes(contentType) ? contentType : 'blog'
+  const selectedFolder = sanitizeRelativeFolder(folderPath)
+  const rootPath = `${user.id}/${selectedType}`
+  const currentPath = selectedFolder ? `${rootPath}/${selectedFolder}` : rootPath
+
+  try {
+    const result = await listStorageFolder(supabase, bucket, currentPath)
+    return { ok: true, currentFolder: selectedFolder, rootPath, ...result }
+  } catch (error) {
+    return {
+      ok: false,
+      error: toActionErrorMessage(error, 'Unable to load media library'),
+      currentFolder: selectedFolder,
+      folders: [],
+      media: [],
+    }
+  }
+}
+
+export async function createStudioMediaFolderAction(formData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  ensureAuthUser(user)
+
+  const contentType = String(formData.get('content_type') || 'blog')
+  const selectedType = ['blog', 'changelog'].includes(contentType) ? contentType : 'blog'
+  const parentFolder = sanitizeRelativeFolder(formData.get('parent_folder'))
+  const folderName = slugify(formData.get('folder_name'))
+
+  if (!folderName) {
+    return { ok: false, error: 'Enter a folder name.' }
+  }
+
+  const bucket = 'pfp'
+  const relativeFolder = parentFolder ? `${parentFolder}/${folderName}` : folderName
+  const objectPath = `${user.id}/${selectedType}/${relativeFolder}/.keep`
+
+  try {
+    const { error } = await supabase.storage.from(bucket).upload(objectPath, Buffer.from(''), {
+      cacheControl: '3600',
+      contentType: 'text/plain',
+      upsert: true,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    revalidatePath('/studio/posts')
+    return {
+      ok: true,
+      folder: {
+        name: folderName,
+        path: `${user.id}/${selectedType}/${relativeFolder}`,
+        updatedAt: new Date().toISOString(),
+      },
+    }
+  } catch (error) {
+    return { ok: false, error: toActionErrorMessage(error, 'Unable to create folder') }
+  }
+}
+
+export async function uploadStudioMediaAction(formData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  ensureAuthUser(user)
+
+  const uploadFile = formData.get('media_upload')
+  const contentType = String(formData.get('content_type') || 'blog')
+  const selectedType = ['blog', 'changelog'].includes(contentType) ? contentType : 'blog'
+  const selectedFolder = sanitizeRelativeFolder(formData.get('folder')) || 'library'
+
+  if (!(uploadFile instanceof File) || uploadFile.size <= 0) {
+    return { ok: false, error: 'Choose an image before uploading.' }
+  }
+
+  const bucket = 'pfp'
+  const ext = extensionFromFile(uploadFile)
+  const safeName = sanitizeFileName(uploadFile.name).replace(/\.[^.]+$/, '') || 'image'
+  const objectPath = `${user.id}/${selectedType}/${selectedFolder}/${Date.now()}-${safeName}.${ext}`
+
+  try {
+    const bytes = Buffer.from(await uploadFile.arrayBuffer())
+    const { error } = await supabase.storage.from(bucket).upload(objectPath, bytes, {
+      cacheControl: '3600',
+      contentType: uploadFile.type || 'application/octet-stream',
+      upsert: false,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    const media = {
+      bucket,
+      path: objectPath,
+      name: uploadFile.name,
+      size: uploadFile.size,
+      mimeType: uploadFile.type,
+      updatedAt: new Date().toISOString(),
+      publicUrl: buildPublicObjectUrl(bucket, objectPath),
+    }
+
+    revalidatePath('/studio/posts')
+    return { ok: true, media }
+  } catch (error) {
+    return { ok: false, error: toActionErrorMessage(error, 'Unable to upload media') }
   }
 }
 

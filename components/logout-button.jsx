@@ -13,12 +13,14 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { logout } from "@/app/login/actions";
+import { clearProfileImageCache } from "@/lib/profile-image-cache";
 import { useState } from "react";
 
 export function LogoutButton() {
   const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
+    await clearProfileImageCache();
     await logout();
     setOpen(false);
   };

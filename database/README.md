@@ -29,6 +29,7 @@ Stores product update releases and version information.
 | product | TEXT | Product: geiger-flow, geiger-notes, geiger-dash, geiger-dam, geiger-grey |
 | release_date | TIMESTAMP | Date of release |
 | is_featured | BOOLEAN | Whether to highlight this release |
+| image_url | TEXT | Optional image shown on the changelog page |
 | created_at | TIMESTAMP | Creation timestamp |
 | updated_at | TIMESTAMP | Last update timestamp |
 
@@ -118,6 +119,18 @@ Both migration files include sample data to help you get started:
 - **Blog:** 4 categories and 3 sample blog posts
 
 ## Color Palette
+
+## Docs Content System
+
+Run `database/init/docs.sql` to create the Supabase-backed docs tables:
+
+| Table | Purpose |
+|-------|---------|
+| `docs_nav_groups` | Left-sidebar documentation groups |
+| `docs_pages` | Dynamic pages served by `/docs/[...slug]` |
+| `docs_content_blocks` | Ordered page sections rendered into the docs article |
+
+`docs_pages.toc` stores right-sidebar links as JSON, while `docs_content_blocks` stores section content in structured JSON fields for paragraphs, cards, feature rows, and product links.
 
 The application uses a consistent color scheme across all Geiger products:
 

@@ -2,10 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import CanvasPlaygroundEditor from "./excalidraw/CanvasPlaygroundEditor";
 
-export default function LandingCanvasShowcase({ ctaHref, ctaLabel }) {
+export default function LandingCanvasShowcase({ backgroundImage, ctaHref, ctaLabel }) {
   return (
-    <section className="mt-8 rounded-sm border border-[#212121] bg-[#161616] px-4 py-4 sm:mt-12 sm:px-6 md:mt-20 md:p-8 xl:p-10">
-      <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+    <section
+      className="relative mt-8 overflow-hidden rounded-sm border border-[#212121] bg-[#161616] bg-cover bg-center bg-no-repeat px-4 py-4 sm:mt-12 sm:px-6 md:mt-20 md:p-8 xl:p-10"
+      style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : undefined}
+    >
+      <div className="absolute inset-0 bg-[#080808]/75" />
+      <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
         
         {/* Left Content - Mockup Window */}
         <div className="w-full lg:w-[70%] flex-1">

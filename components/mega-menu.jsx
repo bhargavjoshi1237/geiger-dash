@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/sheet";
 
 export function MegaMenu({ userId }) {
+  const notesHref = userId ? `/notes/${userId}/home` : "/notes";
+
   const products = [
     {
       icon: ContainerIcon,
@@ -26,7 +28,7 @@ export function MegaMenu({ userId }) {
       icon: Zap,
       label: "Notes",
       description: "Write and collaborate.",
-      href: "/notes",
+      href: notesHref,
     },
     {
       icon: Layers,
@@ -59,7 +61,7 @@ export function MegaMenu({ userId }) {
           </button>
 
           <div className="invisible absolute left-1/2 top-[100%] w-[640px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 shadow-xl">
+            <div className="rounded-xl border border-zinc-800 bg-[#1a1a1a] p-4 shadow-xl">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Products</p>

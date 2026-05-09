@@ -1,17 +1,26 @@
 import Link from "next/link";
 import Image from "next/image";
-import BlogWidget from "./blog_widget";
+import { ArrowRight, Calendar } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
-const PLACEHOLDER_IMAGES = [
+const placeholderImages = [
   "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca23250c.jpg&w=1920&q=70",
   "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-85923e7fafe00c9c0d1f.jpg&w=1920&q=70",
   "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Finternal-brand%2Finternal-brand-023-3291bb4c.jpg&w=1920&q=70",
 ];
 
-function getRandomPlaceholder() {
-  const index = Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
-  return PLACEHOLDER_IMAGES[index];
+function formatDate(value) {
+  if (!value) return "Unpublished";
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getPostImage(post, index) {
+  return post.featured_image || placeholderImages[index % placeholderImages.length];
 }
 
 export default async function BlogComponent() {
@@ -20,7 +29,7 @@ export default async function BlogComponent() {
 
   const { data: posts } = await supabase
     .from("dash_blog_posts")
-    .select("id, title, excerpt, slug, featured_image")
+    .select("id,title,excerpt,slug,category,featured_image,published_at,reading_time_minutes")
     .eq("is_published", true)
     .order("published_at", { ascending: false })
     .limit(latestPostsLimit);
@@ -31,24 +40,38 @@ export default async function BlogComponent() {
         <p className="text-2xl">Stay on the frontier</p>
       </div>
       <div className="grid w-full max-w-7xl grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
-        {(posts || []).map((post) => (
-          <BlogWidget
+        {(posts || []).map((post, index) => (
+          <Link
             key={post.id}
-            title={post.title}
-            description={post.excerpt}
-            linkText="Read post ->"
-            linkHref={post.slug ? `/blog/${post.slug}` : "/blog"}
+            href={post.slug ? `/blog/${post.slug}` : "/blog"}
+            className="group overflow-hidden rounded-lg border border-zinc-800 bg-[#1a1a1a] transition-colors hover:bg-[#202020]"
           >
-            <div className="relative h-40 rounded-md mt-4 border border-zinc-800/50 overflow-hidden">
+            <div className="relative aspect-[16/10] overflow-hidden bg-[#1a1a1a]">
               <Image
-                src={post.featured_image || getRandomPlaceholder()}
+                src={getPostImage(post, index)}
                 alt={post.title}
                 fill
-                className="object-cover"
-                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                sizes="(max-width: 768px) 92vw, (max-width: 1024px) 46vw, 30vw"
               />
             </div>
-          </BlogWidget>
+            <div className="p-5">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-zinc-500">
+                {post.category ? <span>{post.category}</span> : null}
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {formatDate(post.published_at)}
+                </span>
+                {post.reading_time_minutes ? <span>{post.reading_time_minutes} min read</span> : null}
+              </div>
+              <h3 className="text-xl font-semibold leading-tight text-white">{post.title}</h3>
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-400">{post.excerpt}</p>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-zinc-200">
+                Read post
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </Link>
         ))}
         {(!posts || posts.length === 0) && (
           <p className="text-sm text-zinc-400">No blog posts published yet.</p>

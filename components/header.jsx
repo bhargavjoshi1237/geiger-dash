@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
-import { LogoutButton } from "@/components/logout-button";
 import { MegaMenu } from "@/components/mega-menu";
+import { UserProfileDropdown } from "@/components/user-profile-dropdown";
 
 export async function Header() {
   const supabase = await createClient();
@@ -10,6 +10,18 @@ export async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
   const userId = user?.id;
+  const userProfile = userId
+    ? {
+        id: userId,
+        email: user.email,
+        name: user.user_metadata?.name,
+        fullName: user.user_metadata?.full_name,
+        avatarUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${userId}/latest.jpg`
+          : "",
+        dashboardHref: `/notes/${userId}/home`,
+      }
+    : null;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 bg-zinc-950 md:border-zinc-800/50 md:bg-zinc-950/85 md:backdrop-blur-md">
@@ -22,16 +34,8 @@ export async function Header() {
         </div>
         <MegaMenu userId={userId} />
         <div className="hidden items-center gap-4 md:flex">
-          {userId ? (
-            <>
-              <Link
-                href={`/notes/${userId}/home`}
-                className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <LogoutButton />
-            </>
+          {userProfile ? (
+            <UserProfileDropdown user={userProfile} />
           ) : (
             <Link
               href="/login"
