@@ -31,9 +31,9 @@ app/admin/emails/page.js        # Admin surface (directory view)
 components/admin/emails/*        # Tree + preview/editor + logs + keys UI
 app/api/email/send/route.js     # Cross-app send API (Bearer key auth)
 
-supabase/migrations/0001_email.sql   # `email` schema, tables, RLS, grants
-scripts/run-email-migrations.mjs     # npm run email:migrate
-scripts/seed-email-templates.mjs     # npm run email:seed
+supabase/migrations/20260629212506_email.sql  # `email` schema, tables, RLS, grants
+scripts/run-email-migrations.mjs              # npm run email:migrate
+scripts/seed-email-templates.mjs              # npm run email:seed
 ```
 
 ## Data model (`email` schema)
