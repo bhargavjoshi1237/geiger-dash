@@ -35,6 +35,18 @@ const nextConfig = {
         destination: "https://geigerflow.vercel.app/flow/:path*",
       },
       {
+        source: "/forms",
+        destination: "https://geigerforms.vercel.app",
+      },
+      {
+        source: "/forms/:path*",
+        destination: "https://geigerforms.vercel.app/:path*",
+      },
+      {
+        source: "/form/:path*",
+        destination: "https://geigerforms.vercel.app/form/:path*",
+      },
+      {
         source: "/canvas",
         destination: "https://geigercanvas.vercel.app/canvas",
       },
