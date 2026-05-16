@@ -1,29 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Users,
-  Shield,
-  UserCheck,
-  Building2,
-  Plus,
-  X,
-  Clock,
-  Lock,
-  Unlock,
-} from "lucide-react";
+import { Building2, Plus, Shield, UserCheck, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FilterDropdown from "../overview/filter_dropdown";
 
@@ -50,87 +40,75 @@ const TTL_OPTIONS = [
   { value: "90d", label: "90 days" },
 ];
 
+const DEFAULT_ACCESS_CONTROL = {
+  type: "team",
+  allowedRoles: [],
+  allowedUsers: [],
+  allowedPositions: [],
+};
+
+function buildAccessState(item) {
+  return {
+    ...DEFAULT_ACCESS_CONTROL,
+    ...(item?.accessControl || {}),
+  };
+}
+
 export function VaultAccessControl({
   item,
   open = false,
   onOpenChange = () => {},
   onSave = () => {},
 }) {
-  const [accessControl, setAccessControl] = useState({
-    type: "team",
-    allowedRoles: [],
-    allowedUsers: [],
-    allowedPositions: [],
-  });
-  const [ttl, setTtl] = useState("none");
-  const [keylessEntry, setKeylessEntry] = useState(false);
+  const [accessControl, setAccessControl] = useState(() => buildAccessState(item));
+  const [ttl, setTtl] = useState(item?.ttl || "none");
+  const [keylessEntry, setKeylessEntry] = useState(Boolean(item?.keylessEntry));
   const [userInput, setUserInput] = useState("");
 
-  useEffect(() => {
-    if (item && open) {
-      setAccessControl(
-        item.accessControl || {
-          type: "team",
-          allowedRoles: [],
-          allowedUsers: [],
-          allowedPositions: [],
-        }
-      );
-      setTtl(item.ttl || "none");
-      setKeylessEntry(item.keylessEntry || false);
-    }
-  }, [item, open]);
-
   const handleTypeChange = (type) => {
-    setAccessControl((prev) => ({
-      ...prev,
+    setAccessControl((current) => ({
+      ...current,
       type,
-      allowedRoles: type === "roles" ? prev.allowedRoles : [],
-      allowedUsers: type === "users" ? prev.allowedUsers : [],
-      allowedPositions: type === "positions" ? prev.allowedPositions : [],
+      allowedRoles: type === "roles" ? current.allowedRoles : [],
+      allowedUsers: type === "users" ? current.allowedUsers : [],
+      allowedPositions: type === "positions" ? current.allowedPositions : [],
     }));
   };
 
   const handleRoleToggle = (role) => {
-    setAccessControl((prev) => ({
-      ...prev,
-      allowedRoles: prev.allowedRoles.includes(role)
-        ? prev.allowedRoles.filter((r) => r !== role)
-        : [...prev.allowedRoles, role],
+    setAccessControl((current) => ({
+      ...current,
+      allowedRoles: current.allowedRoles.includes(role)
+        ? current.allowedRoles.filter((item) => item !== role)
+        : [...current.allowedRoles, role],
     }));
   };
 
   const handlePositionToggle = (position) => {
-    setAccessControl((prev) => ({
-      ...prev,
-      allowedPositions: prev.allowedPositions.includes(position)
-        ? prev.allowedPositions.filter((p) => p !== position)
-        : [...prev.allowedPositions, position],
+    setAccessControl((current) => ({
+      ...current,
+      allowedPositions: current.allowedPositions.includes(position)
+        ? current.allowedPositions.filter((item) => item !== position)
+        : [...current.allowedPositions, position],
     }));
   };
 
   const handleUserAdd = () => {
-    if (userInput && !accessControl.allowedUsers.includes(userInput)) {
-      setAccessControl((prev) => ({
-        ...prev,
-        allowedUsers: [...prev.allowedUsers, userInput],
-      }));
-      setUserInput("");
-    }
+    const nextUser = userInput.trim();
+    if (!nextUser || accessControl.allowedUsers.includes(nextUser)) return;
+
+    setAccessControl((current) => ({
+      ...current,
+      allowedUsers: [...current.allowedUsers, nextUser],
+    }));
+    setUserInput("");
   };
 
   const handleUserRemove = (email) => {
-    setAccessControl((prev) => ({
-      ...prev,
-      allowedUsers: prev.allowedUsers.filter((u) => u !== email),
+    setAccessControl((current) => ({
+      ...current,
+      allowedUsers: current.allowedUsers.filter((item) => item !== email),
     }));
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleUserAdd();
-    }
   };
 
   const handleSave = () => {
@@ -144,66 +122,57 @@ export function VaultAccessControl({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-y-auto bg-[#161616] text-[#ededed] border border-[#2a2a2a]">
-        <DialogHeader className="pb-2">
+      <DialogContent className="sm:max-w-[540px] max-h-[85vh] overflow-y-auto bg-[#161616] text-[#ededed] border border-[#2a2a2a]">
+        <DialogHeader>
           <DialogTitle className="font-semibold flex items-center gap-2.5 text-white">
-            <Shield className="w-5 h-5 text-[#737373] text-sm" />
+            <Shield className="w-5 h-5 text-[#737373]" />
             Access Control
           </DialogTitle>
           <DialogDescription className="text-[#737373] pt-1 text-xs">
-            Configure who can access {item?.name}
+            Configure who can reveal {item?.name || "this secret"}.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 ">
+        <div className="space-y-5">
           <div className="space-y-3">
-            <Label className="text-xs font-semibold text-[#a3a3a3] tracking-wide">Access Type</Label>
-            <div className="grid grid-cols-4 gap-2.5">
+            <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+              Access Type
+            </Label>
+            <div className="grid grid-cols-4 gap-2">
               {[
                 { value: "team", label: "Team", icon: Users },
                 { value: "roles", label: "Roles", icon: Shield },
                 { value: "users", label: "Users", icon: UserCheck },
                 { value: "positions", label: "Positions", icon: Building2 },
               ].map((option) => {
+                const OptionIcon = option.icon;
                 const isActive = accessControl.type === option.value;
+
                 return (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => handleTypeChange(option.value)}
                     className={cn(
-                      "relative flex flex-col items-center justify-center gap-2 py-3.5 px-3 rounded-lg border text-xs font-medium",
+                      "flex flex-col items-center justify-center gap-2 rounded-lg border px-2 py-3 text-xs font-medium transition-colors",
                       isActive
-                        ? "border-[#404040] text-white"
-                        : "bg-[#1a1a1a] border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a] hover:text-[#a3a3a3]",
+                        ? "border-[#474747] bg-[#242424] text-white"
+                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a] hover:text-[#a3a3a3]",
                     )}
                   >
-                    <div className={cn(
-                      "relative p-1.5 rounded-md transition-all duration-300",
-                      isActive ? "" : "bg-transparent group-hover:bg-[#2a2a2a]/60"
-                    )}>
-                      <option.icon className={cn(
-                        "w-4 h-4 transition-all duration-300",
-                        isActive ? "text-white" : "text-[#666666] group-hover:text-[#999999]"
-                      )} />
-                    </div>
-                    <span className={cn(
-                      "transition-all duration-200",
-                      isActive && "font-semibold tracking-wide"
-                    )}>
-                      {option.label}
-                    </span>
-                     
+                    <OptionIcon className="size-4" />
+                    {option.label}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Role Selection */}
           {accessControl.type === "roles" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">Allowed Roles</Label>
+              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+                Allowed Roles
+              </Label>
               <div className="flex flex-wrap gap-2">
                 {ALL_ROLES.map((role) => (
                   <button
@@ -211,10 +180,10 @@ export function VaultAccessControl({
                     type="button"
                     onClick={() => handleRoleToggle(role)}
                     className={cn(
-                      "px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200",
+                      "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                       accessControl.allowedRoles.includes(role)
-                        ? "bg-[#202020] border-[#474747] text-white shadow-sm"
-                        : "bg-[#1a1a1a] border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a] hover:text-[#a3a3a3] hover:bg-[#1f1f1f]",
+                        ? "border-[#474747] bg-[#242424] text-white"
+                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a]",
                     )}
                   >
                     {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -224,70 +193,60 @@ export function VaultAccessControl({
             </div>
           )}
 
-
-          {/* User Selection */}
           {accessControl.type === "users" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">Email Addresses</Label>
-              <div className="space-y-2.5">
-                {accessControl.allowedUsers.length > 0 && (
-                  <div className="space-y-2">
-                    {accessControl.allowedUsers.map((email, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg px-3.5 py-2 border border-[#2a2a2a] group hover:border-[#3a3a3a] transition-all duration-200"
-                      >
-                        <div className="w-7 h-7 rounded-full bg-[#202020] border border-[#333333] flex items-center justify-center">
-                          <UserCheck className="w-3.5 h-3.5 text-[#737373]" />
-                        </div>
-                        <span className="flex-1 text-sm text-[#ededed]">{email}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleUserRemove(email)}
-                          className="text-[#525252] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div 
-                  data-slot="input-group" 
-                  role="group" 
-                  className="group/input-group relative flex w-full min-w-0 items-center rounded-[var(--input-box-radius)] border border-[#2a2a2a] transition-colors outline-none hover:border-[#3a3a3a] has-[[data-slot=input-group-control]:focus-visible]:border-[#3a3a3a] has-[[data-slot=input-group-control]:focus-visible]:ring-1 has-[[data-slot=input-group-control]:focus-visible]:ring-[#3a3a3a]/50"
-                >
-                  <input 
-                    data-slot="input-group-control"
-                    placeholder="email@example.com"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="flex-1 rounded-none border-0 bg-transparent px-[var(--input-box-padding-x)] py-[var(--input-box-padding-y)] text-sm leading-5 text-[#ededed] outline-none ring-0 placeholder:text-[#525252] focus-visible:ring-0"
-                  />
-                  <div 
-                    role="group" 
-                    data-slot="input-group-addon" 
-                    data-align="inline-end"
-                    className="flex h-auto cursor-text items-center justify-center gap-[var(--input-box-icon-gap)] py-[var(--input-box-padding-y)] pl-[var(--input-box-icon-gap)] text-sm font-medium text-[#737373] select-none order-last pr-[var(--input-box-padding-x)]"
+              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+                Allowed Users
+              </Label>
+              <div className="space-y-2">
+                {accessControl.allowedUsers.map((email) => (
+                  <div
+                    key={email}
+                    className="flex items-center gap-3 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-2"
                   >
+                    <UserCheck className="size-4 text-[#737373]" />
+                    <span className="min-w-0 flex-1 truncate text-sm text-[#ededed]">
+                      {email}
+                    </span>
                     <button
                       type="button"
-                      onClick={handleUserAdd}
-                      className="flex size-5 items-center justify-center rounded-full bg-[#ededed] text-[#161616] hover:bg-white transition-all duration-200"
+                      onClick={() => handleUserRemove(email)}
+                      className="text-[#737373] hover:text-red-300"
                     >
-                      <Plus className="size-3" />
+                      <X className="size-4" />
                     </button>
                   </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="email@example.com"
+                    value={userInput}
+                    onChange={(event) => setUserInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleUserAdd();
+                      }
+                    }}
+                    className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed] placeholder:text-[#525252] h-9"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleUserAdd}
+                    className="bg-[#ededed] text-[#161616] hover:bg-white h-9 px-3"
+                  >
+                    <Plus className="size-4" />
+                  </Button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Position Selection */}
           {accessControl.type === "positions" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">Positions</Label>
+              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+                Positions
+              </Label>
               <div className="flex flex-wrap gap-2">
                 {ALL_POSITIONS.map((position) => (
                   <button
@@ -295,10 +254,10 @@ export function VaultAccessControl({
                     type="button"
                     onClick={() => handlePositionToggle(position)}
                     className={cn(
-                      "px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200",
+                      "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                       accessControl.allowedPositions.includes(position)
-                        ? "bg-[#202020] border-[#474747] text-white shadow-sm"
-                        : "bg-[#1a1a1a] border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a] hover:text-[#a3a3a3] hover:bg-[#1f1f1f]",
+                        ? "border-[#474747] bg-[#242424] text-white"
+                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a]",
                     )}
                   >
                     {position}
@@ -308,60 +267,55 @@ export function VaultAccessControl({
             </div>
           )}
 
-          <div className="mt-8" />
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-7">
-              <div className="flex items-center gap-3">
-                <div>
-                  <Label className="text-sm text-[#a3a3a3]">Keyless Entry</Label>
-                </div>
+          <div className="space-y-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label className="text-sm text-[#a3a3a3]">Keyless Entry</Label>
+                <p className="mt-1 text-xs text-[#737373]">
+                  Allow trusted sessions to skip repeated verification.
+                </p>
               </div>
               <Switch
                 checked={keylessEntry}
                 onCheckedChange={setKeylessEntry}
                 className="data-[state=checked]:bg-[#ededed] data-[state=unchecked]:bg-[#333333]"
-              >
-                <Switch.Thumb className="data-[state=checked]:bg-[#161616] data-[state=unchecked]:bg-[#737373]" />
-              </Switch>
+              />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 justify-between">
-<div>
-                  <Label className="text-sm text-[#a3a3a3]">Time To Live</Label>
-                </div>
-                <FilterDropdown
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label className="text-sm text-[#a3a3a3]">Time To Live</Label>
+                <p className="mt-1 text-xs text-[#737373]">
+                  Expire granted access automatically.
+                </p>
+              </div>
+              <FilterDropdown
                 value={ttl}
                 onValueChange={setTtl}
                 options={TTL_OPTIONS}
                 placeholder="Select expiration"
                 height="h-9"
               />
-              </div> 
-             
             </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-3 pt-4">
+        <DialogFooter className="gap-3 pt-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 border-[#2a2a2a] text-[#737373] hover:text-white hover:bg-[#202020] hover:border-[#3a3a3a] h-9 text-sm font-medium transition-all duration-200"
+            className="flex-1 border-[#2a2a2a] text-[#737373] hover:text-white hover:bg-[#202020] hover:border-[#3a3a3a] h-9"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="flex-1 bg-[#ededed] text-[#161616] hover:bg-white h-9 text-sm font-medium transition-all duration-200"
+            className="flex-1 bg-[#ededed] text-[#161616] hover:bg-white h-9"
           >
-            Save Changes
+            Save Access Control
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-
-

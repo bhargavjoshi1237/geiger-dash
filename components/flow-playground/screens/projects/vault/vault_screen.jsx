@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
 import { VaultItemCard } from "./vault_item_card";
 import { AddVaultItemDialog } from "./add_vault_item_dialog";
+import { VaultCredentialAccessDialog } from "./vault_credential_access_dialog";
 import { VaultAccessControl } from "./vault_access_control";
 import FilterDropdown from "../overview/filter_dropdown";
 
@@ -19,6 +20,7 @@ const initialVaultItems = [
     name: "Production Database",
     type: "database",
     username: "admin",
+    password: "prod-db-root-password",
     url: "prod-db.example.com",
     notes: "Main production database credentials",
     accessControl: {
@@ -29,6 +31,13 @@ const initialVaultItems = [
     },
     ttl: null,
     keylessEntry: false,
+    accessSetup: {
+      methods: ["pin", "password", "passkey"],
+      pin: "1234",
+      password: "vault-access",
+      requirePurpose: true,
+      sessionMinutes: "15",
+    },
     createdAt: "2024-01-15T10:30:00Z",
     updatedAt: "2024-01-20T14:45:00Z",
   },
@@ -37,6 +46,7 @@ const initialVaultItems = [
     name: "AWS Production Keys",
     type: "api_key",
     username: "geiger-prod",
+    apiKey: "AKIA-PROD-EXAMPLE-KEY",
     url: "https://console.aws.amazon.com",
     notes: "AWS root account credentials",
     accessControl: {
@@ -47,6 +57,13 @@ const initialVaultItems = [
     },
     ttl: "7d",
     keylessEntry: true,
+    accessSetup: {
+      methods: ["passkey", "pin"],
+      pin: "2468",
+      password: "",
+      requirePurpose: true,
+      sessionMinutes: "10",
+    },
     createdAt: "2024-01-10T08:00:00Z",
     updatedAt: "2024-02-01T16:20:00Z",
   },
@@ -55,6 +72,7 @@ const initialVaultItems = [
     name: "Stripe API Key",
     type: "api_key",
     username: "",
+    apiKey: "sk_live_stripe_example",
     url: "",
     notes: "Stripe live API key for payments",
     accessControl: {
@@ -65,6 +83,13 @@ const initialVaultItems = [
     },
     ttl: null,
     keylessEntry: false,
+    accessSetup: {
+      methods: ["password"],
+      pin: "",
+      password: "finance-review",
+      requirePurpose: true,
+      sessionMinutes: "5",
+    },
     createdAt: "2024-01-05T12:00:00Z",
     updatedAt: "2024-01-25T09:30:00Z",
   },
@@ -73,6 +98,7 @@ const initialVaultItems = [
     name: "GitHub Organization",
     type: "oauth",
     username: "geiger-org",
+    secret: "github-oauth-client-secret",
     url: "https://github.com/geiger-org",
     notes: "GitHub organization admin access",
     accessControl: {
@@ -83,6 +109,13 @@ const initialVaultItems = [
     },
     ttl: "30d",
     keylessEntry: true,
+    accessSetup: {
+      methods: ["passkey"],
+      pin: "",
+      password: "",
+      requirePurpose: false,
+      sessionMinutes: "20",
+    },
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-30T11:15:00Z",
   },
@@ -91,6 +124,7 @@ const initialVaultItems = [
     name: "SMTP Credentials",
     type: "smtp",
     username: "mailer",
+    password: "smtp-sendgrid-password",
     url: "smtp.sendgrid.net",
     notes: "SendGrid SMTP for transactional emails",
     accessControl: {
@@ -101,6 +135,13 @@ const initialVaultItems = [
     },
     ttl: null,
     keylessEntry: false,
+    accessSetup: {
+      methods: ["pin"],
+      pin: "4321",
+      password: "",
+      requirePurpose: true,
+      sessionMinutes: "15",
+    },
     createdAt: "2024-01-20T15:00:00Z",
     updatedAt: "2024-01-20T15:00:00Z",
   },
@@ -118,13 +159,22 @@ const VAULT_TYPES = [
   { value: "other", label: "Other", icon: "📦" },
 ];
 
+function getNextVaultId(items) {
+  const maxId = items.reduce((max, item) => {
+    const numericId = Number(item.id);
+    return Number.isFinite(numericId) ? Math.max(max, numericId) : max;
+  }, 0);
+
+  return String(maxId + 1);
+}
+
 export function VaultScreen() {
   const [vaultItems, setVaultItems] = useState(initialVaultItems);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [viewingAccessControl, setViewingAccessControl] = useState(null);
+  const [accessingItem, setAccessingItem] = useState(null);
+  const [accessControlItem, setAccessControlItem] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Filter vault items based on search and type
@@ -138,20 +188,22 @@ export function VaultScreen() {
   });
 
   const handleAddItem = (newItem) => {
-    const item = {
-      ...newItem,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setVaultItems([...vaultItems, item]);
+    setVaultItems((items) => [
+      ...items,
+      {
+        ...newItem,
+        id: getNextVaultId(items),
+        createdAt: "2026-05-16T00:00:00.000Z",
+        updatedAt: "2026-05-16T00:00:00.000Z",
+      },
+    ]);
   };
 
   const handleUpdateItem = (updatedItem) => {
     setVaultItems(
       vaultItems.map((item) =>
         item.id === updatedItem.id
-          ? { ...updatedItem, updatedAt: new Date().toISOString() }
+          ? { ...updatedItem, updatedAt: "2026-05-16T00:00:00.000Z" }
           : item,
       ),
     );
@@ -162,14 +214,26 @@ export function VaultScreen() {
   };
 
   const handleDuplicate = (item) => {
-    const duplicate = {
-      ...item,
-      id: Date.now().toString(),
-      name: `${item.name} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setVaultItems([...vaultItems, duplicate]);
+    setVaultItems((items) => [
+      ...items,
+      {
+        ...item,
+        id: getNextVaultId(items),
+        name: `${item.name} (Copy)`,
+        createdAt: "2026-05-16T00:00:00.000Z",
+        updatedAt: "2026-05-16T00:00:00.000Z",
+      },
+    ]);
+  };
+
+  const handleRevealSecret = (item) => {
+    setAccessControlItem(null);
+    setAccessingItem(item);
+  };
+
+  const handleOpenAccessControl = (item) => {
+    setAccessingItem(null);
+    setAccessControlItem(item);
   };
 
   return (
@@ -182,7 +246,8 @@ export function VaultScreen() {
             Manage your assets and store them securely.
           </p>
         </div>
-                <AddVaultItemDialog 
+        <AddVaultItemDialog 
+          key={editingItem?.id || "new-vault-item"}
           open={dialogOpen} 
           onOpenChange={(open) => {
             setDialogOpen(open);
@@ -200,7 +265,10 @@ export function VaultScreen() {
           }}
         >
           <button 
-            onClick={() => setDialogOpen(true)}
+            onClick={() => {
+              setEditingItem(null);
+              setDialogOpen(true);
+            }}
             className="bg-[#e7e7e7] hover:bg-zinc-200 text-black px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors"
           >
             <Plus className="w-4 h-4 text-black font-bold stroke-[3]" />
@@ -258,42 +326,34 @@ export function VaultScreen() {
               }}
               onDelete={() => handleDeleteItem(item.id)}
               onDuplicate={() => handleDuplicate(item)}
-              onViewAccessControl={() => setViewingAccessControl(item)}
+              onAccessCredential={() => handleRevealSecret(item)}
+              onAccessControl={() => handleOpenAccessControl(item)}
             />
           ))}
         </div>
       )}
 
-      {/* Edit Dialog */}
-      <AddVaultItemDialog
-        open={isAddDialogOpen}
-        onOpenChange={(open) => {
-          setIsAddDialogOpen(open);
-          if (!open) setEditingItem(null);
-        }}
-        item={editingItem}
-        onSave={(item) => {
-          if (editingItem) {
-            handleUpdateItem(item);
-          } else {
-            handleAddItem(item);
-          }
-          setIsAddDialogOpen(false);
-          setEditingItem(null);
-        }}
-      />
-
-      {/* Access Control Dialog */}
-      {viewingAccessControl && (
-        <VaultAccessControl
-          item={viewingAccessControl}
-          open={!!viewingAccessControl}
+      {accessingItem && (
+        <VaultCredentialAccessDialog
+          item={accessingItem}
+          open={!!accessingItem}
           onOpenChange={(open) => {
-            if (!open) setViewingAccessControl(null);
+            if (!open) setAccessingItem(null);
+          }}
+        />
+      )}
+
+      {accessControlItem && (
+        <VaultAccessControl
+          key={accessControlItem.id}
+          item={accessControlItem}
+          open={!!accessControlItem}
+          onOpenChange={(open) => {
+            if (!open) setAccessControlItem(null);
           }}
           onSave={(updatedItem) => {
             handleUpdateItem(updatedItem);
-            setViewingAccessControl(null);
+            setAccessControlItem(null);
           }}
         />
       )}

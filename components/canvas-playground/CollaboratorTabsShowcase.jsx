@@ -239,7 +239,7 @@ export default function CollaboratorTabsShowcase({
             className="relative h-[520px] overflow-hidden rounded-lg border border-[#2b2b2b] bg-cover bg-center bg-no-repeat p-3 sm:h-[560px] sm:p-4 md:h-[600px] md:p-6"
             style={{
               backgroundImage:
-                "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Finternal-brand%2Finternal-brand-023-3291bb4c.jpg&w=1920&q=70')",
+                "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/internal-brand-023-3291bb4c.jpg')",
             }}
           >
             <div className="absolute inset-0 bg-black/12" />

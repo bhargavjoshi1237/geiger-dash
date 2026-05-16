@@ -15,7 +15,7 @@ export default function Section() {
       className="relative mx-auto mt-6 h-[520px] w-full max-w-[85%] rounded-sm bg-cover bg-center bg-no-repeat px-3 py-3 sm:mt-10 sm:h-[700px] sm:px-6 sm:py-8 lg:h-[900px]"
       style={{
         backgroundImage:
-          "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca23250c.jpg&w=1920&q=70')",
+          "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-cc24ca462279ca23250c.jpg')",
       }}
     >
       <div className="relative h-full w-full overflow-hidden rounded-lg">

@@ -22,6 +22,7 @@ import {
   FingerprintPattern,
   Pencil,
   Trash2,
+  ScanFace,
 } from "lucide-react";
 import {
   ContextMenu,
@@ -30,7 +31,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { cn } from "@/lib/utils";
 
 function formatTTL(ttl) {
   if (!ttl) return null;
@@ -55,7 +55,8 @@ export function VaultItemCard({
   onEdit,
   onDelete,
   onDuplicate,
-  onViewAccessControl,
+  onAccessCredential,
+  onAccessControl,
 }) {
   const [showSecret, setShowSecret] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -146,17 +147,25 @@ export function VaultItemCard({
             {hasSecret && (
               <div className="flex items-center gap-2 bg-[#161616] rounded-lg px-3 py-2.5 mb-4 border border-[#2a2a2a]">
                 <code className="flex-1 text-[12px] text-[#a3a3a3] truncate font-mono">
-                  {showSecret ? secretValue : "••••••••••••••••"}
+                  {showSecret ? secretValue : "****************"}
                 </code>
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => setShowSecret(!showSecret)}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowSecret(!showSecret);
+                    }}
                     className="w-7 h-7 rounded flex items-center justify-center text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
                   >
                     {showSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                   <button
-                    onClick={handleCopy}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleCopy();
+                    }}
                     className="w-7 h-7 rounded flex items-center justify-center text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
                   >
                     {copied ? (
@@ -181,10 +190,15 @@ export function VaultItemCard({
               </p>
             )}
              <button
-                onClick={onViewAccessControl}
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onAccessCredential();
+                }}
                 className="text-[11px] text-[#737373] hover:text-white flex items-center gap-1.5 transition-colors"
               >
-                <FingerprintPattern className="w-3 h-3" />
+                <ScanFace className="w-3 h-3" />
                 Access
               </button>
             </div>
@@ -193,13 +207,22 @@ export function VaultItemCard({
      
       </ContextMenuTrigger>
       <ContextMenuContent className="bg-[#212121] border-[#2a2a2a] text-[#e7e7e7] w-44 p-1">
-        <ContextMenuItem onClick={onEdit} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+        <ContextMenuItem onSelect={onEdit} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
           <Pencil className="w-3.5 h-3.5" />
           <span className="text-xs">Edit</span>
         </ContextMenuItem>
-        <ContextMenuItem onClick={onDuplicate} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+        <ContextMenuItem onSelect={onDuplicate} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
           <Copy className="w-3.5 h-3.5" />
           <span className="text-xs">Duplicate</span>
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={onAccessControl} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+          <Shield className="w-3.5 h-3.5" />
+          <span className="text-xs">Access Control</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator className="bg-[#2a2a2a]" />
+        <ContextMenuItem onSelect={onDelete} className="cursor-pointer focus:bg-red-500/10 focus:text-red-300 text-red-300 flex items-center gap-2 px-2 py-1.5">
+          <Trash2 className="w-3.5 h-3.5" />
+          <span className="text-xs">Remove</span>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

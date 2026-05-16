@@ -190,7 +190,7 @@ function ProductPreview() {
       className="relative mt-10 aspect-[704/411] overflow-hidden rounded-lg border border-[#2a2a2a] bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:p-3"
       style={{
         backgroundImage:
-          "url('https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-00a586c62c8782e65c0a.jpg&w=1920&q=70')",
+          "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
       }}
     >
       <div className="h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-[#161616] shadow-2xl">
