@@ -27,6 +27,14 @@ const nextConfig = {
         destination: "https://geigerassets.vercel.app/assets/:path*",
       },
       {
+        source: "/office",
+        destination: "https://geigeroffice.vercel.app",
+      },
+      {
+        source: "/office/:path*",
+        destination: "https://geigeroffice.vercel.app/:path*",
+      },
+      {
         source: "/flow",
         destination: "https://geigerflow.vercel.app/flow",
       },

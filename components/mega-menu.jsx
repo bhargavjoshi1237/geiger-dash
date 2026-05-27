@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -34,7 +34,13 @@ export function MegaMenu({ userId }) {
       icon: Layers,
       label: "DAM",
       description: "Manage your media.",
-      href: "#",
+      href: "/assets",
+    },
+    {
+      icon: BriefcaseBusiness,
+      label: "Office",
+      description: "Run office workflows.",
+      href: "/office",
     },
     {
       icon: Cpu,
