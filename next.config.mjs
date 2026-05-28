@@ -35,6 +35,18 @@ const nextConfig = {
         destination: "https://geigeroffice.vercel.app/:path*",
       },
       {
+        source: "/document/:documentid",
+        destination: "https://geigeroffice.vercel.app/document/:documentid",
+      },
+      {
+        source: "/sheet/:sheetid",
+        destination: "https://geigeroffice.vercel.app/sheet/:sheetid",
+      },
+      {
+        source: "/slides/:slideid",
+        destination: "https://geigeroffice.vercel.app/slides/:slideid",
+      },
+      {
         source: "/flow",
         destination: "https://geigerflow.vercel.app/flow",
       },
