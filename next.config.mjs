@@ -8,34 +8,6 @@ const nextConfig = {
       },
     ],
   },
-  async redirects() {
-    // Office editor deep-links emitted without the /office prefix (e.g. a file
-    // opened from the office workspace links to /document/:id). Redirect them to
-    // the canonical /office/* path so they flow through the proven /office proxy
-    // rewrite below. Note office's presentation route is /slide (singular).
-    return [
-      {
-        source: "/document/:documentid",
-        destination: "/office/document/:documentid",
-        permanent: false,
-      },
-      {
-        source: "/sheet/:sheetid",
-        destination: "/office/sheet/:sheetid",
-        permanent: false,
-      },
-      {
-        source: "/slide/:slideid",
-        destination: "/office/slide/:slideid",
-        permanent: false,
-      },
-      {
-        source: "/slides/:slideid",
-        destination: "/office/slide/:slideid",
-        permanent: false,
-      },
-    ];
-  },
   async rewrites() {
     return [
       {
@@ -56,11 +28,11 @@ const nextConfig = {
       },
       {
         source: "/office",
-        destination: "https://geigeroffice.vercel.app",
+        destination: "https://geigeroffice.vercel.app/office",
       },
       {
         source: "/office/:path*",
-        destination: "https://geigeroffice.vercel.app/:path*",
+        destination: "https://geigeroffice.vercel.app/office/:path*",
       },
       {
         source: "/flow",
