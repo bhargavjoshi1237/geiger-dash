@@ -14,7 +14,7 @@ export default function TrustedByComponent() {
     <section className="w-full py-8 sm:py-10">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <p className="mb-5 text-center text-sm text-zinc-100 sm:mb-6 sm:text-2xl">
-          Trusted every day by teams that build world-class software
+         Soon To Be Trusted every day by teams that build world-class software
         </p>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
