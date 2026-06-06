@@ -26,7 +26,7 @@ const GoogleIcon = ({ className }) => (
   </svg>
 );
 
-export function AuthForm() {
+export function AuthForm({ next }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,6 +82,8 @@ export function AuthForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left mt-6">
+          <input type="hidden" name="next" value={next || ""} />
+
           {error && (
             <div className="p-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
@@ -145,7 +147,7 @@ export function AuthForm() {
         </form>
 
         <p className="text-center text-xs text-zinc-500 mt-8">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a
             href="#"
             className="text-zinc-400 hover:text-white transition-colors"
