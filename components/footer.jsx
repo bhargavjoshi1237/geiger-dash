@@ -22,12 +22,17 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-zinc-100 mb-4">Products</h4>
             <ul className="space-y-3">
-              <li><Link href="/flow" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Flow</Link></li>
               <li><Link href="/notes" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Notes</Link></li>
-              <li><Link href="/assets" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger DAM</Link></li>
+              <li><Link href="/flow" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Flow</Link></li>
+              <li><Link href="/assets" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Assets</Link></li>
+              <li><Link href="/grey" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Grey</Link></li>
               <li><Link href="/office" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Office</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Grey</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Enterprise</Link></li>
+              <li><Link href="/forms" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Forms</Link></li>
+              <li><Link href="/events" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Events</Link></li>
+              <li><Link href="/campaign" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Campaign</Link></li>
+              <li><Link href="/chat" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Chat</Link></li>
+              <li><Link href="/canvas" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Canvas</Link></li>
+              <li><Link href="/docs" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Docs</Link></li>
             </ul>
           </div>
 

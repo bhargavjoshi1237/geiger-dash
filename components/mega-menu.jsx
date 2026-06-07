@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,22 +19,28 @@ export function MegaMenu({ userId }) {
 
   const products = [
     {
-      icon: ContainerIcon,
-      label: "Flow",
-      description: "Plan and track work.",
-      href: "/flow",
-    },
-    {
       icon: Zap,
       label: "Notes",
       description: "Write and collaborate.",
       href: notesHref,
     },
     {
+      icon: ContainerIcon,
+      label: "Flow",
+      description: "Plan and track work.",
+      href: "/flow",
+    },
+    {
       icon: Layers,
-      label: "DAM",
+      label: "Assets",
       description: "Manage your media.",
       href: "/assets",
+    },
+    {
+      icon: Cpu,
+      label: "Grey",
+      description: "AI workspace tools.",
+      href: "/grey",
     },
     {
       icon: BriefcaseBusiness,
@@ -43,10 +49,40 @@ export function MegaMenu({ userId }) {
       href: "/office",
     },
     {
-      icon: Cpu,
-      label: "Grey",
-      description: "AI workspace tools.",
-      href: "#",
+      icon: FileText,
+      label: "Forms",
+      description: "Build forms and surveys.",
+      href: "/forms",
+    },
+    {
+      icon: CalendarDays,
+      label: "Events",
+      description: "Schedule and manage events.",
+      href: "/events",
+    },
+    {
+      icon: Megaphone,
+      label: "Campaign",
+      description: "Run marketing campaigns.",
+      href: "/campaign",
+    },
+    {
+      icon: MessageSquare,
+      label: "Chat",
+      description: "Team messaging and communication.",
+      href: "/chat",
+    },
+    {
+      icon: PenTool,
+      label: "Canvas",
+      description: "Visual collaboration workspace.",
+      href: "/canvas",
+    },
+    {
+      icon: BookOpen,
+      label: "Docs",
+      description: "Create and share documents.",
+      href: "/docs",
     },
   ];
 
@@ -66,12 +102,12 @@ export function MegaMenu({ userId }) {
             Features
           </button>
 
-          <div className="invisible absolute left-1/2 top-[100%] w-[640px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="invisible absolute left-1/2 top-[100%] w-[820px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
             <div className="rounded-xl border border-zinc-800 bg-[#1a1a1a] p-4 shadow-xl">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="col-span-3">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Products</p>
-                  <div className="space-y-1">
+                  <div className="grid grid-cols-3 gap-1">
                     {products.map((item) => {
                       const Icon = item.icon;
                       return (

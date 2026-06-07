@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Toaster } from 'sonner'
 import {
   ArrowLeft,
   Calendar,
@@ -9,6 +10,7 @@ import {
   FileText,
   Folder,
   FolderPlus,
+  GitCommit,
   Image as ImageIcon,
   Loader2,
   Megaphone,
@@ -16,6 +18,7 @@ import {
   RefreshCw,
   Save,
   Search,
+  Sparkles,
   Upload,
 } from 'lucide-react'
 import {
@@ -42,6 +45,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
+import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dialog'
+import { CommitChangelogDialog } from '@/components/content-studio/commit-changelog-dialog'
+import { useLlmConfig } from '@/components/content-studio/llm-config'
 
 // Custom input styling to ensure visibility
 const inputClassName = "bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
@@ -301,7 +307,10 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
 
       <Card>
         <CardHeader>
-        
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Post Details
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
@@ -440,40 +449,72 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
 
 // ChangelogForm Component
 const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
-  const [category, setCategory] = useState(changelogDraft.category || 'feature')
-  const [product, setProduct] = useState(changelogDraft.product || 'geiger-dash')
-  const [isFeatured, setIsFeatured] = useState(changelogDraft.is_featured)
+  const [fields, setFields] = useState(changelogDraft)
+  const [commitOpen, setCommitOpen] = useState(false)
+
+  const setField = (key) => (event) => {
+    const value = event?.target ? event.target.value : event
+    setFields((prev) => ({ ...prev, [key]: value }))
+  }
+
+  // Merge an AI / commit-generated draft into the form, keeping anything the
+  // generator left blank.
+  const applyGenerated = (partial) => {
+    setFields((prev) => {
+      const next = { ...prev }
+      Object.entries(partial).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value).length > 0) {
+          next[key] = value
+        }
+      })
+      return next
+    })
+  }
 
   return (
     <form key={formKey} action={saveChangelogAction} className="space-y-6">
-      <input type="hidden" name="id" defaultValue={changelogDraft.id} />
-      <input type="hidden" name="category" value={category} readOnly />
-      <input type="hidden" name="product" value={product} readOnly />
-      <input type="hidden" name="is_featured" value={isFeatured ? 'on' : ''} readOnly />
+      <input type="hidden" name="id" defaultValue={fields.id} />
+      <input type="hidden" name="category" value={fields.category} readOnly />
+      <input type="hidden" name="product" value={fields.product} readOnly />
+      <input type="hidden" name="is_featured" value={fields.is_featured ? 'on' : ''} readOnly />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Megaphone className="h-4 w-4" />
-            Release Information
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Megaphone className="h-4 w-4" />
+              Release Information
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCommitOpen(true)}
+              className="gap-1.5"
+            >
+              <GitCommit className="h-4 w-4" />
+              From commits
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Version" required>
-              <Input 
-                name="version" 
-                defaultValue={changelogDraft.version} 
+              <Input
+                name="version"
+                value={fields.version}
+                onChange={setField('version')}
                 placeholder="1.0.0"
                 className={inputClassName}
                 required
               />
             </FormField>
             <FormField label="Release Date">
-              <Input 
-                type="date" 
-                name="release_date" 
-                defaultValue={changelogDraft.release_date}
+              <Input
+                type="date"
+                name="release_date"
+                value={fields.release_date}
+                onChange={setField('release_date')}
                 className={inputClassName}
               />
             </FormField>
@@ -481,7 +522,7 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
 
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Category">
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={fields.category} onValueChange={setField('category')}>
                 <SelectTrigger className={inputClassName}>
                   <SelectValue />
                 </SelectTrigger>
@@ -495,7 +536,7 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
             </FormField>
 
             <FormField label="Product">
-              <Select value={product} onValueChange={setProduct}>
+              <Select value={fields.product} onValueChange={setField('product')}>
                 <SelectTrigger className={inputClassName}>
                   <SelectValue />
                 </SelectTrigger>
@@ -511,9 +552,10 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
           </div>
 
           <FormField label="Title" required>
-            <Input 
-              name="title" 
-              defaultValue={changelogDraft.title} 
+            <Input
+              name="title"
+              value={fields.title}
+              onChange={setField('title')}
               placeholder="Release title"
               className={inputClassName}
               required
@@ -521,10 +563,11 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
           </FormField>
 
           <FormField label="Description" required>
-            <Textarea 
-              name="description" 
-              rows={3} 
-              defaultValue={changelogDraft.description}
+            <Textarea
+              name="description"
+              rows={3}
+              value={fields.description}
+              onChange={setField('description')}
               placeholder="Brief summary of this release"
               className={textareaClassName}
               required
@@ -540,47 +583,52 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Added" hint="One item per line">
-              <Textarea 
-                name="items_added" 
-                rows={4} 
-                defaultValue={changelogDraft.items_added}
+              <Textarea
+                name="items_added"
+                rows={4}
+                value={fields.items_added}
+                onChange={setField('items_added')}
                 placeholder="New features..."
                 className={textareaClassName}
               />
             </FormField>
             <FormField label="Changed" hint="One item per line">
-              <Textarea 
-                name="items_changed" 
-                rows={4} 
-                defaultValue={changelogDraft.items_changed}
+              <Textarea
+                name="items_changed"
+                rows={4}
+                value={fields.items_changed}
+                onChange={setField('items_changed')}
                 placeholder="Changes..."
                 className={textareaClassName}
               />
             </FormField>
             <FormField label="Fixed" hint="One item per line">
-              <Textarea 
-                name="items_fixed" 
-                rows={4} 
-                defaultValue={changelogDraft.items_fixed}
+              <Textarea
+                name="items_fixed"
+                rows={4}
+                value={fields.items_fixed}
+                onChange={setField('items_fixed')}
                 placeholder="Bug fixes..."
                 className={textareaClassName}
               />
             </FormField>
             <div className="space-y-4">
               <FormField label="Removed" hint="One item per line">
-                <Textarea 
-                  name="items_removed" 
-                  rows={2} 
-                  defaultValue={changelogDraft.items_removed}
+                <Textarea
+                  name="items_removed"
+                  rows={2}
+                  value={fields.items_removed}
+                  onChange={setField('items_removed')}
                   placeholder="Removed items..."
                   className={textareaClassName}
                 />
               </FormField>
               <FormField label="Deprecated" hint="One item per line">
-                <Textarea 
-                  name="items_deprecated" 
-                  rows={2} 
-                  defaultValue={changelogDraft.items_deprecated}
+                <Textarea
+                  name="items_deprecated"
+                  rows={2}
+                  value={fields.items_deprecated}
+                  onChange={setField('items_deprecated')}
                   placeholder="Deprecated items..."
                   className={textareaClassName}
                 />
@@ -590,14 +638,21 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
         </CardContent>
       </Card>
 
+      <CommitChangelogDialog
+        open={commitOpen}
+        onOpenChange={setCommitOpen}
+        product={fields.product}
+        onApply={applyGenerated}
+      />
+
       <CoverImageUpload draft={changelogDraft} existingUrl={changelogDraft.image_url} />
 
       <div className="flex items-center justify-between gap-4 sticky bottom-4 bg-background border rounded-lg p-4 shadow-lg">
         <div className="flex items-center gap-2">
-          <Switch 
+          <Switch
             id="changelog-featured"
-            checked={isFeatured} 
-            onCheckedChange={setIsFeatured} 
+            checked={fields.is_featured}
+            onCheckedChange={setField('is_featured')}
           />
           <Label htmlFor="changelog-featured" className="cursor-pointer">Featured Release</Label>
         </div>
@@ -607,7 +662,7 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
           </Button>
           <Button type="submit" className="gap-2">
             <Save className="h-4 w-4" />
-            {changelogDraft.id ? 'Update Release' : 'Create Release'}
+            {fields.id ? 'Update Release' : 'Create Release'}
           </Button>
         </div>
       </div>
@@ -1040,6 +1095,8 @@ export function ContentStudio({
   error = '',
 }) {
   const [activeTab, setActiveTab] = useState(initialTab)
+  const [llmOpen, setLlmOpen] = useState(false)
+  const { isConfigured } = useLlmConfig()
   const [editingBlogId, setEditingBlogId] = useState('')
   const [editingChangelogId, setEditingChangelogId] = useState('')
   const [blogRevision, setBlogRevision] = useState(0)
@@ -1072,6 +1129,32 @@ export function ContentStudio({
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <Toaster theme="dark" position="bottom-right" richColors closeButton />
+      <LlmSettingsDialog open={llmOpen} onOpenChange={setLlmOpen} />
+
+      {/* Page header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Content Studio</h1>
+          <p className="text-sm text-muted-foreground">Publish blog posts and product changelogs.</p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setLlmOpen(true)}
+          className="gap-2"
+        >
+          <Sparkles className={`h-4 w-4 ${isConfigured ? 'text-indigo-400' : ''}`} />
+          AI Settings
+          <Badge
+            variant="secondary"
+            className={`ml-1 ${isConfigured ? 'bg-emerald-500/15 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}`}
+          >
+            {isConfigured ? 'Connected' : 'Off'}
+          </Badge>
+        </Button>
+      </div>
+
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
