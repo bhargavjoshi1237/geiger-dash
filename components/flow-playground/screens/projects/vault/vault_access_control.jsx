@@ -122,20 +122,20 @@ export function VaultAccessControl({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[540px] max-h-[85vh] overflow-y-auto bg-[#161616] text-[#ededed] border border-[#2a2a2a]">
+      <DialogContent className="sm:max-w-[540px] max-h-[85vh] overflow-y-auto bg-background text-foreground border border-border">
         <DialogHeader>
           <DialogTitle className="font-semibold flex items-center gap-2.5 text-white">
-            <Shield className="w-5 h-5 text-[#737373]" />
+            <Shield className="w-5 h-5 text-text-secondary" />
             Access Control
           </DialogTitle>
-          <DialogDescription className="text-[#737373] pt-1 text-xs">
+          <DialogDescription className="text-text-secondary pt-1 text-xs">
             Configure who can reveal {item?.name || "this secret"}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <div className="space-y-3">
-            <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Access Type
             </Label>
             <div className="grid grid-cols-4 gap-2">
@@ -156,8 +156,8 @@ export function VaultAccessControl({
                     className={cn(
                       "flex flex-col items-center justify-center gap-2 rounded-lg border px-2 py-3 text-xs font-medium transition-colors",
                       isActive
-                        ? "border-[#474747] bg-[#242424] text-white"
-                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a] hover:text-[#a3a3a3]",
+                        ? "border-border-strong bg-surface-active text-white"
+                        : "border-border bg-surface-subtle text-text-secondary hover:border-border-strong hover:text-muted-foreground",
                     )}
                   >
                     <OptionIcon className="size-4" />
@@ -170,7 +170,7 @@ export function VaultAccessControl({
 
           {accessControl.type === "roles" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Allowed Roles
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -182,8 +182,8 @@ export function VaultAccessControl({
                     className={cn(
                       "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                       accessControl.allowedRoles.includes(role)
-                        ? "border-[#474747] bg-[#242424] text-white"
-                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a]",
+                        ? "border-border-strong bg-surface-active text-white"
+                        : "border-border bg-surface-subtle text-text-secondary hover:border-border-strong",
                     )}
                   >
                     {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -195,23 +195,23 @@ export function VaultAccessControl({
 
           {accessControl.type === "users" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Allowed Users
               </Label>
               <div className="space-y-2">
                 {accessControl.allowedUsers.map((email) => (
                   <div
                     key={email}
-                    className="flex items-center gap-3 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-2"
+                    className="flex items-center gap-3 rounded-lg border border-border bg-surface-subtle px-3 py-2"
                   >
-                    <UserCheck className="size-4 text-[#737373]" />
-                    <span className="min-w-0 flex-1 truncate text-sm text-[#ededed]">
+                    <UserCheck className="size-4 text-text-secondary" />
+                    <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                       {email}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleUserRemove(email)}
-                      className="text-[#737373] hover:text-red-300"
+                      className="text-text-secondary hover:text-red-300"
                     >
                       <X className="size-4" />
                     </button>
@@ -228,12 +228,12 @@ export function VaultAccessControl({
                         handleUserAdd();
                       }
                     }}
-                    className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed] placeholder:text-[#525252] h-9"
+                    className="bg-surface-subtle border-border text-foreground placeholder:text-text-tertiary h-9"
                   />
                   <Button
                     type="button"
                     onClick={handleUserAdd}
-                    className="bg-[#ededed] text-[#161616] hover:bg-white h-9 px-3"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
                   >
                     <Plus className="size-4" />
                   </Button>
@@ -244,7 +244,7 @@ export function VaultAccessControl({
 
           {accessControl.type === "positions" && (
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Positions
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -256,8 +256,8 @@ export function VaultAccessControl({
                     className={cn(
                       "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                       accessControl.allowedPositions.includes(position)
-                        ? "border-[#474747] bg-[#242424] text-white"
-                        : "border-[#2a2a2a] bg-[#1a1a1a] text-[#737373] hover:border-[#3a3a3a]",
+                        ? "border-border-strong bg-surface-active text-white"
+                        : "border-border bg-surface-subtle text-text-secondary hover:border-border-strong",
                     )}
                   >
                     {position}
@@ -267,25 +267,25 @@ export function VaultAccessControl({
             </div>
           )}
 
-          <div className="space-y-4 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4">
+          <div className="space-y-4 rounded-xl border border-border bg-surface-subtle p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label className="text-sm text-[#a3a3a3]">Keyless Entry</Label>
-                <p className="mt-1 text-xs text-[#737373]">
+                <Label className="text-sm text-muted-foreground">Keyless Entry</Label>
+                <p className="mt-1 text-xs text-text-secondary">
                   Allow trusted sessions to skip repeated verification.
                 </p>
               </div>
               <Switch
                 checked={keylessEntry}
                 onCheckedChange={setKeylessEntry}
-                className="data-[state=checked]:bg-[#ededed] data-[state=unchecked]:bg-[#333333]"
+                className="data-[state=checked]:bg-[#ededed] data-[state=unchecked]:bg-surface-strong"
               />
             </div>
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label className="text-sm text-[#a3a3a3]">Time To Live</Label>
-                <p className="mt-1 text-xs text-[#737373]">
+                <Label className="text-sm text-muted-foreground">Time To Live</Label>
+                <p className="mt-1 text-xs text-text-secondary">
                   Expire granted access automatically.
                 </p>
               </div>
@@ -304,13 +304,13 @@ export function VaultAccessControl({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 border-[#2a2a2a] text-[#737373] hover:text-white hover:bg-[#202020] hover:border-[#3a3a3a] h-9"
+            className="flex-1 border-border text-text-secondary hover:text-foreground hover:bg-surface-card hover:border-border-strong h-9"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            className="flex-1 bg-[#ededed] text-[#161616] hover:bg-white h-9"
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-9"
           >
             Save Access Control
           </Button>

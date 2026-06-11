@@ -83,7 +83,7 @@ function PlanPrice({ price, yearly }) {
   const isNumeric = Number.isFinite(numericPrice);
 
   if (!isNumeric) {
-    return <div className="text-2xl font-bold text-[#e7e7e7]">Custom</div>;
+    return <div className="text-2xl font-bold text-foreground">Custom</div>;
   }
 
   if (yearly) {
@@ -91,8 +91,8 @@ function PlanPrice({ price, yearly }) {
     return (
       <>
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-[#e7e7e7]">{formatUsd(yearlyTotal)}</span>
-          <span className="text-sm text-[#737373]">/year</span>
+          <span className="text-3xl font-bold text-foreground">{formatUsd(yearlyTotal)}</span>
+          <span className="text-sm text-text-secondary">/year</span>
         </div>
         <p className="mt-1 text-[11px] text-emerald-400">2 months free with annual billing</p>
       </>
@@ -101,8 +101,8 @@ function PlanPrice({ price, yearly }) {
 
   return (
     <div className="flex items-baseline gap-1">
-      <span className="text-3xl font-bold text-[#e7e7e7]">{formatUsd(numericPrice)}</span>
-      <span className="text-sm text-[#737373]">/month</span>
+      <span className="text-3xl font-bold text-foreground">{formatUsd(numericPrice)}</span>
+      <span className="text-sm text-text-secondary">/month</span>
     </div>
   );
 }
@@ -114,13 +114,13 @@ export function PlanCards({ ctaHref }) {
   return (
     <>
       <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-        <span className={`text-sm ${!isYearly ? "text-zinc-100" : "text-zinc-500"}`}>Monthly</span>
+        <span className={`text-sm ${!isYearly ? "text-foreground" : "text-foreground0"}`}>Monthly</span>
         <Switch checked={isYearly} onCheckedChange={setIsYearly} aria-label="Toggle yearly billing" />
-        <span className={`text-sm ${isYearly ? "text-zinc-100" : "text-zinc-500"}`}>Yearly</span>
+        <span className={`text-sm ${isYearly ? "text-foreground" : "text-foreground0"}`}>Yearly</span>
         <Badge variant="success" className="border border-emerald-500/20 bg-emerald-500/10">
           2 months free
         </Badge>
-        <span className="text-xs text-zinc-500">{billingLabel}</span>
+        <span className="text-xs text-foreground0">{billingLabel}</span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 mb-16 md:grid-cols-2 lg:grid-cols-4">
@@ -129,8 +129,8 @@ export function PlanCards({ ctaHref }) {
           return (
             <div key={index} className={`relative group ${index === 1 ? "lg:-mt-4 lg:mb-4" : ""}`}>
               <div
-                className={`relative bg-gradient-to-br from-[#1a1a1a] to-[#1e1e1e] border rounded-2xl overflow-hidden transition-all duration-300 ${
-                  plan.popular ? "border-zinc-500 shadow-2xl shadow-zinc-500/20" : "border-[#333333] hover:border-[#474747]"
+                className={`relative bg-gradient-to-br from-surface-subtle to-[#1e1e1e] border rounded-2xl overflow-hidden transition-all duration-300 ${
+                  plan.popular ? "border-zinc-500 shadow-2xl shadow-zinc-500/20" : "border-border hover:border-border-strong"
                 }`}
               >
                 {plan.popular && (
@@ -142,15 +142,15 @@ export function PlanCards({ ctaHref }) {
 
                 <div className={`pt-8 pb-6 px-6 ${plan.popular ? "pt-12" : ""}`}>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-[#e7e7e7]">{plan.name}</h3>
-                    <Icon className={`w-5 h-5 ${plan.popular ? "text-zinc-400" : "text-[#737373]"}`} />
+                    <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                    <Icon className={`w-5 h-5 ${plan.popular ? "text-muted-foreground" : "text-text-secondary"}`} />
                   </div>
 
                   <div className="mb-3">
                     <PlanPrice price={plan.price} yearly={isYearly} />
                   </div>
 
-                  <p className="text-xs text-[#a3a3a3] mb-6 leading-relaxed min-h-[32px]">
+                  <p className="text-xs text-muted-foreground mb-6 leading-relaxed min-h-[32px]">
                     {plan.description.split(" - ")[1] || plan.description}
                   </p>
 
@@ -158,8 +158,8 @@ export function PlanCards({ ctaHref }) {
                     href={ctaHref}
                     className={`block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-all ${
                       plan.popular
-                        ? "bg-[#474747] hover:bg-[#5a5a5a] text-[#e7e7e7] shadow-lg"
-                        : "bg-[#2a2a2a] hover:bg-[#333333] text-[#a3a3a3]"
+                        ? "bg-border-strong hover:bg-[#5a5a5a] text-foreground shadow-lg"
+                        : "bg-surface-hover hover:bg-surface-strong text-muted-foreground"
                     }`}
                   >
                     {plan.cta}
@@ -171,13 +171,13 @@ export function PlanCards({ ctaHref }) {
         })}
       </div>
 
-      <div className="mb-16 rounded-2xl border border-[#333333] bg-gradient-to-br from-[#1a1a1a] to-[#1e1e1e] p-4 sm:p-6">
+      <div className="mb-16 rounded-2xl border border-border bg-gradient-to-br from-surface-subtle to-[#1e1e1e] p-4 sm:p-6">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-[#e7e7e7]">Extra Storage Add-ons</h3>
-            <p className="text-sm text-[#a3a3a3]">Scale storage independently as your team and media library grow.</p>
+            <h3 className="text-2xl font-bold text-foreground">Extra Storage Add-ons</h3>
+            <p className="text-sm text-muted-foreground">Scale storage independently as your team and media library grow.</p>
           </div>
-          <Badge variant="outline" className="w-fit border-[#474747] text-[#a3a3a3]">
+          <Badge variant="outline" className="w-fit border-border-strong text-muted-foreground">
             Add-on pricing
           </Badge>
         </div>
@@ -191,32 +191,32 @@ export function PlanCards({ ctaHref }) {
                 className={`rounded-xl border p-4 transition-all ${
                   addon.highlight
                     ? "border-zinc-500 bg-zinc-500/5 shadow-[0_0_40px_-24px_rgba(161,161,170,0.45)]"
-                    : "border-[#333333] bg-[#181818]"
+                    : "border-border bg-surface-card"
                 }`}
               >
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#3a3a3a] bg-[#222222]">
-                      <HardDrive className="h-4 w-4 text-[#a3a3a3]" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-strong bg-surface-card">
+                      <HardDrive className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <p className="text-sm font-semibold text-[#e7e7e7]">{addon.name}</p>
+                    <p className="text-sm font-semibold text-foreground">{addon.name}</p>
                   </div>
                   {addon.highlight && <Badge variant="secondary">Best value</Badge>}
                 </div>
 
-                <p className="mb-4 text-xs text-[#a3a3a3]">{addon.storage}</p>
+                <p className="mb-4 text-xs text-muted-foreground">{addon.storage}</p>
 
                 <div className="mb-4">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-[#e7e7e7]">{formatUsd(billingAmount)}</span>
-                    <span className="text-xs text-[#737373]">{isYearly ? "/year" : "/month"}</span>
+                    <span className="text-2xl font-bold text-foreground">{formatUsd(billingAmount)}</span>
+                    <span className="text-xs text-text-secondary">{isYearly ? "/year" : "/month"}</span>
                   </div>
                   {isYearly && <p className="mt-1 text-[11px] text-emerald-400">2 months free on annual add-on</p>}
                 </div>
 
                 <Button
                   asChild
-                  className="w-full bg-[#2a2a2a] text-[#e7e7e7] hover:bg-[#333333]"
+                  className="w-full bg-surface-hover text-foreground hover:bg-surface-strong"
                 >
                   <Link href={ctaHref}>Add Storage</Link>
                 </Button>

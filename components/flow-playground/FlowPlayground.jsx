@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
 const LoadingScreen = () => (
-  <div className="h-full w-full flex items-center justify-center text-zinc-500">
+  <div className="h-full w-full flex items-center justify-center text-foreground0">
     <Loader2 className="w-8 h-8 animate-spin" />
   </div>
 );
@@ -88,13 +88,13 @@ export function FlowPlayground() {
     <BannerProvider>
       <ProjectProvider>
         <AddonRegistryProvider>
-          <div className="flex-col h-full w-full bg-[#161616] text-[#ededed] font-sans overflow-hidden selection:bg-[#333333] flex">
-            <SidebarProvider className="flex-col flex! h-full min-w-0 bg-[#161616]" style={{flexDirection: 'column'}}>
+          <div className="flex-col h-full w-full bg-background text-foreground font-sans overflow-hidden selection:bg-surface-strong flex">
+            <SidebarProvider className="flex-col flex! h-full min-w-0 bg-background" style={{flexDirection: 'column'}}>
               <ProjectTopbar />
               <div className="flex flex-1 overflow-hidden relative">
                 <ProjectSidebar activeTab={currentTab} onTabChange={setCurrentTab} />
                 <SidebarInset className="flex-1 flex flex-col h-full bg-transparent overflow-hidden relative border-none">
-                  <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#161616] blur-[120px] pointer-events-none rounded-full"></div>
+                  <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-background blur-[120px] pointer-events-none rounded-full"></div>
                   <main className="relative z-10 flex-1 w-full min-w-0 overflow-y-auto px-2 py-3 sm:px-3 sm:py-4 md:p-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {renderScreen()}
                   </main>

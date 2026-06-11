@@ -44,7 +44,7 @@ export default function AccountSettings() {
   if (loading)
     return (
       <div className="flex h-40 items-center justify-center">
-        <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+        <Loader2 className="w-5 h-5 text-foreground0 animate-spin" />
       </div>
     );
 
@@ -52,10 +52,10 @@ export default function AccountSettings() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between pb-4 border-b border-zinc-800/50">
+      <div className="flex items-center justify-between pb-4 border-b border-border/50">
         <div>
-          <h3 className="text-sm font-medium text-zinc-200">Account Profile</h3>
-          <p className="text-xs text-zinc-500 mt-1">
+          <h3 className="text-sm font-medium text-foreground">Account Profile</h3>
+          <p className="text-xs text-foreground0 mt-1">
             Manage your personal information and subscription.
           </p>
         </div>
@@ -68,52 +68,52 @@ export default function AccountSettings() {
       </div>
 
       <div className="space-y-5">
-        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
           Personal Information
         </h4>
 
-        <div className="flex items-center gap-4 p-3 rounded-lg border border-zinc-800/50 bg-zinc-900/20">
-          <Avatar className="h-16 w-16 border border-zinc-700 bg-zinc-800">
+        <div className="flex items-center gap-4 p-3 rounded-lg border border-border/50 bg-surface-subtle/20">
+          <Avatar className="h-16 w-16 border border-border-strong bg-surface-hover">
             <AvatarImage src={user.avatarUrl} />
-            <AvatarFallback className="bg-zinc-800 text-zinc-400 font-medium text-lg">
+            <AvatarFallback className="bg-surface-hover text-muted-foreground font-medium text-lg">
               {user.name?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-1">
-            <div className="text-sm font-medium text-zinc-200">{user.name}</div>
-            <div className="text-xs text-zinc-500 flex items-center gap-2">
+            <div className="text-sm font-medium text-foreground">{user.name}</div>
+            <div className="text-xs text-foreground0 flex items-center gap-2">
               <Mail className="w-3 h-3" />
               {user.email}
             </div>
-            <div className="text-[10px] text-zinc-600 pt-1">
+            <div className="text-[10px] text-text-tertiary pt-1">
               Member since {user.memberSince}
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-zinc-400 hover:text-zinc-100"
+            className="h-8 text-muted-foreground hover:text-foreground"
           >
             Edit
           </Button>
         </div>
       </div>
 
-      <div className="space-y-4 pt-4 border-t border-zinc-800/50">
-        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+      <div className="space-y-4 pt-4 border-t border-border/50">
+        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider mb-2">
           Settings
         </h4>
 
         <div className="flex items-center justify-between py-2 group cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded bg-zinc-900/50 border border-zinc-800/50 text-zinc-400 group-hover:text-zinc-200 group-hover:border-zinc-700 transition-colors">
+            <div className="p-2 rounded bg-surface-subtle/50 border border-border/50 text-muted-foreground group-hover:text-foreground group-hover:border-border-strong transition-colors">
               <CreditCard className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-sm font-medium text-zinc-300 group-hover:text-zinc-100 transition-colors">
+              <div className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Subscription
               </div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-foreground0">
                 Manage billing and payment methods
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function AccountSettings() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-zinc-500 group-hover:text-zinc-300"
+            className="text-foreground0 group-hover:text-muted-foreground"
           >
             <div className="text-[10px] mr-2">Manage</div>
           </Button>
@@ -129,14 +129,14 @@ export default function AccountSettings() {
 
         <div className="flex items-center justify-between py-2 group cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded bg-zinc-900/50 border border-zinc-800/50 text-zinc-400 group-hover:text-zinc-200 group-hover:border-zinc-700 transition-colors">
+            <div className="p-2 rounded bg-surface-subtle/50 border border-border/50 text-muted-foreground group-hover:text-foreground group-hover:border-border-strong transition-colors">
               <Shield className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-sm font-medium text-zinc-300 group-hover:text-zinc-100 transition-colors">
+              <div className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Security
               </div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-foreground0">
                 Password and 2FA settings
               </div>
             </div>
@@ -144,16 +144,16 @@ export default function AccountSettings() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-zinc-500 group-hover:text-zinc-300"
+            className="text-foreground0 group-hover:text-muted-foreground"
           >
             <div className="text-[10px] mr-2">Update</div>
           </Button>
         </div>
       </div>
 
-      <div className="pt-6 mt-2 border-t border-zinc-800/50">
+      <div className="pt-6 mt-2 border-t border-border/50">
         <div
-          className="flex items-center justify-between p-3 rounded-md border border-zinc-800/50 bg-red-900/5 hover:bg-red-900/10 hover:border-red-900/30 transition-colors cursor-pointer"
+          className="flex items-center justify-between p-3 rounded-md border border-border/50 bg-red-900/5 hover:bg-red-900/10 hover:border-red-900/30 transition-colors cursor-pointer"
           onClick={handleSignOut}
         >
           <div className="space-y-0.5">

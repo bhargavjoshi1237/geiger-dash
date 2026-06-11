@@ -58,7 +58,7 @@ function SettingRow({
       )}
     >
       <div className="md:w-[300px] shrink-0">
-        <div className="text-sm font-medium text-[#e7e7e7]">{label}</div>
+        <div className="text-sm font-medium text-foreground">{label}</div>
         {description && (
           <p className="text-xs text-[#666] mt-0.5 leading-relaxed">
             {description}
@@ -74,7 +74,7 @@ function ToggleRow({ label, description, checked, onCheckedChange }) {
   return (
     <div className="flex items-center justify-between py-3.5 px-5 border-b border-[#2c2c2c] last:border-0">
       <div>
-        <div className="text-[13px] font-medium text-[#e7e7e7]">{label}</div>
+        <div className="text-[13px] font-medium text-foreground">{label}</div>
         {description && (
           <p className="text-[12px] text-[#666] mt-0.5">{description}</p>
         )}
@@ -86,13 +86,13 @@ function ToggleRow({ label, description, checked, onCheckedChange }) {
 
 function WebhookItem({ name, url, events, status, lastTriggered }) {
   return (
-    <div className="flex items-center justify-between py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-[#1c1c1c] transition-colors">
+    <div className="flex items-center justify-between py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-surface-card transition-colors">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] flex items-center justify-center shrink-0">
-          <Globe className="w-3.5 h-3.5 text-[#a3a3a3]" strokeWidth={1.8} />
+          <Globe className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.8} />
         </div>
         <div className="min-w-0">
-          <div className="text-[13px] font-medium text-[#e7e7e7] truncate">
+          <div className="text-[13px] font-medium text-foreground truncate">
             {name}
           </div>
           <div className="text-[11px] text-[#555] font-mono truncate">{url}</div>
@@ -103,7 +103,7 @@ function WebhookItem({ name, url, events, status, lastTriggered }) {
           {events.map((e) => (
             <Badge
               key={e}
-              className="text-[10px] h-5 px-1.5 bg-[#2c2c2c] text-[#a3a3a3] border-[#3c3c3c] hover:bg-[#2c2c2c]"
+              className="text-[10px] h-5 px-1.5 bg-[#2c2c2c] text-muted-foreground border-[#3c3c3c] hover:bg-[#2c2c2c]"
             >
               {e}
             </Badge>
@@ -114,7 +114,7 @@ function WebhookItem({ name, url, events, status, lastTriggered }) {
             "text-[10px] h-5 px-2",
             status === "active"
               ? "bg-green-500/10 text-green-400 border-green-500/20"
-              : "bg-[#2c2c2c] text-[#a3a3a3] border-[#3c3c3c]"
+              : "bg-[#2c2c2c] text-muted-foreground border-[#3c3c3c]"
           )}
         >
           {status}
@@ -138,14 +138,14 @@ function EnvVarItem({ name, value, isSecret }) {
   };
 
   return (
-    <div className="flex items-center justify-between py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-[#1c1c1c] transition-colors">
+    <div className="flex items-center justify-between py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-surface-card transition-colors">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] flex items-center justify-center shrink-0">
-          <Key className="w-3.5 h-3.5 text-[#a3a3a3]" strokeWidth={1.8} />
+          <Key className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.8} />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium text-[#e7e7e7] font-mono">
+            <span className="text-[13px] font-medium text-foreground font-mono">
               {name}
             </span>
             {isSecret && (
@@ -166,7 +166,7 @@ function EnvVarItem({ name, value, isSecret }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-[#555] hover:text-[#a3a3a3] hover:bg-[#2c2c2c]"
+            className="h-7 w-7 text-[#555] hover:text-muted-foreground hover:bg-[#2c2c2c]"
             onClick={() => setVisible(!visible)}
           >
             {visible ? (
@@ -179,7 +179,7 @@ function EnvVarItem({ name, value, isSecret }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-[#555] hover:text-[#a3a3a3] hover:bg-[#2c2c2c]"
+          className="h-7 w-7 text-[#555] hover:text-muted-foreground hover:bg-[#2c2c2c]"
           onClick={handleCopy}
         >
           {copied ? (
@@ -227,16 +227,16 @@ export function AdvancedSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <SettingRow
             label="Project Visibility"
             description="Control who can discover and access this project"
           >
             <Select defaultValue="private">
-              <SelectTrigger className="w-[200px] bg-[#121212] border-[#2c2c2c] h-9 text-sm text-[#e7e7e7]">
+              <SelectTrigger className="w-[200px] bg-[#121212] border-[#2c2c2c] h-9 text-sm text-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-[#2c2c2c]">
+              <SelectContent className="bg-surface-subtle border-[#2c2c2c]">
                 <SelectItem value="private">Private</SelectItem>
                 <SelectItem value="internal">Internal</SelectItem>
                 <SelectItem value="public">Public</SelectItem>
@@ -264,10 +264,10 @@ export function AdvancedSettingsScreen() {
             description="Primary deployment region for compute and data"
           >
             <Select defaultValue="us-east-1">
-              <SelectTrigger className="w-[200px] bg-[#121212] border-[#2c2c2c] h-9 text-sm text-[#e7e7e7]">
+              <SelectTrigger className="w-[200px] bg-[#121212] border-[#2c2c2c] h-9 text-sm text-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-[#2c2c2c]">
+              <SelectContent className="bg-surface-subtle border-[#2c2c2c]">
                 <SelectItem value="us-east-1">US East (N. Virginia)</SelectItem>
                 <SelectItem value="eu-west-1">EU West (Ireland)</SelectItem>
                 <SelectItem value="ap-southeast-1">
@@ -311,7 +311,7 @@ export function AdvancedSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <div className="p-5 space-y-0">
             <ToggleRow
               label="Audit Logging"
@@ -341,49 +341,49 @@ export function AdvancedSettingsScreen() {
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Shield className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3]">
+              <span className="text-[13px] font-medium text-muted-foreground">
                 SSL/TLS
               </span>
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7] mb-1">
+            <div className="text-xl font-semibold text-foreground mb-1">
               Active
             </div>
             <p className="text-[12px] text-[#555]">
               TLS 1.3 enforced &middot; Auto-renews Jun 12, 2026
             </p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Clock className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3]">
+              <span className="text-[13px] font-medium text-muted-foreground">
                 Session Timeout
               </span>
             </div>
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-xl font-semibold text-[#e7e7e7]">24</span>
+              <span className="text-xl font-semibold text-foreground">24</span>
               <span className="text-sm text-[#555]">hours</span>
             </div>
             <p className="text-[12px] text-[#555]">
               Inactivity timeout for user sessions
             </p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Zap className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3]">
+              <span className="text-[13px] font-medium text-muted-foreground">
                 API Version
               </span>
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7] mb-1">v2.4</div>
+            <div className="text-xl font-semibold text-foreground mb-1">v2.4</div>
             <p className="text-[12px] text-[#555]">
               Latest stable &middot; Deprecation: none
             </p>
@@ -401,7 +401,7 @@ export function AdvancedSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <WebhookItem
             name="CI/CD Pipeline"
             url="https://api.github.com/repos/acme/project/dispatches"
@@ -423,12 +423,12 @@ export function AdvancedSettingsScreen() {
             status="paused"
             lastTriggered="3 days ago"
           />
-          <div className="py-3 px-5 flex items-center justify-between bg-[#161616]/50">
+          <div className="py-3 px-5 flex items-center justify-between bg-background/50">
             <span className="text-[12px] text-[#555]">3 webhooks configured</span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-[12px] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="h-7 text-[12px] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <ExternalLink className="w-3 h-3 mr-1.5" />
               Add Webhook
@@ -447,7 +447,7 @@ export function AdvancedSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <EnvVarItem
             name="DATABASE_URL"
             value="postgresql://db.xxx.supabase.co:5432/postgres"
@@ -473,14 +473,14 @@ export function AdvancedSettingsScreen() {
             value="production"
             isSecret={false}
           />
-          <div className="py-3 px-5 flex items-center justify-between bg-[#161616]/50">
+          <div className="py-3 px-5 flex items-center justify-between bg-background/50">
             <span className="text-[12px] text-[#555]">
               5 variables (3 secrets)
             </span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-[12px] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="h-7 text-[12px] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <ExternalLink className="w-3 h-3 mr-1.5" />
               Add Variable
@@ -500,12 +500,12 @@ export function AdvancedSettingsScreen() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Download className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-sm font-medium text-[#e7e7e7]">
+              <span className="text-sm font-medium text-foreground">
                 Export Data
               </span>
             </div>
@@ -515,18 +515,18 @@ export function AdvancedSettingsScreen() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <Download className="w-3.5 h-3.5 mr-1.5" />
               Export
             </Button>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Upload className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-sm font-medium text-[#e7e7e7]">
+              <span className="text-sm font-medium text-foreground">
                 Import Data
               </span>
             </div>
@@ -536,18 +536,18 @@ export function AdvancedSettingsScreen() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <Upload className="w-3.5 h-3.5 mr-1.5" />
               Import
             </Button>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <RefreshCw className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-sm font-medium text-[#e7e7e7]">
+              <span className="text-sm font-medium text-foreground">
                 Refresh Cache
               </span>
             </div>
@@ -557,7 +557,7 @@ export function AdvancedSettingsScreen() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="w-full h-8 text-[12px] bg-[#121212] border-[#2c2c2c] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
               Refresh
@@ -576,14 +576,14 @@ export function AdvancedSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border border-red-500/20 text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border border-red-500/20 text-foreground rounded-xl overflow-hidden shadow-sm">
           <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0 mt-0.5">
                 <RotateCcw className="w-4 h-4" strokeWidth={1.8} />
               </div>
               <div>
-                <div className="text-sm font-medium text-[#e7e7e7]">
+                <div className="text-sm font-medium text-foreground">
                   Reset Project
                 </div>
                 <p className="text-xs text-[#666] mt-0.5">
@@ -607,7 +607,7 @@ export function AdvancedSettingsScreen() {
                 <Trash2 className="w-4 h-4" strokeWidth={1.8} />
               </div>
               <div>
-                <div className="text-sm font-medium text-[#e7e7e7]">
+                <div className="text-sm font-medium text-foreground">
                   Delete Project
                 </div>
                 <p className="text-xs text-[#666] mt-0.5">

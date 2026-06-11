@@ -39,15 +39,15 @@ export default async function BlogPage() {
     .order("published_at", { ascending: false });
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground selection:bg-indigo-500/30 font-sans">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <Header />
 
       <main className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 sm:pt-40">
         <section className="max-w-3xl">
-          <p className="mb-3 text-sm font-medium text-zinc-400">Blog</p>
+          <p className="mb-3 text-sm font-medium text-muted-foreground">Blog</p>
           <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">Latest from Geiger</h1>
-          <p className="mt-5 text-base leading-7 text-zinc-400">
+          <p className="mt-5 text-base leading-7 text-muted-foreground">
             Product updates, workflow ideas, and notes from the Geiger Studio team.
           </p>
         </section>
@@ -57,9 +57,9 @@ export default async function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group overflow-hidden rounded-lg border border-zinc-800 bg-[#1a1a1a] transition-colors hover:bg-[#202020]"
+              className="group overflow-hidden rounded-lg border border-border bg-surface-subtle transition-colors hover:bg-surface-card"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#1a1a1a]">
+              <div className="relative aspect-[16/10] overflow-hidden bg-surface-subtle">
                 <Image
                   src={getPostImage(post, index)}
                   alt={post.title}
@@ -69,7 +69,7 @@ export default async function BlogPage() {
                 />
               </div>
               <div className="p-5">
-                <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-zinc-500">
+                <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-foreground0">
                   {post.category ? <span>{post.category}</span> : null}
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5" />
@@ -78,8 +78,8 @@ export default async function BlogPage() {
                   {post.reading_time_minutes ? <span>{post.reading_time_minutes} min read</span> : null}
                 </div>
                 <h2 className="text-xl font-semibold leading-tight text-white">{post.title}</h2>
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-400">{post.excerpt}</p>
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-zinc-200">
+                <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground">
                   Read post
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
@@ -89,7 +89,7 @@ export default async function BlogPage() {
         </section>
 
         {(!posts || posts.length === 0) && (
-          <div className="mt-12 rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 text-sm text-zinc-400">
+          <div className="mt-12 rounded-lg border border-border bg-surface-subtle/40 p-6 text-sm text-muted-foreground">
             No blog posts published yet.
           </div>
         )}

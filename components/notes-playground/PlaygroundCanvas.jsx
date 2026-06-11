@@ -152,7 +152,7 @@ export default function PlaygroundCanvas() {
   );
 
   return (
-    <div className="h-[500px] rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+    <div className="h-[500px] rounded-xl border border-border bg-surface-subtle/50 overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -163,12 +163,12 @@ export default function PlaygroundCanvas() {
         onDragOver={onDragOver}
         onDrop={onDrop}
         fitView
-        className="bg-zinc-950"
+        className="bg-background"
       >
         <Background color="#27272a" gap={20} size={1} />
-        <Controls className="bg-zinc-900 border-zinc-800 rounded-lg" />
+        <Controls className="bg-surface-subtle border-border rounded-lg" />
         <MiniMap
-          className="bg-zinc-900 border-zinc-800 rounded-lg"
+          className="bg-surface-subtle border-border rounded-lg"
           nodeColor="#3f3f46"
           maskColor="rgba(0,0,0,0.8)"
         />

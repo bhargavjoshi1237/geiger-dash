@@ -11,11 +11,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function AppDialog({ open, onOpenChange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1e1e1e] border-zinc-800 text-zinc-100 p-0 overflow-hidden shadow-xl sm:rounded-lg">
-        <DialogHeader className="p-4 border-b border-zinc-800">
+      <DialogContent className="max-w-md bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
+        <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Smartphone className="w-5 h-5 text-zinc-400" />
-            <DialogTitle className="text-base font-medium text-zinc-100">
+            <Smartphone className="w-5 h-5 text-muted-foreground" />
+            <DialogTitle className="text-base font-medium text-foreground">
               Mobile App
             </DialogTitle>
           </div>
@@ -26,10 +26,10 @@ export default function AppDialog({ open, onOpenChange }) {
             <div className="text-center space-y-5 animate-in fade-in -mt-10">
               <Smartphone className="w-8 h-8 opacity-20 ml-auto mr-auto" />
             </div>
-            <p className="text-sm font-medium text-zinc-300">
+            <p className="text-sm font-medium text-muted-foreground">
               Coming Soon to iOS & Android
             </p>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-foreground0">
               We're building a seamless mobile experience for you. Stay tuned
               for updates!
             </p>

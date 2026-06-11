@@ -32,26 +32,26 @@ function MetricCard({ title, subtitle, value, data }) {
   };
 
   return (
-    <Card className="bg-[#1a1a1a] border-[#2a2a2a] text-[#e7e7e7] overflow-hidden group hover:border-[#474747] transition-all duration-300">
+    <Card className="bg-surface-subtle border-border text-foreground overflow-hidden group hover:border-border-strong transition-all duration-300">
       <CardHeader className="pb-2 space-y-1">
-        <div className="flex items-center gap-2 text-[#a3a3a3]">
-          <div className="w-5 h-5 rounded bg-[#2a2a2a] flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="w-5 h-5 rounded bg-surface-hover flex items-center justify-center">
             {title === "Productivity" && (
-              <Activity className="w-3 h-3 text-[#737373]" />
+              <Activity className="w-3 h-3 text-text-secondary" />
             )}
             {title === "New Features" && (
-              <Sparkles className="w-3 h-3 text-[#737373]" />
+              <Sparkles className="w-3 h-3 text-text-secondary" />
             )}
             {title === "Issues Solved" && (
-              <Bug className="w-3 h-3 text-[#737373]" />
+              <Bug className="w-3 h-3 text-text-secondary" />
             )}
             {title === "PR Merged" && (
-              <GitMerge className="w-3 h-3 text-[#737373]" />
+              <GitMerge className="w-3 h-3 text-text-secondary" />
             )}
           </div>
           <span className="text-sm font-medium">{title}</span>
         </div>
-        <p className="text-xs text-[#525252]">{subtitle}</p>
+        <p className="text-xs text-text-tertiary">{subtitle}</p>
         <div className="text-2xl font-bold mt-1">{value}</div>
       </CardHeader>
       <CardContent className="p-0 h-32 relative transition-colors -mb-2">
@@ -116,26 +116,26 @@ export function ProjectDetailsScreen() {
           <h1 className="text-2xl font-bold text-white tracking-tight">
             {project?.name}
           </h1>
-          <span className="bg-[#1a1a1a] text-[#737373] text-[9px] px-1.5 py-0.5 rounded border border-[#2a2a2a] font-mono tracking-widest shrink-0">
+          <span className="bg-surface-subtle text-text-secondary text-[9px] px-1.5 py-0.5 rounded border border-border font-mono tracking-widest shrink-0">
             NANO
           </span>
         </div>
         <div className="w-full md:w-auto">
           <div className="flex w-full md:w-auto md:gap-0">
             <div className="flex-1 md:flex-none flex flex-col items-center md:pr-8">
-              <span className="text-[#737373] text-[11px] uppercase tracking-wider font-medium">
+              <span className="text-text-secondary text-[11px] uppercase tracking-wider font-medium">
                 Members
               </span>
               <span className="text-white font-bold text-2xl mt-0.5">6</span>
             </div>
-            <div className="flex-1 md:flex-none flex flex-col items-center border-l border-[#2a2a2a] md:px-8">
-              <span className="text-[#737373] text-[11px] uppercase tracking-wider font-medium">
+            <div className="flex-1 md:flex-none flex flex-col items-center border-l border-border md:px-8">
+              <span className="text-text-secondary text-[11px] uppercase tracking-wider font-medium">
                 Goals
               </span>
               <span className="text-white font-bold text-2xl mt-0.5">0</span>
             </div>
-            <div className="flex-1 md:flex-none flex flex-col items-center border-l border-[#2a2a2a] md:pl-8">
-              <span className="text-[#737373] text-[11px] uppercase tracking-wider font-medium">
+            <div className="flex-1 md:flex-none flex flex-col items-center border-l border-border md:pl-8">
+              <span className="text-text-secondary text-[11px] uppercase tracking-wider font-medium">
                 Milestones
               </span>
               <span className="text-white font-bold text-2xl mt-0.5">0</span>
@@ -144,13 +144,13 @@ export function ProjectDetailsScreen() {
         </div>
       </div>
       <div className="w-full mt-2 mb-6 md:mb-6">
-        <p className="text-zinc-500 text-sm text-center md:text-left">
+        <p className="text-foreground0 text-sm text-center md:text-left">
           Geiger Flow Lightweight creative project manager. Kanban, Timeline
           view, Process, End Node Progress Hiring Templets , Project Templets
           Staging. Milestones. Comments/Discussions , Dropdown Stack of Nodes
         </p>
       </div>
-      <div className="pt-4 border-t border-[#242424]">
+      <div className="pt-4 border-t border-surface-active">
         <FilterDropdown
           value={filterValue}
           onValueChange={setFilterValue}
@@ -191,14 +191,14 @@ export function ProjectDetailsScreen() {
       <div className="py-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="px-1">
-            <h2 className="text-lg font-semibold text-[#e7e7e7] tracking-tight leading-tight">
+            <h2 className="text-lg font-semibold text-foreground tracking-tight leading-tight">
               Top Issues
             </h2>
-            <p className="text-xs text-[#737373]">
+            <p className="text-xs text-text-secondary">
               Tasks requiring immediate attention
             </p>
           </div>
-          <button className="text-xs font-medium text-[#737373] hover:text-[#e7e7e7] px-3 py-1.5 rounded-lg transition-colors hover:border-[#474747] flex items-center gap-2">
+          <button className="text-xs font-medium text-text-secondary hover:text-foreground px-3 py-1.5 rounded-lg transition-colors hover:border-border-strong flex items-center gap-2">
           View Issues <ChevronRight className="w-3 h-3" />
         </button>
         </div>
@@ -212,11 +212,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">API response time exceeding 500ms on /users endpoint</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">Critical issue requiring immediate attention.</p>
+              <p className="text-sm text-muted-foreground mb-4">Critical issue requiring immediate attention.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Alex M.</p>
-                <p><span className="text-[#737373]">Status:</span> Open</p>
-                <p><span className="text-[#737373]">Due:</span> Today</p>
+                <p><span className="text-text-secondary">Assignee:</span> Alex M.</p>
+                <p><span className="text-text-secondary">Status:</span> Open</p>
+                <p><span className="text-text-secondary">Due:</span> Today</p>
               </div>
             </div>
           </IssueItem>
@@ -229,11 +229,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Memory leak in websocket connection handler</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">Critical issue requiring immediate attention.</p>
+              <p className="text-sm text-muted-foreground mb-4">Critical issue requiring immediate attention.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Sarah J.</p>
-                <p><span className="text-[#737373]">Status:</span> In Progress</p>
-                <p><span className="text-[#737373]">Due:</span> Tomorrow</p>
+                <p><span className="text-text-secondary">Assignee:</span> Sarah J.</p>
+                <p><span className="text-text-secondary">Status:</span> In Progress</p>
+                <p><span className="text-text-secondary">Due:</span> Tomorrow</p>
               </div>
             </div>
           </IssueItem>
@@ -246,11 +246,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Database connection pool exhaustion</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">High priority issue.</p>
+              <p className="text-sm text-muted-foreground mb-4">High priority issue.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Mike T.</p>
-                <p><span className="text-[#737373]">Status:</span> Open</p>
-                <p><span className="text-[#737373]">Due:</span> Mar 10</p>
+                <p><span className="text-text-secondary">Assignee:</span> Mike T.</p>
+                <p><span className="text-text-secondary">Status:</span> Open</p>
+                <p><span className="text-text-secondary">Due:</span> Mar 10</p>
               </div>
             </div>
           </IssueItem>
@@ -263,11 +263,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Authentication token refresh failing intermittently</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">High priority issue.</p>
+              <p className="text-sm text-muted-foreground mb-4">High priority issue.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Lisa K.</p>
-                <p><span className="text-[#737373]">Status:</span> In Progress</p>
-                <p><span className="text-[#737373]">Due:</span> Mar 12</p>
+                <p><span className="text-text-secondary">Assignee:</span> Lisa K.</p>
+                <p><span className="text-text-secondary">Status:</span> In Progress</p>
+                <p><span className="text-text-secondary">Due:</span> Mar 12</p>
               </div>
             </div>
           </IssueItem>
@@ -280,11 +280,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Frontend build size exceeds 2MB limit</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">Medium priority issue.</p>
+              <p className="text-sm text-muted-foreground mb-4">Medium priority issue.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Chris P.</p>
-                <p><span className="text-[#737373]">Status:</span> Resolved</p>
-                <p><span className="text-[#737373]">Due:</span> Mar 8</p>
+                <p><span className="text-text-secondary">Assignee:</span> Chris P.</p>
+                <p><span className="text-text-secondary">Status:</span> Resolved</p>
+                <p><span className="text-text-secondary">Due:</span> Mar 8</p>
               </div>
             </div>
           </IssueItem>
@@ -297,11 +297,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Tooltip text overlaps on small screens</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">Low priority cosmetic issue on mobile viewports.</p>
+              <p className="text-sm text-muted-foreground mb-4">Low priority cosmetic issue on mobile viewports.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Jamie L.</p>
-                <p><span className="text-[#737373]">Status:</span> Open</p>
-                <p><span className="text-[#737373]">Due:</span> Mar 18</p>
+                <p><span className="text-text-secondary">Assignee:</span> Jamie L.</p>
+                <p><span className="text-text-secondary">Status:</span> Open</p>
+                <p><span className="text-text-secondary">Due:</span> Mar 18</p>
               </div>
             </div>
           </IssueItem>
@@ -314,11 +314,11 @@ export function ProjectDetailsScreen() {
           >
             <div className="p-4">
               <h2 className="text-lg font-semibold mb-2">Dark mode color mismatch on settings page</h2>
-              <p className="text-sm text-[#a3a3a3] mb-4">Low priority styling inconsistency.</p>
+              <p className="text-sm text-muted-foreground mb-4">Low priority styling inconsistency.</p>
               <div className="space-y-2 text-sm">
-                <p><span className="text-[#737373]">Assignee:</span> Taylor R.</p>
-                <p><span className="text-[#737373]">Status:</span> Resolved</p>
-                <p><span className="text-[#737373]">Due:</span> Mar 20</p>
+                <p><span className="text-text-secondary">Assignee:</span> Taylor R.</p>
+                <p><span className="text-text-secondary">Status:</span> Resolved</p>
+                <p><span className="text-text-secondary">Due:</span> Mar 20</p>
               </div>
             </div>
           </IssueItem>

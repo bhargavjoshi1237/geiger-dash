@@ -58,7 +58,7 @@ const STATUS_CONFIG = [
 const STATUS_META = {
   not_started: {
     label: "Not Started",
-    className: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    className: "bg-zinc-500/10 text-muted-foreground border-zinc-500/20",
   },
   on_track: {
     label: "On Track",
@@ -109,31 +109,31 @@ function GoalCard({ goal, isDragOverlay, onEdit, onDelete, onDuplicate }) {
   const cardElement = (
     <Card
         className={cn(
-          "bg-[#1a1a1a] border-[#2a2a2a] text-[#e7e7e7] rounded-xl py-0 gap-0 cursor-grab active:cursor-grabbing",
-          isDragOverlay && "shadow-2xl shadow-black/40 border-[#3a3a3a]"
+          "bg-surface-subtle border-border text-foreground rounded-xl py-0 gap-0 cursor-grab active:cursor-grabbing",
+          isDragOverlay && "shadow-2xl shadow-black/40 border-border-strong"
         )}
       >
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start gap-2">
             {!isDragOverlay && (
               <button
-                className="mt-0.5 text-[#3a3a3a] hover:text-[#525252] cursor-grab active:cursor-grabbing shrink-0"
+                className="mt-0.5 text-[#3a3a3a] hover:text-text-tertiary cursor-grab active:cursor-grabbing shrink-0"
                 {...listeners}
               >
                 <GripVertical className="w-3.5 h-3.5" />
               </button>
             )}
             <div className="flex-1 min-w-0 space-y-1.5">
-              <h4 className="text-sm font-medium text-[#e7e7e7] leading-snug">
+              <h4 className="text-sm font-medium text-foreground leading-snug">
                 {goal.title}
               </h4>
-              <p className="text-[11px] text-[#525252] line-clamp-2">
+              <p className="text-[11px] text-text-tertiary line-clamp-2">
                 {goal.description}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] justify-between text-[#525252]">
+          <div className="flex items-center gap-3 text-[11px] justify-between text-text-tertiary">
             <span className="inline-flex items-center gap-1">
               <User className="w-3 h-3" />
               {goal.owner}
@@ -149,12 +149,12 @@ function GoalCard({ goal, isDragOverlay, onEdit, onDelete, onDuplicate }) {
               <span className="text-[10px] uppercase tracking-wider text-[#3a3a3a] font-medium">
                 Progress
               </span>
-              <span className="text-[11px] text-[#737373] tabular-nums">{goal.progress}%</span>
+              <span className="text-[11px] text-text-secondary tabular-nums">{goal.progress}%</span>
             </div>
             <Progress
               value={goal.progress}
               className={cn(
-                "h-1 bg-[#2a2a2a] rounded-full",
+                "h-1 bg-surface-hover rounded-full",
                 goal.status === "completed" && "[&_[data-slot=progress-indicator]]:bg-blue-400",
                 goal.status === "at_risk" && "[&_[data-slot=progress-indicator]]:bg-amber-400",
                 goal.status === "not_started" && "[&_[data-slot=progress-indicator]]:bg-zinc-500",
@@ -202,7 +202,7 @@ function GoalCard({ goal, isDragOverlay, onEdit, onDelete, onDuplicate }) {
                       <span
                         className={cn(
                           "text-[11px] flex-1 truncate",
-                          kr.done ? "text-[#737373] line-through" : "text-[#525252]"
+                          kr.done ? "text-text-secondary line-through" : "text-text-tertiary"
                         )}
                       >
                         {kr.label}
@@ -230,22 +230,22 @@ function GoalCard({ goal, isDragOverlay, onEdit, onDelete, onDuplicate }) {
         <ContextMenuTrigger asChild>
           {cardElement}
         </ContextMenuTrigger>
-        <ContextMenuContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#e7e7e7] rounded-lg">
+        <ContextMenuContent className="bg-surface-subtle border-border text-foreground rounded-lg">
           <ContextMenuItem
-            className="text-xs gap-2 focus:bg-[#242424] focus:text-[#e7e7e7]"
+            className="text-xs gap-2 focus:bg-surface-active focus:text-foreground"
             onSelect={() => onEdit?.(goal)}
           >
             <Pencil className="w-3.5 h-3.5" />
             Edit Goal
           </ContextMenuItem>
           <ContextMenuItem
-            className="text-xs gap-2 focus:bg-[#242424] focus:text-[#e7e7e7]"
+            className="text-xs gap-2 focus:bg-surface-active focus:text-foreground"
             onSelect={() => onDuplicate?.(goal)}
           >
             <Copy className="w-3.5 h-3.5" />
             Duplicate
           </ContextMenuItem>
-          <ContextMenuSeparator className="bg-[#2a2a2a]" />
+          <ContextMenuSeparator className="bg-surface-hover" />
           <ContextMenuItem
             variant="destructive"
             className="text-xs gap-2 focus:bg-red-500/10 focus:text-red-400"
@@ -269,16 +269,16 @@ function KanbanColumn({ statusKey, goals, objective, onEdit, onDelete, onDuplica
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col bg-[#131313] border border-[#2a2a2a] border-t-2 rounded-xl min-w-[280px] flex-1 min-h-0 transition-colors",
+        "flex flex-col bg-[#131313] border border-border border-t-2 rounded-xl min-w-[280px] flex-1 min-h-0 transition-colors",
         COLUMN_ACCENT[statusKey],
-        isOver && "bg-[#171717] border-[#3a3a3a]"
+        isOver && "bg-[#171717] border-border-strong"
       )}
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#222]">
         <div className="flex items-center gap-2">
-          <Icon className="w-3.5 h-3.5 text-[#737373]" />
-          <span className="text-xs font-medium text-[#a3a3a3]">{config?.label}</span>
-          <span className="text-[10px] text-[#3a3a3a] bg-[#1a1a1a] rounded-full px-1.5 py-0.5 tabular-nums">
+          <Icon className="w-3.5 h-3.5 text-text-secondary" />
+          <span className="text-xs font-medium text-muted-foreground">{config?.label}</span>
+          <span className="text-[10px] text-[#3a3a3a] bg-surface-subtle rounded-full px-1.5 py-0.5 tabular-nums">
             {goals.length}
           </span>
         </div>
@@ -286,7 +286,7 @@ function KanbanColumn({ statusKey, goals, objective, onEdit, onDelete, onDuplica
           variant="ghost"
           size="icon"
           onClick={() => onAddGoal?.(statusKey)}
-          className="w-6 h-6 text-[#3a3a3a] hover:text-[#a3a3a3] hover:bg-[#1a1a1a]"
+          className="w-6 h-6 text-[#3a3a3a] hover:text-muted-foreground hover:bg-surface-subtle"
         >
           <Plus className="w-3.5 h-3.5" />
         </Button>
@@ -481,20 +481,20 @@ export function ObjectiveKanban({ objective, onBack }) {
   return (
     <MainScreenWrapper>
       <div className="flex flex-col h-[calc(90dvh)]">
-        <div className="flex items-start justify-between border-b border-[#2a2a2a] pb-5 shrink-0">
+        <div className="flex items-start justify-between border-b border-border pb-5 shrink-0">
           <div className="space-y-3 flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onBack}
-                className="shrink-0 w-8 h-8 text-[#525252] hover:text-[#a3a3a3] hover:bg-[#242424]"
+                className="shrink-0 w-8 h-8 text-text-tertiary hover:text-muted-foreground hover:bg-surface-active"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap justify-between">
-                  <h1 className="text-2xl font-bold text-[#e7e7e7] leading-tight">
+                  <h1 className="text-2xl font-bold text-foreground leading-tight">
                     {objective.title}
                   </h1>
                   <Badge
@@ -506,7 +506,7 @@ export function ObjectiveKanban({ objective, onBack }) {
                     {STATUS_META[objective.status]?.label}
                   </Badge>
                 </div>
-                <p className="text-sm text-[#737373] mt-1">
+                <p className="text-sm text-text-secondary mt-1">
                   {objective.description}
                 </p>
               </div>
@@ -519,19 +519,19 @@ export function ObjectiveKanban({ objective, onBack }) {
                 </span>
                 <Progress
                   value={objective.progress}
-                  className={cn("h-1.5 w-28 bg-[#2a2a2a] rounded-full", progressBarColor)}
+                  className={cn("h-1.5 w-28 bg-surface-hover rounded-full", progressBarColor)}
                 />
-                <span className="text-xs text-[#737373] tabular-nums">
+                <span className="text-xs text-text-secondary tabular-nums">
                   {objective.progress}%
                 </span>
               </div>
               <div className="flex items-center gap-6">
-                <span className="inline-flex items-center gap-1 text-xs text-[#525252]">
+                <span className="inline-flex items-center gap-1 text-xs text-text-tertiary">
                 <Calendar className="w-3 h-3" />
                 {dateFormatter.format(new Date(objective.startDate))} —{" "}
                 {dateFormatter.format(new Date(objective.targetDate))}
               </span>
-              <span className="inline-flex items-center gap-1 text-xs text-[#525252]">
+              <span className="inline-flex items-center gap-1 text-xs text-text-tertiary">
                 <Target className="w-3 h-3" />
                 {completedKRs}/{totalKRs} key results
               </span>

@@ -23,7 +23,7 @@ const CanvasSkeleton = () => {
         />
       </div>
 
-      <div className="absolute bottom-10 right-10 flex items-center gap-2 text-zinc-500 text-sm font-medium animate-pulse">
+      <div className="absolute bottom-10 right-10 flex items-center gap-2 text-foreground0 text-sm font-medium animate-pulse">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
         Loading Canvas...
       </div>

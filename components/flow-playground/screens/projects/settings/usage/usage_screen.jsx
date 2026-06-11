@@ -70,7 +70,7 @@ function UsageMetricCard({
 }) {
   const isOverLimit = percentage > 80;
   return (
-    <div className="bg-[#181818] border border-[#2c2c2c] rounded-2xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
+    <div className="bg-surface-card border border-[#2c2c2c] rounded-2xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div
@@ -78,12 +78,12 @@ function UsageMetricCard({
               "w-8 h-8 rounded-lg flex items-center justify-center border",
               isOverLimit
                 ? "bg-red-500/10 border-red-500/20 text-red-400"
-                : "bg-[#2c2c2c] border-[#3c3c3c] text-[#a3a3a3]"
+                : "bg-[#2c2c2c] border-[#3c3c3c] text-muted-foreground"
             )}
           >
             <Icon className="w-4 h-4" strokeWidth={1.8} />
           </div>
-          <span className="text-[13px] font-medium text-[#a3a3a3]">
+          <span className="text-[13px] font-medium text-muted-foreground">
             {label}
           </span>
         </div>
@@ -107,7 +107,7 @@ function UsageMetricCard({
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl font-semibold text-[#e7e7e7] tracking-tight">
+        <span className="text-2xl font-semibold text-foreground tracking-tight">
           {value}
         </span>
         {limit && (
@@ -153,10 +153,10 @@ function ChartSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-[#2c2c2c] pb-2">
-        <span className="text-[13px] font-medium text-[#e7e7e7]">
+        <span className="text-[13px] font-medium text-foreground">
           {title}
         </span>
-        <span className="text-[13px] font-medium text-[#e7e7e7]">
+        <span className="text-[13px] font-medium text-foreground">
           {value}{" "}
           {limit && <span className="text-[#555] font-normal">/ {limit}</span>}
         </span>
@@ -280,18 +280,18 @@ export function UsageSettingsScreen() {
         />
       </div>
 
-      <div className="bg-[#181818] border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
+      <div className="bg-surface-card border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center shrink-0 mt-0.5">
             <Activity className="w-4 h-4" strokeWidth={1.8} />
           </div>
           <div>
-            <div className="text-[14px] font-semibold text-[#e7e7e7] mb-1">
+            <div className="text-[14px] font-semibold text-foreground mb-1">
               Billing cycle progress
             </div>
             <div className="text-[13px] text-[#8b8b8b] leading-relaxed mb-3">
               Your current billing cycle ends on{" "}
-              <span className="text-[#e7e7e7] font-medium">May 8, 2026</span>.
+              <span className="text-foreground font-medium">May 8, 2026</span>.
               Usage resets at the start of each cycle.
             </div>
             <div className="flex items-center gap-3">
@@ -301,7 +301,7 @@ export function UsageSettingsScreen() {
                   style={{ width: "26.7%" }}
                 />
               </div>
-              <span className="text-xs text-[#a3a3a3] font-medium whitespace-nowrap">
+              <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
                 8 / 30 days
               </span>
             </div>
@@ -371,10 +371,10 @@ export function UsageSettingsScreen() {
           />
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-[#2c2c2c] pb-2">
-              <span className="text-[13px] font-medium text-[#e7e7e7]">
+              <span className="text-[13px] font-medium text-foreground">
                 Compute Hours
               </span>
-              <span className="text-[13px] font-medium text-[#e7e7e7]">
+              <span className="text-[13px] font-medium text-foreground">
                 128 hrs{" "}
                 <span className="text-[#555] font-normal">/ 500 hrs</span>
               </span>
@@ -384,19 +384,19 @@ export function UsageSettingsScreen() {
             </div>
 
             <div className="grid grid-cols-2 gap-6 mt-4">
-              <div className="bg-[#161616] border border-[#2c2c2c] rounded-xl p-4">
+              <div className="bg-background border border-[#2c2c2c] rounded-xl p-4">
                 <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
                   Avg. Daily
                 </div>
-                <div className="text-xl font-semibold text-[#e7e7e7]">
+                <div className="text-xl font-semibold text-foreground">
                   4.2<span className="text-sm text-[#555] font-normal ml-1">hrs</span>
                 </div>
               </div>
-              <div className="bg-[#161616] border border-[#2c2c2c] rounded-xl p-4">
+              <div className="bg-background border border-[#2c2c2c] rounded-xl p-4">
                 <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
                   Peak Day
                 </div>
-                <div className="text-xl font-semibold text-[#e7e7e7]">
+                <div className="text-xl font-semibold text-foreground">
                   8.1<span className="text-sm text-[#555] font-normal ml-1">hrs</span>
                 </div>
               </div>
@@ -405,9 +405,9 @@ export function UsageSettingsScreen() {
             <div className="grid grid-cols-3 gap-3 mt-2">
               {["Serverless Functions", "Edge Functions", "Background Jobs"].map(
                 (item, i) => (
-                  <div key={i} className="bg-[#161616] border border-[#2c2c2c] rounded-lg p-3 text-center">
+                  <div key={i} className="bg-background border border-[#2c2c2c] rounded-lg p-3 text-center">
                     <div className="text-[11px] text-[#666] mb-1">{item}</div>
-                    <div className="text-[13px] font-semibold text-[#a3a3a3]">
+                    <div className="text-[13px] font-semibold text-muted-foreground">
                       {[62, 38, 28][i]}%
                     </div>
                   </div>
@@ -443,10 +443,10 @@ export function UsageSettingsScreen() {
           />
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-[#2c2c2c] pb-2">
-              <span className="text-[13px] font-medium text-[#e7e7e7]">
+              <span className="text-[13px] font-medium text-foreground">
                 Sessions This Month
               </span>
-              <span className="text-[13px] font-medium text-[#e7e7e7]">
+              <span className="text-[13px] font-medium text-foreground">
                 247
               </span>
             </div>
@@ -459,10 +459,10 @@ export function UsageSettingsScreen() {
               ].map((item, i) => (
                 <div key={i}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[13px] text-[#a3a3a3]">
+                    <span className="text-[13px] text-muted-foreground">
                       {item.label}
                     </span>
-                    <span className="text-[13px] text-[#e7e7e7]">
+                    <span className="text-[13px] text-foreground">
                       {item.value}{" "}
                       <span className="text-[#555]">({item.pct}%)</span>
                     </span>
@@ -478,19 +478,19 @@ export function UsageSettingsScreen() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <div className="bg-[#161616] border border-[#2c2c2c] rounded-xl p-4">
+              <div className="bg-background border border-[#2c2c2c] rounded-xl p-4">
                 <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
                   Avg. Session
                 </div>
-                <div className="text-xl font-semibold text-[#e7e7e7]">
+                <div className="text-xl font-semibold text-foreground">
                   23<span className="text-sm text-[#555] font-normal ml-1">min</span>
                 </div>
               </div>
-              <div className="bg-[#161616] border border-[#2c2c2c] rounded-xl p-4">
+              <div className="bg-background border border-[#2c2c2c] rounded-xl p-4">
                 <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
                   New Users
                 </div>
-                <div className="text-xl font-semibold text-[#e7e7e7]">
+                <div className="text-xl font-semibold text-foreground">
                   3<span className="text-sm text-[#555] font-normal ml-1">this month</span>
                 </div>
               </div>
@@ -509,7 +509,7 @@ export function UsageSettingsScreen() {
           </p>
         </div>
 
-        <div className="border border-[#2c2c2c] rounded-xl overflow-hidden bg-[#181818]">
+        <div className="border border-[#2c2c2c] rounded-xl overflow-hidden bg-surface-card">
           <div className="border-b border-[#2c2c2c]">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -539,15 +539,15 @@ export function UsageSettingsScreen() {
                 ].map((row, i) => (
                   <tr
                     key={i}
-                    className="border-b border-[#2c2c2c] last:border-0 hover:bg-[#202020] transition-colors"
+                    className="border-b border-[#2c2c2c] last:border-0 hover:bg-surface-card transition-colors"
                   >
-                    <td className="px-5 py-3 text-[13px] text-[#e7e7e7] font-mono">
+                    <td className="px-5 py-3 text-[13px] text-foreground font-mono">
                       {row.table}
                     </td>
-                    <td className="px-5 py-3 text-[13px] text-[#a3a3a3] text-right">
+                    <td className="px-5 py-3 text-[13px] text-muted-foreground text-right">
                       {row.rows}
                     </td>
-                    <td className="px-5 py-3 text-[13px] text-[#a3a3a3] text-right">
+                    <td className="px-5 py-3 text-[13px] text-muted-foreground text-right">
                       {row.size}
                     </td>
                     <td className="px-5 py-3">
@@ -571,9 +571,9 @@ export function UsageSettingsScreen() {
               </tbody>
             </table>
           </div>
-          <div className="px-5 py-3 flex items-center justify-between bg-[#161616]/50">
+          <div className="px-5 py-3 flex items-center justify-between bg-background/50">
             <span className="text-[12px] text-[#555]">Total across 6 tables</span>
-            <span className="text-[12px] text-[#a3a3a3] font-medium">
+            <span className="text-[12px] text-muted-foreground font-medium">
               6,842 rows &middot; 26.9 MB
             </span>
           </div>
@@ -581,12 +581,12 @@ export function UsageSettingsScreen() {
       </div>
 
       <div className="space-y-6">
-        <div className="flex items-start gap-3 bg-[#181818] border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
-          <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center shrink-0 mt-0.5">
+        <div className="flex items-start gap-3 bg-surface-card border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center shrink-0 mt-0.5">
             <Info className="w-4 h-4" strokeWidth={1.8} />
           </div>
           <div>
-            <div className="text-[14px] font-semibold text-[#e7e7e7] mb-1">
+            <div className="text-[14px] font-semibold text-foreground mb-1">
               Need more resources?
             </div>
             <div className="text-[13px] text-[#8b8b8b] leading-relaxed">

@@ -101,7 +101,7 @@ export default async function PricingPage() {
   const ctaHref = user ? `/notes/${user.id}/home` : "/login";
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-[#161616] text-[#e7e7e7] font-sans">
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground font-sans">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#333333_1px,transparent_1px),linear-gradient(to_bottom,#333333_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <Header />
 
@@ -113,7 +113,7 @@ export default async function PricingPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-b from-[#e7e7e7] to-[#a3a3a3] bg-clip-text text-transparent">
              Pricing
             </h1>
-            {/* <p className="text-base text-[#a3a3a3] max-w-2xl mx-auto leading-relaxed">
+            {/* <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Start building for free, collaborate with your team, then scale to millions of users
             </p> */}
           </div>
@@ -122,9 +122,9 @@ export default async function PricingPage() {
 
           {/* Compare Plans Section */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-[#e7e7e7] flex items-center gap-3">
+            <h2 className="text-3xl font-bold mb-8 text-foreground flex items-center gap-3">
               Compare Plans
-              <Badge variant="outline" className="text-xs border-[#333333] text-[#737373]">
+              <Badge variant="outline" className="text-xs border-border text-text-secondary">
                 Feature Matrix
               </Badge>
             </h2>
@@ -132,33 +132,33 @@ export default async function PricingPage() {
             {/* Comparison Tables */}
             <div className="space-y-8">
               {featureCategories.map((category, catIndex) => (
-                <div key={catIndex} className="bg-gradient-to-br from-[#1a1a1a] to-[#1e1e1e] border border-[#333333] rounded-2xl overflow-hidden">
+                <div key={catIndex} className="bg-gradient-to-br from-surface-subtle to-[#1e1e1e] border border-border rounded-2xl overflow-hidden">
                   {/* Category Header */}
-                  <div className="bg-[#202020] border-b border-[#333333] px-6 py-4">
-                    <h3 className="text-lg font-bold text-[#e7e7e7]">{category.name}</h3>
+                  <div className="bg-surface-card border-b border-border px-6 py-4">
+                    <h3 className="text-lg font-bold text-foreground">{category.name}</h3>
                   </div>
                   
                   {/* Comparison Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-[#333333]">
-                          <th className="text-left py-3 px-6 text-sm font-semibold text-[#a3a3a3]">Feature</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-[#a3a3a3] min-w-[120px]">Starter</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-zinc-400 min-w-[120px]">Pro</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-[#a3a3a3] min-w-[120px]">Team</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-[#a3a3a3] min-w-[120px]">Enterprise</th>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-6 text-sm font-semibold text-muted-foreground">Feature</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Starter</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Pro</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Team</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Enterprise</th>
                         </tr>
                       </thead>
                       <tbody>
                         {category.features.map((feature, featIndex) => (
                           <tr 
                             key={featIndex} 
-                            className={`border-b border-[#2a2a2a] hover:bg-[#1e1e1e] transition-colors ${
+                            className={`border-b border-border hover:bg-[#1e1e1e] transition-colors ${
                               featIndex === category.features.length - 1 ? 'border-b-0' : ''
                             }`}
                           >
-                            <td className="py-3 px-6 text-sm text-[#e7e7e7]">{feature.name}</td>
+                            <td className="py-3 px-6 text-sm text-foreground">{feature.name}</td>
                             <td className="text-center py-3 px-4">
                               {typeof feature.starter === 'boolean' ? (
                                 feature.starter ? (
@@ -166,12 +166,12 @@ export default async function PricingPage() {
                                     <Check className="w-3 h-3 text-emerald-400" />
                                   </div>
                                 ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#2a2a2a]">
-                                    <X className="w-3 h-3 text-[#737373]" />
+                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
+                                    <X className="w-3 h-3 text-text-secondary" />
                                   </div>
                                 )
                               ) : (
-                                <span className="text-xs text-[#a3a3a3]">{feature.starter}</span>
+                                <span className="text-xs text-muted-foreground">{feature.starter}</span>
                               )}
                             </td>
                             <td className="text-center py-3 px-4 bg-zinc-500/5">
@@ -181,12 +181,12 @@ export default async function PricingPage() {
                                     <Check className="w-3 h-3 text-emerald-400" />
                                   </div>
                                 ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#2a2a2a]">
-                                    <X className="w-3 h-3 text-[#737373]" />
+                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
+                                    <X className="w-3 h-3 text-text-secondary" />
                                   </div>
                                 )
                               ) : (
-                                <span className="text-xs text-zinc-300 font-semibold">{feature.pro}</span>
+                                <span className="text-xs text-muted-foreground font-semibold">{feature.pro}</span>
                               )}
                             </td>
                             <td className="text-center py-3 px-4">
@@ -196,12 +196,12 @@ export default async function PricingPage() {
                                     <Check className="w-3 h-3 text-emerald-400" />
                                   </div>
                                 ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#2a2a2a]">
-                                    <X className="w-3 h-3 text-[#737373]" />
+                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
+                                    <X className="w-3 h-3 text-text-secondary" />
                                   </div>
                                 )
                               ) : (
-                                <span className="text-xs text-[#a3a3a3]">{feature.team}</span>
+                                <span className="text-xs text-muted-foreground">{feature.team}</span>
                               )}
                             </td>
                             <td className="text-center py-3 px-4">
@@ -211,12 +211,12 @@ export default async function PricingPage() {
                                     <Check className="w-3 h-3 text-emerald-400" />
                                   </div>
                                 ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#2a2a2a]">
-                                    <X className="w-3 h-3 text-[#737373]" />
+                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
+                                    <X className="w-3 h-3 text-text-secondary" />
                                   </div>
                                 )
                               ) : (
-                                <span className="text-xs text-[#a3a3a3]">{feature.enterprise}</span>
+                                <span className="text-xs text-muted-foreground">{feature.enterprise}</span>
                               )}
                             </td>
                           </tr>
@@ -233,7 +233,7 @@ export default async function PricingPage() {
           <div className="text-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-[#e7e7e7] rounded-xl text-sm font-semibold transition-all border border-[#333333] hover:border-[#474747]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-hover hover:bg-surface-strong text-foreground rounded-xl text-sm font-semibold transition-all border border-border hover:border-border-strong"
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
               Back to Home

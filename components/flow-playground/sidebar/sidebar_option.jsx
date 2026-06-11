@@ -69,7 +69,7 @@ export function SidebarOption({
           />
         )}
         {badge && !subItems && (
-          <SidebarMenuBadge className="mr-2 text-[#a3a3a3] text-[10px] px-1.5 py-0.5 rounded border border-[#333333] ml-auto">
+          <SidebarMenuBadge className="mr-2 text-muted-foreground text-[10px] px-1.5 py-0.5 rounded border border-border ml-auto">
             {badge}
           </SidebarMenuBadge>
         )}
@@ -89,7 +89,7 @@ export function SidebarOption({
                   "relative w-full flex items-center px-2 h-[35px] rounded-md text-sm leading-none transition-colors gap-2",
                   activeSubTab === sub.title
                     ? "bg-sidebar-accent text-white font-medium"
-                    : "text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50",
+                    : "text-sidebar-foreground/70 hover:text-foreground hover:bg-sidebar-accent/50",
                 )}
               >
                 {sub.icon && (
@@ -126,7 +126,7 @@ export function SidebarOption({
                       "relative w-full flex items-center justify-center px-2 h-[35px] rounded-md text-sm leading-none transition-colors",
                       activeSubTab === sub.title
                         ? "bg-sidebar-accent text-white font-medium"
-                        : "text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50",
+                        : "text-sidebar-foreground/70 hover:text-foreground hover:bg-sidebar-accent/50",
                     )}
                   >
                     {sub.icon && (

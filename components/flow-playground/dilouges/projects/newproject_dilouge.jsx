@@ -61,25 +61,25 @@ export function NewProjectDialog({ children, onCreate }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-[#161616] border-[#2a2a2a] text-white">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-background border-border text-white">
         <DialogHeader>
           <DialogTitle className="text-xl">Create New Project</DialogTitle>
-          <DialogDescription className="text-[#a3a3a3]">
+          <DialogDescription className="text-muted-foreground">
             Enter the details for your new infrastructure project.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-[#202020]">
+          <TabsList className="grid w-full grid-cols-2 bg-surface-card">
             <TabsTrigger 
               value="details" 
-              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white"
+              className="data-[state=active]:bg-surface-hover data-[state=active]:text-foreground"
             >
               Project Details
             </TabsTrigger>
             <TabsTrigger 
               value="vault" 
-              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white"
+              className="data-[state=active]:bg-surface-hover data-[state=active]:text-foreground"
             >
               <Key className="w-4 h-4 mr-2" />
               Vault Settings
@@ -88,7 +88,7 @@ export function NewProjectDialog({ children, onCreate }) {
 
           <TabsContent value="details" className="space-y-6 py-4">
             <div className="flex flex-col space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-[#a3a3a3]">
+              <Label htmlFor="name" className="text-sm font-medium text-muted-foreground">
                 Project Name *
               </Label>
               <Input
@@ -97,12 +97,12 @@ export function NewProjectDialog({ children, onCreate }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="bg-[#202020] border-[#333333] text-white focus-visible:ring-[#474747] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className="bg-surface-card border-border text-white focus-visible:ring-border-strong focus-visible:ring-offset-0 focus-visible:ring-1"
               />
             </div>
 
             <div className="flex flex-col space-y-2">
-              <Label htmlFor="logo" className="text-sm font-medium text-[#a3a3a3]">
+              <Label htmlFor="logo" className="text-sm font-medium text-muted-foreground">
                 Logo URL (Optional)
               </Label>
               <Input
@@ -110,12 +110,12 @@ export function NewProjectDialog({ children, onCreate }) {
                 placeholder="e.g. https://example.com/logo.png"
                 value={logo}
                 onChange={(e) => setLogo(e.target.value)}
-                className=" bg-[#202020] border-[#333333] text-white focus-visible:ring-[#474747] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className=" bg-surface-card border-border text-white focus-visible:ring-border-strong focus-visible:ring-offset-0 focus-visible:ring-1"
               />
             </div>
 
             <div className="flex flex-col space-y-3">
-              <Label className="text-sm font-medium text-[#a3a3a3]">
+              <Label className="text-sm font-medium text-muted-foreground">
                 Cloud Provider
               </Label>
               <div className="grid grid-cols-3 gap-3">
@@ -124,8 +124,8 @@ export function NewProjectDialog({ children, onCreate }) {
                   onClick={() => setProvider("AWS")}
                   className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
                     provider === "AWS"
-                      ? "border-[#474747] bg-[#2a2a2a] text-white"
-                      : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                      ? "border-border-strong bg-surface-hover text-white"
+                      : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                   }`}
                 >
                   {provider === "AWS" && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white"></div>}
@@ -139,8 +139,8 @@ export function NewProjectDialog({ children, onCreate }) {
                   onClick={() => setProvider("GCP")}
                   className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
                     provider === "GCP"
-                      ? "border-[#474747] bg-[#2a2a2a] text-white"
-                      : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                      ? "border-border-strong bg-surface-hover text-white"
+                      : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                   }`}
                 >
                   {provider === "GCP" && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white"></div>}
@@ -154,8 +154,8 @@ export function NewProjectDialog({ children, onCreate }) {
                   onClick={() => setProvider("Azure")}
                   className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
                     provider === "Azure"
-                      ? "border-[#474747] bg-[#2a2a2a] text-white"
-                      : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                      ? "border-border-strong bg-surface-hover text-white"
+                      : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                   }`}
                 >
                   {provider === "Azure" && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white"></div>}
@@ -170,7 +170,7 @@ export function NewProjectDialog({ children, onCreate }) {
             <div className="flex flex-col space-y-2">
               <Label
                 htmlFor="region"
-                className="text-sm font-medium text-[#a3a3a3]"
+                className="text-sm font-medium text-muted-foreground"
               >
                 Geographic Region
               </Label>
@@ -179,13 +179,13 @@ export function NewProjectDialog({ children, onCreate }) {
                 placeholder="e.g. us-east-1"
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="bg-[#202020] border-[#333333] text-white focus-visible:ring-[#474747] focus-visible:ring-offset-0 focus-visible:ring-1"
+                className="bg-surface-card border-border text-white focus-visible:ring-border-strong focus-visible:ring-offset-0 focus-visible:ring-1"
               />
             </div>
           </TabsContent>
 
           <TabsContent value="vault" className="space-y-6 py-4">
-            <div className="flex items-center justify-between p-4 bg-[#202020] rounded-lg border border-[#333333]">
+            <div className="flex items-center justify-between p-4 bg-surface-card rounded-lg border border-border">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Key className="w-5 h-5 text-white" />
@@ -193,7 +193,7 @@ export function NewProjectDialog({ children, onCreate }) {
                     Enable Vault
                   </Label>
                 </div>
-                <p className="text-xs text-[#737373]">
+                <p className="text-xs text-text-secondary">
                   Create a secure vault for storing project credentials and secrets
                 </p>
               </div>
@@ -206,11 +206,11 @@ export function NewProjectDialog({ children, onCreate }) {
             {vaultEnabled && (
               <>
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium text-[#a3a3a3] flex items-center gap-2">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Shield className="w-4 h-4" />
                     Default Access Control
                   </Label>
-                  <p className="text-xs text-[#737373] mb-2">
+                  <p className="text-xs text-text-secondary mb-2">
                     This will be the default access setting for all secrets in the vault
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -219,8 +219,8 @@ export function NewProjectDialog({ children, onCreate }) {
                       onClick={() => setVaultAccessType("team")}
                       className={`p-3 rounded-lg border text-center transition-all ${
                         vaultAccessType === "team"
-                          ? "border-[#474747] bg-[#202020] text-white"
-                          : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                          ? "border-border-strong bg-surface-card text-white"
+                          : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                       }`}
                     >
                       <Users className="w-5 h-5 mx-auto mb-1" />
@@ -231,8 +231,8 @@ export function NewProjectDialog({ children, onCreate }) {
                       onClick={() => setVaultAccessType("admin")}
                       className={`p-3 rounded-lg border text-center transition-all ${
                         vaultAccessType === "admin"
-                          ? "border-[#474747] bg-[#202020] text-white"
-                          : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                          ? "border-border-strong bg-surface-card text-white"
+                          : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                       }`}
                     >
                       <Shield className="w-5 h-5 mx-auto mb-1" />
@@ -243,8 +243,8 @@ export function NewProjectDialog({ children, onCreate }) {
                       onClick={() => setVaultAccessType("custom")}
                       className={`p-3 rounded-lg border text-center transition-all ${
                         vaultAccessType === "custom"
-                          ? "border-[#474747] bg-[#202020] text-white"
-                          : "border-[#333333] bg-[#202020] text-[#737373] hover:border-[#474747]"
+                          ? "border-border-strong bg-surface-card text-white"
+                          : "border-border bg-surface-card text-text-secondary hover:border-border-strong"
                       }`}
                     >
                       <Users className="w-5 h-5 mx-auto mb-1" />
@@ -253,19 +253,19 @@ export function NewProjectDialog({ children, onCreate }) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-[#202020] rounded-lg border border-[#333333]">
+                <div className="flex items-center justify-between p-4 bg-surface-card rounded-lg border border-border">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       {vaultKeylessEntry ? (
-                        <Unlock className="w-5 h-5 text-[#a3a3a3]" />
+                        <Unlock className="w-5 h-5 text-muted-foreground" />
                       ) : (
-                        <Lock className="w-5 h-5 text-[#a3a3a3]" />
+                        <Lock className="w-5 h-5 text-muted-foreground" />
                       )}
                       <Label className="text-sm font-medium text-white">
                         Keyless Entry
                       </Label>
                     </div>
-                    <p className="text-xs text-[#737373]">
+                    <p className="text-xs text-text-secondary">
                       {vaultKeylessEntry
                         ? "Users can view secret values without password verification"
                         : "Viewing secret values requires user's account password"}
@@ -277,9 +277,9 @@ export function NewProjectDialog({ children, onCreate }) {
                   />
                 </div>
 
-                <div className="p-3 bg-[#202020] border border-[#333333] rounded-lg flex items-start gap-2">
-                  <Info className="w-4 h-4 text-[#a3a3a3] mt-0.5 shrink-0" />
-                  <p className="text-xs text-[#a3a3a3]">
+                <div className="p-3 bg-surface-card border border-border rounded-lg flex items-start gap-2">
+                  <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-xs text-muted-foreground">
                     These settings will be applied as defaults when creating the project. 
                     You can customize access control for each secret individually after creation.
                   </p>
@@ -294,7 +294,7 @@ export function NewProjectDialog({ children, onCreate }) {
             type="button"
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="text-[#a3a3a3] hover:text-white hover:bg-[#202020]"
+            className="text-muted-foreground hover:text-foreground hover:bg-surface-card"
             disabled={loading}
           >
             Cancel

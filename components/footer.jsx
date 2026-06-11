@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-   <div className="bg-zinc-950"> <footer className="w-full border-t border-zinc-800/50 bg-zinc-950 pt-16 pb-8 relative z-30 px-6">
+   <div className="bg-background"> <footer className="w-full border-t border-border/50 bg-background pt-16 pb-8 relative z-30 px-6">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
@@ -13,59 +13,59 @@ export default function Footer() {
               </div>
               <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
             </div>
-            <p className="text-zinc-500 text-sm max-w-sm">
+            <p className="text-foreground0 text-sm max-w-sm">
               Built to Manage. Designed to Create.
               <br /> Turn your ideas into something real with a single suite that combines solid management tools and easy-to-use creative features.
             </p>
           </div>
           
           <div>
-            <h4 className="font-bold text-zinc-100 mb-4">Products</h4>
+            <h4 className="font-bold text-foreground mb-4">Products</h4>
             <ul className="space-y-3">
-              <li><Link href="/notes" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Notes</Link></li>
-              <li><Link href="/flow" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Flow</Link></li>
-              <li><Link href="/assets" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Assets</Link></li>
-              <li><Link href="/grey" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Grey</Link></li>
-              <li><Link href="/office" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Office</Link></li>
-              <li><Link href="/forms" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Forms</Link></li>
-              <li><Link href="/events" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Events</Link></li>
-              <li><Link href="/campaign" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Campaign</Link></li>
-              <li><Link href="/chat" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Chat</Link></li>
-              <li><Link href="/canvas" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Canvas</Link></li>
-              <li><Link href="/docs" className="hover:text-zinc-100 transition-colors text-zinc-400 text-sm">Geiger Docs</Link></li>
+              <li><Link href="/notes" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Notes</Link></li>
+              <li><Link href="/flow" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Flow</Link></li>
+              <li><Link href="/assets" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Assets</Link></li>
+              <li><Link href="/grey" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Grey</Link></li>
+              <li><Link href="/office" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Office</Link></li>
+              <li><Link href="/forms" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Forms</Link></li>
+              <li><Link href="/events" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Events</Link></li>
+              <li><Link href="/campaign" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Campaign</Link></li>
+              <li><Link href="/chat" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Chat</Link></li>
+              <li><Link href="/canvas" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Canvas</Link></li>
+              <li><Link href="/docs" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Docs</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-zinc-100 mb-4">Resources</h4>
-            <ul className="flex flex-col gap-3 text-sm text-zinc-400">
-              <li><Link href="/docs" className="hover:text-zinc-100 transition-colors">Documentation</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Community</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Contact Support</Link></li>
+            <h4 className="font-bold text-foreground mb-4">Resources</h4>
+            <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Help Center</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Community</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Contact Support</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-zinc-100 mb-4">Company</h4>
-            <ul className="flex flex-col gap-3 text-sm text-zinc-400">
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">About</Link></li>
-              <li><Link href="/blog" className="hover:text-zinc-100 transition-colors">Blog</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-zinc-100 transition-colors">Legal</Link></li>
+            <h4 className="font-bold text-foreground mb-4">Company</h4>
+            <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <li><Link href="#" className="hover:text-foreground transition-colors">About</Link></li>
+              <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Careers</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Legal</Link></li>
             </ul>
           </div>
         </div>
-        <div className="pt-8 border-t border-zinc-800/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+        <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-foreground0">
           <p>&copy; {new Date().getFullYear()} Geiger Studios. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-zinc-300 transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-zinc-300 transition-colors">Terms of Service</Link>
+            <Link href="#" className="hover:text-muted-foreground transition-colors">Privacy Policy</Link>
+            <Link href="#" className="hover:text-muted-foreground transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
     </footer>
-    <div className="mt-10 flex justify-center bg-zinc-950 relative z-0"><h1 className="text-[13vw] font-bold text-zinc-100/5 dark:text-white/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
+    <div className="mt-10 flex justify-center bg-background relative z-0"><h1 className="text-[13vw] font-bold text-foreground/5 dark:text-foreground/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
     </div>
   );
 }

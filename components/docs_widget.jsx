@@ -48,19 +48,19 @@ const topTabs = [
 
 function DocsTopBar({ activeSlug }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-[#2a2a2a] bg-[#161616]/95 text-white backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-border bg-background/95 text-white backdrop-blur">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex h-full min-w-0 items-center gap-6">
           <Link href="/" className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md  ">
             <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="h-5 w-5" />
             </span>
-            <span className="hidden border-l border-[#333333] pl-3 text-sm font-semibold text-white sm:block">
+            <span className="hidden border-l border-border pl-3 text-sm font-semibold text-white sm:block">
               Geiger Docs
             </span>
           </Link>
 
-          <nav className="hidden h-full items-center gap-6 text-sm font-medium text-[#a3a3a3] md:flex">
+          <nav className="hidden h-full items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
             {topTabs.map((item) => {
               const isActive = item.match(activeSlug);
               return (
@@ -70,7 +70,7 @@ function DocsTopBar({ activeSlug }) {
                 className={`flex h-full items-center border-b-2 transition-colors ${
                   isActive
                     ? "border-white text-white"
-                    : "border-transparent hover:text-white"
+                    : "border-transparent hover:text-foreground"
                 }`}
               >
                 {item.label}
@@ -80,25 +80,25 @@ function DocsTopBar({ activeSlug }) {
         </div>
 
         <div className="hidden flex-1 justify-center lg:flex">
-          <div className="group flex h-8 w-full max-w-[430px] items-center gap-2 rounded-md border border-[#2a2a2a] bg-[#202020] px-3 text-sm text-[#a3a3a3] shadow-sm transition-colors hover:border-[#474747] hover:bg-[#242424]">
+          <div className="group flex h-8 w-full max-w-[430px] items-center gap-2 rounded-md border border-border bg-surface-card px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:border-border-strong hover:bg-surface-active">
             <Search className="h-4 w-4" />
             <span className="flex-1">Search docs...</span>
-            <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3] transition-colors group-hover:bg-[#2a2a2a] group-hover:text-white">
+            <kbd className="rounded border border-border bg-surface-subtle px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors group-hover:bg-surface-hover group-hover:text-foreground">
               <Command className="mr-0.5 inline h-3 w-3" />K
             </kbd>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden h-8 items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#202020] px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:border-[#474747] hover:bg-[#242424] hover:text-white md:flex">
+          <button className="hidden h-8 items-center gap-3 rounded-md border border-border bg-surface-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground md:flex">
             <span>Ask AI</span>
-            <kbd className="rounded border border-[#333333] bg-[#1a1a1a] px-1.5 py-0.5 text-[11px] text-[#a3a3a3]">
+            <kbd className="rounded border border-border bg-surface-subtle px-1.5 py-0.5 text-[11px] text-muted-foreground">
               Cmd I
             </kbd>
           </button>
           <Link
             href="/login"
-            className="hidden h-8 items-center rounded-md border border-transparent px-3 text-sm font-medium text-[#a3a3a3] transition-colors hover:bg-[#2a2a2a] hover:text-white sm:flex"
+            className="hidden h-8 items-center rounded-md border border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground sm:flex"
           >
             Sign in
           </Link>
@@ -116,11 +116,11 @@ function DocsTopBar({ activeSlug }) {
 
 function LeftSidebar({ navigation, activeSlug }) {
   return (
-    <aside className="docs-scrollbar-hidden fixed bottom-0 left-0 top-14 hidden w-[280px] overflow-y-auto border-r border-[#2a2a2a] bg-[#161616] px-6 py-6 lg:block">
+    <aside className="docs-scrollbar-hidden fixed bottom-0 left-0 top-14 hidden w-[280px] overflow-y-auto border-r border-border bg-background px-6 py-6 lg:block">
       <nav className="space-y-8">
         {navigation.map((section) => (
           <div key={section.title}>
-            <p className="mb-3 text-xs font-medium uppercase text-[#737373]">{section.title}</p>
+            <p className="mb-3 text-xs font-medium uppercase text-text-secondary">{section.title}</p>
             <div className="space-y-1">
               {section.links.map((link) => {
                 const isActive = link.slug === activeSlug;
@@ -129,11 +129,11 @@ function LeftSidebar({ navigation, activeSlug }) {
                   href={link.href}
                   key={`${section.title}-${link.label}`}
                   className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium leading-5 transition-colors ${
-                    isActive ? "bg-[#202020] text-white" : "text-[#a3a3a3] hover:bg-[#202020] hover:text-white"
+                    isActive ? "bg-surface-card text-white" : "text-muted-foreground hover:bg-surface-card hover:text-foreground"
                   }`}
                 >
                   <span>{link.label}</span>
-                  {link.chevron ? <ChevronRight className="h-3.5 w-3.5 text-[#a3a3a3]" /> : null}
+                  {link.chevron ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : null}
                 </Link>
               )})}
             </div>
@@ -146,16 +146,16 @@ function LeftSidebar({ navigation, activeSlug }) {
 
 function RightSidebar({ toc }) {
   return (
-    <aside className="docs-scrollbar-hidden fixed bottom-0 right-0 top-14 hidden w-[280px] overflow-y-auto bg-[#161616] px-6 py-8 xl:block">
-      <div className="border-l border-[#2a2a2a] pl-5">
-        <p className="mb-4 text-xs font-medium uppercase text-[#737373]">On this page</p>
+    <aside className="docs-scrollbar-hidden fixed bottom-0 right-0 top-14 hidden w-[280px] overflow-y-auto bg-background px-6 py-8 xl:block">
+      <div className="border-l border-border pl-5">
+        <p className="mb-4 text-xs font-medium uppercase text-text-secondary">On this page</p>
         <div className="space-y-4 text-sm">
           {toc.map((link, index) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`block transition-colors hover:text-white ${
-                index === 0 ? "text-[#a3a3a3]" : "text-[#737373]"
+              className={`block transition-colors hover:text-foreground ${
+                index === 0 ? "text-muted-foreground" : "text-text-secondary"
               }`}
             >
               {link.label}
@@ -163,7 +163,7 @@ function RightSidebar({ toc }) {
           ))}
         </div>
 
-        <div className="my-5 h-px w-full bg-[#2a2a2a]" />
+        <div className="my-5 h-px w-full bg-surface-hover" />
 
         <div className="space-y-4">
           {actionLinks.map((action) => {
@@ -171,7 +171,7 @@ function RightSidebar({ toc }) {
             return (
               <button
                 key={action.label}
-                className="flex items-center gap-2 text-sm font-medium text-[#737373] transition-colors hover:text-white"
+                className="flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-foreground"
               >
                 <Icon className="h-3.5 w-3.5" />
                 <span>{action.label}</span>
@@ -187,13 +187,13 @@ function RightSidebar({ toc }) {
 function ProductPreview() {
   return (
     <div
-      className="relative mt-10 aspect-[704/411] overflow-hidden rounded-lg border border-[#2a2a2a] bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:p-3"
+      className="relative mt-10 aspect-[704/411] overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:p-3"
       style={{
         backgroundImage:
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
       }}
     >
-      <div className="h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-[#161616] shadow-2xl">
+      <div className="h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-background shadow-2xl">
         <div className="h-[142.857%] w-[142.857%] origin-top-left scale-[0.7]">
           <ClientAssetsPlayground />
         </div>
@@ -208,10 +208,10 @@ function StartCard({ item }) {
   return (
     <Link
       href={item.href}
-      className="group min-h-[160px] rounded-md border border-[#2a2a2a] bg-[#202020] transition-colors hover:border-[#474747] hover:bg-[#242424]"
+      className="group min-h-[160px] rounded-md border border-border bg-surface-card transition-colors hover:border-border-strong hover:bg-surface-active"
     >
-      <div className="flex h-12 items-center gap-3 border-b border-[#2a2a2a] px-4">
-        <Icon className="h-4 w-4 text-[#a3a3a3]" />
+      <div className="flex h-12 items-center gap-3 border-b border-border px-4">
+        <Icon className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm font-semibold text-white">{item.title}</span>
       </div>
       <p className="px-4 pt-4 text-[15px] font-medium leading-6 text-[#e5e5e5]">{item.body}</p>
@@ -222,9 +222,9 @@ function StartCard({ item }) {
 function ContentSection({ id, eyebrow, title, children }) {
   return (
     <section id={id} className="pt-12">
-      <p className="mb-3 text-sm text-[#a3a3a3]">{eyebrow}</p>
+      <p className="mb-3 text-sm text-muted-foreground">{eyebrow}</p>
       <h2 className="text-2xl font-semibold text-white">{title}</h2>
-      <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#a3a3a3]">{children}</div>
+      <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">{children}</div>
     </section>
   );
 }
@@ -237,9 +237,9 @@ function FeatureGrid({ features }) {
         return (
           <div
             key={item.text}
-            className="flex items-center gap-3 rounded-md border border-[#2a2a2a] bg-[#202020] p-3 transition-colors hover:border-[#474747] hover:bg-[#242424]"
+            className="flex items-center gap-3 rounded-md border border-border bg-surface-card p-3 transition-colors hover:border-border-strong hover:bg-surface-active"
           >
-            <Icon className="h-4 w-4 text-[#a3a3a3]" />
+            <Icon className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-[#e5e5e5]">{item.text}</span>
           </div>
         );
@@ -257,13 +257,13 @@ function ProductLinks({ links }) {
           <Link
             href={item.href || "#"}
             key={item.label}
-            className="flex items-center justify-between rounded-md border border-[#2a2a2a] bg-[#202020] p-4 text-sm font-semibold text-[#e5e5e5] transition-colors hover:border-[#474747] hover:bg-[#242424] hover:text-white"
+            className="flex items-center justify-between rounded-md border border-border bg-surface-card p-4 text-sm font-semibold text-[#e5e5e5] transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground"
           >
             <span className="flex items-center gap-2">
-              <Icon className="h-4 w-4 text-[#a3a3a3]" />
+              <Icon className="h-4 w-4 text-muted-foreground" />
               {item.label}
             </span>
-            <ChevronRight className="h-4 w-4 text-[#737373]" />
+            <ChevronRight className="h-4 w-4 text-text-secondary" />
           </Link>
         );
       })}
@@ -302,7 +302,7 @@ export default function DocsWidget({
       <LeftSidebar navigation={navigation} activeSlug={page.slug} />
       <RightSidebar toc={toc} />
 
-      <main className="min-h-screen bg-[#161616] pt-14 text-white lg:pl-[280px] xl:pr-[280px]">
+      <main className="min-h-screen bg-background pt-14 text-white lg:pl-[280px] xl:pr-[280px]">
         <div className="mx-auto w-full max-w-[704px] px-5 py-9 sm:px-0">
           <div className="docs-scrollbar-hidden mb-6 flex gap-2 overflow-x-auto pb-2 lg:hidden">
             {navigation.flatMap((section) =>
@@ -311,8 +311,8 @@ export default function DocsWidget({
               <Link
                 href={link.href}
                 key={`mobile-${link.section}-${link.label}`}
-                className={`shrink-0 rounded-md border border-[#2a2a2a] px-3 py-1.5 text-sm font-medium ${
-                  link.slug === page.slug ? "bg-white text-black" : "bg-[#202020] text-[#a3a3a3]"
+                className={`shrink-0 rounded-md border border-border px-3 py-1.5 text-sm font-medium ${
+                  link.slug === page.slug ? "bg-white text-black" : "bg-surface-card text-muted-foreground"
                 }`}
               >
                 {link.label}
@@ -321,7 +321,7 @@ export default function DocsWidget({
           </div>
 
           <article>
-            <p className="mb-3 text-sm font-medium text-[#a3a3a3]">{page.groupTitle}</p>
+            <p className="mb-3 text-sm font-medium text-muted-foreground">{page.groupTitle}</p>
             <h1 className="text-[34px] font-semibold leading-tight text-white sm:text-[36px]">
               {page.title}
             </h1>

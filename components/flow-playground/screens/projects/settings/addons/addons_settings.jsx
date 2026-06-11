@@ -33,8 +33,8 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
       className={cn(
         "rounded-xl border transition-all duration-300",
         enabled
-          ? "border-[#2c2c2c] bg-[#181818] hover:border-[#3c3c3c] shadow-sm"
-          : "border-[#222] bg-[#161616] opacity-60 hover:opacity-75"
+          ? "border-[#2c2c2c] bg-surface-card hover:border-[#3c3c3c] shadow-sm"
+          : "border-[#222] bg-background opacity-60 hover:opacity-75"
       )}
     >
       <div className="flex items-center gap-4 p-5">
@@ -43,7 +43,7 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
             "w-11 h-11 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-300",
             enabled
               ? ""
-              : "border-[#2c2c2c] bg-[#1a1a1a]"
+              : "border-[#2c2c2c] bg-surface-subtle"
           )}
           style={
             enabled
@@ -64,13 +64,13 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-[#e7e7e7] text-[15px]">
+            <span className="font-medium text-foreground text-[15px]">
               {addon.name}
             </span>
-            <Badge className="text-[9px] h-4 px-1.5 font-medium border-[#2c2c2c] text-[#666] bg-[#1a1a1a] hover:bg-[#1a1a1a]">
+            <Badge className="text-[9px] h-4 px-1.5 font-medium border-[#2c2c2c] text-[#666] bg-surface-subtle hover:bg-surface-subtle">
               v{addon.version}
             </Badge>
-            <Badge className="text-[9px] h-4 px-1.5 font-medium border-[#2c2c2c] text-[#666] bg-[#1a1a1a] hover:bg-[#1a1a1a]">
+            <Badge className="text-[9px] h-4 px-1.5 font-medium border-[#2c2c2c] text-[#666] bg-surface-subtle hover:bg-surface-subtle">
               {addon.category}
             </Badge>
           </div>
@@ -93,7 +93,7 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-1.5 py-2.5 border-t border-[#222] hover:bg-[#1a1a1a] transition-colors duration-200"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 border-t border-[#222] hover:bg-surface-subtle transition-colors duration-200"
       >
         {expanded ? (
           <ChevronDown className="w-3.5 h-3.5 text-[#555]" />
@@ -126,7 +126,7 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
                   />
                 </div>
                 <div className="flex-1">
-                  <span className="text-[12px] text-[#e7e7e7]">Accent color</span>
+                  <span className="text-[12px] text-foreground">Accent color</span>
                   <p className="text-[11px] text-[#555] mt-0.5">
                     Custom color for the sidebar icon and UI accents
                   </p>
@@ -153,13 +153,13 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
                 <div className="flex items-center gap-3">
                   <GripVertical className="w-4 h-4 text-[#444] shrink-0" />
                   <div className="flex-1">
-                    <span className="text-[12px] text-[#e7e7e7]">Sidebar position</span>
+                    <span className="text-[12px] text-foreground">Sidebar position</span>
                     <p className="text-[11px] text-[#555] mt-0.5">
                       Choose where this add-on appears in the navigation sidebar
                     </p>
                   </div>
                   <Select value={selectValue} onValueChange={onPositionChange}>
-                    <SelectTrigger className="h-8 text-xs w-auto min-w-[180px] bg-[#1e1e1e] border-[#2c2c2c] text-[#e7e7e7] focus:ring-[#333] focus:border-[#444]">
+                    <SelectTrigger className="h-8 text-xs w-auto min-w-[180px] bg-[#1e1e1e] border-[#2c2c2c] text-foreground focus:ring-[#333] focus:border-[#444]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1e1e1e] border-[#2c2c2c]">
@@ -167,7 +167,7 @@ function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor,
                         <SelectItem
                           key={opt.value}
                           value={opt.value}
-                          className="text-xs text-[#ccc] focus:bg-[#2c2c2c] focus:text-white"
+                          className="text-xs text-[#ccc] focus:bg-[#2c2c2c] focus:text-foreground"
                         >
                           {opt.label}
                         </SelectItem>
@@ -208,14 +208,14 @@ export function AddonsSettingsScreen() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between gap-4 pb-6 border-b border-[#2a2a2a]">
+      <div className="flex items-start justify-between gap-4 pb-6 border-b border-border">
         <div className="space-y-1.5">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#1e1e1e] border border-[#2c2c2c] flex items-center justify-center">
-              <LucidePackagePlus className="w-4.5 h-4.5 text-[#a3a3a3]" strokeWidth={1.8} />
+              <LucidePackagePlus className="w-4.5 h-4.5 text-muted-foreground" strokeWidth={1.8} />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-[#e7e7e7]">
+              <h3 className="text-lg font-medium text-foreground">
                 Add-ons
               </h3>
               <p className="text-xs text-[#666]">
@@ -244,7 +244,7 @@ export function AddonsSettingsScreen() {
       </div>
 
       {installedAddons.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[#2c2c2c] bg-[#161616] p-12 flex flex-col items-center justify-center gap-3">
+        <div className="rounded-xl border border-dashed border-[#2c2c2c] bg-background p-12 flex flex-col items-center justify-center gap-3">
           <div className="w-12 h-12 rounded-full bg-[#1e1e1e] border border-[#2c2c2c] flex items-center justify-center">
             <LucidePackagePlus className="w-6 h-6 text-[#555]" />
           </div>

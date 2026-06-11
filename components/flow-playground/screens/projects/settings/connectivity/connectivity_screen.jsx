@@ -164,13 +164,13 @@ const statusMeta = {
     label: "Not connected",
     detail: "Optional",
     icon: Link2,
-    badge: "border-[#2a2a2a] bg-[#202020] text-[#8a8a8a]",
+    badge: "border-border bg-surface-card text-[#8a8a8a]",
     dot: "bg-[#525252]",
   },
 };
 
 const accentClasses = {
-  neutral: "bg-[#202020] border-[#333333] text-[#ededed]",
+  neutral: "bg-surface-card border-border text-foreground",
   emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300",
   amber: "bg-amber-500/10 border-amber-500/20 text-amber-300",
   blue: "bg-sky-500/10 border-sky-500/20 text-sky-300",
@@ -183,16 +183,16 @@ function normalizeStatus(status) {
 
 function ConnectionStat({ icon: Icon, label, value, sublabel, tone = "neutral" }) {
   const toneClasses = {
-    neutral: "text-[#e7e7e7]",
+    neutral: "text-foreground",
     emerald: "text-emerald-400",
     amber: "text-amber-300",
     red: "text-red-400",
   };
 
   return (
-    <div className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4 text-[#e7e7e7] transition-colors hover:border-[#3a3a3a]">
-      <div className="flex items-center gap-2 text-[#737373]">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#2a2a2a] bg-[#202020]">
+    <div className="rounded-xl border border-border bg-surface-subtle p-4 text-foreground transition-colors hover:border-border-strong">
+      <div className="flex items-center gap-2 text-text-secondary">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-card">
           <Icon className="h-3.5 w-3.5" />
         </div>
         <span className="text-xs font-medium">{label}</span>
@@ -200,7 +200,7 @@ function ConnectionStat({ icon: Icon, label, value, sublabel, tone = "neutral" }
       <div className={cn("mt-3 text-2xl font-semibold", toneClasses[tone])}>
         {value}
       </div>
-      <p className="mt-1 text-xs text-[#525252]">{sublabel}</p>
+      <p className="mt-1 text-xs text-text-tertiary">{sublabel}</p>
     </div>
   );
 }
@@ -228,7 +228,7 @@ function ConnectionAction({ status, integrationId, onConnect, onDisconnect, onMa
           size="sm"
           variant="outline"
           onClick={() => onManage(integrationId)}
-          className="h-8 border-[#2a2a2a] bg-[#202020] px-3 text-xs text-[#e7e7e7] hover:border-[#3a3a3a] hover:bg-[#2a2a2a]"
+          className="h-8 border-border bg-surface-card px-3 text-xs text-foreground hover:border-border-strong hover:bg-surface-hover"
         >
           <Settings className="h-3.5 w-3.5" />
           Manage
@@ -238,7 +238,7 @@ function ConnectionAction({ status, integrationId, onConnect, onDisconnect, onMa
           size="icon-sm"
           variant="ghost"
           onClick={() => onDisconnect(integrationId)}
-          className="h-8 w-8 text-[#737373] hover:bg-red-500/10 hover:text-red-300"
+          className="h-8 w-8 text-text-secondary hover:bg-red-500/10 hover:text-red-300"
           title="Disconnect"
         >
           <Unlink className="h-3.5 w-3.5" />
@@ -294,7 +294,7 @@ function IntegrationRow({ integration, status, onConnect, onDisconnect, onManage
   const meta = statusMeta[normalizedStatus];
 
   return (
-    <div className="group px-4 py-4 transition-colors hover:bg-[#202020]/70 sm:px-5">
+    <div className="group px-4 py-4 transition-colors hover:bg-surface-card/70 sm:px-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <div
@@ -308,7 +308,7 @@ function IntegrationRow({ integration, status, onConnect, onDisconnect, onManage
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-semibold text-[#ededed]">
+              <h3 className="text-sm font-semibold text-foreground">
                 {integration.name}
               </h3>
               <span className="hidden text-[#3a3a3a] sm:inline">/</span>
@@ -321,7 +321,7 @@ function IntegrationRow({ integration, status, onConnect, onDisconnect, onManage
               {integration.features.map((feature) => (
                 <span
                   key={feature}
-                  className="rounded-md border border-[#2a2a2a] bg-[#161616] px-2 py-1 text-[10px] font-medium text-[#737373]"
+                  className="rounded-md border border-border bg-background px-2 py-1 text-[10px] font-medium text-text-secondary"
                 >
                   {feature}
                 </span>
@@ -330,28 +330,28 @@ function IntegrationRow({ integration, status, onConnect, onDisconnect, onManage
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 rounded-lg border border-[#242424] bg-[#161616] p-3 text-xs lg:w-[230px]">
+        <div className="grid grid-cols-2 gap-3 rounded-lg border border-surface-active bg-background p-3 text-xs lg:w-[230px]">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#525252]">
+            <p className="text-[10px] uppercase tracking-wider text-text-tertiary">
               Type
             </p>
-            <p className="mt-1 truncate font-medium text-[#a3a3a3]">
+            <p className="mt-1 truncate font-medium text-muted-foreground">
               {integration.category}
             </p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#525252]">
+            <p className="text-[10px] uppercase tracking-wider text-text-tertiary">
               State
             </p>
             <div className="mt-1 flex items-center gap-1.5">
               <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
-              <span className="truncate font-medium text-[#a3a3a3]">
+              <span className="truncate font-medium text-muted-foreground">
                 {meta.detail}
               </span>
             </div>
           </div>
-          <div className="col-span-2 border-t border-[#242424] pt-2">
-            <p className="truncate text-[#666666]">{integration.lastActivity}</p>
+          <div className="col-span-2 border-t border-surface-active pt-2">
+            <p className="truncate text-text-secondary">{integration.lastActivity}</p>
           </div>
         </div>
 
@@ -360,7 +360,7 @@ function IntegrationRow({ integration, status, onConnect, onDisconnect, onManage
             asChild
             size="icon-sm"
             variant="ghost"
-            className="h-8 w-8 text-[#737373] hover:bg-[#2a2a2a] hover:text-[#ededed]"
+            className="h-8 w-8 text-text-secondary hover:bg-surface-hover hover:text-foreground"
             title={`${integration.name} documentation`}
           >
             <a href={integration.docsUrl} target="_blank" rel="noopener noreferrer">
@@ -394,22 +394,22 @@ function NextStepItem({ integration, status }) {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[#242424] bg-[#161616] p-3">
+    <div className="flex items-center gap-3 rounded-lg border border-surface-active bg-background p-3">
       <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border", accentClasses[integration.accent])}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate text-xs font-medium text-[#ededed]">
+          <span className="truncate text-xs font-medium text-foreground">
             {integration.name}
           </span>
           <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
         </div>
-        <p className="mt-0.5 truncate text-[11px] text-[#666666]">
+        <p className="mt-0.5 truncate text-[11px] text-text-secondary">
           {copy[normalizedStatus]}
         </p>
       </div>
-      <ArrowUpRight className="h-3.5 w-3.5 text-[#525252]" />
+      <ArrowUpRight className="h-3.5 w-3.5 text-text-tertiary" />
     </div>
   );
 }
@@ -498,17 +498,17 @@ export function ConnectivityScreen() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <section className="overflow-hidden rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] text-[#e7e7e7]">
-          <div className="flex flex-col gap-4 border-b border-[#2a2a2a] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="overflow-hidden rounded-xl border border-border bg-surface-subtle text-foreground">
+          <div className="flex flex-col gap-4 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#202020] text-[#a3a3a3]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-card text-muted-foreground">
                 <Link2 className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h2 className="text-base font-semibold tracking-tight text-[#ededed]">
+                <h2 className="text-base font-semibold tracking-tight text-foreground">
                   Project connections
                 </h2>
-                <p className="mt-1 text-xs leading-relaxed text-[#737373]">
+                <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                   External services that power deploys, data, infrastructure, and automation.
                 </p>
               </div>
@@ -519,7 +519,7 @@ export function ConnectivityScreen() {
             </Badge>
           </div>
 
-          <div className="divide-y divide-[#2a2a2a]">
+          <div className="divide-y divide-border">
             {integrations.map((integration) => (
               <IntegrationRow
                 key={integration.id}
@@ -534,27 +534,27 @@ export function ConnectivityScreen() {
         </section>
 
         <aside className="space-y-4">
-          <div className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-5">
+          <div className="rounded-xl border border-border bg-surface-subtle p-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-[#ededed]">
+                <h3 className="text-sm font-semibold text-foreground">
                   Connection health
                 </h3>
-                <p className="mt-1 text-xs text-[#666666]">
+                <p className="mt-1 text-xs text-text-secondary">
                   {issueCount === 0 ? "All linked services are healthy." : `${issueCount} service${issueCount === 1 ? "" : "s"} need a look.`}
                 </p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#2a2a2a] bg-[#202020] text-emerald-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-card text-emerald-400">
                 <ShieldCheck className="h-4 w-4" />
               </div>
             </div>
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between text-xs">
-                <span className="text-[#737373]">Coverage</span>
-                <span className="font-medium text-[#ededed]">{progress}%</span>
+                <span className="text-text-secondary">Coverage</span>
+                <span className="font-medium text-foreground">{progress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full border border-[#2a2a2a] bg-[#111111]">
+              <div className="h-2 overflow-hidden rounded-full border border-border bg-background">
                 <div
                   className="h-full rounded-full bg-emerald-400 transition-all"
                   style={{ width: `${progress}%` }}
@@ -563,32 +563,32 @@ export function ConnectivityScreen() {
             </div>
 
             <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg border border-[#242424] bg-[#161616] px-2 py-2">
+              <div className="rounded-lg border border-surface-active bg-background px-2 py-2">
                 <p className="text-sm font-semibold text-emerald-400">{statusCounts.connected}</p>
-                <p className="mt-0.5 text-[10px] text-[#666666]">active</p>
+                <p className="mt-0.5 text-[10px] text-text-secondary">active</p>
               </div>
-              <div className="rounded-lg border border-[#242424] bg-[#161616] px-2 py-2">
+              <div className="rounded-lg border border-surface-active bg-background px-2 py-2">
                 <p className="text-sm font-semibold text-amber-300">{statusCounts.pending}</p>
-                <p className="mt-0.5 text-[10px] text-[#666666]">pending</p>
+                <p className="mt-0.5 text-[10px] text-text-secondary">pending</p>
               </div>
-              <div className="rounded-lg border border-[#242424] bg-[#161616] px-2 py-2">
+              <div className="rounded-lg border border-surface-active bg-background px-2 py-2">
                 <p className="text-sm font-semibold text-red-400">{statusCounts.error}</p>
-                <p className="mt-0.5 text-[10px] text-[#666666]">errors</p>
+                <p className="mt-0.5 text-[10px] text-text-secondary">errors</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-5">
+          <div className="rounded-xl border border-border bg-surface-subtle p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-[#ededed]">
+                <h3 className="text-sm font-semibold text-foreground">
                   Next steps
                 </h3>
-                <p className="mt-1 text-xs text-[#666666]">
+                <p className="mt-1 text-xs text-text-secondary">
                   Finish the connections that unblock project automation.
                 </p>
               </div>
-              <RefreshCw className="h-4 w-4 text-[#525252]" />
+              <RefreshCw className="h-4 w-4 text-text-tertiary" />
             </div>
 
             <div className="space-y-2">
@@ -604,7 +604,7 @@ export function ConnectivityScreen() {
             <Button
               type="button"
               variant="outline"
-              className="mt-4 h-9 w-full border-[#2a2a2a] bg-[#202020] text-xs text-[#a3a3a3] hover:border-[#3a3a3a] hover:bg-[#2a2a2a] hover:text-[#ededed]"
+              className="mt-4 h-9 w-full border-border bg-surface-card text-xs text-muted-foreground hover:border-border-strong hover:bg-surface-hover hover:text-foreground"
             >
               Review connection policy
               <ArrowUpRight className="h-3.5 w-3.5" />

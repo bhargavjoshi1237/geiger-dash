@@ -4,14 +4,14 @@ import { TrendingUp, FolderOpen, HardDrive, Download, Layers } from "lucide-reac
 
 export function StatsCard({ icon: Icon, label, value, change, changeType }) {
   return (
-    <Card className="bg-[#1a1a1a] border-[#2a2a2a] text-[#e7e7e7] hover:border-[#474747] transition-all duration-300">
+    <Card className="bg-surface-subtle border-border text-foreground hover:border-border-strong transition-all duration-300">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#242424] flex items-center justify-center">
-              <Icon className="w-4 h-4 text-[#a3a3a3]" />
+            <div className="w-8 h-8 rounded-lg bg-surface-active flex items-center justify-center">
+              <Icon className="w-4 h-4 text-muted-foreground" />
             </div>
-            <span className="text-sm text-[#a3a3a3]">{label}</span>
+            <span className="text-sm text-muted-foreground">{label}</span>
           </div>
         </div>
       </CardHeader>
@@ -33,7 +33,7 @@ export function StatsCard({ icon: Icon, label, value, change, changeType }) {
             >
               {change}
             </span>
-            <span className="text-xs text-[#525252]">vs last month</span>
+            <span className="text-xs text-text-tertiary">vs last month</span>
           </div>
         )}
       </CardContent>

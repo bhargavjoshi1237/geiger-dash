@@ -40,7 +40,7 @@ const initialNodes = [
     type: "link",
     data: {
       url: "https://geiger.studio/design-system",
-      backgroundColor: "#1a1a1a",
+      backgroundColor: "var(--surface-dialog)",
     },
     position: { x: 700, y: 300 },
     style: { width: 340, height: 68 },
@@ -95,7 +95,7 @@ export default function HeroCanvas() {
   );
 
   return (
-    <div className="w-full h-full bg-zinc-950">
+    <div className="w-full h-full bg-background">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -103,7 +103,7 @@ export default function HeroCanvas() {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        className="bg-zinc-950"
+        className="bg-background"
         minZoom={0.5}
         maxZoom={1.5}
         proOptions={{ hideAttribution: true }}

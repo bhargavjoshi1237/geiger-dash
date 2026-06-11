@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { ReactFlow, Background, SelectionMode } from "@xyflow/react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import Sidebar from "@/components/notes-playground/internal/layout/Sidebar";
 import Topbar from "@/components/notes-playground/internal/layout/Topbar";
@@ -18,6 +19,7 @@ import { useLandingPlaygroundLogic } from "@/lib/hooks/useLandingPlaygroundLogic
 import "@xyflow/react/dist/style.css";
 
 export default function BoardPlaygroundCanvas({ className = "" }) {
+  const { resolvedTheme } = useTheme();
   const {
     nodes,
     edges,
@@ -269,7 +271,7 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
   }, []);
 
   return (
-    <div className={`relative h-full w-full overflow-hidden bg-[#161616] text-white ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden bg-background text-foreground ${className}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -285,9 +287,9 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
         onNodeDoubleClick={onNodeDoubleClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        colorMode="dark"
+        colorMode={resolvedTheme === "dark" ? "dark" : "light"}
         defaultViewport={viewport}
-        className="bg-[#161616] touch-none"
+        className="bg-background touch-none"
         proOptions={{ hideAttribution: true }}
         minZoom={0.1}
         maxZoom={2}
@@ -299,7 +301,7 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
         zoomOnDoubleClick={false}
         selectionMode={SelectionMode.Partial}
       >
-        <Background color="#373737" gap={12} size={1} variant="dots" />
+        <Background color="var(--canvas-dots)" gap={12} size={1} variant="dots" />
       </ReactFlow>
 
       <div className="absolute top-0 left-0 right-0 z-40">
@@ -333,10 +335,10 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
       <div
         className={`absolute bottom-4 z-50 transition-all duration-300 ${sidebarOpen ? "left-20" : "left-4"}`}
       >
-        <div className="flex flex-col bg-[#333333]/60 backdrop-blur-md rounded-lg shadow-xl border border-zinc-700/50 overflow-hidden">
+        <div className="flex flex-col bg-surface-strong/60 backdrop-blur-md rounded-lg shadow-xl border border-border-strong/50 overflow-hidden">
           <button
             onClick={() => rfInstance?.zoomIn({ duration: 300 })}
-            className="p-2 hover:bg-zinc-700/60 text-zinc-400 hover:text-white transition-colors border-b border-zinc-700/50"
+            className="p-2 hover:bg-surface-strong/60 text-muted-foreground hover:text-foreground transition-colors border-b border-border-strong/50"
             title="Zoom In"
           >
             <svg
@@ -356,7 +358,7 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
           </button>
           <button
             onClick={() => rfInstance?.zoomOut({ duration: 300 })}
-            className="p-2 hover:bg-zinc-700/60 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 hover:bg-surface-strong/60 text-muted-foreground hover:text-foreground transition-colors"
             title="Zoom Out"
           >
             <svg

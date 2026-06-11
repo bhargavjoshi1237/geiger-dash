@@ -54,7 +54,7 @@ function ToggleRow({ label, description, checked, onCheckedChange, badge }) {
     <div className="flex items-center justify-between py-3.5 px-5 border-b border-[#2c2c2c] last:border-0">
       <div className="pr-4">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-[#e7e7e7]">{label}</span>
+          <span className="text-[13px] font-medium text-foreground">{label}</span>
           {badge && (
             <Badge
               className={cn(
@@ -63,7 +63,7 @@ function ToggleRow({ label, description, checked, onCheckedChange, badge }) {
                   ? "bg-green-500/10 text-green-400 border-green-500/20"
                   : badge.variant === "amber"
                   ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                  : "bg-[#2c2c2c] text-[#a3a3a3] border-[#3c3c3c]"
+                  : "bg-[#2c2c2c] text-muted-foreground border-[#3c3c3c]"
               )}
             >
               {badge.text}
@@ -83,20 +83,20 @@ function ComplianceItem({ icon: Icon, title, status, lastAudit, details }) {
   const isActive = status === "compliant" || status === "verified";
 
   return (
-    <div className="flex items-start gap-4 py-4 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-[#1c1c1c] transition-colors">
+    <div className="flex items-start gap-4 py-4 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-surface-card transition-colors">
       <div
         className={cn(
           "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border",
           isActive
             ? "bg-green-500/10 border-green-500/20 text-green-400"
-            : "bg-[#2c2c2c] border-[#3c3c3c] text-[#a3a3a3]"
+            : "bg-[#2c2c2c] border-[#3c3c3c] text-muted-foreground"
         )}
       >
         <Icon className="w-4 h-4" strokeWidth={1.8} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-[#e7e7e7]">
+          <span className="text-[13px] font-medium text-foreground">
             {title}
           </span>
           <Badge
@@ -114,7 +114,7 @@ function ComplianceItem({ icon: Icon, title, status, lastAudit, details }) {
       </div>
       <div className="text-right shrink-0 ml-4">
         <div className="text-[11px] text-[#555]">Last audit</div>
-        <div className="text-[12px] text-[#a3a3a3] font-medium">{lastAudit}</div>
+        <div className="text-[12px] text-muted-foreground font-medium">{lastAudit}</div>
       </div>
     </div>
   );
@@ -124,14 +124,14 @@ function SSOProviderCard({ name, status, domains, userCount }) {
   const isConfigured = status === "configured" || status === "active";
 
   return (
-    <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
+    <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300">
       <div className="flex items-start justify-between mb-4">
         <div
           className={cn(
             "w-10 h-10 rounded-lg flex items-center justify-center border",
             isConfigured
               ? "bg-primary/10 border-primary/20 text-primary"
-              : "bg-[#2c2c2c] border-[#3c3c3c] text-[#a3a3a3]"
+              : "bg-[#2c2c2c] border-[#3c3c3c] text-muted-foreground"
           )}
         >
           <KeyRound className="w-5 h-5" strokeWidth={1.8} />
@@ -147,12 +147,12 @@ function SSOProviderCard({ name, status, domains, userCount }) {
           {status}
         </Badge>
       </div>
-      <div className="text-sm font-medium text-[#e7e7e7] mb-1">{name}</div>
+      <div className="text-sm font-medium text-foreground mb-1">{name}</div>
       <p className="text-[11px] text-[#555] mb-3">
         {isConfigured ? domains.join(", ") : "Not configured"}
       </p>
       {isConfigured ? (
-        <div className="flex items-center gap-1.5 text-[12px] text-[#a3a3a3]">
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
           <Users className="w-3 h-3" />
           {userCount} users linked
         </div>
@@ -160,7 +160,7 @@ function SSOProviderCard({ name, status, domains, userCount }) {
         <Button
           variant="outline"
           size="sm"
-          className="w-full h-7 text-[11px] bg-[#121212] border-[#2c2c2c] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+          className="w-full h-7 text-[11px] bg-[#121212] border-[#2c2c2c] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
         >
           Configure
           <ArrowRight className="w-3 h-3 ml-1" />
@@ -184,10 +184,10 @@ function AuditLogItem({ action, user, target, time, severity }) {
   };
 
   return (
-    <div className="flex items-start gap-3 py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-[#1c1c1c] transition-colors">
+    <div className="flex items-start gap-3 py-3 px-5 border-b border-[#2c2c2c] last:border-0 hover:bg-surface-card transition-colors">
       <div className="mt-0.5 shrink-0">{iconMap[severity]}</div>
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] text-[#e7e7e7]">
+        <div className="text-[13px] text-foreground">
           <span className="font-medium">{user}</span> {action}
         </div>
         <div className="text-[11px] text-[#555] mt-0.5 truncate">{target}</div>
@@ -224,13 +224,13 @@ export function EnterpriseSettingsScreen() {
         </p>
       </div>
 
-      <div className="bg-[#181818] border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
+      <div className="bg-surface-card border border-[#2c2c2c] rounded-2xl p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 mt-0.5">
             <Building2 className="w-4 h-4" strokeWidth={1.8} />
           </div>
           <div>
-            <div className="text-[14px] font-semibold text-[#e7e7e7] mb-1">
+            <div className="text-[14px] font-semibold text-foreground mb-1">
               Enterprise Plan
             </div>
             <div className="text-[13px] text-[#8b8b8b] leading-relaxed">
@@ -255,7 +255,7 @@ export function EnterpriseSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <div className="p-5 space-y-0">
             <ToggleRow
               label="Single Sign-On (SSO)"
@@ -304,7 +304,7 @@ export function EnterpriseSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <ComplianceItem
             icon={ShieldCheck}
             title="SOC 2 Type II"
@@ -340,14 +340,14 @@ export function EnterpriseSettingsScreen() {
             lastAudit="Mar 22, 2026"
             details="Self-assessment questionnaire submitted · awaiting approval"
           />
-          <div className="py-3 px-5 flex items-center justify-between bg-[#161616]/50">
+          <div className="py-3 px-5 flex items-center justify-between bg-background/50">
             <span className="text-[12px] text-[#555]">
               4 compliant &middot; 1 in review
             </span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-[12px] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="h-7 text-[12px] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               <FileText className="w-3 h-3 mr-1.5" />
               View Certificates
@@ -366,7 +366,7 @@ export function EnterpriseSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <div className="p-5 space-y-0">
             <ToggleRow
               label="Encryption at Rest"
@@ -418,32 +418,32 @@ export function EnterpriseSettingsScreen() {
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
             <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
               Encryption Keys
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7]">3</div>
+            <div className="text-xl font-semibold text-foreground">3</div>
             <p className="text-[11px] text-[#555] mt-0.5">All active</p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
             <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
               Whitelisted IPs
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7]">8</div>
+            <div className="text-xl font-semibold text-foreground">8</div>
             <p className="text-[11px] text-[#555] mt-0.5">4 CIDR ranges</p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
             <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
               Retention Period
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7]">7</div>
+            <div className="text-xl font-semibold text-foreground">7</div>
             <p className="text-[11px] text-[#555] mt-0.5">years</p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-4 shadow-sm">
             <div className="text-[11px] text-[#666] uppercase tracking-wider font-medium mb-2">
               Key Rotation
             </div>
-            <div className="text-xl font-semibold text-[#e7e7e7]">28</div>
+            <div className="text-xl font-semibold text-foreground">28</div>
             <p className="text-[11px] text-[#555] mt-0.5">days ago</p>
           </div>
         </div>
@@ -459,7 +459,7 @@ export function EnterpriseSettingsScreen() {
           </p>
         </div>
 
-        <Card className="bg-[#181818] border-[#2c2c2c] text-[#e7e7e7] rounded-xl overflow-hidden shadow-sm">
+        <Card className="bg-surface-card border-[#2c2c2c] text-foreground rounded-xl overflow-hidden shadow-sm">
           <AuditLogItem
             action="enabled SSO for project"
             user="bhargavjoshi"
@@ -502,14 +502,14 @@ export function EnterpriseSettingsScreen() {
             time="12 days ago"
             severity="info"
           />
-          <div className="py-3 px-5 flex items-center justify-between bg-[#161616]/50">
+          <div className="py-3 px-5 flex items-center justify-between bg-background/50">
             <span className="text-[12px] text-[#555]">
               Showing recent events
             </span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-[12px] text-[#a3a3a3] hover:text-[#e7e7e7] hover:bg-[#2c2c2c]"
+              className="h-7 text-[12px] text-muted-foreground hover:text-foreground hover:bg-[#2c2c2c]"
             >
               View Full Audit Log
               <ChevronRight className="w-3 h-3 ml-1" />
@@ -529,12 +529,12 @@ export function EnterpriseSettingsScreen() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <FileText className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3] group-hover:text-[#e7e7e7] transition-colors">
+              <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 API Docs
               </span>
             </div>
@@ -542,12 +542,12 @@ export function EnterpriseSettingsScreen() {
               Enterprise API reference and authentication guides.
             </p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Network className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3] group-hover:text-[#e7e7e7] transition-colors">
+              <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 SSO Setup Guide
               </span>
             </div>
@@ -555,12 +555,12 @@ export function EnterpriseSettingsScreen() {
               Step-by-step guide for configuring SAML and OIDC.
             </p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <Scale className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3] group-hover:text-[#e7e7e7] transition-colors">
+              <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Compliance Hub
               </span>
             </div>
@@ -568,12 +568,12 @@ export function EnterpriseSettingsScreen() {
               Download certificates, BAA, DPA, and audit reports.
             </p>
           </div>
-          <div className="bg-[#181818] border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
+          <div className="bg-surface-card border border-[#2c2c2c] rounded-xl p-5 shadow-sm hover:border-[#3c3c3c] transition-all duration-300 cursor-pointer group">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-[#a3a3a3] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2c2c2c] border border-[#3c3c3c] text-muted-foreground flex items-center justify-center">
                 <UserCog className="w-4 h-4" strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-medium text-[#a3a3a3] group-hover:text-[#e7e7e7] transition-colors">
+              <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Contact Sales
               </span>
             </div>

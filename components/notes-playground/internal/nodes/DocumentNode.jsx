@@ -93,14 +93,14 @@ const DocumentNode = ({ id, data, selected, dragging }) => {
 
         <div className="flex-1 w-full h-full flex items-center justify-between px-4 py-2 gap-3 cursor-pointer">
           <div className="flex items-center gap-3 w-full overflow-hidden">
-            <div className="p-2 bg-zinc-800 rounded-md shrink-0">
-              <FileText className="w-5 h-5 text-zinc-300" />
+            <div className="p-2 bg-surface-hover rounded-md shrink-0">
+              <FileText className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium text-zinc-200 truncate font-sans">
+              <span className="text-sm font-medium text-foreground truncate font-sans">
                 {data.label || "Untitled Document"}
               </span>
-              <span className="text-xs text-zinc-500 truncate font-sans">
+              <span className="text-xs text-foreground0 truncate font-sans">
                 Double-click to edit
               </span>
             </div>

@@ -1148,7 +1148,7 @@ export function ContentStudio({
           AI Settings
           <Badge
             variant="secondary"
-            className={`ml-1 ${isConfigured ? 'bg-emerald-500/15 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}`}
+            className={`ml-1 ${isConfigured ? 'bg-emerald-500/15 text-emerald-400' : 'bg-surface-hover text-muted-foreground'}`}
           >
             {isConfigured ? 'Connected' : 'Off'}
           </Badge>

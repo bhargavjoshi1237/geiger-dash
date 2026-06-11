@@ -36,7 +36,7 @@ export default async function ChangeLogComponent() {
           </Link>
         ))}
         {(!changelogs || changelogs.length === 0) && (
-          <p className="text-sm text-zinc-400">No changelog entries published yet.</p>
+          <p className="text-sm text-muted-foreground">No changelog entries published yet.</p>
         )}
       </div>
       <div className="w-full max-w-7xl px-4 sm:px-6">

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowLeft, Save, Check, FolderOpen } from "lucide-react";
+import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
 
 // ── Lazy-load Excalidraw (browser-only, no SSR) ──────────────────────────────
@@ -35,7 +36,7 @@ const ExcalidrawComponent = dynamic(
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          <p className="text-sm text-[#737373]">Loading canvas…</p>
+          <p className="text-sm text-text-secondary">Loading canvas…</p>
         </div>
       </div>
     ),
@@ -49,7 +50,7 @@ const SAVE_DEBOUNCE_MS = 2500;
 function SaveStatus({ status }) {
   if (status === "saving")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+      <span className="flex items-center gap-1.5 text-xs text-text-secondary">
         <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
           <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
@@ -59,14 +60,14 @@ function SaveStatus({ status }) {
     );
   if (status === "saved")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+      <span className="flex items-center gap-1.5 text-xs text-text-secondary">
         <Check className="w-3 h-3 text-[#10b981]" />
         Saved
       </span>
     );
   // unsaved
   return (
-    <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+    <span className="flex items-center gap-1.5 text-xs text-text-secondary">
       <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block" />
       Unsaved changes
     </span>
@@ -75,6 +76,8 @@ function SaveStatus({ status }) {
 
 // ── Main editor component ─────────────────────────────────────────────────────
 export default function ExcalidrawEditor({ board, projectName }) {
+  const { resolvedTheme } = useTheme();
+  const colorMode = resolvedTheme === "dark" ? "dark" : "light";
   const [saveStatus, setSaveStatus] = useState("saved");
   const [boardName, setBoardName] = useState(board?.name || "Untitled Board");
   const [editingName, setEditingName] = useState(false);
@@ -104,7 +107,7 @@ export default function ExcalidrawEditor({ board, projectName }) {
       setSaveStatus(error ? "unsaved" : "saved");
       if (error) console.error("[Canvas] Save error:", error);
     },
-    [board?.id, supabase]
+    [board.id, supabase]
   );
 
   // ── Debounced auto-save ────────────────────────────────────────────────────
@@ -161,26 +164,26 @@ export default function ExcalidrawEditor({ board, projectName }) {
     elements: parseField(board?.elements, []),
     appState: {
       ...parseField(board?.app_state, {}),
-      theme: "dark",
+      theme: colorMode,
     },
     files: parseField(board?.files, {}),
     scrollToContent: true,
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#161616]">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
       {/* ── Floating topbar ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 h-12 bg-[#161616] border-b border-[#2a2a2a] shrink-0 z-20 selection:bg-[#333333]">
+      <div className="flex items-center gap-3 px-4 h-12 bg-background border-b border-border shrink-0 z-20 selection:bg-surface-strong">
         {/* Back */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 text-[#737373] hover:text-[#e7e7e7] transition-colors text-xs font-medium group shrink-0"
+          className="flex items-center gap-1.5 text-text-secondary hover:text-foreground transition-colors text-xs font-medium group shrink-0"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
           Boards
         </Link>
 
-        <div className="w-px h-4 bg-[#333333] shrink-0" />
+        <div className="w-px h-4 bg-surface-strong shrink-0" />
 
         {/* Board name (inline edit) */}
         {editingName ? (
@@ -196,13 +199,13 @@ export default function ExcalidrawEditor({ board, projectName }) {
                 setEditingName(false);
               }
             }}
-            className="text-sm font-medium text-[#e7e7e7] bg-[#2a2a2a] border border-[#474747] rounded-md px-2 py-0.5 focus:outline-none w-52 min-w-0"
+            className="text-sm font-medium text-foreground bg-surface-hover border border-border-strong rounded-md px-2 py-0.5 focus:outline-none w-52 min-w-0"
           />
         ) : (
           <button
             onClick={() => setEditingName(true)}
             title="Click to rename"
-            className="text-sm font-medium text-[#e7e7e7] hover:text-white transition-colors truncate max-w-xs min-w-0"
+            className="text-sm font-medium text-foreground hover:text-foreground transition-colors truncate max-w-xs min-w-0"
           >
             {boardName}
           </button>
@@ -210,7 +213,7 @@ export default function ExcalidrawEditor({ board, projectName }) {
 
         {/* Project badge */}
         {projectName && (
-          <span className="hidden sm:flex items-center gap-1 text-[10px] text-[#737373] bg-[#242424] border border-[#2a2a2a] px-2 py-0.5 rounded-full shrink-0">
+          <span className="hidden sm:flex items-center gap-1 text-[10px] text-text-secondary bg-surface-active border border-border px-2 py-0.5 rounded-full shrink-0">
             <FolderOpen className="w-2.5 h-2.5" />
             {projectName}
           </span>
@@ -223,7 +226,7 @@ export default function ExcalidrawEditor({ board, projectName }) {
           <SaveStatus status={saveStatus} />
           <button
             onClick={handleManualSave}
-            className="flex items-center gap-1.5 text-xs font-medium bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#474747] text-[#a3a3a3] hover:text-[#e7e7e7] px-2.5 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium bg-surface-subtle border border-border hover:border-border-strong text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg transition-colors"
           >
             <Save className="w-3 h-3" />
             Save
@@ -235,6 +238,7 @@ export default function ExcalidrawEditor({ board, projectName }) {
       <div className="flex-1 relative">
         <ExcalidrawComponent
           initialData={initialData}
+          theme={colorMode}
           onChange={handleChange}
         />
       </div>

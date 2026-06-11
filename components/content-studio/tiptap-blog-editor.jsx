@@ -48,8 +48,8 @@ function ToolbarButton({ active = false, label, children, ...props }) {
           type="button"
           size="icon-sm"
           variant="ghost"
-          className={`border border-transparent text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-zinc-50 ${
-            active ? 'border-zinc-600 bg-zinc-800 text-zinc-50' : ''
+          className={`border border-transparent text-muted-foreground hover:border-border-strong hover:bg-surface-hover hover:text-foreground ${
+            active ? 'border-zinc-600 bg-surface-hover text-foreground' : ''
           }`}
           {...props}
         >
@@ -62,7 +62,7 @@ function ToolbarButton({ active = false, label, children, ...props }) {
 }
 
 const editorSurfaceClass =
-  'prose prose-invert max-w-none min-h-[460px] rounded-md border border-zinc-800 bg-zinc-950 px-6 py-5 text-sm leading-relaxed text-zinc-100 focus:outline-none [&_a]:text-blue-300 [&_blockquote]:border-l-zinc-600 [&_blockquote]:text-zinc-300 [&_code]:rounded [&_code]:bg-zinc-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-zinc-800 [&_img]:my-4 [&_img]:rounded-lg [&_img]:border [&_img]:border-zinc-800 [&_pre]:bg-zinc-900 [&_pre]:border [&_pre]:border-zinc-800'
+  'prose prose-invert max-w-none min-h-[460px] rounded-md border border-border bg-background px-6 py-5 text-sm leading-relaxed text-foreground focus:outline-none [&_a]:text-blue-300 [&_blockquote]:border-l-zinc-600 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-surface-hover [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-border [&_img]:my-4 [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_pre]:bg-surface-subtle [&_pre]:border [&_pre]:border-border'
 
 const AI_SYSTEM_PROMPT =
   'You are an expert technical blog writer for a modern SaaS product suite. ' +
@@ -165,15 +165,15 @@ function AiAssist({ editor }) {
         <TooltipContent>Write or rewrite with AI</TooltipContent>
       </Tooltip>
 
-      <PopoverContent align="end" className="w-[380px] border-zinc-800 bg-zinc-950 p-3">
+      <PopoverContent align="end" className="w-[380px] border-border bg-background p-3">
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-zinc-200">
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Sparkles className="h-4 w-4 text-indigo-400" />
             AI writing assistant
           </div>
 
           {selectionText && (
-            <p className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-[11px] text-zinc-400">
+            <p className="rounded-md border border-border bg-surface-subtle px-2 py-1.5 text-[11px] text-muted-foreground">
               Working from your selection ({countWords(selectionText)} words)
             </p>
           )}
@@ -187,7 +187,7 @@ function AiAssist({ editor }) {
                 : 'e.g. Write an intro about real-time collaboration in Geiger Flow'
             }
             rows={3}
-            className="resize-none border-zinc-800 bg-zinc-950 text-sm text-zinc-100 placeholder:text-zinc-500"
+            className="resize-none border-border bg-background text-sm text-foreground placeholder:text-foreground0"
           />
 
           {!isConfigured && (
@@ -198,7 +198,7 @@ function AiAssist({ editor }) {
 
           {draft && (
             <div
-              className="max-h-48 overflow-y-auto rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs leading-relaxed text-zinc-300 [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:font-semibold"
+              className="max-h-48 overflow-y-auto rounded-md border border-border bg-surface-subtle/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:font-semibold"
               dangerouslySetInnerHTML={{ __html: stripFences(draft) }}
             />
           )}
@@ -353,7 +353,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
   }
 
   const shell = isFullscreen
-    ? 'fixed inset-0 z-50 flex flex-col gap-3 overflow-y-auto bg-zinc-950 p-4'
+    ? 'fixed inset-0 z-50 flex flex-col gap-3 overflow-y-auto bg-background p-4'
     : 'space-y-3'
 
   return (
@@ -363,7 +363,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
 
         <Tabs value={activeView} onValueChange={setActiveView} className="flex flex-1 flex-col space-y-3">
           {/* Toolbar */}
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-2 backdrop-blur">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface-subtle/90 p-2 backdrop-blur">
             <div className="flex flex-wrap items-center gap-0.5">
               <ToolbarButton label="Undo" onClick={() => editor?.chain().focus().undo().run()} disabled={!editor?.can().undo()}>
                 <Undo2 />
@@ -371,7 +371,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               <ToolbarButton label="Redo" onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().redo()}>
                 <Redo2 />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-zinc-800" />
+              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
               <ToolbarButton label="Paragraph" active={editor?.isActive('paragraph')} onClick={() => editor?.chain().focus().setParagraph().run()}>
                 <Pilcrow />
               </ToolbarButton>
@@ -384,7 +384,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               <ToolbarButton label="Heading 3" active={editor?.isActive('heading', { level: 3 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
                 <Heading3 />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-zinc-800" />
+              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
               <ToolbarButton label="Bold" active={editor?.isActive('bold')} onClick={() => editor?.chain().focus().toggleBold().run()}>
                 <Bold />
               </ToolbarButton>
@@ -397,7 +397,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               <ToolbarButton label="Inline code" active={editor?.isActive('code')} onClick={() => editor?.chain().focus().toggleCode().run()}>
                 <Code />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-zinc-800" />
+              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
               <ToolbarButton label="Bullet list" active={editor?.isActive('bulletList')} onClick={() => editor?.chain().focus().toggleBulletList().run()}>
                 <List />
               </ToolbarButton>
@@ -413,7 +413,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               <ToolbarButton label="Divider" onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
                 <Minus />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-zinc-800" />
+              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
               <ToolbarButton label="Add link" active={editor?.isActive('link')} onClick={setLink}>
                 <Link2 />
               </ToolbarButton>
@@ -430,7 +430,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               >
                 {isFullscreen ? <Minimize2 /> : <Maximize2 />}
               </ToolbarButton>
-              <TabsList className="bg-zinc-950">
+              <TabsList className="bg-background">
                 <TabsTrigger value="write" className="gap-1">
                   <Pilcrow className="h-3.5 w-3.5" />
                   Write
@@ -448,14 +448,14 @@ export function TiptapBlogEditor({ name, defaultValue }) {
           </div>
 
           {/* Image insertion bar */}
-          <div className="grid gap-3 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 md:grid-cols-[1fr_auto]">
+          <div className="grid gap-3 rounded-lg border border-border bg-surface-subtle/40 p-3 md:grid-cols-[1fr_auto]">
             <div className="flex gap-2">
               <Input
                 value={imageSrc}
                 onChange={(event) => setImageSrc(event.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImageBySrc())}
                 placeholder="Paste an image URL to place it in the article"
-                className="border-zinc-700 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500"
+                className="border-border-strong bg-background text-foreground placeholder:text-foreground0"
               />
               <Button type="button" variant="outline" onClick={addImageBySrc} disabled={!canInsertImage}>
                 <ImagePlus className="h-4 w-4" />
@@ -465,7 +465,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
             <div className="flex items-center gap-2">
               <Label
                 htmlFor={`${name}-inline-image`}
-                className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+                className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-border-strong bg-background px-3 text-sm text-foreground transition-colors hover:bg-surface-hover"
               >
                 <ImagePlus className="h-4 w-4" />
                 Upload inline
@@ -482,7 +482,7 @@ export function TiptapBlogEditor({ name, defaultValue }) {
             <div
               className={editorSurfaceClass}
               dangerouslySetInnerHTML={{
-                __html: html || '<p class="text-zinc-500">Your formatted post preview will appear here.</p>',
+                __html: html || '<p class="text-foreground0">Your formatted post preview will appear here.</p>',
               }}
             />
           </TabsContent>
@@ -492,14 +492,14 @@ export function TiptapBlogEditor({ name, defaultValue }) {
               value={html}
               onChange={handleHtmlChange}
               spellCheck={false}
-              className="min-h-[460px] resize-y border-zinc-800 bg-zinc-950 font-mono text-xs leading-6 text-zinc-100 placeholder:text-zinc-500"
+              className="min-h-[460px] resize-y border-border bg-background font-mono text-xs leading-6 text-foreground placeholder:text-foreground0"
               placeholder="<h2>Write with HTML</h2>"
             />
           </TabsContent>
         </Tabs>
 
         {/* Status bar */}
-        <div className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-[11px] text-zinc-500">
+        <div className="flex items-center justify-between rounded-md border border-border bg-surface-subtle/60 px-3 py-1.5 text-[11px] text-foreground0">
           <span>
             {stats.words} words · {stats.chars} characters
           </span>

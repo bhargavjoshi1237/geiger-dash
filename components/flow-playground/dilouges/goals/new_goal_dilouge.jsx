@@ -156,8 +156,8 @@ export function NewGoalDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col bg-[#161616] border-[#2a2a2a] text-[#ededed] p-0 shadow-2xl">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#2a2a2a]">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col bg-background border-border text-foreground p-0 shadow-2xl">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
           <DialogTitle className="text-xl flex items-center gap-2 font-semibold">
             {isEditMode ? (
               <Pencil className="w-5 h-5 text-blue-500" />
@@ -166,7 +166,7 @@ export function NewGoalDialog({
             )}
             {isEditMode ? "Edit Goal" : "New Goal"}
           </DialogTitle>
-          <DialogDescription className="text-zinc-400 text-sm">
+          <DialogDescription className="text-muted-foreground text-sm">
             {isEditMode
               ? "Update the goal details and key results."
               : "Define a measurable goal with key results for your project."}
@@ -179,12 +179,12 @@ export function NewGoalDialog({
           className="flex-1 overflow-y-auto px-6 py-4 space-y-6"
         >
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
               General Information
             </h4>
             <div className="grid grid-cols-[1fr_160px] gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="goal-title" className="text-xs text-zinc-300">
+                <Label htmlFor="goal-title" className="text-xs text-muted-foreground">
                   Goal Title *
                 </Label>
                 <Input
@@ -192,19 +192,19 @@ export function NewGoalDialog({
                   placeholder="e.g., Improve onboarding conversion rate"
                   value={formData.title}
                   onChange={(e) => set("title", e.target.value)}
-                  className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] placeholder:text-zinc-600 h-10 text-sm"
+                  className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground placeholder:text-text-tertiary h-10 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-zinc-300">Status</Label>
+                <Label className="text-xs text-muted-foreground">Status</Label>
                 <Select
                   value={formData.status}
                   onValueChange={(v) => set("status", v)}
                 >
-                  <SelectTrigger className="bg-[#202020] border-[#2a2a2a] text-[#ededed] h-10 text-sm">
+                  <SelectTrigger className="bg-surface-card border-border text-foreground h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1e1e1e] border-[#2a2a2a]">
+                  <SelectContent className="bg-[#1e1e1e] border-border">
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem
                         key={s.value}
@@ -220,34 +220,34 @@ export function NewGoalDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-zinc-300">Description</Label>
+              <Label className="text-xs text-muted-foreground">Description</Label>
               <Textarea
                 placeholder="Describe what this goal aims to achieve..."
                 value={formData.description}
                 onChange={(e) => set("description", e.target.value)}
                 rows={3}
-                className="bg-[#202020] border-[#2a2a2a] text-[#ededed] placeholder:text-zinc-600 text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-700"
+                className="bg-surface-card border-border text-foreground placeholder:text-text-tertiary text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-700"
               />
             </div>
           </div>
 
-          <Separator className="bg-[#2a2a2a]" />
+          <Separator className="bg-surface-hover" />
 
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
               Ownership & Progress
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-xs text-zinc-300">Owner</Label>
+                <Label className="text-xs text-muted-foreground">Owner</Label>
                 <Select
                   value={formData.owner}
                   onValueChange={(v) => set("owner", v)}
                 >
-                  <SelectTrigger className="bg-[#202020] border-[#2a2a2a] text-[#ededed] h-10 text-sm">
+                  <SelectTrigger className="bg-surface-card border-border text-foreground h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1e1e1e] border-[#2a2a2a]">
+                  <SelectContent className="bg-[#1e1e1e] border-border">
                     {TEAM_MEMBERS.map((m) => (
                       <SelectItem
                         key={m}
@@ -261,7 +261,7 @@ export function NewGoalDialog({
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="goal-progress" className="text-xs text-zinc-300">
+                <Label htmlFor="goal-progress" className="text-xs text-muted-foreground">
                   Progress (%)
                 </Label>
                 <Input
@@ -276,17 +276,17 @@ export function NewGoalDialog({
                       Math.min(100, Math.max(0, Number(e.target.value) || 0))
                     )
                   }
-                  className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] h-10 text-sm"
+                  className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground h-10 text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <Separator className="bg-[#2a2a2a]" />
+          <Separator className="bg-surface-hover" />
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
                 Key Results
               </h4>
               <Button
@@ -294,7 +294,7 @@ export function NewGoalDialog({
                 variant="ghost"
                 size="sm"
                 onClick={addKeyResult}
-                className="text-zinc-400 hover:text-white hover:bg-[#202020] h-7 text-xs"
+                className="text-muted-foreground hover:text-foreground hover:bg-surface-card h-7 text-xs"
               >
                 <Plus className="w-3 h-3 mr-1" />
                 Add
@@ -303,14 +303,14 @@ export function NewGoalDialog({
             <div className="space-y-2.5">
               {formData.keyResults.map((kr, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-500 shrink-0">
+                  <div className="w-5 h-5 rounded-full border border-border-strong flex items-center justify-center text-[10px] text-foreground0 shrink-0">
                     {idx + 1}
                   </div>
                   <Input
                     value={kr.label}
                     onChange={(e) => handleKeyResultChange(idx, e.target.value)}
                     placeholder="Enter a measurable key result..."
-                    className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] placeholder:text-zinc-600 h-9 text-sm flex-1"
+                    className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground placeholder:text-text-tertiary h-9 text-sm flex-1"
                   />
                   {isEditMode && (
                     <Input
@@ -321,7 +321,7 @@ export function NewGoalDialog({
                       onChange={(e) =>
                         handleKeyResultProgress(idx, e.target.value)
                       }
-                      className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] h-9 text-sm w-16 text-center shrink-0"
+                      className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground h-9 text-sm w-16 text-center shrink-0"
                     />
                   )}
                   {formData.keyResults.length > 1 && (
@@ -330,7 +330,7 @@ export function NewGoalDialog({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeKeyResult(idx)}
-                      className="w-8 h-8 text-zinc-600 hover:text-red-400 hover:bg-[#202020] shrink-0"
+                      className="w-8 h-8 text-text-tertiary hover:text-red-400 hover:bg-surface-card shrink-0"
                     >
                       <X className="w-3.5 h-3.5" />
                     </Button>
@@ -341,12 +341,12 @@ export function NewGoalDialog({
           </div>
         </form>
 
-        <DialogFooter className="px-6 py-4 border-t border-[#2a2a2a]">
+        <DialogFooter className="px-6 py-4 border-t border-border">
           <Button
             type="button"
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="text-zinc-400 hover:text-white hover:bg-[#202020]"
+            className="text-muted-foreground hover:text-foreground hover:bg-surface-card"
           >
             Cancel
           </Button>
@@ -354,7 +354,7 @@ export function NewGoalDialog({
             type="submit"
             form="goal-form"
             disabled={!isValid || loading}
-            className="bg-white text-black hover:bg-[#e7e7e7] min-w-[120px]"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[120px]"
           >
             {loading
               ? isEditMode

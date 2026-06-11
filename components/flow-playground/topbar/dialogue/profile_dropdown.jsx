@@ -34,15 +34,15 @@ import { logout } from "@/app/login/actions";
 import { clearProfileImageCache } from "@/lib/profile-image-cache";
 
 const surfaceStyle = {
-  backgroundColor: "#202020",
-  borderColor: "#333333",
-  color: "#ffffff",
+  backgroundColor: "var(--surface-dialog)",
+  borderColor: "var(--border)",
+  color: "var(--foreground)",
 };
 
 const itemBaseStyle =
   "flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer outline-none [&>span]:min-w-0 [&>span]:truncate";
 
-const itemHoverStyle = "text-[#a3a3a3] hover:bg-[#2a2a2a] hover:text-white focus:bg-[#2a2a2a] focus:text-white";
+const itemHoverStyle = "text-muted-foreground hover:bg-surface-hover hover:text-foreground focus:bg-surface-hover focus:text-foreground";
 
 export function ProfileDropdown({ children }) {
   const [user, setUser] = useState(null);
@@ -71,12 +71,12 @@ export function ProfileDropdown({ children }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {children || (
-          <button className="w-8 h-8 rounded-full border border-[#333333] hover:border-[#474747] overflow-hidden ml-1 transition-colors">
+          <button className="w-8 h-8 rounded-full border border-border hover:border-border-strong overflow-hidden ml-1 transition-colors">
             <Avatar className="size-full">
               {pfpUrl && (
                 <CachedAvatarImage src={pfpUrl} cacheKey={user.id} alt={displayName} />
               )}
-              <AvatarFallback className="bg-[#474747] text-white text-[10px] font-semibold border-0">
+              <AvatarFallback className="bg-border-strong text-white text-[10px] font-semibold border-0">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -93,11 +93,11 @@ export function ProfileDropdown({ children }) {
         <div className="p-4 pb-3">
           <DropdownMenuLabel className="p-0">
             <div className="flex items-center gap-3">
-              <Avatar className="size-10 border border-[#333333]">
+              <Avatar className="size-10 border border-border">
                 {pfpUrl && (
                   <CachedAvatarImage src={pfpUrl} cacheKey={user.id} alt={displayName} />
                 )}
-                <AvatarFallback className="bg-[#474747] text-white text-xs font-semibold border-0">
+                <AvatarFallback className="bg-border-strong text-white text-xs font-semibold border-0">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -105,7 +105,7 @@ export function ProfileDropdown({ children }) {
                 <span className="text-sm font-semibold text-white truncate">
                   {displayName}
                 </span>
-                <span className="text-xs text-[#a3a3a3] truncate">
+                <span className="text-xs text-muted-foreground truncate">
                   {displayEmail}
                 </span>
               </div>
@@ -113,7 +113,7 @@ export function ProfileDropdown({ children }) {
           </DropdownMenuLabel>
         </div>
 
-        <DropdownMenuSeparator className="bg-[#333333] mx-0" />
+        <DropdownMenuSeparator className="bg-surface-strong mx-0" />
 
         <div className="p-1.5">
           <DropdownMenuGroup>
@@ -139,7 +139,7 @@ export function ProfileDropdown({ children }) {
             </DropdownMenuItem>
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="bg-[#333333] my-1" />
+          <DropdownMenuSeparator className="bg-surface-strong my-1" />
 
           <DropdownMenuGroup>
             <DropdownMenuItem className="hover:bg-transparent focus:bg-transparent p-2 cursor-default">
@@ -147,17 +147,17 @@ export function ProfileDropdown({ children }) {
                 type="single"
                 value={theme}
                 onValueChange={(value) => { if (value) setTheme(value); }}
-                className="bg-[#1a1a1a] flex items-center justify-evenly rounded-md p-0.5 w-full"
+                className="bg-surface-subtle flex items-center justify-evenly rounded-md p-0.5 w-full"
               >
                 <ToggleGroupItem
                   value="light"
-                  className="data-[state=on]:bg-[#2a2a2a] data-[state=on]:text-white text-[#a3a3a3] rounded-sm hover:bg-[#2a2a2a] hover:text-white px-3 h-7 text-xs gap-1.5 flex-1 justify-center"
+                  className="data-[state=on]:bg-surface-hover data-[state=on]:text-foreground text-muted-foreground rounded-sm hover:bg-surface-hover hover:text-foreground px-3 h-7 text-xs gap-1.5 flex-1 justify-center"
                 >
                   <Sun className="size-3.5" />
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="dark"
-                  className="data-[state=on]:bg-[#2a2a2a] data-[state=on]:text-white text-[#a3a3a3] rounded-sm hover:bg-[#2a2a2a] hover:text-white px-3 h-7 text-xs gap-1.5 flex-1 justify-center"
+                  className="data-[state=on]:bg-surface-hover data-[state=on]:text-foreground text-muted-foreground rounded-sm hover:bg-surface-hover hover:text-foreground px-3 h-7 text-xs gap-1.5 flex-1 justify-center"
                 >
                   <Moon className="size-3.5" />
                 </ToggleGroupItem>
@@ -179,7 +179,7 @@ export function ProfileDropdown({ children }) {
             </DropdownMenuItem>
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="bg-[#333333] my-1" />
+          <DropdownMenuSeparator className="bg-surface-strong my-1" />
 
           <DropdownMenuGroup>
             <DropdownMenuItem
@@ -187,7 +187,7 @@ export function ProfileDropdown({ children }) {
             >
               <BookMarked className="w-3.5 h-3.5" />
               <span>Documentation</span>
-              <ExternalLink className="size-3 ml-auto text-[#737373]" />
+              <ExternalLink className="size-3 ml-auto text-text-secondary" />
             </DropdownMenuItem>
 
             <DropdownMenuItem
@@ -206,7 +206,7 @@ export function ProfileDropdown({ children }) {
             <form action={logout} onSubmit={() => clearProfileImageCache()}>
               <DropdownMenuItem
                 asChild
-                className={`${itemBaseStyle} text-[#737373] hover:bg-[#2a2a2a] hover:text-white focus:bg-[#2a2a2a] focus:text-white`}
+                className={`${itemBaseStyle} text-text-secondary hover:bg-surface-hover hover:text-foreground focus:bg-surface-hover focus:text-foreground`}
               >
                 <button type="submit" className="w-full">
                   <LogOut className="w-3.5 h-3.5" />
@@ -217,8 +217,8 @@ export function ProfileDropdown({ children }) {
           </DropdownMenuGroup>
         </div>
 
-        <div className="px-4 py-2.5 border-t border-[#333333]">
-          <div className="flex items-center justify-between text-[11px] text-[#737373]">
+        <div className="px-4 py-2.5 border-t border-border">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary">
             <span>Flow v1.0.0</span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>

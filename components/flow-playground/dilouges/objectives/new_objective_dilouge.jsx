@@ -122,9 +122,9 @@ function SearchableKeyResultSelect({ value, onChange, selectedLabels }) {
         <PopoverTrigger asChild>
           <div
             className={cn(
-              "flex items-center h-9 w-full rounded-md border bg-[#202020] text-sm cursor-text",
-              "border-[#2a2a2a] focus-within:ring-1 focus-within:ring-zinc-700",
-              value ? "text-[#ededed]" : "text-zinc-600"
+              "flex items-center h-9 w-full rounded-md border bg-surface-card text-sm cursor-text",
+              "border-border focus-within:ring-1 focus-within:ring-zinc-700",
+              value ? "text-foreground" : "text-text-tertiary"
             )}
             onClick={() => inputRef.current?.focus()}
           >
@@ -140,23 +140,23 @@ function SearchableKeyResultSelect({ value, onChange, selectedLabels }) {
                 if (!open) setOpen(true);
               }}
               placeholder="Search or type a key result..."
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 h-full px-3 text-[#ededed] placeholder:text-zinc-600 text-sm p-0"
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 h-full px-3 text-foreground placeholder:text-text-tertiary text-sm p-0"
             />
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="bg-[#1e1e1e] border-[#2a2a2a] text-[#e7e7e7] p-0 w-[--radix-popover-trigger-width] rounded-lg shadow-xl"
+          className="bg-[#1e1e1e] border-border text-foreground p-0 w-[--radix-popover-trigger-width] rounded-lg shadow-xl"
           align="start"
           sideOffset={4}
         >
-          <div className="px-3 py-2 border-b border-[#2a2a2a]">
+          <div className="px-3 py-2 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground0" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search suggestions..."
-                className="!pl-7 !pr-3 !py-1 !h-8 bg-[#202020] border-[#2a2a2a] text-xs text-[#ededed] placeholder:text-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-700"
+                className="!pl-7 !pr-3 !py-1 !h-8 bg-surface-card border-border text-xs text-foreground placeholder:text-text-tertiary focus-visible:ring-1 focus-visible:ring-zinc-700"
                 autoFocus
               />
             </div>
@@ -164,14 +164,14 @@ function SearchableKeyResultSelect({ value, onChange, selectedLabels }) {
           <ScrollArea className="max-h-[260px]">
             <div className="py-1">
               {filtered.length === 0 && (
-                <div className="px-3 py-6 text-center text-xs text-zinc-500">
+                <div className="px-3 py-6 text-center text-xs text-foreground0">
                   No suggestions found. Type your own key result above.
                 </div>
               )}
               {filtered.map((cat) => (
                 <div key={cat.category}>
                   <div className="px-3 pt-2 pb-1">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-600 font-medium">
+                    <span className="text-[10px] uppercase tracking-wider text-text-tertiary font-medium">
                       {cat.category}
                     </span>
                   </div>
@@ -187,8 +187,8 @@ function SearchableKeyResultSelect({ value, onChange, selectedLabels }) {
                         className={cn(
                           "w-full text-left px-3 py-1.5 text-xs rounded-sm flex items-center gap-2 transition-colors",
                           isSelected
-                            ? "text-zinc-500 cursor-not-allowed"
-                            : "text-zinc-300 hover:bg-[#242424] hover:text-white cursor-pointer"
+                            ? "text-foreground0 cursor-not-allowed"
+                            : "text-muted-foreground hover:bg-surface-active hover:text-foreground cursor-pointer"
                         )}
                         onClick={() => {
                           onChange(item);
@@ -328,8 +328,8 @@ export function NewObjectiveDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col bg-[#161616] border-[#2a2a2a] text-[#ededed] p-0 shadow-2xl">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#2a2a2a]">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col bg-background border-border text-foreground p-0 shadow-2xl">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
           <DialogTitle className="text-xl flex items-center gap-2 font-semibold">
             {isEditMode ? (
               <Pencil className="w-5 h-5 text-blue-500" />
@@ -338,7 +338,7 @@ export function NewObjectiveDialog({
             )}
             {isEditMode ? "Edit Objective" : "New Objective"}
           </DialogTitle>
-          <DialogDescription className="text-zinc-400 text-sm">
+          <DialogDescription className="text-muted-foreground text-sm">
             {isEditMode
               ? "Update the objective details and key results."
               : "Define a measurable objective with key results for your project."}
@@ -352,12 +352,12 @@ export function NewObjectiveDialog({
         >
           {/* General Information */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
               General Information
             </h4>
             <div className="grid grid-cols-[1fr_160px] gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="obj-title" className="text-xs text-zinc-300">
+                <Label htmlFor="obj-title" className="text-xs text-muted-foreground">
                   Objective Title *
                 </Label>
                 <Input
@@ -365,19 +365,19 @@ export function NewObjectiveDialog({
                   placeholder="e.g., Improve onboarding conversion rate"
                   value={formData.title}
                   onChange={(e) => set("title", e.target.value)}
-                  className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] placeholder:text-zinc-600 h-10 text-sm"
+                  className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground placeholder:text-text-tertiary h-10 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-zinc-300">Status</Label>
+                <Label className="text-xs text-muted-foreground">Status</Label>
                 <Select
                   value={formData.status}
                   onValueChange={(v) => set("status", v)}
                 >
-                  <SelectTrigger className="bg-[#202020] border-[#2a2a2a] text-[#ededed] h-10 text-sm">
+                  <SelectTrigger className="bg-surface-card border-border text-foreground h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1e1e1e] border-[#2a2a2a]">
+                  <SelectContent className="bg-[#1e1e1e] border-border">
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem
                         key={s.value}
@@ -393,27 +393,27 @@ export function NewObjectiveDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-zinc-300">Description</Label>
+              <Label className="text-xs text-muted-foreground">Description</Label>
               <Textarea
                 placeholder="Describe what this objective aims to achieve..."
                 value={formData.description}
                 onChange={(e) => set("description", e.target.value)}
                 rows={3}
-                className="bg-[#202020] border-[#2a2a2a] text-[#ededed] placeholder:text-zinc-600 text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-700"
+                className="bg-surface-card border-border text-foreground placeholder:text-text-tertiary text-sm resize-none focus-visible:ring-1 focus-visible:ring-zinc-700"
               />
             </div>
           </div>
 
-          <Separator className="bg-[#2a2a2a]" />
+          <Separator className="bg-surface-hover" />
 
           {/* Timeline & Ownership */}
           <div className="space-y-4">
-            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
               Timeline & Ownership
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="obj-start" className="text-xs text-zinc-300">
+                <Label htmlFor="obj-start" className="text-xs text-muted-foreground">
                   Start Date *
                 </Label>
                 <Input
@@ -421,11 +421,11 @@ export function NewObjectiveDialog({
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => set("startDate", e.target.value)}
-                  className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] h-10 text-sm"
+                  className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground h-10 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="obj-target" className="text-xs text-zinc-300">
+                <Label htmlFor="obj-target" className="text-xs text-muted-foreground">
                   Target Date *
                 </Label>
                 <Input
@@ -433,20 +433,20 @@ export function NewObjectiveDialog({
                   type="date"
                   value={formData.targetDate}
                   onChange={(e) => set("targetDate", e.target.value)}
-                  className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] h-10 text-sm"
+                  className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground h-10 text-sm"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-zinc-300">Owner</Label>
+              <Label className="text-xs text-muted-foreground">Owner</Label>
               <Select
                 value={formData.owner}
                 onValueChange={(v) => set("owner", v)}
               >
-                <SelectTrigger className="bg-[#202020] border-[#2a2a2a] text-[#ededed] h-10 text-sm">
+                <SelectTrigger className="bg-surface-card border-border text-foreground h-10 text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1e1e1e] border-[#2a2a2a]">
+                <SelectContent className="bg-[#1e1e1e] border-border">
                   {TEAM_MEMBERS.map((m) => (
                     <SelectItem
                       key={m}
@@ -461,12 +461,12 @@ export function NewObjectiveDialog({
             </div>
           </div>
 
-          <Separator className="bg-[#2a2a2a]" />
+          <Separator className="bg-surface-hover" />
 
           {/* Key Results */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
                 Key Results
               </h4>
               <Button
@@ -474,19 +474,19 @@ export function NewObjectiveDialog({
                 variant="ghost"
                 size="sm"
                 onClick={addKeyResult}
-                className="text-zinc-400 hover:text-white hover:bg-[#202020] h-7 text-xs"
+                className="text-muted-foreground hover:text-foreground hover:bg-surface-card h-7 text-xs"
               >
                 <Plus className="w-3 h-3 mr-1" />
                 Add
               </Button>
             </div>
-            <p className="text-[11px] text-zinc-600 -mt-2">
+            <p className="text-[11px] text-text-tertiary -mt-2">
               Search from suggestions or type your own measurable key result.
             </p>
             <div className="space-y-2.5">
               {formData.keyResults.map((kr, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-500 shrink-0">
+                  <div className="w-5 h-5 rounded-full border border-border-strong flex items-center justify-center text-[10px] text-foreground0 shrink-0">
                     {idx + 1}
                   </div>
                   <SearchableKeyResultSelect
@@ -503,7 +503,7 @@ export function NewObjectiveDialog({
                       onChange={(e) =>
                         handleKeyResultProgress(idx, e.target.value)
                       }
-                      className="bg-[#202020] border-[#2a2a2a] focus-visible:ring-1 focus-visible:ring-zinc-700 text-[#ededed] h-9 text-sm w-16 text-center shrink-0"
+                      className="bg-surface-card border-border focus-visible:ring-1 focus-visible:ring-zinc-700 text-foreground h-9 text-sm w-16 text-center shrink-0"
                     />
                   )}
                   {formData.keyResults.length > 1 && (
@@ -512,7 +512,7 @@ export function NewObjectiveDialog({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeKeyResult(idx)}
-                      className="w-8 h-8 text-zinc-600 hover:text-red-400 hover:bg-[#202020] shrink-0"
+                      className="w-8 h-8 text-text-tertiary hover:text-red-400 hover:bg-surface-card shrink-0"
                     >
                       <X className="w-3.5 h-3.5" />
                     </Button>
@@ -523,12 +523,12 @@ export function NewObjectiveDialog({
           </div>
         </form>
 
-        <DialogFooter className="px-6 py-4 border-t border-[#2a2a2a]">
+        <DialogFooter className="px-6 py-4 border-t border-border">
           <Button
             type="button"
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="text-zinc-400 hover:text-white hover:bg-[#202020]"
+            className="text-muted-foreground hover:text-foreground hover:bg-surface-card"
           >
             Cancel
           </Button>
@@ -536,7 +536,7 @@ export function NewObjectiveDialog({
             type="submit"
             form="objective-form"
             disabled={!isValid || loading}
-            className="bg-white text-black hover:bg-[#e7e7e7] min-w-[120px]"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[120px]"
           >
             {loading
               ? isEditMode

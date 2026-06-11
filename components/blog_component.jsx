@@ -44,9 +44,9 @@ export default async function BlogComponent() {
           <Link
             key={post.id}
             href={post.slug ? `/blog/${post.slug}` : "/blog"}
-            className="group overflow-hidden rounded-lg border border-zinc-800 bg-[#1a1a1a] transition-colors hover:bg-[#202020]"
+            className="group overflow-hidden rounded-lg border border-border bg-surface-subtle transition-colors hover:bg-surface-card"
           >
-            <div className="relative aspect-[16/10] overflow-hidden bg-[#1a1a1a]">
+            <div className="relative aspect-[16/10] overflow-hidden bg-surface-subtle">
               <Image
                 src={getPostImage(post, index)}
                 alt={post.title}
@@ -56,7 +56,7 @@ export default async function BlogComponent() {
               />
             </div>
             <div className="p-5">
-              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-zinc-500">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-foreground0">
                 {post.category ? <span>{post.category}</span> : null}
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
@@ -65,8 +65,8 @@ export default async function BlogComponent() {
                 {post.reading_time_minutes ? <span>{post.reading_time_minutes} min read</span> : null}
               </div>
               <h3 className="text-xl font-semibold leading-tight text-white">{post.title}</h3>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-400">{post.excerpt}</p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-zinc-200">
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground">
                 Read post
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </span>
@@ -74,7 +74,7 @@ export default async function BlogComponent() {
           </Link>
         ))}
         {(!posts || posts.length === 0) && (
-          <p className="text-sm text-zinc-400">No blog posts published yet.</p>
+          <p className="text-sm text-muted-foreground">No blog posts published yet.</p>
         )}
       </div>
       <div className="w-full max-w-7xl px-4 sm:px-6">

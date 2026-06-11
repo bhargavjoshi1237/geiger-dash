@@ -86,7 +86,7 @@ export function VaultItemCard({
   };
   const accessLabel = getAccessLabel();
 
-  const typeStyle = { bg: 'bg-[#202020]', border: 'border-[#2a2a2a]', text: 'text-[#a3a3a3]' };
+  const typeStyle = { bg: 'bg-surface-card', border: 'border-border', text: 'text-muted-foreground' };
 
   const handleCopy = () => {
     const textToCopy = item.secret || item.password || item.apiKey || item.username || "";
@@ -104,7 +104,7 @@ export function VaultItemCard({
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <div>
-          <div className="group bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-5 hover:border-[#3a3a3a] transition-all duration-200">
+          <div className="group bg-surface-subtle border border-border rounded-xl p-5 hover:border-border-strong transition-all duration-200">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export function VaultItemCard({
                   <h3 className="text-[15px] font-medium text-white truncate">
                     {item.name}
                   </h3>
-                  <p className="text-[12px] text-[#737373] truncate">
+                  <p className="text-[12px] text-text-secondary truncate">
                     {item.username || item.url || "No details"}
                   </p>
                 </div>
@@ -121,22 +121,22 @@ export function VaultItemCard({
 
               <div className="flex items-center gap-2 flex-wrap mb-3">
               {accessLabel && (
-                <span className="text-[11px] font-medium px-2 py-1 rounded-md bg-[#202020] border border-[#2a2a2a] text-[#a3a3a3]">
+                <span className="text-[11px] font-medium px-2 py-1 rounded-md bg-surface-card border border-border text-muted-foreground">
                   {accessLabel}
                 </span>
               )}
               {item.ttl && (
-                <span className=" text-[11px] font-medium px-2 py-1 rounded-md bg-[#202020] border border-[#2a2a2a] text-[#a3a3a3] flex items-center gap-1">
+                <span className=" text-[11px] font-medium px-2 py-1 rounded-md bg-surface-card border border-border text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {formatTTL(item.ttl)}
                 </span>
               )}
               {item.keylessEntry ? (
-                <span className="text-[11px] font-medium px-2 py-1.5 rounded-md bg-[#202020] border border-[#2a2a2a] text-[#a3a3a3] flex items-center gap-1">
+                <span className="text-[11px] font-medium px-2 py-1.5 rounded-md bg-surface-card border border-border text-muted-foreground flex items-center gap-1">
                   <Unlock className="w-3 h-3" />
                 </span>
               ) : (
-                <span className="text-[11px] font-medium px-2 py-1.5 rounded-md bg-[#202020] border border-[#2a2a2a] text-[#737373] flex items-center gap-1">
+                <span className="text-[11px] font-medium px-2 py-1.5 rounded-md bg-surface-card border border-border text-text-secondary flex items-center gap-1">
                   <Lock className="w-3 h-3" />
                 </span>
               )}
@@ -145,8 +145,8 @@ export function VaultItemCard({
 
             {/* Secret Preview */}
             {hasSecret && (
-              <div className="flex items-center gap-2 bg-[#161616] rounded-lg px-3 py-2.5 mb-4 border border-[#2a2a2a]">
-                <code className="flex-1 text-[12px] text-[#a3a3a3] truncate font-mono">
+              <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2.5 mb-4 border border-border">
+                <code className="flex-1 text-[12px] text-muted-foreground truncate font-mono">
                   {showSecret ? secretValue : "****************"}
                 </code>
                 <div className="flex items-center gap-1">
@@ -156,7 +156,7 @@ export function VaultItemCard({
                       event.stopPropagation();
                       setShowSecret(!showSecret);
                     }}
-                    className="w-7 h-7 rounded flex items-center justify-center text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+                    className="w-7 h-7 rounded flex items-center justify-center text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
                   >
                     {showSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -166,10 +166,10 @@ export function VaultItemCard({
                       event.stopPropagation();
                       handleCopy();
                     }}
-                    className="w-7 h-7 rounded flex items-center justify-center text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+                    className="w-7 h-7 rounded flex items-center justify-center text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
                   >
                     {copied ? (
-                      <span className="text-[11px] font-medium text-[#a3a3a3]">Copied</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">Copied</span>
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
@@ -185,7 +185,7 @@ export function VaultItemCard({
 
             <div className="flex items-center justify-between pt-3">
                {item.notes && (
-              <p className="text-[12px] text-[#737373] line-clamp-2">
+              <p className="text-[12px] text-text-secondary line-clamp-2">
                 {item.notes}
               </p>
             )}
@@ -196,7 +196,7 @@ export function VaultItemCard({
                   event.stopPropagation();
                   onAccessCredential();
                 }}
-                className="text-[11px] text-[#737373] hover:text-white flex items-center gap-1.5 transition-colors"
+                className="text-[11px] text-text-secondary hover:text-foreground flex items-center gap-1.5 transition-colors"
               >
                 <ScanFace className="w-3 h-3" />
                 Access
@@ -206,20 +206,20 @@ export function VaultItemCard({
         </div>
      
       </ContextMenuTrigger>
-      <ContextMenuContent className="bg-[#212121] border-[#2a2a2a] text-[#e7e7e7] w-44 p-1">
-        <ContextMenuItem onSelect={onEdit} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+      <ContextMenuContent className="bg-[#212121] border-border text-foreground w-44 p-1">
+        <ContextMenuItem onSelect={onEdit} className="cursor-pointer focus:bg-[#323232] focus:text-foreground flex items-center gap-2 px-2 py-1.5">
           <Pencil className="w-3.5 h-3.5" />
           <span className="text-xs">Edit</span>
         </ContextMenuItem>
-        <ContextMenuItem onSelect={onDuplicate} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+        <ContextMenuItem onSelect={onDuplicate} className="cursor-pointer focus:bg-[#323232] focus:text-foreground flex items-center gap-2 px-2 py-1.5">
           <Copy className="w-3.5 h-3.5" />
           <span className="text-xs">Duplicate</span>
         </ContextMenuItem>
-        <ContextMenuItem onSelect={onAccessControl} className="cursor-pointer focus:bg-[#323232] focus:text-[#e7e7e7] flex items-center gap-2 px-2 py-1.5">
+        <ContextMenuItem onSelect={onAccessControl} className="cursor-pointer focus:bg-[#323232] focus:text-foreground flex items-center gap-2 px-2 py-1.5">
           <Shield className="w-3.5 h-3.5" />
           <span className="text-xs">Access Control</span>
         </ContextMenuItem>
-        <ContextMenuSeparator className="bg-[#2a2a2a]" />
+        <ContextMenuSeparator className="bg-surface-hover" />
         <ContextMenuItem onSelect={onDelete} className="cursor-pointer focus:bg-red-500/10 focus:text-red-300 text-red-300 flex items-center gap-2 px-2 py-1.5">
           <Trash2 className="w-3.5 h-3.5" />
           <span className="text-xs">Remove</span>

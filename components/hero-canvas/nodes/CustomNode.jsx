@@ -16,12 +16,12 @@ const ResizeHandle = () => {
         <path
           d="M 6 10 L 10 6 L 10 10 Z"
           fill="currentColor"
-          className="text-zinc-400"
+          className="text-muted-foreground"
         />
         <path
           d="M 2 10 L 10 2 L 10 4 L 4 10 Z"
           fill="currentColor"
-          className="text-zinc-400"
+          className="text-muted-foreground"
         />
       </svg>
     </div>
@@ -128,7 +128,7 @@ const CustomNode = ({ id, data, selected, dragging }) => {
         <div className="flex-1 w-full h-full overflow-hidden flex items-center justify-center">
           {selected ? (
             <textarea
-              className="w-full h-full p-4 text-start bg-transparent resize-none outline-none text-zinc-300 placeholder:text-zinc-600 placeholder:text-start font-sans block"
+              className="w-full h-full p-4 text-start bg-transparent resize-none outline-none text-muted-foreground placeholder:text-text-tertiary placeholder:text-start font-sans block"
               placeholder="Start typing..."
               value={data.label || ""}
               onChange={(evt) => {
@@ -157,7 +157,7 @@ const CustomNode = ({ id, data, selected, dragging }) => {
           ) : (
             <p
               className={`font-sans p-4 whitespace-pre-wrap text-start w-full ${
-                data.label ? "text-zinc-300" : "text-zinc-500"
+                data.label ? "text-muted-foreground" : "text-foreground0"
               }`}
             >
               {data.label || "Start typing..."}

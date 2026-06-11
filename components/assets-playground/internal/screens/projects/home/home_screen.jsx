@@ -130,10 +130,10 @@ const quickActions = [
 
 function StatCard({ title, icon: Icon, value, change, trend }) {
   return (
-    <div className="flex flex-col gap-3 p-5 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#474747] transition-all duration-300 group cursor-default">
+    <div className="flex flex-col gap-3 p-5 rounded-xl bg-surface-subtle border border-border hover:border-border-strong transition-all duration-300 group cursor-default">
       <div className="flex items-center justify-between">
-        <div className="w-9 h-9 rounded-lg bg-[#2a2a2a] flex items-center justify-center group-hover:bg-[#333333] transition-colors">
-          <Icon className="w-4 h-4 text-[#737373] group-hover:text-[#a3a3a3] transition-colors" />
+        <div className="w-9 h-9 rounded-lg bg-surface-hover flex items-center justify-center group-hover:bg-surface-strong transition-colors">
+          <Icon className="w-4 h-4 text-text-secondary group-hover:text-muted-foreground transition-colors" />
         </div>
         {trend === "up" && (
           <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium">
@@ -143,9 +143,9 @@ function StatCard({ title, icon: Icon, value, change, trend }) {
       </div>
       <div>
         <div className="text-2xl font-semibold text-white tracking-tight">{value}</div>
-        <div className="text-xs text-[#525252] mt-0.5">{change}</div>
+        <div className="text-xs text-text-tertiary mt-0.5">{change}</div>
       </div>
-      <div className="text-xs font-medium text-[#737373]">{title}</div>
+      <div className="text-xs font-medium text-text-secondary">{title}</div>
     </div>
   );
 }
@@ -153,15 +153,15 @@ function StatCard({ title, icon: Icon, value, change, trend }) {
 function StorageBar({ type, icon: Icon, size, percent, color }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="w-8 h-8 rounded-lg bg-[#2a2a2a] flex items-center justify-center shrink-0">
+      <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center shrink-0">
         <Icon className="w-3.5 h-3.5" style={{ color }} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-sm text-[#e5e5e5] font-medium">{type}</span>
-          <span className="text-xs font-mono text-[#737373]">{size}</span>
+          <span className="text-xs font-mono text-text-secondary">{size}</span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-[#2a2a2a] overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-surface-hover overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{ width: `${percent}%`, backgroundColor: color }}
@@ -174,25 +174,25 @@ function StorageBar({ type, icon: Icon, size, percent, color }) {
 
 function RecentAssetRow({ name, type, size, date, user, icon: Icon }) {
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#202020] transition-colors cursor-pointer group">
-      <div className="w-8 h-8 rounded-lg bg-[#2a2a2a] flex items-center justify-center shrink-0 group-hover:bg-[#333333] transition-colors">
-        <Icon className="w-3.5 h-3.5 text-[#737373] group-hover:text-[#a3a3a3] transition-colors" />
+    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-card transition-colors cursor-pointer group">
+      <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center shrink-0 group-hover:bg-surface-strong transition-colors">
+        <Icon className="w-3.5 h-3.5 text-text-secondary group-hover:text-muted-foreground transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[#e5e5e5] font-medium truncate">{name}</p>
-        <p className="text-xs text-[#525252]">
+        <p className="text-xs text-text-tertiary">
           {type} · {size}
         </p>
       </div>
       <Avatar className="w-6 h-6 shrink-0">
-        <AvatarFallback className="text-[10px] bg-[#2a2a2a] text-[#a3a3a3] border-0">
+        <AvatarFallback className="text-[10px] bg-surface-hover text-muted-foreground border-0">
           {user}
         </AvatarFallback>
       </Avatar>
-      <span className="text-xs text-[#525252] shrink-0 tabular-nums" suppressHydrationWarning>
+      <span className="text-xs text-text-tertiary shrink-0 tabular-nums" suppressHydrationWarning>
         {formatDistanceToNow(date, { addSuffix: false })}
       </span>
-      <ArrowUpRight className="w-3.5 h-3.5 text-[#525252] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+      <ArrowUpRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
     </div>
   );
 }
@@ -201,16 +201,16 @@ function ActivityRow({ action, user, initials, time, icon: Icon }) {
   return (
     <div className="flex items-start gap-3 py-3 group">
       <Avatar className="w-7 h-7 shrink-0 mt-0.5">
-        <AvatarFallback className="text-[10px] bg-[#2a2a2a] text-[#a3a3a3] border-0">
+        <AvatarFallback className="text-[10px] bg-surface-hover text-muted-foreground border-0">
           {initials}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-[#e5e5e5] leading-relaxed">
           <span className="font-medium text-white">{user}</span>{" "}
-          <span className="text-[#a3a3a3]">{action}</span>
+          <span className="text-muted-foreground">{action}</span>
         </p>
-        <p className="text-xs text-[#525252] mt-1" suppressHydrationWarning>
+        <p className="text-xs text-text-tertiary mt-1" suppressHydrationWarning>
           {formatDistanceToNow(time, { addSuffix: true })}
         </p>
       </div>
@@ -220,15 +220,15 @@ function ActivityRow({ action, user, initials, time, icon: Icon }) {
 
 function QuickActionCard({ icon: Icon, label, description }) {
   return (
-    <button className="flex items-center gap-3 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#474747] transition-all duration-300 text-left w-full group cursor-pointer">
-      <div className="w-9 h-9 rounded-lg bg-[#2a2a2a] flex items-center justify-center shrink-0 group-hover:bg-[#333333] transition-colors">
-        <Icon className="w-4 h-4 text-[#a3a3a3] group-hover:text-white transition-colors" />
+    <button className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-subtle border border-border hover:border-border-strong transition-all duration-300 text-left w-full group cursor-pointer">
+      <div className="w-9 h-9 rounded-lg bg-surface-hover flex items-center justify-center shrink-0 group-hover:bg-surface-strong transition-colors">
+        <Icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-[#e5e5e5]">{label}</p>
-        <p className="text-xs text-[#525252] mt-0.5">{description}</p>
+        <p className="text-xs text-text-tertiary mt-0.5">{description}</p>
       </div>
-      <ArrowRight className="w-3.5 h-3.5 text-[#525252] opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5 shrink-0" />
+      <ArrowRight className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5 shrink-0" />
     </button>
   );
 }
@@ -240,11 +240,11 @@ export function HomeScreen() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold tracking-tight text-white sm:text-xl">Geiger Assets</h1>
-            <Badge variant="secondary" className="text-[10px] font-medium bg-[#2a2a2a] text-[#737373] border border-[#333333] hover:bg-[#2a2a2a]">
+            <Badge variant="secondary" className="text-[10px] font-medium bg-surface-hover text-text-secondary border border-border hover:bg-surface-hover">
               Active
             </Badge>
           </div>
-          <p className="text-xs text-[#525252] sm:text-sm">
+          <p className="text-xs text-text-tertiary sm:text-sm">
             Monitor your project assets, activity, and team performance
           </p>
         </div>
@@ -262,36 +262,36 @@ export function HomeScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-7 flex flex-col gap-6">
-          <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
+          <section className="rounded-xl bg-surface-subtle border border-border overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#737373]" />
+                <Clock className="w-4 h-4 text-text-secondary" />
                 <h2 className="text-sm font-medium text-white">Recent Assets</h2>
               </div>
-              <Button variant="ghost" size="sm" className="text-[#525252] hover:text-white text-xs h-7 rounded-md">
+              <Button variant="ghost" size="sm" className="text-text-tertiary hover:text-foreground text-xs h-7 rounded-md">
                 View all
                 <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
             </div>
-            <div className="divide-y divide-[#2a2a2a]/60">
+            <div className="divide-y divide-border/60">
               {recentAssets.map((asset) => (
                 <RecentAssetRow key={asset.name} {...asset} />
               ))}
             </div>
           </section>
 
-          <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
+          <section className="rounded-xl bg-surface-subtle border border-border overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[#737373]" />
+                <Activity className="w-4 h-4 text-text-secondary" />
                 <h2 className="text-sm font-medium text-white">Activity</h2>
               </div>
-              <Button variant="ghost" size="sm" className="text-[#525252] hover:text-white text-xs h-7 rounded-md">
+              <Button variant="ghost" size="sm" className="text-text-tertiary hover:text-foreground text-xs h-7 rounded-md">
                 View log
                 <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
             </div>
-            <div className="px-5 divide-y divide-[#2a2a2a]/60">
+            <div className="px-5 divide-y divide-border/60">
               {recentActivity.map((item, idx) => (
                 <ActivityRow key={idx} {...item} />
               ))}
@@ -300,16 +300,16 @@ export function HomeScreen() {
         </div>
 
         <div className="lg:col-span-5 flex flex-col gap-6">
-          <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] p-5">
+          <section className="rounded-xl bg-surface-subtle border border-border p-5">
             <div className="flex items-center gap-2 mb-1">
-              <HardDrive className="w-4 h-4 text-[#737373]" />
+              <HardDrive className="w-4 h-4 text-text-secondary" />
               <h2 className="text-sm font-medium text-white">Storage</h2>
             </div>
             <div className="flex items-baseline gap-1.5 mb-1">
               <span className="text-2xl font-semibold text-white tracking-tight">4.2 GB</span>
-              <span className="text-sm text-[#525252]">of 10 GB</span>
+              <span className="text-sm text-text-tertiary">of 10 GB</span>
             </div>
-            <Progress value={42} className="h-2 bg-[#2a2a2a] mb-5 [&>div]:bg-white" />
+            <Progress value={42} className="h-2 bg-surface-hover mb-5 [&>div]:bg-white" />
             <div className="flex flex-col gap-2">
               {storageBreakdown.map((item) => (
                 <StorageBar key={item.type} {...item} />
@@ -317,9 +317,9 @@ export function HomeScreen() {
             </div>
           </section>
 
-          <section className="rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] p-5">
+          <section className="rounded-xl bg-surface-subtle border border-border p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-4 h-4 text-[#737373]" />
+              <Sparkles className="w-4 h-4 text-text-secondary" />
               <h2 className="text-sm font-medium text-white">Quick Actions</h2>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

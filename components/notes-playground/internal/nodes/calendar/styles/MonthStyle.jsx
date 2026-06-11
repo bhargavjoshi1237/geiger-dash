@@ -88,7 +88,7 @@ const MonthStyle = ({ width, height, theme }) => {
                     width: `${monthPillSize}px`,
                     height: `${monthPillSize}px`,
                     backgroundColor: "#ef4444",
-                    color: "#ffffff",
+                    color: "var(--foreground)",
                   }}
                 >
                   {day}

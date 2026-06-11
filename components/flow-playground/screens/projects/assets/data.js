@@ -87,11 +87,11 @@ export const mediaItems = [
 export const typeIcons = { Image, Video: Film, Document: FileText, Audio: Music, Archive };
 
 export const typeColors = {
-  Image: "text-zinc-200",
-  Video: "text-zinc-200",
-  Document: "text-zinc-200",
-  Audio: "text-zinc-200",
-  Archive: "text-zinc-200",
+  Image: "text-foreground",
+  Video: "text-foreground",
+  Document: "text-foreground",
+  Audio: "text-foreground",
+  Archive: "text-foreground",
 };
 
 export const storageBreakdown = [

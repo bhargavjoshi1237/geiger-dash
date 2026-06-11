@@ -102,18 +102,18 @@ export default function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-2xl bg-[#1e1e1e] border-zinc-800 text-zinc-100 p-0 overflow-hidden shadow-xl sm:rounded-lg"
+        className="max-w-2xl bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg"
       >
-        <DialogHeader className="p-4 border-b border-zinc-800 ">
+        <DialogHeader className="p-4 border-b border-border ">
           <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-zinc-400" />
-            <DialogTitle className="text-base font-medium text-zinc-100">
+            <Settings className="w-5 h-5 text-muted-foreground" />
+            <DialogTitle className="text-base font-medium text-foreground">
               Settings
             </DialogTitle>
           </div>
         </DialogHeader>
 
-        <div className="flex border-b border-zinc-800 bg-[#1e1e1e] -mt-4">
+        <div className="flex border-b border-border bg-[#1e1e1e] -mt-4">
           {[
             { id: "general", label: "General" },
             { id: "defaults", label: "Defaults" },
@@ -125,8 +125,8 @@ export default function SettingsDialog({
               className={cn(
                 "flex-1 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === tab.id
-                  ? "border-zinc-100 text-zinc-100 bg-zinc-800/30"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/20",
+                  ? "border-zinc-100 text-foreground bg-surface-hover/30"
+                  : "border-transparent text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/20",
               )}
             >
               {tab.label}
@@ -148,10 +148,10 @@ export default function SettingsDialog({
           {activeTab === "defaults" && (
             <div className="p-6 space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-zinc-200 mb-1">
+                <h3 className="text-sm font-medium text-foreground mb-1">
                   Global Preferences
                 </h3>
-                <p className="text-xs text-zinc-500 mb-4">
+                <p className="text-xs text-foreground0 mb-4">
                   Set default properties for new items created on the canvas.
                 </p>
 
@@ -164,18 +164,18 @@ export default function SettingsDialog({
                   {/* Edge Styles */}
                   <AccordionItem
                     value="edges"
-                    className="border border-zinc-800 rounded-md bg-zinc-900/30"
+                    className="border border-border rounded-md bg-surface-subtle/30"
                   >
-                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-zinc-300 hover:text-zinc-100">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <ArrowRight className="w-4 h-4 text-zinc-500" />
+                        <ArrowRight className="w-4 h-4 text-foreground0" />
                         <span>Edge Styles</span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-4 space-y-4 border-t border-zinc-800/50">
+                    <AccordionContent className="px-4 py-4 space-y-4 border-t border-border/50">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-xs text-zinc-400 mb-2 block">
+                          <Label className="text-xs text-muted-foreground mb-2 block">
                             Default Color
                           </Label>
                           <ColorPicker
@@ -184,24 +184,24 @@ export default function SettingsDialog({
                               updateEdgeDefault("stroke", color)
                             }
                           >
-                            <button className="flex items-center w-full h-9 px-3 gap-2 border border-zinc-700 rounded hover:border-zinc-500 transition-colors bg-transparent">
+                            <button className="flex items-center w-full h-9 px-3 gap-2 border border-border-strong rounded hover:border-zinc-500 transition-colors bg-transparent">
                               <div
                                 className="w-4 h-4 rounded-full border border-zinc-600"
                                 style={{ backgroundColor: edgeDefaults.stroke }}
                               />
-                              <span className="text-sm text-zinc-300 font-mono">
+                              <span className="text-sm text-muted-foreground font-mono">
                                 {edgeDefaults.stroke}
                               </span>
                             </button>
                           </ColorPicker>
                         </div>
                         <div>
-                          <Label className="text-xs text-zinc-400 mb-2 block">
+                          <Label className="text-xs text-muted-foreground mb-2 block">
                             Stroke Style
                           </Label>
                           <Popover>
                             <PopoverTrigger asChild>
-                              <button className="flex items-center justify-center w-full h-9 px-3 border border-zinc-700 rounded hover:border-zinc-500 transition-colors bg-transparent text-zinc-300">
+                              <button className="flex items-center justify-center w-full h-9 px-3 border border-border-strong rounded hover:border-zinc-500 transition-colors bg-transparent text-muted-foreground">
                                 <div
                                   className="w-12 bg-current rounded-full"
                                   style={{ height: edgeDefaults.strokeWidth }}
@@ -209,7 +209,7 @@ export default function SettingsDialog({
                               </button>
                             </PopoverTrigger>
                             <PopoverContent
-                              className="w-40 bg-[#1e1e1e] border-zinc-800 p-1"
+                              className="w-40 bg-[#1e1e1e] border-border p-1"
                               side="bottom"
                             >
                               {STROKE_WIDTHS.map((sw) => (
@@ -221,8 +221,8 @@ export default function SettingsDialog({
                                   className={cn(
                                     "flex items-center gap-3 px-2 py-2 w-full rounded text-sm transition-colors",
                                     edgeDefaults.strokeWidth === sw.value
-                                      ? "bg-zinc-800 text-zinc-100"
-                                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200",
+                                      ? "bg-surface-hover text-foreground"
+                                      : "text-muted-foreground hover:bg-surface-hover/50 hover:text-foreground",
                                   )}
                                 >
                                   <div
@@ -240,8 +240,8 @@ export default function SettingsDialog({
                       </div>
 
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-3 text-zinc-300">
-                          <Activity className="w-4 h-4 text-zinc-500" />
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Activity className="w-4 h-4 text-foreground0" />
                           <span className="text-sm font-medium">
                             Animated Edges
                           </span>
@@ -258,15 +258,15 @@ export default function SettingsDialog({
 
                   <AccordionItem
                     value="toolbar"
-                    className="border border-zinc-800 rounded-md bg-zinc-900/30"
+                    className="border border-border rounded-md bg-surface-subtle/30"
                   >
-                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-zinc-300 hover:text-zinc-100">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <MousePointer2 className="w-4 h-4 text-zinc-500" />
+                        <MousePointer2 className="w-4 h-4 text-foreground0" />
                         <span>Toolbar Options</span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-4 border-t border-zinc-800/50">
+                    <AccordionContent className="px-4 py-4 border-t border-border/50">
                       <ToolbarOptions
                         selectedTools={selectedTools}
                         onToggleTool={toggleTool}
@@ -277,15 +277,15 @@ export default function SettingsDialog({
 
                   <AccordionItem
                     value="nodes"
-                    className="border border-zinc-800 rounded-md bg-zinc-900/30"
+                    className="border border-border rounded-md bg-surface-subtle/30"
                   >
-                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-zinc-300 hover:text-zinc-100">
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <Layout className="w-4 h-4 text-zinc-500" />
+                        <Layout className="w-4 h-4 text-foreground0" />
                         <span>Node Styles</span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-4 text-zinc-500 text-sm border-t border-zinc-800/50">
+                    <AccordionContent className="px-4 py-4 text-foreground0 text-sm border-t border-border/50">
                       Node default settings are not yet implemented.
                     </AccordionContent>
                   </AccordionItem>
@@ -301,15 +301,15 @@ export default function SettingsDialog({
           )}
         </div>
 
-        <div className="p-4 border-t border-zinc-800 bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
+        <div className="p-4 border-t border-border bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+            className="text-muted-foreground hover:text-foreground hover:bg-surface-hover"
           >
             Cancel
           </Button>
-          <Button className="bg-zinc-100 text-black hover:bg-zinc-300">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
             Save Changes
           </Button>
         </div>

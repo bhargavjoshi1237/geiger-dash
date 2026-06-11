@@ -5,7 +5,7 @@ import BoardPlaygroundCanvas from "@/components/notes-playground/internal/canvas
 export default function LandingBoardShowcase({ backgroundImage, ctaHref, ctaLabel }) {
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-[#212121] bg-[#161616] bg-cover bg-center bg-no-repeat px-4 py-4 sm:px-6 md:p-8 xl:p-10"
+      className="relative overflow-hidden rounded-2xl border border-[#212121] bg-background bg-cover bg-center bg-no-repeat px-4 py-4 sm:px-6 md:p-8 xl:p-10"
       style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : undefined}
     >
       <div className="absolute inset-0 bg-[#080808]/75" />
@@ -31,8 +31,8 @@ export default function LandingBoardShowcase({ backgroundImage, ctaHref, ctaLabe
         </div>
 
         <div className="w-full lg:w-[70%] flex-1 ">
-          <div className="relative overflow-hidden rounded-2xl border border-[#313131] bg-[#222222] p-1.5 shadow-2xl">
-            <div className="h-[340px] overflow-hidden rounded-xl border border-[#313131] bg-[#161616] sm:h-[460px] lg:h-[600px]">
+          <div className="relative overflow-hidden rounded-2xl border border-[#313131] bg-surface-card p-1.5 shadow-2xl">
+            <div className="h-[340px] overflow-hidden rounded-xl border border-[#313131] bg-background sm:h-[460px] lg:h-[600px]">
               <BoardPlaygroundCanvas />
             </div>
           </div>

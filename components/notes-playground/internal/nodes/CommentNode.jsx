@@ -84,7 +84,7 @@ const CommentNode = ({ id, data, selected }) => {
           >
             <input
               type="text"
-              className="w-full bg-[#3B4654] text-zinc-200 text-sm rounded px-3 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-zinc-500 placeholder:text-zinc-500"
+              className="w-full bg-[#3B4654] text-foreground text-sm rounded px-3 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-zinc-500 placeholder:text-foreground0"
               placeholder="Write a comment..."
               value={comment}
               onChange={handleChange}

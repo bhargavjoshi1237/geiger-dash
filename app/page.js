@@ -48,7 +48,7 @@ export default async function Home() {
     getRandomShowcaseBackgrounds(3);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-zinc-950 text-zinc-100 selection:bg-indigo-500/30 font-sans">
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground selection:bg-indigo-500/30 font-sans">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
@@ -61,7 +61,7 @@ export default async function Home() {
         <section className="mx-auto mt-10 mb-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
           <div className="max-w-3xl">
             <h1 className="mb-4 text-2xl font-semibold text-white sm:text-3xl">Built to Manage. Designed to Create</h1>
-            <p className="mb-6 text-sm text-zinc-400 sm:text-base">
+            <p className="mb-6 text-sm text-muted-foreground sm:text-base">
               Turn your ideas into something real with a single suite that combines solid management tools and
               easy-to-use creative features.
             </p>
@@ -107,7 +107,7 @@ export default async function Home() {
           }}
         >
           <div className="flex h-full flex-col">
-            <div className="relative h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-[#161616] shadow-2xl">
+            <div className="relative h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-background shadow-2xl">
               <ClientAssetsPlayground />
             </div>
           </div>
@@ -127,7 +127,7 @@ export default async function Home() {
 
         <section className="relative z-20 overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           <div className="container mx-auto relative z-10 flex flex-col items-center text-center">
-            <h3 className="mb-4 text-xs font-semibold tracking-widest text-zinc-500 uppercase sm:text-sm">
+            <h3 className="mb-4 text-xs font-semibold tracking-widest text-foreground0 uppercase sm:text-sm">
               Open source from day one
             </h3>
             <h2 className="mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-3xl font-black tracking-tighter text-transparent drop-shadow-lg sm:mb-10 sm:text-5xl lg:text-6xl">

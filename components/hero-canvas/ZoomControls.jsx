@@ -7,10 +7,10 @@ export default function ZoomControls() {
 
   return (
     <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-50">
-      <div className="flex flex-col bg-[#333333] rounded-lg shadow-xl border border-zinc-700 overflow-hidden">
+      <div className="flex flex-col bg-surface-strong rounded-lg shadow-xl border border-border-strong overflow-hidden">
         <button
           onClick={() => zoomIn({ duration: 300 })}
-          className="p-2 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors border-b border-zinc-700 last:border-b-0"
+          className="p-2 hover:bg-surface-strong text-muted-foreground hover:text-foreground transition-colors border-b border-border-strong last:border-b-0"
           title="Zoom In"
         >
           <svg
@@ -30,7 +30,7 @@ export default function ZoomControls() {
         </button>
         <button
           onClick={() => zoomOut({ duration: 300 })}
-          className="p-2 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 hover:bg-surface-strong text-muted-foreground hover:text-foreground transition-colors"
           title="Zoom Out"
         >
           <svg

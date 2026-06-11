@@ -17,12 +17,12 @@ const ResizeHandle = () => {
         <path
           d="M 6 10 L 10 6 L 10 10 Z"
           fill="currentColor"
-          className="text-zinc-400"
+          className="text-muted-foreground"
         />
         <path
           d="M 2 10 L 10 2 L 10 4 L 4 10 Z"
           fill="currentColor"
-          className="text-zinc-400"
+          className="text-muted-foreground"
         />
       </svg>
     </div>
@@ -111,10 +111,10 @@ const LinkNode = ({ id, data, selected, dragging }) => {
         </NodeResizeControl>
 
         <div className="flex-1 w-full h-full overflow-hidden flex items-center px-4">
-          <Link className="w-5 h-5 text-zinc-500 mr-3 flex-shrink-0" />
+          <Link className="w-5 h-5 text-foreground0 mr-3 flex-shrink-0" />
           <TextEditingTrait className="w-full">
             <input
-              className="w-full bg-transparent outline-none text-zinc-300 placeholder:text-zinc-600 font-sans"
+              className="w-full bg-transparent outline-none text-muted-foreground placeholder:text-text-tertiary font-sans"
               placeholder="Enter a link URL"
               value={data.url || ""}
               onChange={(evt) => {

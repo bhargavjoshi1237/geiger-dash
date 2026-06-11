@@ -29,8 +29,8 @@ function FallbackRelease() {
 
 function ChangelogImage({ changelog }) {
   return (
-    <div className="mt-7 overflow-hidden rounded-md border border-[#333333] bg-[#202020] shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
-      <div className="relative aspect-[704/398] overflow-hidden bg-[#1a1a1a]">
+    <div className="mt-7 overflow-hidden rounded-md border border-border bg-surface-card shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
+      <div className="relative aspect-[704/398] overflow-hidden bg-surface-subtle">
         {changelog.image_url ? (
           <Image
             src={changelog.image_url}
@@ -42,10 +42,10 @@ function ChangelogImage({ changelog }) {
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,#262626_0%,#1f1f1f_42%,#171717_100%)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_36%)]" />
-            <div className="relative flex h-[72%] w-[82%] items-center justify-center rounded-md border border-dashed border-[#474747] bg-[#161616]/70">
+            <div className="relative flex h-[72%] w-[82%] items-center justify-center rounded-md border border-dashed border-border-strong bg-background/70">
               <div className="text-center">
                 <p className="text-sm font-semibold text-[#e5e5e5]">Release image</p>
-                <p className="mt-2 text-xs font-medium text-[#737373]">Add an image in Studio to feature it here</p>
+                <p className="mt-2 text-xs font-medium text-text-secondary">Add an image in Studio to feature it here</p>
               </div>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default async function ChangelogPage() {
   const releases = changelogs?.length ? changelogs : [FallbackRelease()];
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-zinc-950 font-sans text-zinc-100 antialiased selection:bg-indigo-500/30">
+    <div className="flex min-h-screen w-full flex-col bg-background font-sans text-foreground antialiased selection:bg-indigo-500/30">
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <Header />
 
@@ -76,15 +76,15 @@ export default async function ChangelogPage() {
             <article
               key={changelog.id}
               className={`grid gap-8 md:grid-cols-[250px_minmax(0,704px)] lg:grid-cols-[280px_minmax(0,704px)] ${
-                index === 0 ? "" : "border-t border-[#2a2a2a] pt-24"
+                index === 0 ? "" : "border-t border-border pt-24"
               }`}
             >
-              <time className="text-base font-semibold text-[#737373]" dateTime={changelog.release_date}>
+              <time className="text-base font-semibold text-text-secondary" dateTime={changelog.release_date}>
                 {formatDate(changelog.release_date)}
               </time>
 
               <div>
-                {index === 0 ? <p className="mb-4 text-sm font-medium text-[#a3a3a3]">Changelog</p> : null}
+                {index === 0 ? <p className="mb-4 text-sm font-medium text-muted-foreground">Changelog</p> : null}
                 <h1 className="max-w-[650px] text-[34px] font-semibold leading-[1.08] text-white sm:text-[38px]">
                   {changelog.title}
                 </h1>
@@ -99,17 +99,17 @@ export default async function ChangelogPage() {
           ))}
         </div>
 
-        <div className="mt-28 border-t border-[#2a2a2a] pt-10">
+        <div className="mt-28 border-t border-border pt-10">
           <Link
             href="/docs"
-            className="inline-flex items-center gap-2 rounded-md border border-[#2a2a2a] bg-[#202020] px-4 py-2 text-sm font-medium text-[#e5e5e5] transition-colors hover:border-[#474747] hover:bg-[#242424] hover:text-white"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-surface-card px-4 py-2 text-sm font-medium text-[#e5e5e5] transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground"
           >
             Read the docs
             <ChevronRight className="h-4 w-4" />
           </Link>
           <Link
             href="/"
-            className="ml-3 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-[#a3a3a3] transition-colors hover:bg-[#202020] hover:text-white"
+            className="ml-3 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-card hover:text-foreground"
           >
             Back home
             <ArrowRight className="h-4 w-4" />

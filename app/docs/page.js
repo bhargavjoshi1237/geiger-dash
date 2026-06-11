@@ -12,7 +12,7 @@ export default async function DocsPage() {
   const { navigation, page } = await getDocsPageWithNavigation("welcome");
 
   return (
-    <div className="min-h-screen bg-[#161616] font-sans text-white antialiased selection:bg-[#333333] selection:text-white">
+    <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
       <DocsWidget navigation={navigation} page={page} />
     </div>
   );

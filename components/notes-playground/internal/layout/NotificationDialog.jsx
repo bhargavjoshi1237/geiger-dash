@@ -40,11 +40,11 @@ export default function NotificationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1e1e1e] border-zinc-800 text-zinc-100 p-0 overflow-hidden shadow-xl sm:rounded-lg">
-        <DialogHeader className="p-4 border-b border-zinc-800">
+      <DialogContent className="max-w-md bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
+        <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Bell className="w-5 h-5 text-zinc-400" />
-            <DialogTitle className="text-base font-medium text-zinc-100">
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            <DialogTitle className="text-base font-medium text-foreground">
               Notifications
             </DialogTitle>
             {notifications.length > 0 && (
@@ -61,10 +61,10 @@ export default function NotificationDialog({
               <div className="text-center space-y-5 animate-in fade-in -mt-10">
                 <Bell className="w-8 h-8 opacity-20 ml-auto mr-auto" />
               </div>
-              <p className="text-sm font-medium text-zinc-300">
+              <p className="text-sm font-medium text-muted-foreground">
                 No new notifications
               </p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-foreground0">
                 We'll notify you when something important happens.
               </p>
             </div>
@@ -73,18 +73,18 @@ export default function NotificationDialog({
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="p-4 flex gap-4 hover:bg-zinc-800/30 transition-colors"
+                  className="p-4 flex gap-4 hover:bg-surface-hover/30 transition-colors"
                 >
                   <div className="mt-1">
                     {notification.type === "request" && (
                       <div className="relative">
-                        <Avatar className="h-10 w-10 border border-zinc-700">
+                        <Avatar className="h-10 w-10 border border-border-strong">
                           <AvatarImage src={notification.data.avatar_url} />
-                          <AvatarFallback className="bg-zinc-800 text-zinc-400">
+                          <AvatarFallback className="bg-surface-hover text-muted-foreground">
                             {notification.data.name?.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="absolute -bottom-1 -right-1 bg-zinc-900 rounded-full p-0.5 border border-zinc-800">
+                        <div className="absolute -bottom-1 -right-1 bg-surface-subtle rounded-full p-0.5 border border-border">
                           <User className="w-3 h-3 text-blue-400 fill-blue-400" />
                         </div>
                       </div>
@@ -92,17 +92,17 @@ export default function NotificationDialog({
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between">
-                      <p className="text-sm font-medium text-zinc-200">
+                      <p className="text-sm font-medium text-foreground">
                         {notification.title}
                       </p>
-                      <span className="text-[10px] text-zinc-500">
+                      <span className="text-[10px] text-foreground0">
                         {new Date(notification.timestamp).toLocaleTimeString(
                           [],
                           { hour: "2-digit", minute: "2-digit" },
                         )}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       {notification.message}
                     </p>
 
@@ -119,7 +119,7 @@ export default function NotificationDialog({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-xs text-zinc-400 hover:text-red-400 hover:bg-red-900/10"
+                          className="h-7 text-xs text-muted-foreground hover:text-red-400 hover:bg-red-900/10"
                           onClick={() => onKickMember(notification.id)}
                         >
                           <X className="w-3 h-3 mr-1.5" />

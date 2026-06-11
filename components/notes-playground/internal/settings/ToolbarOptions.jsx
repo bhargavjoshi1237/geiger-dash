@@ -68,13 +68,13 @@ export default function ToolbarOptions({
                       flex flex-col items-center justify-center gap-2 aspect-square rounded-xl transition-all pt-3 pb-3 border-2
                       ${
                         isActive
-                          ? "bg-zinc-800 border-zinc-500 text-white"
-                          : "bg-zinc-900 border-transparent text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                          ? "bg-surface-hover border-zinc-500 text-white"
+                          : "bg-surface-subtle border-transparent text-foreground0 hover:bg-surface-hover hover:text-muted-foreground"
                       }
                     `}
                   >
                     <Icon
-                      className={`w-6 h-6 ${isActive ? "text-[#e7e7e7]" : ""}`}
+                      className={`w-6 h-6 ${isActive ? "text-foreground" : ""}`}
                     />
                     <span className="text-[10px] font-medium truncate w-full px-1">
                       {tool.label}

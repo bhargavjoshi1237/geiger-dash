@@ -19,7 +19,7 @@ function AssetsPlaygroundContent() {
     const isSettingsTab = settingsNav.some((item) => item.title === currentTab);
     if (isSettingsTab) {
       return (
-        <div className="flex items-center justify-center h-full text-[#525252] text-sm">
+        <div className="flex items-center justify-center h-full text-text-tertiary text-sm">
           Settings: {currentTab}
         </div>
       );
@@ -31,12 +31,12 @@ function AssetsPlaygroundContent() {
       // case "Library":
       //   return <LibraryScreen id={id} />;
       default:
-        return <div className="flex items-center justify-center h-full text-[#525252] text-sm">Screen: {currentTab}</div>;
+        return <div className="flex items-center justify-center h-full text-text-tertiary text-sm">Screen: {currentTab}</div>;
     }
   };
 
   return (
-    <div className="flex-col h-full w-full bg-[#161616] text-[#ededed] font-sans overflow-hidden selection:bg-[#333333] flex">
+    <div className="flex-col h-full w-full bg-background text-foreground font-sans overflow-hidden selection:bg-surface-strong flex">
       <SidebarProvider className="flex-col !flex h-full min-w-0" style={{flexDirection: 'column'}}>
         <ProjectTopbar />
         <div className="flex flex-1 overflow-hidden relative">

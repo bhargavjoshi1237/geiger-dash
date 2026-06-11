@@ -420,18 +420,18 @@ export function ProjectionsScreen() {
   };
 
   return (
-    <MainScreenWrapper className="text-[#e7e7e7]">
+    <MainScreenWrapper className="text-foreground">
     <div className="flex flex-col h-full w-full min-h-screen">
-    <div className="hidden sm:flex items-center justify-between border-b border-[#2a2a2a] pb-6 mb-8"> 
+    <div className="hidden sm:flex items-center justify-between border-b border-border pb-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#e7e7e7]">Projections</h1>
-          <p className="text-[#a3a3a3] mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Projections</h1>
+          <p className="text-muted-foreground mt-1">
             View and manage project timelines, milestones, and delivery dates.
           </p>
         </div>
         <div className="flex items-center ">
         <div className="flex items-center gap-1.5 justify-center">
-          <div className="flex items-center gap-1 bg-[#1a1a1a] w-full justify-center rounded-lg p-1 border border-[#2a2a2a]">
+          <div className="flex items-center gap-1 bg-surface-subtle w-full justify-center rounded-lg p-1 border border-border">
             {TABS.map((tab, idx) => (
               <button
                 key={tab}
@@ -440,8 +440,8 @@ export function ProjectionsScreen() {
                 className={cn(
                   "px-4 py-1.5 text-sm w-full font-medium rounded-md transition-all",
                   activeTab === TAB_KEYS[idx]
-                    ? "bg-[#2a2a2a] text-white shadow-sm"
-                    : "text-[#737373] hover:text-white"
+                    ? "bg-surface-hover text-white shadow-sm"
+                    : "text-text-secondary hover:text-foreground"
                 )}
               >
                 {tab}
@@ -454,18 +454,18 @@ export function ProjectionsScreen() {
 
       {/* Mobile page heading */}
       <div className="sm:hidden mb-4">
-        <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
-          <h1 className="text-[35px] font-semibold leading-none text-[#e7e7e7] tracking-tight">Calendar</h1>
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h1 className="text-[35px] font-semibold leading-none text-foreground tracking-tight">Calendar</h1>
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+              className="p-2 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
             >
               <SlidersHorizontal className="w-4 h-4" />
             </button>
             <button
               type="button"
-              className="p-2 rounded-lg text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+              className="p-2 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -474,13 +474,13 @@ export function ProjectionsScreen() {
       </div>
       
       {/* ── Calendar area ────────────────────────────────────────────────────── */}
-        <div className="border border-[#2a2a2a] rounded-2xl overflow-hidden bg-[#1a1a1a]">
+        <div className="border border-border rounded-2xl overflow-hidden bg-surface-subtle">
           {/* Sub-header: month nav + controls */}
-          <div className="border-b border-[#2a2a2a]">
+          <div className="border-b border-border">
             {/* ── Mobile layout ──────────────────────────────────────────────── */}
             <div className="flex flex-col gap-3 px-4 py-3 sm:hidden">
               {/* Row 1: tabs */}
-              <div className="flex items-center gap-1 bg-[#202020] w-full justify-center rounded-xl p-1 border border-[#2a2a2a]">
+              <div className="flex items-center gap-1 bg-surface-card w-full justify-center rounded-xl p-1 border border-border">
                 {TABS.map((tab, idx) => (
                   <button
                     key={tab}
@@ -490,7 +490,7 @@ export function ProjectionsScreen() {
                       "px-3 py-1.5 text-sm w-full font-medium rounded-lg transition-all",
                       activeTab === TAB_KEYS[idx]
                         ? "bg-[#f5f5f5] text-[#111111] shadow-sm"
-                        : "text-[#8a8a8a] hover:text-white"
+                        : "text-[#8a8a8a] hover:text-foreground"
                     )}
                   >
                     {tab}
@@ -502,20 +502,20 @@ export function ProjectionsScreen() {
                 <p className="text-[15px] font-semibold text-white leading-tight">
                   {getViewTitle(currentDate, viewMode)}
                 </p>
-                <p className="text-xs text-[#737373] leading-tight">
+                <p className="text-xs text-text-secondary leading-tight">
                   {getViewSubtitle(currentDate, viewMode)}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <Select value={viewMode} onValueChange={handleViewModeChange}>
-                  <SelectTrigger className="h-9 w-[136px] bg-[#202020] border-[#333333] text-[#a3a3a3] text-sm rounded-lg focus:ring-0 focus:border-[#474747]">
+                  <SelectTrigger className="h-9 w-[136px] bg-surface-card border-border text-muted-foreground text-sm rounded-lg focus:ring-0 focus:border-border-strong">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#202020] border-[#2a2a2a]">
-                    <SelectItem value="month" className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Month</SelectItem>
-                    <SelectItem value="week"  className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Week</SelectItem>
-                    <SelectItem value="day"   className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Day</SelectItem>
+                  <SelectContent className="bg-surface-card border-border">
+                    <SelectItem value="month" className="text-muted-foreground focus:bg-surface-hover">Month</SelectItem>
+                    <SelectItem value="week"  className="text-muted-foreground focus:bg-surface-hover">Week</SelectItem>
+                    <SelectItem value="day"   className="text-muted-foreground focus:bg-surface-hover">Day</SelectItem>
                   </SelectContent>
                 </Select>
                 <AddActivityDialog onSave={handleSaveActivity}>
@@ -530,7 +530,7 @@ export function ProjectionsScreen() {
               <div className="grid grid-cols-[40px_1fr_40px] border border-[#2f2f2f] rounded-xl overflow-hidden">
                 <button
                   type="button"
-                  className="h-9 flex items-center justify-center text-[#737373] border-r border-[#2f2f2f] hover:text-white hover:bg-[#202020] transition-colors"
+                  className="h-9 flex items-center justify-center text-text-secondary border-r border-[#2f2f2f] hover:text-foreground hover:bg-surface-card transition-colors"
                   onClick={navigatePrev}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -538,13 +538,13 @@ export function ProjectionsScreen() {
                 <button
                   type="button"
                   onClick={goToToday}
-                  className="h-9 text-sm font-semibold text-center text-[#a3a3a3] hover:text-white hover:bg-[#202020] transition-colors"
+                  className="h-9 text-sm font-semibold text-center text-muted-foreground hover:text-foreground hover:bg-surface-card transition-colors"
                 >
                   Today
                 </button>
                 <button
                   type="button"
-                  className="h-9 flex items-center justify-center text-[#737373] border-l border-[#2f2f2f] hover:text-white hover:bg-[#202020] transition-colors"
+                  className="h-9 flex items-center justify-center text-text-secondary border-l border-[#2f2f2f] hover:text-foreground hover:bg-surface-card transition-colors"
                   onClick={navigateNext}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -562,7 +562,7 @@ export function ProjectionsScreen() {
                     <button
                       type="button"
                       onClick={() => setViewMode("month")}
-                      className="flex mr-4 items-center gap-1.5 text-sm font-medium text-[#a3a3a3] hover:text-white transition-colors mr-1"
+                      className="flex mr-4 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mr-1"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                       <span className="hidden lg:inline">Month</span>
@@ -570,7 +570,7 @@ export function ProjectionsScreen() {
                   )}
 
                   <div
-                  className="pointer mr-2 flex flex-col items-center justify-center w-11 h-11 rounded-lg border border-[#333333] bg-[#242424] text-center leading-none">
+                  className="pointer mr-2 flex flex-col items-center justify-center w-11 h-11 rounded-lg border border-border bg-surface-active text-center leading-none">
                     <span className="text-[9px] font-bold text-[#60a5fa] uppercase tracking-widest">
                       {MONTHS[today.getMonth()].slice(0, 3)}
                     </span>
@@ -582,7 +582,7 @@ export function ProjectionsScreen() {
                     <p className="text-[15px] font-semibold text-white leading-tight">
                       {getViewTitle(currentDate, viewMode)}
                     </p>
-                    <p className="text-xs text-[#737373] leading-tight mt-0.5">
+                    <p className="text-xs text-text-secondary leading-tight mt-0.5">
                       {getViewSubtitle(currentDate, viewMode)}
                     </p>
                   </div>
@@ -594,7 +594,7 @@ export function ProjectionsScreen() {
                 <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  className="p-1.5 rounded-lg text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+                  className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
                   onClick={navigatePrev}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -602,27 +602,27 @@ export function ProjectionsScreen() {
                 {/* <button
                   type="button"
                   onClick={goToToday}
-                  className="px-3.5 py-1.5 text-sm font-medium text-[#a3a3a3] hover:text-white border border-[#2a2a2a] rounded-lg hover:bg-[#202020] transition-colors"
+                  className="px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-surface-card transition-colors"
                 >
                   Today Button
                 </button> */}
                 <button
                   type="button"
-                  className="p-1.5 rounded-lg text-[#737373] hover:text-white hover:bg-[#202020] transition-colors"
+                  className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-card transition-colors"
                   onClick={navigateNext}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
                 <Select value={viewMode} onValueChange={handleViewModeChange}>
-                  <SelectTrigger className="h-9 w-36 bg-[#202020] border-[#333333] text-[#a3a3a3] text-sm rounded-lg focus:ring-0 focus:border-[#474747]">
-                    <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-[#737373]" />
+                  <SelectTrigger className="h-9 w-36 bg-surface-card border-border text-muted-foreground text-sm rounded-lg focus:ring-0 focus:border-border-strong">
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-text-secondary" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#202020] border-[#2a2a2a]">
-                    <SelectItem value="month" className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Month</SelectItem>
-                    <SelectItem value="week"  className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Week</SelectItem>
-                    <SelectItem value="day"   className="text-[#a3a3a3] focus:bg-[#2a2a2a]">Day</SelectItem>
+                  <SelectContent className="bg-surface-card border-border">
+                    <SelectItem value="month" className="text-muted-foreground focus:bg-surface-hover">Month</SelectItem>
+                    <SelectItem value="week"  className="text-muted-foreground focus:bg-surface-hover">Week</SelectItem>
+                    <SelectItem value="day"   className="text-muted-foreground focus:bg-surface-hover">Day</SelectItem>
                   </SelectContent>
                 </Select>
                 <AddActivityDialog onSave={handleSaveActivity}>

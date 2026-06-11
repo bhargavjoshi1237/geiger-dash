@@ -56,7 +56,7 @@ function DraggableCollaboratorDialog({
   return (
     <div
       className={cn(
-        "absolute z-10 w-[min(26rem,calc(100%-1.5rem))] overflow-hidden rounded-lg border border-zinc-800 bg-[#1e1e1e] text-zinc-100 shadow-xl",
+        "absolute z-10 w-[min(26rem,calc(100%-1.5rem))] overflow-hidden rounded-lg border border-border bg-[#1e1e1e] text-foreground shadow-xl",
         className,
       )}
       style={{
@@ -64,7 +64,7 @@ function DraggableCollaboratorDialog({
       }}
     >
       <div
-        className="cursor-move touch-none select-none border-b border-zinc-800 p-4"
+        className="cursor-move touch-none select-none border-b border-border p-4"
         onPointerDown={beginDrag}
         onPointerMove={drag}
         onPointerUp={endDrag}
@@ -72,8 +72,8 @@ function DraggableCollaboratorDialog({
       >
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users2 className="h-4 w-4 text-zinc-400" />
-            <h4 className="text-base font-normal text-zinc-100">Collaborate</h4>
+            <Users2 className="h-4 w-4 text-muted-foreground" />
+            <h4 className="text-base font-normal text-foreground">Collaborate</h4>
           </div>
 
           <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-emerald-500">
@@ -83,7 +83,7 @@ function DraggableCollaboratorDialog({
         </div>
       </div>
 
-      <div className="flex border-b border-zinc-800 bg-[#1e1e1e]">
+      <div className="flex border-b border-border bg-[#1e1e1e]">
         {[
           { id: "session", label: "Session" },
           { id: "members", label: "Members" },
@@ -95,8 +95,8 @@ function DraggableCollaboratorDialog({
             className={cn(
               "flex-1 border-b-2 py-3 text-sm font-medium transition-colors",
               activeTab === tab.id
-                ? "border-zinc-100 bg-zinc-800/30 text-zinc-100"
-                : "border-transparent text-zinc-500",
+                ? "border-zinc-100 bg-surface-hover/30 text-foreground"
+                : "border-transparent text-foreground0",
             )}
             type="button"
           >
@@ -107,7 +107,7 @@ function DraggableCollaboratorDialog({
 
       <div className="h-[250px] bg-[#1e1e1e] p-4">{children}</div>
 
-      <div className="flex justify-end gap-2 border-t border-zinc-800 bg-[#1e1e1e] p-4">
+      <div className="flex justify-end gap-2 border-t border-border bg-[#1e1e1e] p-4">
         {footer}
       </div>
     </div>
@@ -120,7 +120,7 @@ function SessionTabPreview() {
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-foreground0">
               Session Active
             </span>
           </div>
@@ -128,19 +128,19 @@ function SessionTabPreview() {
           <div className="group relative">
             <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 opacity-20 blur transition duration-500 group-hover:opacity-40" />
             <button
-              className="relative flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-all duration-300"
+              className="relative flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface-subtle p-4 transition-all duration-300"
               type="button"
             >
-              <span className="select-all font-mono text-xl font-bold tracking-[0.15em] text-zinc-100">
+              <span className="select-all font-mono text-xl font-bold tracking-[0.15em] text-foreground">
                 GEIGER-4G7Q-2M9A
               </span>
-              <span className="flex w-[10%] items-center justify-center text-zinc-500">
+              <span className="flex w-[10%] items-center justify-center text-foreground0">
                 <Copy className="h-3.5 w-3.5" />
               </span>
             </button>
           </div>
 
-          <p className="px-4 text-center text-[11px] text-zinc-600">
+          <p className="px-4 text-center text-[11px] text-text-tertiary">
             Share this code with team members to let them join your workspace
             instantly.
           </p>
@@ -154,18 +154,18 @@ function MembersTabPreview() {
   return (
     <div className="flex h-full flex-col">
       <div className="-mx-2 flex-1 overflow-hidden px-2">
-        <h4 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h4 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-foreground0">
           In Session ({MEMBERS.length})
         </h4>
         <div className="space-y-1">
           {MEMBERS.map((member) => (
             <div
-              className="group flex items-center justify-between rounded p-2 transition-colors hover:bg-zinc-800/50"
+              className="group flex items-center justify-between rounded p-2 transition-colors hover:bg-surface-hover/50"
               key={member.id}
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-xs font-medium text-zinc-300">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border-strong bg-surface-hover text-xs font-medium text-muted-foreground">
                     {member.name.charAt(0).toUpperCase()}
                   </div>
                   <div
@@ -176,18 +176,18 @@ function MembersTabPreview() {
                   />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-zinc-200">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                     {member.name}
                     {member.isMe && (
-                      <span className="text-xs text-zinc-500">(You)</span>
+                      <span className="text-xs text-foreground0">(You)</span>
                     )}
                     {member.role === "Owner" && (
-                      <span className="h-4 rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-400">
+                      <span className="h-4 rounded border border-border-strong px-1 text-[10px] font-normal text-muted-foreground">
                         Host
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-zinc-500">{member.role}</div>
+                  <div className="text-xs text-foreground0">{member.role}</div>
                 </div>
               </div>
               {!member.isMe && (
@@ -213,7 +213,7 @@ export default function CollaboratorTabsShowcase({
 }) {
   return (
     <section
-      className="relative overflow-hidden rounded-sm border border-[#212121] bg-[#161616] bg-cover bg-center bg-no-repeat p-4 sm:p-6 md:p-8 xl:p-10"
+      className="relative overflow-hidden rounded-sm border border-[#212121] bg-background bg-cover bg-center bg-no-repeat p-4 sm:p-6 md:p-8 xl:p-10"
       style={backgroundImage ? { backgroundImage: `url('${backgroundImage}')` } : undefined}
     >
       <div className="absolute inset-0 bg-[#080808]/75" />
@@ -264,7 +264,7 @@ export default function CollaboratorTabsShowcase({
               className="bottom-3 right-3 z-20 sm:bottom-5 md:bottom-8 md:right-8"
               footer={
                 <button
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-800 px-3 text-sm font-medium text-zinc-400"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-surface-hover px-3 text-sm font-medium text-muted-foreground"
                   type="button"
                 >
                   Close

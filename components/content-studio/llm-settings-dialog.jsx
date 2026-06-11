@@ -23,7 +23,7 @@ import {
 import { LLM_PRESETS, callLlmChat, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =
-  'border-zinc-700 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-600'
+  'border-border-strong bg-background text-foreground placeholder:text-foreground0 focus-visible:ring-zinc-600'
 
 export function LlmSettingsDialog({ open, onOpenChange }) {
   const { config, save, clear, isConfigured } = useLlmConfig()
@@ -91,7 +91,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-zinc-300">Provider</Label>
+            <Label className="text-muted-foreground">Provider</Label>
             <Select value={draft.provider} onValueChange={applyPreset}>
               <SelectTrigger className={fieldClass}>
                 <SelectValue placeholder="Choose a provider" />
@@ -107,7 +107,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-zinc-300">Base URL</Label>
+            <Label className="text-muted-foreground">Base URL</Label>
             <Input
               value={draft.baseUrl}
               onChange={update('baseUrl')}
@@ -118,7 +118,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-zinc-300">API Key</Label>
+              <Label className="text-muted-foreground">API Key</Label>
               <Input
                 type="password"
                 value={draft.apiKey}
@@ -129,7 +129,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Model</Label>
+              <Label className="text-muted-foreground">Model</Label>
               <Input
                 value={draft.model}
                 onChange={update('model')}
@@ -173,7 +173,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
             size="sm"
             onClick={clear}
             disabled={!isConfigured}
-            className="text-zinc-400 hover:text-red-400"
+            className="text-muted-foreground hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
             Disconnect

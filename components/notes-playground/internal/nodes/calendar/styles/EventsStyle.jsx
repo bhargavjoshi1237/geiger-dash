@@ -127,7 +127,7 @@ const EventsStyle = ({ width, height, theme }) => {
                       width: `${eventPillSize}px`,
                       height: `${eventPillSize}px`,
                       backgroundColor: "#ef4444",
-                      color: "#ffffff",
+                      color: "var(--foreground)",
                     }}
                   >
                     {day}

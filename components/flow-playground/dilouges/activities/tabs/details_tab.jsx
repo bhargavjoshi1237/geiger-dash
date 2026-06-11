@@ -76,7 +76,7 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
       {/* Name & Type Row */}
       <div className="flex gap-2">
         <div className="w-[80%]">
-          <Label className="text-sm font-medium text-zinc-300">
+          <Label className="text-sm font-medium text-muted-foreground">
             Name
           </Label>
           <Input
@@ -84,21 +84,21 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
             required
-            className="bg-[#202020] mt-1.5 border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
+            className="bg-surface-card mt-1.5 border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
           />
         </div>
         <div className="w-[20%]">
-          <Label className="text-sm font-medium text-zinc-300 mb-1.5">Type</Label>
+          <Label className="text-sm font-medium text-muted-foreground mb-1.5">Type</Label>
           <Select
             value={formData.type}
             onValueChange={(value) => handleInputChange("type", value)}
           >
-            <SelectTrigger className="bg-[#202020] border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
+            <SelectTrigger className="bg-surface-card border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]">
+            <SelectContent className="bg-surface-subtle border-border text-foreground">
               {ACTIVITY_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value} className="focus:bg-[#2a2a2a]">
+                <SelectItem key={type.value} value={type.value} className="focus:bg-surface-hover">
                   {type.label}
                 </SelectItem>
               ))}
@@ -109,32 +109,32 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
 
       {/* Description */}
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium text-zinc-300">Description</Label>
+        <Label className="text-sm font-medium text-muted-foreground">Description</Label>
         <Textarea
           placeholder="Brief description..."
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
-          className="bg-[#202020] border-[#333333] text-white min-h-[60px] resize-none text-sm focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
+          className="bg-surface-card border-border text-white min-h-[60px] resize-none text-sm focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
         />
       </div>
 
       {/* Priority, Status, Progress Row */}
       <div className="flex gap-4">
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-300">Priority</Label>
+          <Label className="text-sm font-medium text-muted-foreground">Priority</Label>
           <Select
             value={formData.priority}
             onValueChange={(value) => handleInputChange("priority", value)}
           >
-            <SelectTrigger className="bg-[#202020] border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
+            <SelectTrigger className="bg-surface-card border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]">
+            <SelectContent className="bg-surface-subtle border-border text-foreground">
               {PRIORITY_LEVELS.map((priority) => (
                 <SelectItem
                   key={priority.value}
                   value={priority.value}
-                  className="focus:bg-[#2a2a2a]"
+                  className="focus:bg-surface-hover"
                 >
                   <priority.Icon className="w-3.5 h-3.5 mr-2" />
                   <span className={cn(priority.color, "font-medium")}>{priority.label}</span>
@@ -144,17 +144,17 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-300">Status</Label>
+          <Label className="text-sm font-medium text-muted-foreground">Status</Label>
           <Select
             value={formData.status}
             onValueChange={(value) => handleInputChange("status", value)}
           >
-            <SelectTrigger className="bg-[#202020] border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
+            <SelectTrigger className="bg-surface-card border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]">
+            <SelectContent className="bg-surface-subtle border-border text-foreground">
               {STATUS_OPTIONS.map((status) => (
-                <SelectItem key={status.value} value={status.value} className="focus:bg-[#2a2a2a]">
+                <SelectItem key={status.value} value={status.value} className="focus:bg-surface-hover">
                   {status.label}
                 </SelectItem>
               ))}
@@ -162,8 +162,8 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-300">
-            Progress <span className="text-zinc-500 text-xs">({formData.progress}%)</span>
+          <Label className="text-sm font-medium text-muted-foreground">
+            Progress <span className="text-foreground0 text-xs">({formData.progress}%)</span>
           </Label>
           <input
             type="range"
@@ -171,16 +171,16 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
             max="100"
             value={formData.progress}
             onChange={(e) => handleInputChange("progress", parseInt(e.target.value))}
-            className="w-full h-1.5 bg-[#2a2a2a] rounded-lg appearance-none cursor-pointer accent-[#ededed] mt-3"
+            className="w-full h-1.5 bg-surface-hover rounded-lg appearance-none cursor-pointer accent-[#ededed] mt-3"
           />
         </div>
       </div>
 
-      <Separator className="bg-[#2a2a2a]" />
+      <Separator className="bg-surface-hover" />
 
       {/* Tags */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-zinc-300">Tags</Label>
+        <Label className="text-sm font-medium text-muted-foreground">Tags</Label>
         <div className="flex flex-wrap gap-1.5">
           {TAG_PRESETS.map((tag) => (
             <button
@@ -191,7 +191,7 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
                 "px-2.5 py-1 rounded text-xs font-medium transition-all border",
                 formData.tags.includes(tag.id)
                   ? "bg-[#ededed] text-[#161616] border-[#ededed]"
-                  : "bg-[#202020] border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]"
+                  : "bg-surface-card border-border text-text-secondary hover:border-border-strong"
               )}
             >
               {tag.label}
@@ -202,12 +202,12 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
 
       {/* Assignees */}
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium text-zinc-300">Assignees</Label>
+        <Label className="text-sm font-medium text-muted-foreground">Assignees</Label>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between bg-[#202020] border-[#333333] text-white hover:bg-[#252525] h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
+              className="w-full justify-between bg-surface-card border-border text-white hover:bg-surface-active h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
             >
               <div className="flex items-center gap-2">
                 {formData.assignees.length > 0 ? (
@@ -218,7 +218,7 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
                         return (
                           <div
                             key={id}
-                            className="w-5 h-5 rounded-full bg-[#2a2a2a] flex items-center justify-center text-[10px] font-medium border border-[#202020]"
+                            className="w-5 h-5 rounded-full bg-surface-hover flex items-center justify-center text-[10px] font-medium border border-surface-card"
                           >
                             {member?.name.charAt(0)}
                           </div>
@@ -228,27 +228,27 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
                     <span className="text-sm">{formData.assignees.length} selected</span>
                   </>
                 ) : (
-                  <span className="text-[#525252]">Select team members</span>
+                  <span className="text-text-tertiary">Select team members</span>
                 )}
               </div>
               <ChevronDown className="h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]"
+            className="w-[var(--radix-dropdown-menu-trigger-width)] bg-surface-subtle border-border text-foreground"
             align="start"
           >
             <DropdownMenuLabel>Team Members</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[#2a2a2a]" />
+            <DropdownMenuSeparator className="bg-surface-hover" />
             {TEAM_MEMBERS.map((member) => (
               <DropdownMenuCheckboxItem
                 key={member.id}
                 checked={formData.assignees.includes(member.id)}
                 onCheckedChange={() => handleToggleAssignee(member.id)}
-                className="focus:bg-[#2a2a2a]"
+                className="focus:bg-surface-hover"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#2a2a2a] flex items-center justify-center text-xs">
+                  <div className="w-5 h-5 rounded-full bg-surface-hover flex items-center justify-center text-xs">
                     {member.name.charAt(0)}
                   </div>
                   <span className="text-sm">{member.name}</span>
@@ -262,36 +262,36 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
       {/* Project & Milestone Row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-300">Project</Label>
+          <Label className="text-sm font-medium text-muted-foreground">Project</Label>
           <Select
             value={formData.projectId || "none"}
             onValueChange={(value) => handleInputChange("projectId", value === "none" ? null : value)}
           >
-            <SelectTrigger className="bg-[#202020] border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
+            <SelectTrigger className="bg-surface-card border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
               <SelectValue placeholder="None" />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]">
-              <SelectItem value="none" className="focus:bg-[#2a2a2a]">No project</SelectItem>
-              <SelectItem value="proj_1" className="focus:bg-[#2a2a2a]">Marketing Website</SelectItem>
-              <SelectItem value="proj_2" className="focus:bg-[#2a2a2a]">Mobile App</SelectItem>
-              <SelectItem value="proj_3" className="focus:bg-[#2a2a2a]">Dashboard v2</SelectItem>
+            <SelectContent className="bg-surface-subtle border-border text-foreground">
+              <SelectItem value="none" className="focus:bg-surface-hover">No project</SelectItem>
+              <SelectItem value="proj_1" className="focus:bg-surface-hover">Marketing Website</SelectItem>
+              <SelectItem value="proj_2" className="focus:bg-surface-hover">Mobile App</SelectItem>
+              <SelectItem value="proj_3" className="focus:bg-surface-hover">Dashboard v2</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-300">Milestone</Label>
+          <Label className="text-sm font-medium text-muted-foreground">Milestone</Label>
           <Select
             value={formData.milestoneId || "none"}
             onValueChange={(value) => handleInputChange("milestoneId", value === "none" ? null : value)}
           >
-            <SelectTrigger className="bg-[#202020] border-[#333333] text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
+            <SelectTrigger className="bg-surface-card border-border text-white h-9 focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1">
               <SelectValue placeholder="None" />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#ededed]">
-              <SelectItem value="none" className="focus:bg-[#2a2a2a]">No milestone</SelectItem>
-              <SelectItem value="ms_1" className="focus:bg-[#2a2a2a]">MVP Launch</SelectItem>
-              <SelectItem value="ms_2" className="focus:bg-[#2a2a2a]">Beta Release</SelectItem>
-              <SelectItem value="ms_3" className="focus:bg-[#2a2a2a]">Production Deploy</SelectItem>
+            <SelectContent className="bg-surface-subtle border-border text-foreground">
+              <SelectItem value="none" className="focus:bg-surface-hover">No milestone</SelectItem>
+              <SelectItem value="ms_1" className="focus:bg-surface-hover">MVP Launch</SelectItem>
+              <SelectItem value="ms_2" className="focus:bg-surface-hover">Beta Release</SelectItem>
+              <SelectItem value="ms_3" className="focus:bg-surface-hover">Production Deploy</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -299,12 +299,12 @@ export function DetailsTab({ formData, handleInputChange, handleToggleTag, handl
 
       {/* Notes */}
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium text-zinc-300">Notes</Label>
+        <Label className="text-sm font-medium text-muted-foreground">Notes</Label>
         <Textarea
           placeholder="Additional notes..."
           value={formData.notes}
           onChange={(e) => handleInputChange("notes", e.target.value)}
-          className="bg-[#202020] border-[#333333] text-white min-h-[50px] resize-none text-sm focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
+          className="bg-surface-card border-border text-white min-h-[50px] resize-none text-sm focus-visible:ring-zinc-600 focus-visible:ring-offset-0 focus-visible:ring-1"
         />
       </div>
     </div>

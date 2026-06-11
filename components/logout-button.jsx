@@ -31,16 +31,16 @@ export function LogoutButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-zinc-400 hover:text-zinc-100 h-9 w-9"
+          className="text-muted-foreground hover:text-foreground h-9 w-9"
         >
           <LogOut className="h-4 w-4" />
           <span className="sr-only">Logout</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800">
+      <DialogContent className="sm:max-w-md bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="text-zinc-100">Sign out</DialogTitle>
-          <DialogDescription className="text-zinc-400">
+          <DialogTitle className="text-foreground">Sign out</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Are you sure you want to sign out of your account?
           </DialogDescription>
         </DialogHeader>
@@ -50,7 +50,7 @@ export function LogoutButton() {
             <Button
               type="button"
               variant="secondary"
-              className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border-zinc-700"
+              className="bg-surface-hover text-muted-foreground hover:bg-surface-strong hover:text-foreground border-border-strong"
             >
               Cancel
             </Button>

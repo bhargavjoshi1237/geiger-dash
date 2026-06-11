@@ -85,10 +85,10 @@ const BoardNode = ({ id, data, selected, dragging }) => {
             })()}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-zinc-200 font-medium text-sm truncate">
+            <span className="text-foreground font-medium text-sm truncate">
               {data.label || "Untitled Board"}
             </span>
-            <span className="text-zinc-500 text-[10px] uppercase tracking-wider font-semibold truncate">
+            <span className="text-foreground0 text-[10px] uppercase tracking-wider font-semibold truncate">
               {data.caption ? data.caption : "Double click to open"}
             </span>
           </div>

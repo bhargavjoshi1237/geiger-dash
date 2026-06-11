@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge'
 import { callLlmChat, extractJson, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =
-  'border-zinc-700 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-600'
+  'border-border-strong bg-background text-foreground placeholder:text-foreground0 focus-visible:ring-zinc-600'
 
 // Map a conventional-commit prefix to a changelog bucket.
 const PREFIX_MAP = [
@@ -281,7 +281,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
 
         <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
           <div className="space-y-1.5">
-            <Label className="text-xs text-zinc-400">Repository</Label>
+            <Label className="text-xs text-muted-foreground">Repository</Label>
             <Input
               value={repo}
               onChange={(e) => setRepo(e.target.value)}
@@ -291,9 +291,9 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs text-zinc-400">Branch</Label>
+            <Label className="text-xs text-muted-foreground">Branch</Label>
             <div className="relative">
-              <GitBranch className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+              <GitBranch className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground0" />
               <Input
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
@@ -307,7 +307,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
 
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <div className="space-y-1.5">
-            <Label className="text-xs text-zinc-400">GitHub token (optional — private repos / rate limits)</Label>
+            <Label className="text-xs text-muted-foreground">GitHub token (optional — private repos / rate limits)</Label>
             <Input
               type="password"
               value={token}
@@ -328,7 +328,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
           <>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground0" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -341,7 +341,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
               </Button>
             </div>
 
-            <ScrollArea className="h-[280px] rounded-md border border-zinc-800">
+            <ScrollArea className="h-[280px] rounded-md border border-border">
               <div className="divide-y divide-zinc-800/70">
                 {filtered.map((commit) => {
                   const isSelected = selected.has(commit.sha)
@@ -350,7 +350,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
                       key={commit.sha}
                       type="button"
                       onClick={() => toggle(commit.sha)}
-                      className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors hover:bg-zinc-800/50 ${
+                      className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover/50 ${
                         isSelected ? 'bg-indigo-500/10' : ''
                       }`}
                     >
@@ -364,9 +364,9 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
                         {isSelected && <Check className="h-3 w-3" />}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm text-zinc-100">{commit.title}</span>
-                        <span className="mt-0.5 flex items-center gap-2 text-[11px] text-zinc-500">
-                          <code className="rounded bg-zinc-800 px-1 text-zinc-400">{commit.shortSha}</code>
+                        <span className="block truncate text-sm text-foreground">{commit.title}</span>
+                        <span className="mt-0.5 flex items-center gap-2 text-[11px] text-foreground0">
+                          <code className="rounded bg-surface-hover px-1 text-muted-foreground">{commit.shortSha}</code>
                           <span className="truncate">{commit.author}</span>
                           {commit.date && <span>· {new Date(commit.date).toLocaleDateString()}</span>}
                         </span>
@@ -392,7 +392,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
             </ScrollArea>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <Badge variant="secondary" className="bg-zinc-800 text-zinc-300">
+              <Badge variant="secondary" className="bg-surface-hover text-muted-foreground">
                 {selected.size} selected
               </Badge>
               <div className="flex gap-2">

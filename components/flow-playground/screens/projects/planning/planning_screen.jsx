@@ -482,27 +482,27 @@ export function PlanningScreen() {
 
   return (
     <MainScreenWrapper className="max-w-none space-y-5">
-      <div className="border-b border-[#2a2a2a] pb-6">
-        <h1 className="text-3xl font-bold text-[#e7e7e7]">Planning</h1>
-        <p className="mt-1 text-[#a3a3a3]">
+      <div className="border-b border-border pb-6">
+        <h1 className="text-3xl font-bold text-foreground">Planning</h1>
+        <p className="mt-1 text-muted-foreground">
           Build multiple planning files, switch context instantly, and map dependencies on a shared canvas.
         </p>
       </div>
 
       <div className="grid min-h-[calc(100dvh-250px)] grid-cols-1 gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col rounded-2xl border border-[#2a2a2a] bg-[#131313] p-4">
+        <aside className="flex min-h-0 flex-col rounded-2xl border border-border bg-[#131313] p-4">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#737373]">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-secondary">
                 Planning files
               </p>
-              <p className="text-xs text-[#525252]">{planningFiles.length} total</p>
+              <p className="text-xs text-text-tertiary">{planningFiles.length} total</p>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleCreateFile}
-              className="h-8 w-8 border border-[#2a2a2a] text-[#737373] hover:bg-[#202020] hover:text-[#ededed]"
+              className="h-8 w-8 border border-border text-text-secondary hover:bg-surface-card hover:text-foreground"
               title="Create file"
             >
               <Plus className="h-4 w-4" />
@@ -529,8 +529,8 @@ export function PlanningScreen() {
                   className={cn(
                     "rounded-xl border p-3 transition-all",
                     isActive
-                      ? "border-[#3a3a3a] bg-[#1b1b1b]"
-                      : "border-[#222] bg-[#171717] hover:border-[#2e2e2e] hover:bg-[#1a1a1a]"
+                      ? "border-border-strong bg-[#1b1b1b]"
+                      : "border-[#222] bg-[#171717] hover:border-surface-dialog hover:bg-surface-subtle"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -553,7 +553,7 @@ export function PlanningScreen() {
                               }
                             }}
                             autoFocus
-                            className="h-7 w-full rounded-md border border-[#2f2f2f] bg-[#101010] px-2 text-sm text-[#ededed] outline-none focus:border-[#3f3f3f]"
+                            className="h-7 w-full rounded-md border border-[#2f2f2f] bg-[#101010] px-2 text-sm text-foreground outline-none focus:border-[#3f3f3f]"
                           />
                           <Button
                             variant="ghost"
@@ -563,7 +563,7 @@ export function PlanningScreen() {
                               event.stopPropagation();
                               handleCommitRename(file.id);
                             }}
-                            className="h-7 w-7 text-[#737373] hover:bg-[#242424] hover:text-[#ededed]"
+                            className="h-7 w-7 text-text-secondary hover:bg-surface-active hover:text-foreground"
                           >
                             <Check className="h-3.5 w-3.5" />
                           </Button>
@@ -575,15 +575,15 @@ export function PlanningScreen() {
                               event.stopPropagation();
                               handleCancelRename();
                             }}
-                            className="h-7 w-7 text-[#737373] hover:bg-[#242424] hover:text-[#ededed]"
+                            className="h-7 w-7 text-text-secondary hover:bg-surface-active hover:text-foreground"
                           >
                             <X className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       ) : (
                         <>
-                          <p className="truncate text-sm font-medium text-[#e7e7e7]">{file.name}</p>
-                          <p className="mt-0.5 text-[11px] text-[#525252]">
+                          <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+                          <p className="mt-0.5 text-[11px] text-text-tertiary">
                             {file.nodes.length} nodes / {file.edges.length} links
                           </p>
                         </>
@@ -599,7 +599,7 @@ export function PlanningScreen() {
                             event.stopPropagation();
                             handleStartRename(file);
                           }}
-                          className="h-7 w-7 text-[#525252] hover:bg-[#242424] hover:text-[#a3a3a3]"
+                          className="h-7 w-7 text-text-tertiary hover:bg-surface-active hover:text-muted-foreground"
                           title="Rename file"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -611,7 +611,7 @@ export function PlanningScreen() {
                             event.stopPropagation();
                             handleDuplicateFile(file.id);
                           }}
-                          className="h-7 w-7 text-[#525252] hover:bg-[#242424] hover:text-[#a3a3a3]"
+                          className="h-7 w-7 text-text-tertiary hover:bg-surface-active hover:text-muted-foreground"
                           title="Duplicate file"
                         >
                           <Copy className="h-3.5 w-3.5" />
@@ -624,7 +624,7 @@ export function PlanningScreen() {
                             event.stopPropagation();
                             handleDeleteFile(file.id);
                           }}
-                          className="h-7 w-7 text-[#525252] hover:bg-red-500/10 hover:text-red-400 disabled:opacity-35"
+                          className="h-7 w-7 text-text-tertiary hover:bg-red-500/10 hover:text-red-400 disabled:opacity-35"
                           title="Delete file"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -644,29 +644,29 @@ export function PlanningScreen() {
             })}
           </div>
 
-          <div className="mt-4 rounded-xl border border-[#242424] bg-[#171717] p-3">
-            <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#737373]">
+          <div className="mt-4 rounded-xl border border-surface-active bg-[#171717] p-3">
+            <div className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-text-secondary">
               <Layers3 className="h-3.5 w-3.5" />
               Active summary
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg border border-[#242424] bg-[#151515] py-2">
-                <p className="text-[10px] uppercase tracking-widest text-[#525252]">Files</p>
-                <p className="mt-1 text-sm font-semibold text-[#e7e7e7]">{activeSummary.files}</p>
+              <div className="rounded-lg border border-surface-active bg-[#151515] py-2">
+                <p className="text-[10px] uppercase tracking-widest text-text-tertiary">Files</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{activeSummary.files}</p>
               </div>
-              <div className="rounded-lg border border-[#242424] bg-[#151515] py-2">
-                <p className="text-[10px] uppercase tracking-widest text-[#525252]">Nodes</p>
-                <p className="mt-1 text-sm font-semibold text-[#e7e7e7]">{activeSummary.nodes}</p>
+              <div className="rounded-lg border border-surface-active bg-[#151515] py-2">
+                <p className="text-[10px] uppercase tracking-widest text-text-tertiary">Nodes</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{activeSummary.nodes}</p>
               </div>
-              <div className="rounded-lg border border-[#242424] bg-[#151515] py-2">
-                <p className="text-[10px] uppercase tracking-widest text-[#525252]">Links</p>
-                <p className="mt-1 text-sm font-semibold text-[#e7e7e7]">{activeSummary.edges}</p>
+              <div className="rounded-lg border border-surface-active bg-[#151515] py-2">
+                <p className="text-[10px] uppercase tracking-widest text-text-tertiary">Links</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{activeSummary.edges}</p>
               </div>
             </div>
           </div>
         </aside>
 
-        <div className="relative min-h-0 overflow-hidden rounded-2xl border border-[#2a2a2a] bg-[#141414]">
+        <div className="relative min-h-0 overflow-hidden rounded-2xl border border-border bg-surface-dialog">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(148,163,184,0.15),transparent_38%),radial-gradient(circle_at_95%_100%,rgba(59,130,246,0.12),transparent_42%)]" />
 
           <div className="relative h-full min-h-[560px]">
@@ -689,7 +689,7 @@ export function PlanningScreen() {
               proOptions={proOptions}
               deleteKeyCode={["Backspace", "Delete"]}
               multiSelectionKeyCode="Shift"
-              className="bg-[#161616]"
+              className="bg-background"
               defaultEdgeOptions={{
                 type: "center",
                 markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
@@ -698,7 +698,7 @@ export function PlanningScreen() {
               <Background color="#2a2a2a" gap={24} size={1} />
               <Controls
                 showInteractive={false}
-                className="!bg-[#1e1e1e] !border-[#2a2a2a] !rounded-lg [&>button]:!bg-[#1e1e1e] [&>button]:!border-[#2a2a2a] [&>button]:!text-[#737373] [&>button:hover]:!bg-[#2a2a2a] [&>button:hover]:!text-[#e7e7e7] [&>button]:!border-b [&>button:last-child]:!border-b-0"
+                className="!bg-[#1e1e1e] !border-border !rounded-lg [&>button]:!bg-[#1e1e1e] [&>button]:!border-border [&>button]:!text-text-secondary [&>button:hover]:!bg-surface-hover [&>button:hover]:!text-foreground [&>button]:!border-b [&>button:last-child]:!border-b-0"
               />
               <Panel position="top-center" className="!m-0 !p-0 pt-3">
                 <PlanningToolbar

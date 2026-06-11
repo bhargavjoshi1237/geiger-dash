@@ -239,10 +239,10 @@ export function VaultScreen() {
   return (
     <MainScreenWrapper>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-6">
+      <div className="flex items-center justify-between border-b border-border pb-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#e7e7e7]">Vault</h1>
-          <p className="text-[#a3a3a3] mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Vault</h1>
+          <p className="text-muted-foreground mt-1">
             Manage your assets and store them securely.
           </p>
         </div>
@@ -269,7 +269,7 @@ export function VaultScreen() {
               setEditingItem(null);
               setDialogOpen(true);
             }}
-            className="bg-[#e7e7e7] hover:bg-zinc-200 text-black px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors"
           >
             <Plus className="w-4 h-4 text-black font-bold stroke-[3]" />
             Add Secret
@@ -280,12 +280,12 @@ export function VaultScreen() {
       {/* Search and Filters */}
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#737373]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
           <Input
             placeholder="Search secrets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="!pl-10 !pr-4 !py-[7px] bg-[#1a1a1a] border-[#2a2a2a] text-white text-sm placeholder:text-[#737373] focus-visible:ring-0 focus-visible:border-[#474747]"
+            className="!pl-10 !pr-4 !py-[7px] bg-surface-subtle border-border text-white text-sm placeholder:text-text-secondary focus-visible:ring-0 focus-visible:border-border-strong"
           />
         </div>
         <FilterDropdown
@@ -299,16 +299,16 @@ export function VaultScreen() {
 
       {/* Vault Items Grid */}
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-[#2a2a2a] rounded-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4">
+        <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-border rounded-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-surface-subtle flex items-center justify-center mb-4">
             <Key className="w-7 h-7 text-[#474747]" strokeWidth={1.5} />
           </div>
-          <p className="text-[#a3a3a3] font-medium mb-1">
+          <p className="text-muted-foreground font-medium mb-1">
             {searchQuery || filterType !== "all"
               ? "No secrets found"
               : "No secrets yet"}
           </p>
-          <p className="text-[#737373] text-sm">
+          <p className="text-text-secondary text-sm">
             {searchQuery || filterType !== "all"
               ? "Try adjusting your search or filters"
               : "Add your first secret to get started"}

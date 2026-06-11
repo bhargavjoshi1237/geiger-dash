@@ -5,15 +5,15 @@ import { PenLine, Plus } from "lucide-react";
 
 export default function Topbar({ onNewBoard }) {
   return (
-    <header className="sticky top-0 z-40 flex items-center gap-4 px-6 h-14 bg-[#161616] border-b border-[#2a2a2a] shrink-0">
+    <header className="sticky top-0 z-40 flex items-center gap-4 px-6 h-14 bg-background border-b border-border shrink-0">
       {/* Branding */}
       <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-        <div className="w-7 h-7 rounded-lg bg-[#2a2a2a] border border-[#333333] flex items-center justify-center group-hover:border-[#474747] transition-colors">
-          <PenLine className="w-3.5 h-3.5 text-[#a3a3a3]" />
+        <div className="w-7 h-7 rounded-lg bg-surface-hover border border-border flex items-center justify-center group-hover:border-border-strong transition-colors">
+          <PenLine className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
-        <span className="text-sm font-semibold text-[#e7e7e7] tracking-tight">
+        <span className="text-sm font-semibold text-foreground tracking-tight">
           Geiger{" "}
-          <span className="text-[#737373] font-normal">Canvas</span>
+          <span className="text-text-secondary font-normal">Canvas</span>
         </span>
       </Link>
 
@@ -22,7 +22,7 @@ export default function Topbar({ onNewBoard }) {
       {/* New board button */}
       <button
         onClick={onNewBoard}
-        className="flex items-center gap-2 bg-[#e7e7e7] hover:bg-white text-[#161616] px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+        className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors"
       >
         <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
         New Board

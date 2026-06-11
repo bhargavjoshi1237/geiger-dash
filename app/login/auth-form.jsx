@@ -46,34 +46,34 @@ export function AuthForm({ next }) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-zinc-100">
+    <div className="flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
       <div className="w-full max-w-[400px] space-y-6 text-center relative z-10">
         <div className="space-y-2 mb-8">
           <h1 className="text-2xl font-medium tracking-tight text-white">
             Welcome to Geiger
           </h1>
-          <p className="text-zinc-500 font-medium text-lg">
+          <p className="text-foreground0 font-medium text-lg">
             The better way to manage work.
           </p>
         </div>
 
         <div className="space-y-3">
           <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-zinc-800 bg-black hover:bg-zinc-900 text-white h-10 px-4 w-full relative"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-border bg-black hover:bg-surface-subtle text-white h-10 px-4 w-full relative"
             type="button"
           >
             <GoogleIcon className="mr-2 h-4 w-4" />
             Continue with Google
           </button>
           <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-zinc-800 bg-black hover:bg-zinc-900 text-white h-10 px-4 w-full relative"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-border bg-black hover:bg-surface-subtle text-white h-10 px-4 w-full relative"
             type="button"
           >
             <Github className="mr-2 h-4 w-4" />
             Continue with GitHub
           </button>
           <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-zinc-800 bg-black hover:bg-zinc-900 text-white h-10 px-4 w-full relative"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 border border-border bg-black hover:bg-surface-subtle text-white h-10 px-4 w-full relative"
             type="button"
           >
             <Apple className="mr-2 h-4 w-4" />
@@ -92,7 +92,7 @@ export function AuthForm({ next }) {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs text-zinc-500 font-medium ml-1">
+            <label className="text-xs text-foreground0 font-medium ml-1">
               Email
             </label>
             <input
@@ -102,7 +102,7 @@ export function AuthForm({ next }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus-visible:outline-none focus-visible:border-zinc-600 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              className="flex h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-muted-foreground placeholder:text-text-tertiary focus-visible:outline-none focus-visible:border-zinc-600 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             />
           </div>
 
@@ -119,7 +119,7 @@ export function AuthForm({ next }) {
                 type="password"
                 placeholder="Your password"
                 required={showPassword}
-                className="flex h-10 w-full rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus-visible:outline-none focus-visible:border-zinc-600 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className="flex h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-muted-foreground placeholder:text-text-tertiary focus-visible:outline-none focus-visible:border-zinc-600 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               />
             </div>
           </div>
@@ -132,7 +132,7 @@ export function AuthForm({ next }) {
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 h-10 px-8 w-full relative overflow-hidden group border border-zinc-800"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-surface-subtle text-foreground hover:bg-surface-hover h-10 px-8 w-full relative overflow-hidden group border border-border"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -146,11 +146,11 @@ export function AuthForm({ next }) {
           </button>
         </form>
 
-        <p className="text-center text-xs text-zinc-500 mt-8">
+        <p className="text-center text-xs text-foreground0 mt-8">
           Don&apos;t have an account?{" "}
           <a
             href="#"
-            className="text-zinc-400 hover:text-white transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Sign up
           </a>

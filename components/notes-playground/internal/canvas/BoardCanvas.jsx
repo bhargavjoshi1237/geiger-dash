@@ -27,6 +27,7 @@ export default function BoardCanvas({
   breadcrumbs,
   onBreadcrumbClick,
 }) {
+  const { resolvedTheme } = useTheme();
   const {
     nodes,
     edges,
@@ -317,9 +318,9 @@ export default function BoardCanvas({
   );
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#161616] text-white">
+    <div className="relative h-screen w-screen overflow-hidden bg-background text-foreground">
       <div
-        className={`absolute inset-0 z-10 bg-[#161616] transition-opacity duration-700 pointer-events-none ${
+        className={`absolute inset-0 z-10 bg-background transition-opacity duration-700 pointer-events-none ${
           !isInitialized || isLoading ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -346,9 +347,9 @@ export default function BoardCanvas({
           onNodeDoubleClick={onNodeDoubleClick}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          colorMode="dark"
+          colorMode={resolvedTheme === "dark" ? "dark" : "light"}
           defaultViewport={viewport}
-          className="bg-[#161616] touch-none"
+          className="bg-background touch-none"
           proOptions={{ hideAttribution: true }}
           minZoom={0.1}
           maxZoom={2}
@@ -360,7 +361,7 @@ export default function BoardCanvas({
           zoomOnDoubleClick={false}
           selectionMode={SelectionMode.Partial}
         >
-          <Background color="#373737" gap={12} size={1} variant="dots" />
+          <Background color="var(--canvas-dots)" gap={12} size={1} variant="dots" />
         </ReactFlow>
       </div>
 
@@ -391,10 +392,10 @@ export default function BoardCanvas({
       </div>
 
       <div className={`absolute bottom-4 z-50 transition-all duration-300 ${sidebarOpen ? "left-20" : "left-4"}`}>
-        <div className="flex flex-col bg-[#333333]/60 backdrop-blur-md rounded-lg shadow-xl border border-zinc-700/50 overflow-hidden">
+        <div className="flex flex-col bg-surface-strong/60 backdrop-blur-md rounded-lg shadow-xl border border-border-strong/50 overflow-hidden">
           <button
             onClick={() => rfInstance?.zoomIn({ duration: 300 })}
-            className="p-2 hover:bg-zinc-700/60 text-zinc-400 hover:text-white transition-colors border-b border-zinc-700/50"
+            className="p-2 hover:bg-surface-strong/60 text-muted-foreground hover:text-foreground transition-colors border-b border-border-strong/50"
             title="Zoom In"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -404,7 +405,7 @@ export default function BoardCanvas({
           </button>
           <button
             onClick={() => rfInstance?.zoomOut({ duration: 300 })}
-            className="p-2 hover:bg-zinc-700/60 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 hover:bg-surface-strong/60 text-muted-foreground hover:text-foreground transition-colors"
             title="Zoom Out"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -146,7 +146,7 @@ export function GeneralSettingsScreen() {
       {/* Example 2: Banner + icon + text + trailing button */}
       <IconButtonCard
         classNames={{
-          container: "bg-[#161616] shadow-none",
+          container: "bg-background shadow-none",
         }}
         banner="Project usage"
         icon={<BarChart2 className="w-5 h-5" />}

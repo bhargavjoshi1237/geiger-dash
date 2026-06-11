@@ -112,7 +112,7 @@ const CustomNode = ({ id, data, selected, dragging }) => {
           {selected ? (
             <TextEditingTrait className="w-full h-full block">
               <textarea
-                className="w-full h-full p-4 bg-transparent resize-none outline-none text-zinc-300 placeholder:text-zinc-600 font-sans"
+                className="w-full h-full p-4 bg-transparent resize-none outline-none text-muted-foreground placeholder:text-text-tertiary font-sans"
                 placeholder="Start typing..."
                 value={data.label || ""}
                 onChange={(evt) => {
@@ -145,7 +145,7 @@ const CustomNode = ({ id, data, selected, dragging }) => {
           ) : (
             <p
               className={`font-sans p-4 whitespace-pre-wrap w-full ${
-                data.label ? "text-zinc-300" : "text-zinc-500"
+                data.label ? "text-muted-foreground" : "text-foreground0"
               }`}
               style={{
                 fontWeight: data.bold ? "bold" : "normal",

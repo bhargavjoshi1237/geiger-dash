@@ -31,10 +31,10 @@ export default function BoardCard({ board, projectName, onDelete }) {
         board.elements !== "null";
 
   return (
-    <div className="group relative flex flex-col rounded-2xl bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#474747] transition-all duration-200 overflow-hidden hover:-translate-y-0.5">
+    <div className="group relative flex flex-col rounded-2xl bg-surface-subtle border border-border hover:border-border-strong transition-all duration-200 overflow-hidden hover:-translate-y-0.5">
       {/* Preview area */}
       <Link href={`/board/${board.id}`} className="block">
-        <div className="h-32 bg-[#202020] border-b border-[#2a2a2a] flex items-center justify-center relative overflow-hidden">
+        <div className="h-32 bg-surface-card border-b border-border flex items-center justify-center relative overflow-hidden">
           {/* Dot grid pattern */}
           <div
             className="absolute inset-0"
@@ -47,7 +47,7 @@ export default function BoardCard({ board, projectName, onDelete }) {
           <div className="relative z-10 flex flex-col items-center gap-2">
             <Layout className="w-8 h-8 text-[#333333]" />
             {hasElements && (
-              <span className="text-[10px] text-[#525252] font-mono">
+              <span className="text-[10px] text-text-tertiary font-mono">
                 has content
               </span>
             )}
@@ -59,7 +59,7 @@ export default function BoardCard({ board, projectName, onDelete }) {
       <div className="flex flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <Link href={`/board/${board.id}`} className="flex-1 min-w-0">
-            <h3 className="text-[#e7e7e7] font-medium text-sm leading-snug truncate hover:text-white transition-colors">
+            <h3 className="text-foreground font-medium text-sm leading-snug truncate hover:text-foreground transition-colors">
               {board.name || "Untitled Board"}
             </h3>
           </Link>
@@ -68,7 +68,7 @@ export default function BoardCard({ board, projectName, onDelete }) {
           <div className="relative shrink-0">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded-md hover:bg-[#2a2a2a] text-[#525252] hover:text-[#e7e7e7] transition-colors opacity-0 group-hover:opacity-100"
+              className="p-1 rounded-md hover:bg-surface-hover text-text-tertiary hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
             >
               <MoreVertical className="w-4 h-4" />
             </button>
@@ -79,19 +79,19 @@ export default function BoardCard({ board, projectName, onDelete }) {
                   className="fixed inset-0 z-10"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-[#2e2e2e] border border-[#333333] rounded-xl overflow-hidden shadow-2xl py-1">
+                <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-surface-dialog border border-border rounded-xl overflow-hidden shadow-2xl py-1">
                   <Link
                     href={`/board/${board.id}`}
-                    className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#a3a3a3] hover:bg-[#333333] hover:text-[#e7e7e7] transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:bg-surface-strong hover:text-foreground transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     Open Board
                   </Link>
-                  <div className="my-1 border-t border-[#333333]" />
+                  <div className="my-1 border-t border-border" />
                   <button
                     onClick={handleDelete}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-[#333333] transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-surface-strong transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     Delete Board
@@ -105,18 +105,18 @@ export default function BoardCard({ board, projectName, onDelete }) {
         {/* Meta */}
         <div className="flex items-center gap-2 flex-wrap">
           {projectName && (
-            <span className="flex items-center gap-1 text-[10px] text-[#737373] bg-[#242424] px-2 py-0.5 rounded-full border border-[#2a2a2a]">
+            <span className="flex items-center gap-1 text-[10px] text-text-secondary bg-surface-active px-2 py-0.5 rounded-full border border-border">
               <FolderOpen className="w-2.5 h-2.5" />
               {projectName}
             </span>
           )}
-          <span className="text-[10px] text-[#525252]">
+          <span className="text-[10px] text-text-tertiary">
             Updated {timeAgo}
           </span>
         </div>
 
         {board.description && (
-          <p className="text-[11px] text-[#737373] line-clamp-1">
+          <p className="text-[11px] text-text-secondary line-clamp-1">
             {board.description}
           </p>
         )}

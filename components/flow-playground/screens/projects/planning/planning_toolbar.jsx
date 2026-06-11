@@ -56,16 +56,16 @@ export function PlanningToolbar({
   activeFileName = "Planning file",
 }) {
   return (
-    <div className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-2xl border border-[#2a2a2a] bg-[#1b1b1b]/95 p-1.5 shadow-2xl shadow-black/20 backdrop-blur">
-      <div className="hidden xl:flex items-center gap-2 border-r border-[#2a2a2a] px-3 pr-4">
-        <div className="flex size-8 items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#161616]">
-          <Layers3 className="size-4 text-[#a3a3a3]" />
+    <div className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-2xl border border-border bg-[#1b1b1b]/95 p-1.5 shadow-2xl shadow-black/20 backdrop-blur">
+      <div className="hidden xl:flex items-center gap-2 border-r border-border px-3 pr-4">
+        <div className="flex size-8 items-center justify-center rounded-xl border border-border bg-background">
+          <Layers3 className="size-4 text-muted-foreground" />
         </div>
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-[#737373]">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-text-secondary">
             Active file
           </p>
-          <p className="max-w-[220px] truncate text-sm font-medium text-[#ededed]">
+          <p className="max-w-[220px] truncate text-sm font-medium text-foreground">
             {activeFileName}
           </p>
         </div>
@@ -80,7 +80,7 @@ export function PlanningToolbar({
               key={nodeType.type}
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+              className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
               onClick={() => onAddNode(nodeType)}
               title={`Add ${nodeType.label}`}
             >
@@ -90,11 +90,11 @@ export function PlanningToolbar({
         })}
       </div>
 
-      <div className="flex items-center gap-0.5 border-l border-[#2a2a2a] px-1 pl-2">
+      <div className="flex items-center gap-0.5 border-l border-border px-1 pl-2">
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
           onClick={onCreateFile}
           title="Create new file"
         >
@@ -103,7 +103,7 @@ export function PlanningToolbar({
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
           onClick={onDuplicateFile}
           title="Duplicate active file"
         >
@@ -112,7 +112,7 @@ export function PlanningToolbar({
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed] disabled:opacity-40"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground disabled:opacity-40"
           onClick={onDeleteFile}
           title="Delete active file"
           disabled={!canDeleteFile}
@@ -121,23 +121,23 @@ export function PlanningToolbar({
         </Button>
       </div>
 
-      <div className="flex items-center gap-0.5 border-l border-[#2a2a2a] px-1 pl-2">
+      <div className="flex items-center gap-0.5 border-l border-border px-1 pl-2">
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
           onClick={onZoomOut}
           title="Zoom out"
         >
           <ZoomOut className="size-4" />
         </Button>
-        <span className="w-12 select-none text-center font-mono text-[11px] text-[#737373]">
+        <span className="w-12 select-none text-center font-mono text-[11px] text-text-secondary">
           {Math.round(zoomLevel * 100)}%
         </span>
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
           onClick={onZoomIn}
           title="Zoom in"
         >
@@ -146,7 +146,7 @@ export function PlanningToolbar({
         <Button
           variant="ghost"
           size="icon-sm"
-          className="h-8 w-8 border border-transparent p-0 text-[#737373] hover:border-[#2f2f2f] hover:bg-[#242424] hover:text-[#ededed]"
+          className="h-8 w-8 border border-transparent p-0 text-text-secondary hover:border-[#2f2f2f] hover:bg-surface-active hover:text-foreground"
           onClick={onFitView}
           title="Fit to view"
         >

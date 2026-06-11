@@ -17,10 +17,10 @@ export default function JoinTab({
         <div className="text-center space-y-5 animate-in fade-in -mt-10">
           <LucideLogIn className="w-8 h-8 opacity-20 ml-auto mr-auto" />
           <div className="space-y-1">
-            <h3 className="text-md font-semibold text-zinc-100">
+            <h3 className="text-md font-semibold text-foreground">
               Session Active
             </h3>
-            <p className="text-xs text-zinc-500 max-w-[260px] mx-auto">
+            <p className="text-xs text-foreground0 max-w-[260px] mx-auto">
               You are currently in a session. Leave the current session to join
               another.
             </p>
@@ -31,10 +31,10 @@ export default function JoinTab({
           <div className="space-y-5">
             <LucideLogIn className="w-8 h-8 opacity-20 ml-auto mr-auto" />
             <div className="space-y-1">
-              <h3 className="text-md font-semibold text-zinc-100">
+              <h3 className="text-md font-semibold text-foreground">
                 Join a Session
               </h3>
-              <p className="text-xs text-zinc-500 w-full  mx-auto">
+              <p className="text-xs text-foreground0 w-full  mx-auto">
                 Enter a session code to join a live collaborative workspace.
               </p>
             </div>
@@ -47,10 +47,10 @@ export default function JoinTab({
               value={sessionCodeInput}
               onChange={(e) => setSessionCodeInput(e.target.value)}
               className={cn(
-                "w-full bg-zinc-900 border rounded-md px-3 py-2 text-sm text-center text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors font-mono uppercase",
+                "w-full bg-surface-subtle border rounded-md px-3 py-2 text-sm text-center text-foreground placeholder:text-text-tertiary focus:outline-none focus:border-border-strong transition-colors font-mono uppercase",
                 joinError
                   ? "border-red-500/50 focus:border-red-500"
-                  : "border-zinc-800",
+                  : "border-border",
               )}
             />
             {joinError && <p className="text-xs text-red-400">{joinError}</p>}

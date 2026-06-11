@@ -5,6 +5,7 @@ import "@excalidraw/excalidraw/index.css";
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Save, Check, FolderOpen } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // ── Lazy-load Excalidraw (browser-only, no SSR) ──────────────────────────────
 const ExcalidrawComponent = dynamic(
@@ -18,7 +19,7 @@ const ExcalidrawComponent = dynamic(
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          <p className="text-sm text-[#737373]">Loading canvas…</p>
+          <p className="text-sm text-text-secondary">Loading canvas…</p>
         </div>
       </div>
     ),
@@ -29,7 +30,7 @@ const ExcalidrawComponent = dynamic(
 function SaveStatus({ status }) {
   if (status === "saving")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+      <span className="flex items-center gap-1.5 text-xs text-text-secondary">
         <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
           <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
@@ -39,13 +40,13 @@ function SaveStatus({ status }) {
     );
   if (status === "saved")
     return (
-      <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+      <span className="flex items-center gap-1.5 text-xs text-text-secondary">
         <Check className="w-3 h-3 text-[#10b981]" />
         Saved locally
       </span>
     );
   return (
-    <span className="flex items-center gap-1.5 text-xs text-[#737373]">
+    <span className="flex items-center gap-1.5 text-xs text-text-secondary">
       <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block" />
       Unsaved changes
     </span>
@@ -54,6 +55,8 @@ function SaveStatus({ status }) {
 
 // ── Main editor component ─────────────────────────────────────────────────────
 export default function CanvasPlaygroundEditor() {
+  const { resolvedTheme } = useTheme();
+  const colorMode = resolvedTheme === "dark" ? "dark" : "light";
   const [saveStatus, setSaveStatus] = useState("saved");
   const [boardName, setBoardName] = useState("Geiger Canvas Demo");
   
@@ -266,15 +269,19 @@ export default function CanvasPlaygroundEditor() {
         verticalAlign: "top"
       }
     ],
-    appState: { theme: "dark", zoom: { value: 0.75 } },
+    appState: { theme: colorMode, zoom: { value: 0.75 } },
     files: {},
     scrollToContent: true,
   };
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden bg-[#161616]">
+    <div className="flex flex-col h-full w-full overflow-hidden bg-background">
       <div className="flex-1 relative excalidraw-wrapper">
-        <ExcalidrawComponent initialData={initialData} onChange={handleChange} />
+        <ExcalidrawComponent
+          initialData={initialData}
+          theme={colorMode}
+          onChange={handleChange}
+        />
       </div>
     </div>
   );

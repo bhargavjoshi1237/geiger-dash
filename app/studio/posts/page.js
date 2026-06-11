@@ -37,7 +37,7 @@ export default async function StudioPostsPage({ searchParams }) {
   ])
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-6 text-zinc-100 sm:px-6 lg:py-10">
+    <div className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 lg:py-10">
       <div className="mx-auto max-w-7xl">
         <ContentStudio
           categories={categories || []}
