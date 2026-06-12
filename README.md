@@ -4,6 +4,7 @@ Geiger Assets (Assets Manager) -------- Handles Assets Up-Down, GoogleDrive Link
 
 Geiger Notes (Canvas/Board Notes) -------- Visual, Free-Form Canvas, Drag & Drop and Visual Organisation. (https://github.com/bhargavjoshi1237/geiger) JS,JSX
 
+Geiger Content -------- Served through the parent app at `/content` and proxied to `https://geigercontent.vercel.app/content`.
 
 Do Not Commit In Main Branch, Linked TO Auto Deploy Vercel Triggers Build For All 3 Repositorys, Costs Build Munites!
 
