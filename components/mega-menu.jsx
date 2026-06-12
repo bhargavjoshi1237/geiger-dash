@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -59,6 +59,12 @@ export function MegaMenu({ userId }) {
       label: "Events",
       description: "Schedule and manage events.",
       href: "/events",
+    },
+    {
+      icon: Library,
+      label: "Content",
+      description: "Create and organize content.",
+      href: "/content",
     },
     {
       icon: Megaphone,

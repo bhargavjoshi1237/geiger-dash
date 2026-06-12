@@ -29,6 +29,7 @@ export default function Footer() {
               <li><Link href="/office" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Office</Link></li>
               <li><Link href="/forms" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Forms</Link></li>
               <li><Link href="/events" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Events</Link></li>
+              <li><Link href="/content" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Content</Link></li>
               <li><Link href="/campaign" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Campaign</Link></li>
               <li><Link href="/chat" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Chat</Link></li>
               <li><Link href="/canvas" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Canvas</Link></li>
