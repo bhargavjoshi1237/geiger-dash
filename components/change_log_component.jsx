@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ChangelogWidget from "./changelog_widget";
-import { createClient } from "@/utils/supabase/server";
+import { getHomepageChangelogs } from "@/lib/public-content/queries";
 
 function formatReleaseDate(value) {
   if (!value) return "TBD";
@@ -16,13 +16,7 @@ function formatReleaseDate(value) {
 }
 
 export default async function ChangeLogComponent() {
-  const supabase = await createClient();
-
-  const { data: changelogs } = await supabase
-    .from("dash_changelog")
-    .select("id, title, release_date")
-    .order("release_date", { ascending: false })
-    .limit(3);
+  const changelogs = await getHomepageChangelogs();
 
   return (
     <div className="w-full flex flex-col items-center">

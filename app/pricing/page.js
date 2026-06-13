@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Check, X, Zap, Crown, Diamond, HelpCircle, Sparkles } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Footer from "@/components/footer";
 import { PlanCards } from "@/components/pricing/plan_cards";
 
@@ -106,24 +105,30 @@ export default async function PricingPage() {
       <Header />
 
       {/* MAIN CONTENT */}
-      <main className="relative z-10 pt-20 pb-16 px-4 sm:px-6">
-        <div className="w-full lg:w-[75%] mx-auto">
+      <main className="relative z-10 px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
+        <div className="mx-auto w-full max-w-6xl">
           {/* Page Header */}
-          <div className="text-center mb-24">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-b from-[#e7e7e7] to-[#a3a3a3] bg-clip-text text-transparent">
-             Pricing
-            </h1>
-            {/* <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Start building for free, collaborate with your team, then scale to millions of users
-            </p> */}
+          <div className="mb-16 grid gap-8 border-b border-border/70 pb-10 lg:grid-cols-[1fr_0.65fr] lg:items-end">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-10 bg-foreground" />
+                <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Pricing</span>
+              </div>
+              <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+                Start small. Keep every door open.
+              </h1>
+            </div>
+            <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">
+              One connected workspace for planning, creating, and shipping. Scale storage and collaboration only when you need it.
+            </p>
           </div>
 
           <PlanCards ctaHref={ctaHref} />
 
           {/* Compare Plans Section */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-foreground flex items-center gap-3">
-              Compare Plans
+            <h2 className="mb-8 flex items-center gap-3 text-2xl font-semibold tracking-tight text-foreground">
+              Compare plans
               <Badge variant="outline" className="text-xs border-border text-text-secondary">
                 Feature Matrix
               </Badge>

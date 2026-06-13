@@ -20,7 +20,7 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="font-bold text-foreground mb-4">Products</h4>
+            <h2 className="font-bold text-foreground mb-4">Products</h2>
             <ul className="space-y-3">
               <li><Link href="/notes" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Notes</Link></li>
               <li><Link href="/flow" className="hover:text-foreground transition-colors text-muted-foreground text-sm">Geiger Flow</Link></li>
@@ -38,30 +38,31 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Resources</h4>
+            <h2 className="font-bold text-foreground mb-4">Resources</h2>
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
               <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
               <li><Link href="#" className="hover:text-foreground transition-colors">Help Center</Link></li>
               <li><Link href="#" className="hover:text-foreground transition-colors">Community</Link></li>
-              <li><Link href="#" className="hover:text-foreground transition-colors">Contact Support</Link></li>
+              <li><a href="mailto:support@geiger.studio" className="hover:text-foreground transition-colors">Contact Support</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-foreground mb-4">Company</h4>
+            <h2 className="font-bold text-foreground mb-4">Company</h2>
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
               <li><Link href="#" className="hover:text-foreground transition-colors">About</Link></li>
               <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               <li><Link href="#" className="hover:text-foreground transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-foreground transition-colors">Legal</Link></li>
+              <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
+              <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
             </ul>
           </div>
         </div>
         <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-foreground0">
           <p>&copy; {new Date().getFullYear()} Geiger Studios. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-muted-foreground transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-muted-foreground transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-muted-foreground transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-muted-foreground transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

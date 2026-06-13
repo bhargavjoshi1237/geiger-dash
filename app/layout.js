@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SystemFavicon } from "@/components/system-favicon";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +21,6 @@ export const metadata = {
     template: "%s | Geiger Studios",
   },
   description: "Geiger Studios is a suite of tools for teams to plan, create, and collaborate. Built to Manage. Designed to Create",
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title: "Geiger Studios",
     description: "Geiger Studios is a suite of tools for teams to plan, create, and collaborate. Built to Manage. Designed to Create",
@@ -37,6 +36,7 @@ export default function RootLayout({ children }) {
       <body suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SystemFavicon />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -44,6 +44,7 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

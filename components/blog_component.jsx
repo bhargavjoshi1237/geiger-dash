@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Calendar } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { getHomepageBlogPosts } from "@/lib/public-content/queries";
 
 const placeholderImages = [
   "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-cc24ca462279ca23250c.jpg",
@@ -24,15 +24,7 @@ function getPostImage(post, index) {
 }
 
 export default async function BlogComponent() {
-  const supabase = await createClient();
-  const latestPostsLimit = 3;
-
-  const { data: posts } = await supabase
-    .from("dash_blog_posts")
-    .select("id,title,excerpt,slug,category,featured_image,published_at,reading_time_minutes")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false })
-    .limit(latestPostsLimit);
+  const posts = await getHomepageBlogPosts();
 
   return (
     <div className="w-full flex flex-col items-center">

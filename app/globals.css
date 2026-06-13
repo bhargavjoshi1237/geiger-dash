@@ -81,11 +81,6 @@
 
 :root {
   --radius: 0.625rem;
-  --input-box-radius: 6px;
-  --input-box-padding-x: 14px;
-  --input-box-padding-y: 10px;
-  --input-box-icon-gap: 8px;
-  --input-box-label-gap: 10px;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -250,4 +245,42 @@
 
 .docs-scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+.legal-content {
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.legal-content h2 {
+  margin-top: 2.5rem;
+  color: var(--foreground);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.legal-content h2:first-child {
+  margin-top: 0;
+}
+
+.legal-content p,
+.legal-content ul {
+  margin-top: 0.85rem;
+}
+
+.legal-content ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.legal-content li + li {
+  margin-top: 0.45rem;
+}
+
+.legal-content a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

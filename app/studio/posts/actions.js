@@ -293,6 +293,42 @@ export async function uploadStudioMediaAction(formData) {
   }
 }
 
+export async function deleteBlogPostAction(postId) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  ensureAuthUser(user)
+
+  const id = String(postId || '').trim()
+  if (!id) return { ok: false, error: 'Missing blog post id.' }
+
+  const { error } = await supabase.from('dash_blog_posts').delete().eq('id', id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/blog')
+  revalidatePath('/studio/posts')
+  return { ok: true }
+}
+
+export async function deleteChangelogAction(changelogId) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  ensureAuthUser(user)
+
+  const id = String(changelogId || '').trim()
+  if (!id) return { ok: false, error: 'Missing release id.' }
+
+  const { error } = await supabase.from('dash_changelog').delete().eq('id', id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/changelog')
+  revalidatePath('/studio/posts')
+  return { ok: true }
+}
+
 export async function saveBlogPostAction(formData) {
   const supabase = await createClient()
   const {

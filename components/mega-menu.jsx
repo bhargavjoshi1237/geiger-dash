@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -93,6 +93,7 @@ export function MegaMenu({ userId }) {
   ];
 
   const resources = [
+    { label: "Free Image Tools", href: "/tools", icon: Wrench },
     { label: "Documentation", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Blog", href: "/blog" },

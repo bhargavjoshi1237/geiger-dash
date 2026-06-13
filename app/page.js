@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, GitBranch, Github } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
-import { Header } from "@/components/header";
+import { ArrowRight } from "lucide-react";
+import { PublicHeader } from "@/components/header";
 import Footer from "@/components/footer";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
@@ -18,6 +17,15 @@ const websiteJsonLd = {
   name: "Geiger Studios",
   url: "https://geiger.studio/",
 };
+
+export const metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
+
+export const dynamic = "force-static";
+export const revalidate = 300;
 
 const showcaseBackgroundImages = [
   "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg",
@@ -38,12 +46,7 @@ function getRandomShowcaseBackgrounds(count) {
   );
 }
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const userId = user?.id;
+export default function Home() {
   const [notesShowcaseBg, canvasShowcaseBg, flowShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
 
@@ -55,7 +58,7 @@ export default async function Home() {
       />
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-      <Header />
+      <PublicHeader />
 
       <main className="relative z-10 flex flex-1 flex-col pt-16 sm:pt-20">
         <section className="mx-auto mt-10 mb-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
@@ -84,17 +87,17 @@ export default async function Home() {
         <div className="mx-auto my-10 w-full max-w-7xl space-y-8 px-4 sm:my-20 sm:space-y-20 sm:px-6">
           <LandingBoardShowcase
             backgroundImage={notesShowcaseBg}
-            ctaHref={userId ? `/notes/${userId}/home` : "/login"}
+            ctaHref="/login"
             ctaLabel="Checkout Notes"
           />
           <LandingCanvasShowcase
             backgroundImage={canvasShowcaseBg}
-            ctaHref={userId ? `/canvas/${userId}/home` : "/login"}
+            ctaHref="/login"
             ctaLabel="Checkout Canvas"
           />
           <CollaboratorTabsShowcase
             backgroundImage={flowShowcaseBg}
-            ctaHref={userId ? `/notes/${userId}/home` : "/login"}
+            ctaHref="/login"
             ctaLabel="Checkout Flow"
           />
         </div>

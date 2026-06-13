@@ -26,7 +26,7 @@ Stores product update releases and version information.
 | title | TEXT | Release title |
 | description | TEXT | Brief description |
 | category | TEXT | Type: feature, improvement, bugfix, breaking |
-| product | TEXT | Product: geiger-flow, geiger-notes, geiger-dash, geiger-dam, geiger-grey |
+| product | TEXT | Product slug for one of the Geiger projects listed in `database/init/changelog_products.sql` |
 | release_date | TIMESTAMP | Date of release |
 | is_featured | BOOLEAN | Whether to highlight this release |
 | image_url | TEXT | Optional image shown on the changelog page |
@@ -101,6 +101,7 @@ All tables have RLS enabled with the following policies:
 1. **Run migrations in Supabase SQL Editor:**
    ```sql
    -- Execute database/init/changelog.sql
+   -- Execute database/init/changelog_products.sql for an existing database
    -- Execute database/init/blog.sql
    -- Execute database/init/storage_policies.sql
    ```

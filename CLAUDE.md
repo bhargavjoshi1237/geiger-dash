@@ -49,3 +49,32 @@ Prioritise clean, readable, and maintainable code.
 Follow existing project conventions.
 Avoid unnecessary complexity.
 Keep implementations simple, scalable, and consistent with the current codebase.
+
+## Feature-Based Data Architecture
+
+All features (Tasks, Issues, Documents, Forms, etc.) use a feature-based structure:
+
+```
+src/features/<feature>/
+    queries.js      # Database reads (getTasks, getTaskById, etc.)
+    actions.js      # Server actions & mutations (createTask, updateTask, etc.)
+    components/     # Feature-specific UI components
+    utils.js        # Feature helpers
+```
+
+### Key Rules
+
+- **No direct Supabase queries in UI components** — always go through `queries.js` or `actions.js`.
+- **No duplicate queries** — reuse existing query/action functions.
+- **Server Components** fetch data via feature queries.
+- **Client Components** receive data via props.
+- **Mutations** use Server Actions, not API routes.
+- **Keep feature logic inside the feature folder**, not scattered globally.
+
+### Data Flow
+
+**Reads:** `UI → Server Component → Query → Supabase`
+
+**Writes:** `Form/UI → Server Action → Supabase`
+
+Avoid redundant or looping fetches — ensure mutations don't trigger unnecessary re-queries in a cycle.

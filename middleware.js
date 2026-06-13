@@ -1,6 +1,11 @@
+import { NextResponse } from 'next/server'
 import { updateSession } from './utils/supabase/middleware'
 
 export async function middleware(request) {
+  if (request.nextUrl.pathname === '/') {
+    return NextResponse.next()
+  }
+
   return await updateSession(request)
 }
 

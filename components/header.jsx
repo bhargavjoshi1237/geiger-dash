@@ -5,11 +5,7 @@ import { MegaMenu } from "@/components/mega-menu";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
 import ThemeToggle from "@/components/ui/theme-toggle";
 
-export async function Header() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+function HeaderContent({ user = null }) {
   const userId = user?.id;
   const userProfile = userId
     ? {
@@ -50,4 +46,17 @@ export async function Header() {
       </div>
     </header>
   );
+}
+
+export function PublicHeader() {
+  return <HeaderContent />;
+}
+
+export async function Header() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return <HeaderContent user={user} />;
 }

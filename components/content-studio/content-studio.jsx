@@ -1,28 +1,37 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Toaster } from 'sonner'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import {
   ArrowLeft,
+  ArrowUpRight,
   Calendar,
   ChevronRight,
+  Circle,
   Copy,
   FileText,
   Folder,
   FolderPlus,
   GitCommit,
   Image as ImageIcon,
+  LayoutGrid,
   Loader2,
   Megaphone,
   PlusCircle,
   RefreshCw,
   Save,
   Search,
+  Settings2,
   Sparkles,
+  Trash2,
   Upload,
 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   createStudioMediaFolderAction,
+  deleteBlogPostAction,
+  deleteChangelogAction,
   listStudioMediaAction,
   saveBlogPostAction,
   saveChangelogAction,
@@ -38,6 +47,12 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -49,9 +64,24 @@ import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dial
 import { CommitChangelogDialog } from '@/components/content-studio/commit-changelog-dialog'
 import { useLlmConfig } from '@/components/content-studio/llm-config'
 
-// Custom input styling to ensure visibility
-const inputClassName = "bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
-const textareaClassName = "bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-ring min-h-[80px]"
+const inputClassName = "bg-background text-foreground placeholder:text-muted-foreground"
+const textareaClassName = "min-h-[80px] bg-background text-foreground placeholder:text-muted-foreground"
+
+const releaseProducts = [
+  { value: 'geiger-assets', label: 'Geiger Assets' },
+  { value: 'geiger-campaign', label: 'Geiger Campaign' },
+  { value: 'geiger-canvas', label: 'Geiger Canvas' },
+  { value: 'geiger-chat', label: 'Geiger Chat' },
+  { value: 'geiger-content', label: 'Geiger Content' },
+  { value: 'geiger-dash', label: 'Geiger Dash' },
+  { value: 'geiger-docs', label: 'Geiger Docs' },
+  { value: 'geiger-events', label: 'Geiger Events' },
+  { value: 'geiger-flow', label: 'Geiger Flow' },
+  { value: 'geiger-forms', label: 'Geiger Forms' },
+  { value: 'geiger-grey', label: 'Geiger Grey' },
+  { value: 'geiger-notes', label: 'Geiger Notes' },
+  { value: 'geiger-office', label: 'Geiger Office' },
+]
 
 
 // Utility functions
@@ -176,7 +206,7 @@ const getChangelogDraft = (record) => {
 
 // FormField Component
 const FormField = ({ label, children, hint, required }) => (
-  <div className="space-y-2">
+  <div className="min-w-0 space-y-2">
     <Label className="text-sm font-medium text-foreground">
       {label}
       {required && <span className="text-red-500 ml-1">*</span>}
@@ -186,11 +216,33 @@ const FormField = ({ label, children, hint, required }) => (
   </div>
 )
 
+const CollapsibleSection = ({ value, icon: Icon, title, children }) => (
+  <Card className="min-w-0 max-w-full overflow-hidden border-border bg-card/45 shadow-none">
+    <Accordion type="single" collapsible defaultValue={value} className="min-w-0 max-w-full">
+      <AccordionItem value={value} className="border-0">
+        <CardHeader className="p-0">
+          <AccordionTrigger className="px-4 py-4 hover:no-underline">
+            <span className="flex items-center gap-2 text-base">
+              {Icon ? <Icon className="size-4" /> : null}
+              {title}
+            </span>
+          </AccordionTrigger>
+        </CardHeader>
+        <AccordionContent className="min-w-0 max-w-full overflow-hidden px-4 pb-4">
+          {children}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </Card>
+)
+
 // CoverImageUpload Component
 const CoverImageUpload = ({ draft, existingUrl }) => {
+  const fileInputId = useId()
   const [bucket, setBucket] = useState(draft.image_bucket || 'pfp')
   const [path, setPath] = useState(draft.image_path || '')
   const [url, setUrl] = useState(draft.image_url || '')
+  const [fileName, setFileName] = useState('')
   const [previewUrl, setPreviewUrl] = useState(existingUrl || draft.image_url || publicObjectUrl(draft.image_bucket, draft.image_path))
 
   const resolvedStorageUrl = useMemo(() => publicObjectUrl(bucket, path), [bucket, path])
@@ -212,18 +264,13 @@ const CoverImageUpload = ({ draft, existingUrl }) => {
   const handleFilePreview = (event) => {
     const file = event.target.files?.[0]
     if (!file) return
+    setFileName(file.name)
     setPreviewUrl(URL.createObjectURL(file))
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <ImageIcon className="h-4 w-4" />
-          Cover Image
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <CollapsibleSection value="cover-image" icon={ImageIcon} title="Cover Image">
+      <div className="space-y-4">
         <input type="hidden" name="existing_image_url" defaultValue={existingUrl || ''} />
 
         <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted">
@@ -238,12 +285,24 @@ const CoverImageUpload = ({ draft, existingUrl }) => {
         </div>
 
         <FormField label="Upload Image">
-          <Input 
-            name="image_upload" 
-            type="file" 
-            accept="image/*" 
+          <div className="flex min-w-0 items-center gap-3">
+            <Button type="button" variant="outline" asChild>
+              <Label htmlFor={fileInputId} className="cursor-pointer">
+                <Upload className="size-4" />
+                Choose image
+              </Label>
+            </Button>
+            <span className="min-w-0 truncate text-sm text-muted-foreground">
+              {fileName || 'No file selected'}
+            </span>
+          </div>
+          <Input
+            id={fileInputId}
+            name="image_upload"
+            type="file"
+            accept="image/*"
             onChange={handleFilePreview}
-            className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+            className="sr-only"
           />
         </FormField>
 
@@ -287,8 +346,8 @@ const CoverImageUpload = ({ draft, existingUrl }) => {
             className="bg-background border-input"
           />
         </FormField>
-      </CardContent>
-    </Card>
+      </div>
+    </CollapsibleSection>
   )
 }
 
@@ -299,20 +358,14 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
   const [isFeatured, setIsFeatured] = useState(blogDraft.is_featured)
 
   return (
-    <form key={formKey} action={saveBlogPostAction} className="space-y-6">
+    <form key={formKey} action={saveBlogPostAction} className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       <input type="hidden" name="id" defaultValue={blogDraft.id} />
       <input type="hidden" name="category" value={category} readOnly />
       <input type="hidden" name="is_published" value={isPublished ? 'on' : ''} readOnly />
       <input type="hidden" name="is_featured" value={isFeatured ? 'on' : ''} readOnly />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Post Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <CollapsibleSection value="post-details" icon={FileText} title="Post Details">
+        <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Title" required>
               <Input 
@@ -377,28 +430,28 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
               />
             </FormField>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      <Card>
-        <CardHeader>
+      <Card className="min-w-0 max-w-full overflow-hidden rounded-lg border-border bg-card/45 shadow-none">
+        <CardHeader className="p-4">
           <CardTitle className="text-base">Content</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="min-w-0 max-w-full overflow-hidden p-4 pt-0">
           <TiptapBlogEditor name="content" defaultValue={blogDraft.content} />
         </CardContent>
       </Card>
 
       <CoverImageUpload draft={blogDraft} existingUrl={blogDraft.featured_image} />
 
-      <Card>
-        <CardHeader>
+      <Card className="rounded-lg border-border bg-card/45 shadow-none">
+        <CardHeader className="p-4">
           <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Publishing Options
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 pt-0">
           <FormField label="Publish Date & Time">
             <Input 
               type="datetime-local" 
@@ -414,6 +467,7 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
                 id="is-published"
                 checked={isPublished} 
                 onCheckedChange={setIsPublished} 
+                className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
               />
               <Label htmlFor="is-published" className="cursor-pointer">Published</Label>
             </div>
@@ -422,6 +476,7 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
                 id="is-featured"
                 checked={isFeatured} 
                 onCheckedChange={setIsFeatured} 
+                className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
               />
               <Label htmlFor="is-featured" className="cursor-pointer">Featured</Label>
             </div>
@@ -429,7 +484,7 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between gap-4 sticky bottom-4 bg-background border rounded-lg p-4 shadow-lg">
+      <div className="sticky bottom-3 z-20 flex items-center justify-between gap-4 rounded-lg border border-border bg-background/95 p-3 shadow-xl backdrop-blur">
         <p className="text-sm text-muted-foreground">
           {blogDraft.id ? 'Editing existing post' : 'Creating new post'}
         </p>
@@ -472,14 +527,14 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
   }
 
   return (
-    <form key={formKey} action={saveChangelogAction} className="space-y-6">
+    <form key={formKey} action={saveChangelogAction} className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       <input type="hidden" name="id" defaultValue={fields.id} />
       <input type="hidden" name="category" value={fields.category} readOnly />
       <input type="hidden" name="product" value={fields.product} readOnly />
       <input type="hidden" name="is_featured" value={fields.is_featured ? 'on' : ''} readOnly />
 
-      <Card>
-        <CardHeader>
+      <Card className="rounded-lg border-border bg-card/45 shadow-none">
+        <CardHeader className="p-4">
           <div className="flex items-center justify-between gap-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Megaphone className="h-4 w-4" />
@@ -497,7 +552,7 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 pt-0">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Version" required>
               <Input
@@ -523,7 +578,7 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Category">
               <Select value={fields.category} onValueChange={setField('category')}>
-                <SelectTrigger className={inputClassName}>
+                <SelectTrigger className={`${inputClassName} w-full`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -537,15 +592,15 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
 
             <FormField label="Product">
               <Select value={fields.product} onValueChange={setField('product')}>
-                <SelectTrigger className={inputClassName}>
+                <SelectTrigger className={`${inputClassName} w-full`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="geiger-flow">Geiger Flow</SelectItem>
-                  <SelectItem value="geiger-notes">Geiger Notes</SelectItem>
-                  <SelectItem value="geiger-dash">Geiger Dash</SelectItem>
-                  <SelectItem value="geiger-dam">Geiger DAM</SelectItem>
-                  <SelectItem value="geiger-grey">Geiger Grey</SelectItem>
+                  {releaseProducts.map((product) => (
+                    <SelectItem key={product.value} value={product.value}>
+                      {product.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormField>
@@ -576,11 +631,11 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="rounded-lg border-border bg-card/45 shadow-none">
+        <CardHeader className="p-4">
           <CardTitle className="text-base">Release Items</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 pt-0">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Added" hint="One item per line">
               <Textarea
@@ -647,12 +702,13 @@ const ChangelogForm = ({ changelogDraft, onReset, formKey }) => {
 
       <CoverImageUpload draft={changelogDraft} existingUrl={changelogDraft.image_url} />
 
-      <div className="flex items-center justify-between gap-4 sticky bottom-4 bg-background border rounded-lg p-4 shadow-lg">
+      <div className="sticky bottom-3 z-20 flex items-center justify-between gap-4 rounded-lg border border-border bg-background/95 p-3 shadow-xl backdrop-blur">
         <div className="flex items-center gap-2">
           <Switch
             id="changelog-featured"
             checked={fields.is_featured}
             onCheckedChange={setField('is_featured')}
+            className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
           />
           <Label htmlFor="changelog-featured" className="cursor-pointer">Featured Release</Label>
         </div>
@@ -681,14 +737,12 @@ const MediaLibrary = ({ activeTab }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isCreatingFolder, setIsCreatingFolder] = useState(false)
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     let isCurrent = true
 
     const loadMedia = async () => {
       setIsLoading(true)
-      setMessage('')
       const result = await listStudioMediaAction(contentType, currentFolder)
       if (!isCurrent) return
 
@@ -698,7 +752,7 @@ const MediaLibrary = ({ activeTab }) => {
       } else {
         setFolders([])
         setMedia([])
-        setMessage(result.error || 'Unable to load media.')
+        toast.error(result.error || 'Unable to load media.')
       }
       setIsLoading(false)
     }
@@ -731,13 +785,13 @@ const MediaLibrary = ({ activeTab }) => {
 
   const refreshMedia = async () => {
     setIsLoading(true)
-    setMessage('')
     const result = await listStudioMediaAction(contentType, currentFolder)
     if (result.ok) {
       setFolders(result.folders || [])
       setMedia(result.media || [])
+      toast.success('Assets refreshed')
     } else {
-      setMessage(result.error || 'Unable to refresh media.')
+      toast.error(result.error || 'Unable to refresh media.')
     }
     setIsLoading(false)
   }
@@ -752,13 +806,12 @@ const MediaLibrary = ({ activeTab }) => {
     formData.set('folder', currentFolder || 'library')
 
     setIsUploading(true)
-    setMessage('')
     const result = await uploadStudioMediaAction(formData)
     if (result.ok) {
       setMedia((items) => [result.media, ...items])
-      setMessage('Uploaded successfully')
+      toast.success('Asset uploaded')
     } else {
-      setMessage(result.error || 'Upload failed.')
+      toast.error(result.error || 'Upload failed.')
     }
     setIsUploading(false)
     event.target.value = ''
@@ -771,31 +824,29 @@ const MediaLibrary = ({ activeTab }) => {
     formData.set('folder_name', newFolderName)
 
     setIsCreatingFolder(true)
-    setMessage('')
     const result = await createStudioMediaFolderAction(formData)
     if (result.ok) {
       setFolders((items) => [result.folder, ...items.filter((item) => item.path !== result.folder.path)])
       setNewFolderName('')
-      setMessage('Folder created.')
+      toast.success('Folder created')
     } else {
-      setMessage(result.error || 'Unable to create folder.')
+      toast.error(result.error || 'Unable to create folder.')
     }
     setIsCreatingFolder(false)
   }
 
   const copyUrl = async (item) => {
     await navigator.clipboard.writeText(item.publicUrl)
-    setMessage('URL copied to clipboard')
+    toast.success('URL copied to clipboard')
   }
 
   const applyAsCover = (item) => {
     window.dispatchEvent(new CustomEvent('content-studio:use-cover', { detail: item }))
-    setMessage('Applied as cover image')
+    toast.success('Applied as cover image')
   }
 
   const insertInEditor = (item) => {
     window.dispatchEvent(new CustomEvent('content-studio:insert-image', { detail: item }))
-    setMessage('Inserted into editor')
   }
 
   const openFolder = (folderPath) => {
@@ -812,29 +863,36 @@ const MediaLibrary = ({ activeTab }) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full rounded-none border-0 bg-transparent shadow-none">
+      <CardHeader className="border-b border-border p-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
-            Media Library
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Settings2 className="size-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Assets
+            </span>
+          </div>
           <Button 
             type="button" 
-            size="sm" 
+            size="icon-sm"
             variant="ghost" 
             onClick={refreshMedia} 
             disabled={isLoading}
+            aria-label="Refresh assets"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-4">
         <Tabs value={contentType} onValueChange={setContentType}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="blog">Blog</TabsTrigger>
-            <TabsTrigger value="changelog">Changelog</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted">
+            <TabsTrigger value="blog" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Blog
+            </TabsTrigger>
+            <TabsTrigger value="changelog" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Changelog
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -918,21 +976,18 @@ const MediaLibrary = ({ activeTab }) => {
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search media"
+              placeholder="Search assets..."
               className={`${inputClassName} pl-9`}
             />
           </div>
 
-          {message && (
-            <p className="text-xs text-muted-foreground">{message}</p>
-          )}
         </div>
 
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[calc(100vh-430px)] min-h-64">
           <div className="grid grid-cols-2 gap-3 pr-4">
             {filteredFolders.map((item) => (
               <button
@@ -1025,10 +1080,21 @@ const MediaLibrary = ({ activeTab }) => {
 }
 
 // RecordList Component
-const RecordList = ({ title, items, empty, query, onQuery, onNew, onSelect, selectedId, type }) => {
+const RecordList = ({ title, items, empty, query, onQuery, onNew, onSelect, onDelete, selectedId, type }) => {
+  const [deletingId, setDeletingId] = useState('')
+
+  const handleDelete = async (item) => {
+    const label = type === 'blog' ? 'blog post' : 'release'
+    if (!window.confirm(`Delete this ${label}? This cannot be undone.`)) return
+
+    setDeletingId(item.id)
+    await onDelete(item)
+    setDeletingId('')
+  }
+
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full rounded-none border-0 bg-transparent shadow-none">
+      <CardHeader className="border-b border-border p-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">{title}</CardTitle>
           <Button type="button" size="sm" variant="outline" onClick={onNew}>
@@ -1037,43 +1103,65 @@ const RecordList = ({ title, items, empty, query, onQuery, onNew, onSelect, sele
           </Button>
         </div>
         <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input 
             value={query} 
             onChange={(e) => onQuery(e.target.value)} 
-            placeholder="Search..." 
+            placeholder={type === 'blog' ? 'Search blog posts...' : 'Search releases...'}
             className={`${inputClassName} pl-9`}
           />
         </div>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px]">
-          <div className="space-y-2 pr-4">
+      <CardContent className="min-w-0 overflow-hidden p-2">
+        <ScrollArea className="h-[calc(100vh-215px)] min-h-72 min-w-0 max-w-full [&_[data-slot=scroll-area-viewport]>div]:!block">
+          <div className="min-w-0 max-w-full space-y-1 pr-3">
             {items.map((item) => (
-              <Button
+              <div
                 key={item.id}
-                type="button"
-                variant="outline"
-                className={`h-auto w-full justify-start text-left p-3 ${
-                  selectedId === item.id ? 'border-primary bg-primary/10' : ''
+                className={`grid w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-1 overflow-hidden rounded-md border p-1 transition-colors ${
+                  selectedId === item.id ? 'border-border bg-accent' : 'bg-transparent hover:border-border'
                 }`}
-                onClick={() => onSelect(item.id)}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">{item.title}</p>
-                    {type === 'blog' && item.is_published && (
-                      <Badge variant="secondary" className="text-xs">Live</Badge>
-                    )}
-                    {type === 'changelog' && item.is_featured && (
-                      <Badge variant="secondary" className="text-xs">Featured</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate mt-1">
+                <button
+                  type="button"
+                  className="min-w-0 overflow-hidden rounded-sm px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => onSelect(item.id)}
+                >
+                  <p className="block w-full truncate text-sm font-medium">{item.title}</p>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
                     {type === 'blog' ? item.slug : `v${item.version} - ${item.product}`}
                   </p>
+                </button>
+                <div className="flex shrink-0 items-center gap-1 pr-1">
+                  {type === 'blog' ? (
+                    <Badge
+                      variant={item.is_published ? 'success' : 'outline'}
+                      className="gap-1 px-1.5 py-0.5 text-[10px]"
+                    >
+                      <Circle className={`size-1.5 ${item.is_published ? 'fill-current' : ''}`} />
+                      {item.is_published ? 'Live' : 'Draft'}
+                    </Badge>
+                  ) : item.is_featured ? (
+                    <Badge variant="info" className="px-1.5 py-0.5 text-[10px]">
+                      Featured
+                    </Badge>
+                  ) : null}
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    className="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => handleDelete(item)}
+                    disabled={deletingId === item.id}
+                    aria-label={`Delete ${item.title}`}
+                    title={`Delete ${item.title}`}
+                  >
+                    {deletingId === item.id
+                      ? <Loader2 className="size-3.5 animate-spin" />
+                      : <Trash2 className="size-3.5" />}
+                  </Button>
                 </div>
-              </Button>
+              </div>
             ))}
             {items.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-8">{empty}</p>
@@ -1094,6 +1182,8 @@ export function ContentStudio({
   saved = false,
   error = '',
 }) {
+  const router = useRouter()
+  const hasShownRouteToast = useRef(false)
   const [activeTab, setActiveTab] = useState(initialTab)
   const [llmOpen, setLlmOpen] = useState(false)
   const { isConfigured } = useLlmConfig()
@@ -1125,110 +1215,181 @@ export function ContentStudio({
   const blogDraft = getBlogDraft(editingBlog)
   const changelogDraft = getChangelogDraft(editingChangelog)
   const publishedCount = posts.filter((post) => post.is_published).length
-  const featuredCount = posts.filter((post) => post.is_featured).length + changelogs.filter((entry) => entry.is_featured).length
+
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    const previousBodyOverflow = document.body.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow
+      document.body.style.overflow = previousBodyOverflow
+    }
+  }, [])
+
+  useEffect(() => {
+    if (hasShownRouteToast.current || (!saved && !error)) return
+    hasShownRouteToast.current = true
+
+    if (error) {
+      toast.error('Could not save', { description: error })
+    } else {
+      toast.success('Changes saved', {
+        description: 'Public pages were revalidated.',
+      })
+    }
+
+    router.replace(`/studio/posts?tab=${initialTab}`, { scroll: false })
+  }, [error, initialTab, router, saved])
+
+  const deleteBlogPost = async (post) => {
+    const result = await deleteBlogPostAction(post.id)
+    if (!result.ok) {
+      toast.error(result.error || 'Unable to delete blog post')
+      return
+    }
+    if (editingBlogId === post.id) {
+      setEditingBlogId('')
+      setBlogRevision((value) => value + 1)
+    }
+    toast.success('Blog post deleted')
+    router.refresh()
+  }
+
+  const deleteChangelog = async (entry) => {
+    const result = await deleteChangelogAction(entry.id)
+    if (!result.ok) {
+      toast.error(result.error || 'Unable to delete release')
+      return
+    }
+    if (editingChangelogId === entry.id) {
+      setEditingChangelogId('')
+      setChangelogRevision((value) => value + 1)
+    }
+    toast.success('Release deleted')
+    router.refresh()
+  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Toaster theme="dark" position="bottom-right" richColors closeButton />
+    <div className="fixed inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-background text-foreground">
       <LlmSettingsDialog open={llmOpen} onOpenChange={setLlmOpen} />
 
-      {/* Page header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Content Studio</h1>
-          <p className="text-sm text-muted-foreground">Publish blog posts and product changelogs.</p>
+      <header className="flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur sm:px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link href="/" className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+            <LayoutGrid className="size-4" />
+            <span className="sr-only">Back to Geiger</span>
+          </Link>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="truncate text-sm font-semibold">Geiger Content Studio</h1>
+              <Badge variant="outline" className="hidden font-mono text-[10px] sm:inline-flex">EDITOR</Badge>
+            </div>
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              {activeTab === 'blog' ? `${publishedCount} published posts` : `${changelogs.length} release entries`}
+            </p>
+          </div>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setLlmOpen(true)}
-          className="gap-2"
-        >
-          <Sparkles className={`h-4 w-4 ${isConfigured ? 'text-indigo-400' : ''}`} />
-          AI Settings
-          <Badge
-            variant="secondary"
-            className={`ml-1 ${isConfigured ? 'bg-emerald-500/15 text-emerald-400' : 'bg-surface-hover text-muted-foreground'}`}
-          >
-            {isConfigured ? 'Connected' : 'Off'}
-          </Badge>
-        </Button>
-      </div>
+        <div className="flex items-center gap-2">
+          <Button asChild type="button" size="sm" variant="ghost" className="hidden sm:inline-flex">
+            <Link href={activeTab === 'blog' ? '/blog' : '/changelog'} target="_blank">
+              View live
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => setLlmOpen(true)}>
+            <Sparkles className={isConfigured ? 'text-emerald-400' : ''} />
+            <span className="hidden sm:inline">AI model</span>
+            <span
+              className={`size-1.5 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-muted-foreground'}`
+              }
+              aria-label={isConfigured ? 'AI connected' : 'AI disconnected'}
+            />
+          </Button>
+        </div>
+      </header>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Blog Posts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{posts.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Published</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{publishedCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Changelogs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{changelogs.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Featured</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{featuredCount}</p>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 overflow-x-hidden lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_330px]">
+        <aside className="hidden min-h-0 min-w-0 overflow-x-hidden border-r border-border bg-card/25 lg:flex lg:flex-col">
+          <div className="border-b border-border p-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="blog">
+                  <FileText className="size-3.5" />
+                  Posts
+                </TabsTrigger>
+                <TabsTrigger value="changelog">
+                  <Megaphone className="size-3.5" />
+                  Releases
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          <div className="min-h-0 flex-1">
+            {activeTab === 'blog' ? (
+              <RecordList
+                title="Blog posts"
+                items={filteredPosts}
+                empty="No blog posts found"
+                query={blogQuery}
+                onQuery={setBlogQuery}
+                selectedId={editingBlogId}
+                type="blog"
+                onDelete={deleteBlogPost}
+                onNew={() => {
+                  setEditingBlogId('')
+                  setBlogRevision((v) => v + 1)
+                }}
+                onSelect={(id) => {
+                  setEditingBlogId(id)
+                  setBlogRevision((v) => v + 1)
+                }}
+              />
+            ) : (
+              <RecordList
+                title="Release notes"
+                items={filteredChangelogs}
+                empty="No changelog entries found"
+                query={changelogQuery}
+                onQuery={setChangelogQuery}
+                selectedId={editingChangelogId}
+                type="changelog"
+                onDelete={deleteChangelog}
+                onNew={() => {
+                  setEditingChangelogId('')
+                  setChangelogRevision((v) => v + 1)
+                }}
+                onSelect={(id) => {
+                  setEditingChangelogId(id)
+                  setChangelogRevision((v) => v + 1)
+                }}
+              />
+            )}
+          </div>
+        </aside>
 
-      {/* Main Content */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        {/* Editor */}
-        <Card>
-          <CardHeader className="border-b">
-            <div className="flex items-center justify-between">
+        <main className="min-h-0 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
+          <div className="mx-auto min-w-0 max-w-4xl px-3 py-4 sm:px-6 sm:py-6">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <CardTitle>{activeTab === 'blog' ? 'Blog Editor' : 'Changelog Editor'}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {activeTab === 'blog' ? 'Create and edit blog posts' : 'Create and edit changelog entries'}
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {activeTab === 'blog' ? 'Blog document' : 'Product release'}
                 </p>
+                <h2 className="mt-1 text-xl font-semibold tracking-tight">
+                  {activeTab === 'blog'
+                    ? editingBlog?.title || 'Untitled post'
+                    : editingChangelog?.title || 'Untitled release'}
+                </h2>
               </div>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="lg:hidden">
                 <TabsList>
-                  <TabsTrigger value="blog">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Blog
-                  </TabsTrigger>
-                  <TabsTrigger value="changelog">
-                    <Megaphone className="h-4 w-4 mr-2" />
-                    Changelog
-                  </TabsTrigger>
+                  <TabsTrigger value="blog">Blog</TabsTrigger>
+                  <TabsTrigger value="changelog">Changelog</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
-            {saved && (
-              <div className="mt-4 p-3 rounded-md bg-green-500/10 border border-green-500/20 text-green-600 text-sm">
-                Saved successfully!
-              </div>
-            )}
-            {error && (
-              <div className="mt-4 p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-600 text-sm">
-                Error: {error}
-              </div>
-            )}
-          </CardHeader>
 
-          <CardContent className="p-6">
             {activeTab === 'blog' ? (
               <BlogForm
                 blogDraft={blogDraft}
@@ -1249,53 +1410,14 @@ export function ContentStudio({
                 }}
               />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </main>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <MediaLibrary activeTab={activeTab} />
-          
-          <RecordList
-            title="Blog Posts"
-            items={filteredPosts}
-            empty="No blog posts found"
-            query={blogQuery}
-            onQuery={setBlogQuery}
-            selectedId={editingBlogId}
-            type="blog"
-            onNew={() => {
-              setActiveTab('blog')
-              setEditingBlogId('')
-              setBlogRevision((v) => v + 1)
-            }}
-            onSelect={(id) => {
-              setActiveTab('blog')
-              setEditingBlogId(id)
-              setBlogRevision((v) => v + 1)
-            }}
-          />
-
-          <RecordList
-            title="Changelog Entries"
-            items={filteredChangelogs}
-            empty="No changelog entries found"
-            query={changelogQuery}
-            onQuery={setChangelogQuery}
-            selectedId={editingChangelogId}
-            type="changelog"
-            onNew={() => {
-              setActiveTab('changelog')
-              setEditingChangelogId('')
-              setChangelogRevision((v) => v + 1)
-            }}
-            onSelect={(id) => {
-              setActiveTab('changelog')
-              setEditingChangelogId(id)
-              setChangelogRevision((v) => v + 1)
-            }}
-          />
-        </div>
+        <aside className="hidden min-h-0 min-w-0 overflow-x-hidden border-l border-border bg-card/25 xl:flex xl:flex-col">
+          <div className="min-h-0 flex-1">
+            <MediaLibrary activeTab={activeTab} />
+          </div>
+        </aside>
       </div>
     </div>
   )
