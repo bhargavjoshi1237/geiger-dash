@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Wrench } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Wrench, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,6 +16,13 @@ import {
 
 export function MegaMenu({ userId }) {
   const notesHref = userId ? `/notes/${userId}/home` : "/notes";
+  const closeMenuOnMouseLeave = (event) => {
+    const focusedElement = document.activeElement;
+
+    if (focusedElement instanceof HTMLElement && event.currentTarget.contains(focusedElement)) {
+      focusedElement.blur();
+    }
+  };
 
   const products = [
     {
@@ -93,62 +100,79 @@ export function MegaMenu({ userId }) {
   ];
 
   const resources = [
-    { label: "Free Image Tools", href: "/tools", icon: Wrench },
     { label: "Documentation", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Blog", href: "/blog" },
     { label: "GitHub Repository", href: "#" },
     { label: "Self Host Geiger", href: "#" },
+    { label: "Free Image Tools", href: "/tools", },
   ];
 
   return (
     <>
       <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium text-muted-foreground">
-        <div className="group">
-          <button className="flex items-center gap-1 py-6 transition-colors hover:text-foreground">
-            Features
+        <div className="group relative" onMouseLeave={closeMenuOnMouseLeave}>
+          <button
+            type="button"
+            aria-haspopup="true"
+            className="flex items-center gap-1 py-6 transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+          >
+            Products
+            <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
           </button>
 
-          <div className="invisible absolute left-1/2 top-[100%] w-[820px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="invisible absolute left-1/2 top-[100%] w-[650px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
             <div className="rounded-xl border border-border bg-surface-subtle p-4 shadow-xl">
-              <div className="grid grid-cols-4 gap-4">
-                <div className="col-span-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground0">Products</p>
-                  <div className="grid grid-cols-3 gap-1">
-                    {products.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          href={item.href}
-                          key={item.label}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-surface-hover"
-                        >
-                          <Icon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm text-foreground">{item.label}</p>
-                            <p className="text-xs text-foreground0">{item.description}</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground0">Products</p>
+              <div className="grid grid-cols-3 gap-1">
+                {products.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      href={item.href}
+                      key={item.label}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none"
+                    >
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-foreground">{item.label}</p>
+                        <p className="text-xs text-foreground0">{item.description}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground0">Resources</p>
-                  <div className="space-y-1">
-                    {resources.map((item) => (
-                      <Link
-                        href={item.href}
-                        key={item.label}
-                        className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
-                      >
-                        {item.label}
-                        <ArrowRight className="h-3.5 w-3.5 text-foreground0" />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+        <div className="group relative" onMouseLeave={closeMenuOnMouseLeave}>
+          <button
+            type="button"
+            aria-haspopup="true"
+            className="flex items-center gap-1 py-6 transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+          >
+            Resources
+            <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
+          </button>
+
+          <div className="invisible absolute left-1/2 top-[100%] w-[280px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <div className="rounded-xl border border-border bg-surface-subtle p-3 shadow-xl">
+              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-foreground0">Resources</p>
+              <div className="space-y-1">
+                {resources.map((item) => (
+                  <Link
+                    href={item.href}
+                    key={item.label}
+                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:bg-surface-hover focus-visible:text-foreground focus-visible:outline-none"
+                  >
+                    <span className="flex items-center gap-2">
+                      {item.icon ? <item.icon className="h-4 w-4" /> : null}
+                      {item.label}
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-foreground0" />
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
@@ -218,7 +242,7 @@ export function MegaMenu({ userId }) {
                 <SheetClose asChild>
                   <Link
                     href="/pricing"
-                    className="inline-flex w-full items-center justify-center rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900"
+                    className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     View Pricing
                   </Link>

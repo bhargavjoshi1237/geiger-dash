@@ -11,7 +11,7 @@ export const contentType = socialImageContentType;
 export default function Image() {
   return createToolSocialImage({
     eyebrow: "Free image cropper",
-    title: "Crop an image without uploading it.",
+    title: "Crop An Image Without Uploading It.",
     detail: "Choose the exact area and export PNG, JPG, or WebP in seconds.",
     accent: "#f59e0b",
   });

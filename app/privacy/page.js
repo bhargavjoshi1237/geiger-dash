@@ -33,7 +33,7 @@ export default function PrivacyPage() {
         and the connected Geiger products, including Notes, Flow, Assets,
         Canvas, Forms, Events, Office, Content, Campaign, Chat, Grey, and Docs.
         For privacy questions or requests, contact{" "}
-        <a href="mailto:privacy@geiger.studio">privacy@geiger.studio</a>.
+        <a href="mailto:info@geiger.studio">info@geiger.studio</a>.
       </p>
 
       <h2>2. Scope</h2>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
       </p>
       <p>
         Send requests to{" "}
-        <a href="mailto:privacy@geiger.studio">privacy@geiger.studio</a>. We may
+        <a href="mailto:info@geiger.studio">info@geiger.studio</a>. We may
         need to verify your identity and may retain limited information about
         the request. We aim to acknowledge privacy and grievance requests within
         seven days and respond within the period required by applicable law.

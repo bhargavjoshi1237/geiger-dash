@@ -2,14 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FileDropzone } from "@/components/tools/file-dropzone";
 import { ImagePreview } from "@/components/tools/image-preview";
 import {
   Field,
   ProcessButton,
-  RangeInput,
   ResultCard,
-  SelectInput,
 } from "@/components/tools/tool-controls";
 import {
   downloadBlob,
@@ -109,21 +115,26 @@ export function ImageConverterTool() {
         <p className="mb-5 text-sm font-medium">Conversion settings</p>
         <div className="space-y-5">
           <Field label="Output format">
-            <SelectInput value={format} onChange={(event) => setFormat(event.target.value)}>
-              {Object.entries(formats).map(([value, item]) => (
-                <option value={value} key={value}>
-                  {item.label}
-                </option>
-              ))}
-            </SelectInput>
+            <Select value={format} onValueChange={setFormat}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(formats).map(([value, item]) => (
+                  <SelectItem value={value} key={value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           {format !== "image/png" ? (
             <Field label="Quality" hint={`${quality}%`}>
-              <RangeInput
-                min="35"
-                max="100"
-                value={quality}
-                onChange={(event) => setQuality(Number(event.target.value))}
+              <Slider
+                min={35}
+                max={100}
+                value={[quality]}
+                onValueChange={([val]) => setQuality(val)}
               />
             </Field>
           ) : null}

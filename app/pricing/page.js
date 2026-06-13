@@ -1,251 +1,120 @@
 import Link from "next/link";
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/header";
-import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/footer";
 import { PlanCards } from "@/components/pricing/plan_cards";
-
-const featureCategories = [
-  {
-    name: "Canvas & Projects",
-    features: [
-      { name: "Canvas Projects", starter: "5 included", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
-      { name: "Team Members", starter: "1 user", pro: "5 users", team: "Unlimited", enterprise: "Unlimited" },
-      { name: "Project Storage", starter: "1 GB", pro: "10 GB", team: "100 GB", enterprise: "Unlimited" },
-      { name: "File Uploads", starter: "10 MB max", pro: "100 MB max", team: "500 MB max", enterprise: "Unlimited" },
-      { name: "Custom Domains", starter: false, pro: true, team: true, enterprise: true },
-      { name: "API Access", starter: false, pro: true, team: true, enterprise: true },
-    ]
-  },
-  {
-    name: "Geiger Flow",
-    features: [
-      { name: "Kanban Boards", starter: "3 boards", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
-      { name: "Timeline View", starter: false, pro: true, team: true, enterprise: true },
-      { name: "Node Discussions", starter: true, pro: true, team: true, enterprise: true },
-      { name: "Project Templates", starter: "Basic", pro: "Advanced", team: "Advanced", enterprise: "Custom" },
-      { name: "Workflow Automation", starter: false, pro: "100/month", team: "1,000/month", enterprise: "Unlimited" },
-      { name: "Time Tracking", starter: false, pro: true, team: true, enterprise: true },
-    ]
-  },
-  {
-    name: "Geiger Notes",
-    features: [
-      { name: "Infinite Canvas", starter: true, pro: true, team: true, enterprise: true },
-      { name: "Real-time Collaboration", starter: "2 users", pro: "10 users", team: "50 users", enterprise: "Unlimited" },
-      { name: "Node Types", starter: "Basic", pro: "Advanced", team: "Advanced", enterprise: "Custom" },
-      { name: "Export Formats", starter: "PDF", pro: "PDF, PNG, SVG", team: "All formats", enterprise: "All + API" },
-      { name: "Version History", starter: "7 days", pro: "30 days", team: "90 days", enterprise: "Unlimited" },
-      { name: "Comment Reactions", starter: true, pro: true, team: true, enterprise: true },
-    ]
-  },
-  {
-    name: "Database & Storage",
-    features: [
-      { name: "Database Size", starter: "500 MB", pro: "8 GB", team: "100 GB", enterprise: "Unlimited" },
-      { name: "Automatic Backups", starter: false, pro: "7 days", team: "14 days", enterprise: "Custom retention" },
-      { name: "Point-in-Time Recovery", starter: false, pro: false, team: true, enterprise: true },
-      { name: "File Storage (DAM)", starter: "1 GB", pro: "100 GB", team: "1 TB", enterprise: "Unlimited" },
-      { name: "CDN Bandwidth", starter: "5 GB", pro: "250 GB", team: "1 TB", enterprise: "Unlimited" },
-      { name: "Asset Metadata", starter: "Basic", pro: "Advanced", team: "Advanced", enterprise: "Custom" },
-    ]
-  },
-  {
-    name: "Security & Compliance",
-    features: [
-      { name: "SOC2 Compliance", starter: false, pro: false, team: true, enterprise: true },
-      { name: "SSO (SAML)", starter: false, pro: false, team: true, enterprise: true },
-      { name: "HIPAA Compliance", starter: false, pro: false, team: false, enterprise: "Available" },
-      { name: "Role-Based Access", starter: "Basic", pro: "Advanced", team: "Advanced", enterprise: "Custom RBAC" },
-      { name: "Audit Logs", starter: "1 day", pro: "7 days", team: "28 days", enterprise: "Custom retention" },
-      { name: "Private Link", starter: false, pro: false, team: false, enterprise: true },
-    ]
-  },
-  {
-    name: "Support",
-    features: [
-      { name: "Community Support", starter: true, pro: true, team: true, enterprise: true },
-      { name: "Email Support", starter: false, pro: true, team: "Priority", enterprise: "24/7 Dedicated" },
-      { name: "SLA Uptime", starter: false, pro: false, team: "99.5%", enterprise: "99.99%" },
-      { name: "Dedicated Manager", starter: false, pro: false, team: false, enterprise: true },
-      { name: "Private Slack Channel", starter: false, pro: false, team: false, enterprise: true },
-      { name: "Onboarding Support", starter: false, pro: false, team: true, enterprise: "Custom" },
-    ]
-  }
-];
+import { PublicPageHero } from "@/components/public-page-hero";
+import { Button } from "@/components/ui/button";
 
 const faqs = [
   {
-    question: "Can I switch plans anytime?",
-    answer: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any differences."
+    question: "How does product access work?",
+    answer:
+      "Each foundation includes an allowance for Core, Add-on, and Cherry products. You can choose the exact products in each group and pay only for selections above the plan allowance.",
   },
   {
-    question: "Is there a free trial?",
-    answer: "Our Pro and Enterprise plans come with a 14-day free trial. No credit card required to start."
+    question: "Can I change products after I subscribe?",
+    answer:
+      "Products can be enabled or disabled as your needs change, with billing updated on the next monthly cycle. Foundations can also be upgraded or downgraded at any time.",
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, PayPal, and bank transfers for Enterprise customers."
+    question: "How much storage and bandwidth are included?",
+    answer:
+      "Basic includes 5 GB storage, Plus includes 50 GB, and Pro includes 100 GB. Extra storage is $0.50 per GB, each selected storage GB includes 5 GB of bandwidth, and extra bandwidth is $0.25 per GB.",
   },
   {
-    question: "Can I cancel my subscription?",
-    answer: "Absolutely. You can cancel anytime from your dashboard. Your access continues until the end of your billing period."
-  }
+    question: "What is included with the Beta Tester plan?",
+    answer:
+      "Beta testers get access to all 12 products for $0 while the beta program is active, along with a small included workspace allowance.",
+  },
+  {
+    question: "How are usage overages handled?",
+    answer:
+      "Extra active projects are $5 each, extra collaborators are $1 each, and bandwidth is $0.25 per extra GB. Edge/CDN usage is not included with any foundation, starts at 0 GB, and costs $0.10 per GB across 119 PoPs. AI credits are $10 per 1,000 beyond the foundation allowance.",
+  },
 ];
 
 export default async function PricingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const ctaHref = user ? `/notes/${user.id}/home` : "/login";
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const ctaHref = user ? "/" : "/login";
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground font-sans">
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#333333_1px,transparent_1px),linear-gradient(to_bottom,#333333_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+    <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
       <Header />
 
-      {/* MAIN CONTENT */}
       <main className="relative z-10 px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
         <div className="mx-auto w-full max-w-6xl">
-          {/* Page Header */}
-          <div className="mb-16 grid gap-8 border-b border-border/70 pb-10 lg:grid-cols-[1fr_0.65fr] lg:items-end">
-            <div>
-              <div className="mb-5 flex items-center gap-3">
-                <span className="h-px w-10 bg-foreground" />
-                <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Pricing</span>
-              </div>
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
-                Start small. Keep every door open.
-              </h1>
+          <div className="mb-20">
+            <PublicPageHero
+              eyebrow="Plans and pricing"
+              title="One suite, priced around your team."
+              description="Choose a foundation, then shape the product mix and scale around your work. Every allowance and overage stays visible as you configure."
+            />
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <a href="#plans-heading">
+                  Explore plans
+                  <ArrowRight className="size-4" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href="#plan-calculator">Build a custom plan</a>
+              </Button>
             </div>
-            <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">
-              One connected workspace for planning, creating, and shipping. Scale storage and collaboration only when you need it.
-            </p>
           </div>
 
           <PlanCards ctaHref={ctaHref} />
 
-          {/* Compare Plans Section */}
-          <div className="mb-16">
-            <h2 className="mb-8 flex items-center gap-3 text-2xl font-semibold tracking-tight text-foreground">
-              Compare plans
-              <Badge variant="outline" className="text-xs border-border text-text-secondary">
-                Feature Matrix
-              </Badge>
-            </h2>
-            
-            {/* Comparison Tables */}
-            <div className="space-y-8">
-              {featureCategories.map((category, catIndex) => (
-                <div key={catIndex} className="bg-gradient-to-br from-surface-subtle to-[#1e1e1e] border border-border rounded-2xl overflow-hidden">
-                  {/* Category Header */}
-                  <div className="bg-surface-card border-b border-border px-6 py-4">
-                    <h3 className="text-lg font-bold text-foreground">{category.name}</h3>
-                  </div>
-                  
-                  {/* Comparison Table */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-border">
-                          <th className="text-left py-3 px-6 text-sm font-semibold text-muted-foreground">Feature</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Starter</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Pro</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Team</th>
-                          <th className="text-center py-3 px-4 text-sm font-semibold text-muted-foreground min-w-[120px]">Enterprise</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {category.features.map((feature, featIndex) => (
-                          <tr 
-                            key={featIndex} 
-                            className={`border-b border-border hover:bg-[#1e1e1e] transition-colors ${
-                              featIndex === category.features.length - 1 ? 'border-b-0' : ''
-                            }`}
-                          >
-                            <td className="py-3 px-6 text-sm text-foreground">{feature.name}</td>
-                            <td className="text-center py-3 px-4">
-                              {typeof feature.starter === 'boolean' ? (
-                                feature.starter ? (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
-                                    <X className="w-3 h-3 text-text-secondary" />
-                                  </div>
-                                )
-                              ) : (
-                                <span className="text-xs text-muted-foreground">{feature.starter}</span>
-                              )}
-                            </td>
-                            <td className="text-center py-3 px-4 bg-zinc-500/5">
-                              {typeof feature.pro === 'boolean' ? (
-                                feature.pro ? (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
-                                    <X className="w-3 h-3 text-text-secondary" />
-                                  </div>
-                                )
-                              ) : (
-                                <span className="text-xs text-muted-foreground font-semibold">{feature.pro}</span>
-                              )}
-                            </td>
-                            <td className="text-center py-3 px-4">
-                              {typeof feature.team === 'boolean' ? (
-                                feature.team ? (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
-                                    <X className="w-3 h-3 text-text-secondary" />
-                                  </div>
-                                )
-                              ) : (
-                                <span className="text-xs text-muted-foreground">{feature.team}</span>
-                              )}
-                            </td>
-                            <td className="text-center py-3 px-4">
-                              {typeof feature.enterprise === 'boolean' ? (
-                                feature.enterprise ? (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-hover">
-                                    <X className="w-3 h-3 text-text-secondary" />
-                                  </div>
-                                )
-                              ) : (
-                                <span className="text-xs text-muted-foreground">{feature.enterprise}</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <section className="border-t border-border py-16 sm:py-20" aria-labelledby="faq-heading">
+            <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Good to know</p>
+                <h2 id="faq-heading" className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+                  Straight answers, without the pricing maze.
+                </h2>
+                <p className="mt-4 max-w-sm text-sm leading-7 text-muted-foreground">
+                  A few direct answers about configuring products, changing your plan, and understanding the estimate.
+                </p>
+              </div>
 
-          {/* Footer CTA */}
-          <div className="text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-hover hover:bg-surface-strong text-foreground rounded-xl text-sm font-semibold transition-all border border-border hover:border-border-strong"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              Back to Home
-            </Link>
+              <div className="divide-y divide-border border-y border-border">
+                {faqs.map((faq, index) => (
+                  <details key={faq.question} className="group py-5" open={index === 0}>
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded-sm text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      {faq.question}
+                      <span className="relative size-5 shrink-0 rounded-full border border-border text-muted-foreground">
+                        <span className="absolute left-1/2 top-1/2 h-px w-2 -translate-x-1/2 -translate-y-1/2 bg-current" />
+                        <span className="absolute left-1/2 top-1/2 h-2 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition group-open:rotate-90 group-open:opacity-0" />
+                      </span>
+                    </summary>
+                    <p className="max-w-2xl pt-4 text-sm leading-7 text-muted-foreground">{faq.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-border bg-surface-card p-6 sm:flex-row sm:items-center sm:p-8">
+            <div>
+              <p className="text-sm font-semibold">Need higher limits or enterprise controls?</p>
+              <p className="mt-1 text-sm text-muted-foreground">We can model dedicated support, security, data residency, and unusually high-volume workloads.</p>
+            </div>
+            <Button asChild variant="outline" className="shrink-0">
+              <Link href="mailto:support@geiger.studio">
+                Talk to us
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

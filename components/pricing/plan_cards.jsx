@@ -1,230 +1,772 @@
 "use client";
 
 import Link from "next/link";
-import { Crown, Diamond, HardDrive, Sparkles, Zap } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import {
+  ArrowDown,
+  ArrowRight,
+  BookOpen,
+  BriefcaseBusiness,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  Code2,
+  FileStack,
+  FolderKanban,
+  HardDrive,
+  Image,
+  Megaphone,
+  MessageSquareText,
+  Minus,
+  Plus,
+  Radio,
+  Sparkles,
+  Workflow,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 
-const pricingPlans = [
+const betaPlan = {
+  name: "Beta Tester",
+  price: 0,
+  description: "Help shape Geiger with full access to all 12 products while the suite is in beta.",
+  included: ["All 12 products", "1 active project", "3 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
+};
+
+const plans = [
   {
-    name: "Starter",
-    price: "2.99",
-    description: "Perfect for passion projects & simple websites",
-    icon: Zap,
-    cta: "Get Started",
-    popular: false,
+    id: "basic",
+    name: "Basic",
+    price: 19,
+    description: "A focused workspace for small teams shipping one active project.",
+    eyebrow: "For Smaller Teams",
+    included: ["1 Core + 1 Add-on + 2 Cherry", "1 active project", "5 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
+    productAllowances: { core: 1, addon: 1, cherry: 2 },
+    projectAllowance: 1,
+    seatAllowance: 5,
+    storageAllowance: 5,
+    aiAllowance: 50,
   },
   {
+    id: "plus",
+    name: "Plus",
+    price: 79,
+    description: "More products, people, and room for teams managing parallel work.",
+    eyebrow: "Most popular",
+    included: ["2 Core + 2 Add-on + all Cherry", "3 active projects", "12 collaborators", "50 GB storage", "250 GB bandwidth", "200 AI credits"],
+    productAllowances: { core: 2, addon: 2, cherry: 3 },
+    projectAllowance: 3,
+    seatAllowance: 12,
+    storageAllowance: 50,
+    aiAllowance: 200,
+    featured: true,
+  },
+  {
+    id: "pro",
     name: "Pro",
-    price: "4.99",
-    description: "Most Popular - For production applications with the power to scale",
-    icon: Crown,
-    cta: "Start Free Trial",
-    popular: true,
-  },
-  {
-    name: "Team",
-    price: "9.99",
-    description: "For large teams with advanced collaboration needs",
-    icon: Diamond,
-    cta: "Start Free Trial",
-    popular: false,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    description: "For large-scale applications with dedicated support",
-    icon: Diamond,
-    cta: "Contact Sales",
-    popular: false,
+    price: 119,
+    description: "The complete suite for teams coordinating complex, multi-project delivery.",
+    eyebrow: "For growing studios",
+    included: ["3 Core + 4 Add-on + all Cherry", "10 active projects", "25 collaborators", "100 GB storage", "500 GB bandwidth", "300 AI credits"],
+    productAllowances: { core: 3, addon: 4, cherry: 3 },
+    projectAllowance: 10,
+    seatAllowance: 25,
+    storageAllowance: 100,
+    aiAllowance: 300,
   },
 ];
 
-const storageAddons = [
+const products = [
+  { id: "campaign", name: "Campaign", detail: "Campaign planning and delivery", category: "core", icon: Megaphone },
+  { id: "flow", name: "Flow", detail: "Projects and delivery", category: "core", icon: Workflow },
+  { id: "events", name: "Events", detail: "Event operations and registration", category: "core", icon: CalendarDays },
+  { id: "assets", name: "Assets", detail: "Creative asset control", category: "core", icon: Image },
+  { id: "forms", name: "Forms", detail: "Intake and feedback", category: "addon", icon: CheckCircle2 },
+  { id: "grey", name: "Grey", detail: "AI project assistant", category: "addon", icon: Sparkles },
+  { id: "office", name: "Office", detail: "Workspace operations", category: "addon", icon: BriefcaseBusiness },
+  { id: "docs", name: "Docs", detail: "Published documentation", category: "addon", icon: BookOpen },
+  { id: "content", name: "Content", detail: "Publishing workflows", category: "addon", icon: Code2 },
+  { id: "chat", name: "Chat", detail: "Project conversations", category: "cherry", icon: MessageSquareText },
+  { id: "notes", name: "Notes", detail: "Docs and knowledge", category: "cherry", icon: FileStack },
+  { id: "canvas", name: "Canvas", detail: "Visual collaboration", category: "cherry", icon: FolderKanban },
+];
+
+const productCategories = [
   {
-    name: "Storage 50",
-    storage: "50 GB extra",
-    monthlyPrice: 5,
-    highlight: false,
+    id: "core",
+    name: "Core products",
+    description: "The operational foundation of your workspace.",
+    rate: 10,
   },
   {
-    name: "Storage 200",
-    storage: "200 GB extra",
-    monthlyPrice: 15,
-    highlight: true,
+    id: "addon",
+    name: "Add-on products",
+    description: "Specialized tools to extend your workflow.",
+    rate: 5,
   },
   {
-    name: "Storage 500",
-    storage: "500 GB extra",
-    monthlyPrice: 29,
-    highlight: false,
-  },
-  {
-    name: "Storage 1 TB",
-    storage: "1 TB extra",
-    monthlyPrice: 49,
-    highlight: false,
+    id: "cherry",
+    name: "Cherry products",
+    description: "Lightweight collaboration tools for the finishing touch.",
+    rate: 3,
   },
 ];
 
-function formatUsd(value) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+const metricConfig = [
+  { id: "projects", label: "Active projects", min: 1, max: 30, step: 1 },
+  { id: "seats", label: "Collaborators", min: 1, max: 100, step: 1 },
+  { id: "storage", label: "Storage", min: 0, max: 1000, step: 3, suffix: "GB" },
+  { id: "bandwidth", label: "Bandwidth", min: 0, max: 5000, step: 3, suffix: "GB" },
+  { id: "edgeData", label: "Edge / CDN Serving", min: 0, max: 5000, step: 3, suffix: "GB" },
+  { id: "aiCredits", label: "AI credits", min: 0, max: 5000, step: 10, suffix: "credits" },
+];
+
+const PROJECT_RATE = 5;
+const COLLABORATOR_RATE = 1;
+const STORAGE_RATE = 0.5;
+const BANDWIDTH_RATE = 0.25;
+const EDGE_DATA_RATE = 0.1;
+const AI_RATE_PER_1000 = 10;
+
+function formatNumber(value) {
+  return new Intl.NumberFormat("en-US").format(value);
 }
 
-function PlanPrice({ price, yearly }) {
-  const numericPrice = Number(price);
-  const isNumeric = Number.isFinite(numericPrice);
+function RollingDigit({ previousDigit, digit, direction }) {
+  const [active, setActive] = useState(false);
+  const increasing = direction >= 0;
+  const digits = increasing
+    ? [previousDigit, digit]
+    : [digit, previousDigit];
 
-  if (!isNumeric) {
-    return <div className="text-2xl font-bold text-foreground">Custom</div>;
-  }
-
-  if (yearly) {
-    const yearlyTotal = numericPrice * 10;
-    return (
-      <>
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-foreground">{formatUsd(yearlyTotal)}</span>
-          <span className="text-sm text-text-secondary">/year</span>
-        </div>
-        <p className="mt-1 text-[11px] text-emerald-400">2 months free with annual billing</p>
-      </>
-    );
-  }
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setActive(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-3xl font-bold text-foreground">{formatUsd(numericPrice)}</span>
-      <span className="text-sm text-text-secondary">/month</span>
+    <span className="relative inline-block h-[1em] w-[1ch] overflow-hidden">
+      <span
+        className="absolute inset-x-0 top-0 flex flex-col transition-transform duration-500 ease-out motion-reduce:transition-none"
+        style={{
+          transform: increasing
+            ? `translateY(${active ? "-50%" : "0"})`
+            : `translateY(${active ? "0" : "-50%"})`,
+        }}
+      >
+        {digits.map((number, index) => (
+          <span
+            key={`${number}-${index}`}
+            className="block h-[1em] text-center leading-[1em]"
+          >
+            {number}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+function RollingNumber({ value, className }) {
+  const currentValue = String(value);
+  const [transition, setTransition] = useState({
+    previous: currentValue,
+    current: currentValue,
+  });
+
+  if (currentValue !== transition.current) {
+    setTransition({
+      previous: transition.current,
+      current: currentValue,
+    });
+  }
+
+  const previousValue = transition.previous;
+  const direction =
+    Number(currentValue.replaceAll(",", "")) -
+    Number(previousValue.replaceAll(",", ""));
+
+  return (
+    <span className={cn("inline-flex h-[1em] items-center leading-[1em] tabular-nums", className)}>
+      {currentValue.split("").map((char, index, chars) => {
+        const previousIndex = index - (chars.length - previousValue.length);
+        const previousChar = previousValue[previousIndex];
+
+        if (/\d/.test(char) && /\d/.test(previousChar) && char !== previousChar) {
+          return (
+            <RollingDigit
+              key={`${index}-${previousChar}-${char}`}
+              previousDigit={Number(previousChar)}
+              digit={Number(char)}
+              direction={direction}
+            />
+          );
+        }
+        return <span key={index}>{char}</span>;
+      })}
+    </span>
+  );
+}
+
+function RollingPrice({ value, className }) {
+  return (
+    <span className={cn("inline-flex h-[1em] items-center leading-[1em]", className)}>
+      <span className="sr-only">${value}</span>
+      <span className="inline-flex h-[1em] items-center leading-[1em]" aria-hidden="true">
+        <span className="inline-block h-[1em] leading-[1em]">$</span>
+        <RollingNumber value={value} />
+      </span>
+    </span>
+  );
+}
+
+function Counter({ label, value, minimum = 1, maximum, onChange }) {
+  const atMinimum = value <= minimum;
+  const atMaximum = value >= maximum;
+
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/60 p-3">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(minimum, value - 1))}
+          disabled={atMinimum}
+          className="flex size-8 items-center justify-center rounded-lg border border-border bg-surface-card text-muted-foreground transition hover:border-border-strong hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-35"
+          aria-label={`Decrease ${label}`}
+        >
+          <Minus className="size-3.5" />
+        </button>
+        <span className="min-w-8 text-center text-sm font-semibold tabular-nums" aria-live="polite">
+          {value}
+        </span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(maximum, value + 1))}
+          disabled={atMaximum}
+          className="flex size-8 items-center justify-center rounded-lg border border-border bg-surface-card text-muted-foreground transition hover:border-border-strong hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-35"
+          aria-label={`Increase ${label}`}
+        >
+          <Plus className="size-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
 
 export function PlanCards({ ctaHref }) {
   const [isYearly, setIsYearly] = useState(false);
-  const billingLabel = useMemo(() => (isYearly ? "Yearly billing" : "Monthly billing"), [isYearly]);
+  const [selectedPlanId, setSelectedPlanId] = useState("plus");
+  const [selectedProducts, setSelectedProducts] = useState([
+    "campaign",
+    "flow",
+    "forms",
+    "grey",
+    "chat",
+    "notes",
+    "canvas",
+  ]);
+  const [metrics, setMetrics] = useState({
+    projects: 3,
+    seats: 12,
+    storage: 50,
+    bandwidth: 250,
+    edgeData: 0,
+    aiCredits: 200,
+  });
+
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) || plans[0];
+  const billingMultiplier = isYearly ? 10 : 1;
+  const billingPeriod = isYearly ? "year" : "month";
+
+  const selectPlan = (plan) => {
+    setSelectedPlanId(plan.id);
+    setMetrics({
+      projects: plan.projectAllowance,
+      seats: plan.seatAllowance,
+      storage: plan.storageAllowance,
+      bandwidth: plan.storageAllowance * 5,
+      edgeData: 0,
+      aiCredits: plan.aiAllowance,
+    });
+    setSelectedProducts(
+      products
+        .filter((product) => {
+          const categoryProducts = products.filter((item) => item.category === product.category);
+          return categoryProducts.indexOf(product) < plan.productAllowances[product.category];
+        })
+        .map((product) => product.id)
+    );
+  };
+
+  const toggleProduct = (productId) => {
+    setSelectedProducts((current) =>
+      current.includes(productId)
+        ? current.filter((id) => id !== productId)
+        : [...current, productId]
+    );
+  };
+
+  const estimate = useMemo(() => {
+    const productCosts = productCategories.reduce((costs, category) => {
+      const selectedCount = products.filter(
+        (product) =>
+          product.category === category.id && selectedProducts.includes(product.id)
+      ).length;
+      const includedCount = selectedPlan.productAllowances[category.id];
+      return {
+        ...costs,
+        [category.id]: Math.max(0, selectedCount - includedCount) * category.rate,
+      };
+    }, {});
+    const productCost = Object.values(productCosts).reduce((total, cost) => total + cost, 0);
+    const projectCost = Math.max(0, metrics.projects - selectedPlan.projectAllowance) * PROJECT_RATE;
+    const seatCost = Math.max(0, metrics.seats - selectedPlan.seatAllowance) * COLLABORATOR_RATE;
+    const storageCost = Math.max(0, metrics.storage - selectedPlan.storageAllowance) * STORAGE_RATE;
+    const includedBandwidth = metrics.storage * 5;
+    const bandwidthCost = Math.max(0, metrics.bandwidth - includedBandwidth) * BANDWIDTH_RATE;
+    const edgeDataCost = metrics.edgeData * EDGE_DATA_RATE;
+    const aiCost =
+      (Math.max(0, metrics.aiCredits - selectedPlan.aiAllowance) / 1000) *
+      AI_RATE_PER_1000;
+
+    return {
+      total:
+        selectedPlan.price +
+        productCost +
+        projectCost +
+        seatCost +
+        storageCost +
+        bandwidthCost +
+        edgeDataCost +
+        aiCost,
+      productCost,
+      projectCost,
+      seatCost,
+      storageCost,
+      bandwidthCost,
+      edgeDataCost,
+      aiCost,
+    };
+  }, [metrics, selectedPlan, selectedProducts]);
 
   return (
     <>
-      <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-        <span className={`text-sm ${!isYearly ? "text-foreground" : "text-foreground0"}`}>Monthly</span>
-        <Switch checked={isYearly} onCheckedChange={setIsYearly} aria-label="Toggle yearly billing" />
-        <span className={`text-sm ${isYearly ? "text-foreground" : "text-foreground0"}`}>Yearly</span>
-        <Badge variant="success" className="border border-emerald-500/20 bg-emerald-500/10">
-          2 months free
-        </Badge>
-        <span className="text-xs text-foreground0">{billingLabel}</span>
-      </div>
+      <section aria-labelledby="plans-heading">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Choose a foundation</p>
+            <h2 id="plans-heading" className="mt-2 capitalize text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+              Start with a foundation, then customize.
+            </h2>
+          </div>
+          <div className="flex w-full items-center gap-2 rounded-full border border-border bg-surface-card px-3 py-2.5 sm:w-auto sm:gap-3 sm:px-4">
+            <span className={`text-xs font-medium sm:text-sm ${isYearly ? "text-muted-foreground" : "text-foreground"}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+              aria-label="Toggle yearly billing"
+            />
+            <span className={`text-xs font-medium sm:text-sm ${isYearly ? "text-foreground" : "text-muted-foreground"}`}>
+              Yearly
+            </span>
+            <span className="ml-auto rounded-full bg-surface-active px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:ml-0">
+              Save 17%
+            </span>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 mb-16 md:grid-cols-2 lg:grid-cols-4">
-        {pricingPlans.map((plan, index) => {
-          const Icon = plan.icon;
-          return (
-            <div key={index} className={`relative group ${index === 1 ? "lg:-mt-4 lg:mb-4" : ""}`}>
-              <div
-                className={`relative bg-gradient-to-br from-surface-subtle to-[#1e1e1e] border rounded-2xl overflow-hidden transition-all duration-300 ${
-                  plan.popular ? "border-zinc-500 shadow-2xl shadow-zinc-500/20" : "border-border hover:border-border-strong"
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 left-0 right-0 py-1.5 px-4 text-xs font-semibold text-center bg-gradient-to-r from-zinc-500/20 via-purple-500/20 to-emerald-500/20 border-b border-zinc-500/30 flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Most Popular
-                  </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {plans.map((plan) => (
+            <article
+              key={plan.id}
+              className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-2xl border p-5 transition duration-300 sm:p-6 ${
+                plan.featured
+                  ? "border-foreground/30 bg-foreground text-background shadow-[0_28px_80px_-48px_rgba(255,255,255,0.4)] dark:bg-[#eeeeec] dark:text-[#151515]"
+                  : "border-border bg-surface-card hover:-translate-y-1 hover:border-border-strong"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${plan.featured ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
+                  {plan.eyebrow}
+                </p>
+                {plan.featured && (
+                  <span className="rounded-full bg-background/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider dark:bg-[#151515]/10">
+                    Recommended
+                  </span>
                 )}
+              </div>
 
-                <div className={`pt-8 pb-6 px-6 ${plan.popular ? "pt-12" : ""}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                    <Icon className={`w-5 h-5 ${plan.popular ? "text-muted-foreground" : "text-text-secondary"}`} />
-                  </div>
+              <h3 className="mt-7 text-2xl font-semibold tracking-tight">{plan.name}</h3>
+              <div className="mt-3 flex items-end gap-2">
+                <RollingPrice
+                  key={plan.price * billingMultiplier}
+                  value={formatNumber(plan.price * billingMultiplier)}
+                  className="text-5xl font-semibold tracking-[-0.06em]"
+                />
+                <span className={`pb-1 text-sm ${plan.featured ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
+                  / {billingPeriod}
+                </span>
+              </div>
+              <p className={`mt-5 min-h-12 text-sm leading-6 ${plan.featured ? "text-background/70 dark:text-[#151515]/70" : "text-muted-foreground"}`}>
+                {plan.description}
+              </p>
 
-                  <div className="mb-3">
-                    <PlanPrice price={plan.price} yearly={isYearly} />
-                  </div>
+              <ul className="mt-7 space-y-3">
+                {plan.included.map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm capitalize">
+                    <span className={`flex size-5 items-center justify-center rounded-full ${plan.featured ? "bg-background/10 dark:bg-[#151515]/10" : "bg-surface-hover"}`}>
+                      <Check className="size-3" />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
 
-                  <p className="text-xs text-muted-foreground mb-6 leading-relaxed min-h-[32px]">
-                    {plan.description.split(" - ")[1] || plan.description}
-                  </p>
+              <div className="mt-auto pt-6">
+                <a
+                  href="#plan-calculator"
+                  onClick={() => selectPlan(plan)}
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    plan.featured
+                      ? "border-background/15 bg-background text-foreground hover:bg-background/90 dark:border-[#151515]/15 dark:bg-[#151515] dark:text-white"
+                      : "border-border bg-surface-subtle hover:border-border-strong hover:bg-surface-hover"
+                  }`}
+                >
+                  Configure this plan
+                  <ArrowDown className="size-4" />
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
-                  <Link
-                    href={ctaHref}
-                    className={`block w-full text-center py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                      plan.popular
-                        ? "bg-border-strong hover:bg-[#5a5a5a] text-foreground shadow-lg"
-                        : "bg-surface-hover hover:bg-surface-strong text-muted-foreground"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
-                </div>
+      <section id="plan-calculator" className="scroll-mt-24 py-20 sm:py-24" aria-labelledby="calculator-heading">
+        <div className="mb-8 max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Plan calculator</p>
+          <h2 id="calculator-heading" className="mt-3 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            Shape the plan around your work.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
+            Choose a foundation, select the products you need, then adjust team size and usage. Your estimate updates as you go.
+          </p>
+        </div>
+
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface-card">
+            <div className="border-b border-border p-5 sm:p-6">
+              <p className="text-sm font-semibold">1. Choose a foundation</p>
+              <div className="mt-4 grid min-w-0 grid-cols-3 gap-2">
+                {plans.map((plan) => {
+                  const isSelected = selectedPlanId === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => selectPlan(plan)}
+                      aria-pressed={isSelected}
+                      className={`min-w-0 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-4 ${
+                        isSelected
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border bg-background/50 hover:border-border-strong"
+                      }`}
+                    >
+                      <span className="block truncate text-xs font-semibold sm:text-sm">{plan.name}</span>
+                      <span className="mt-2 flex min-w-0 items-end gap-1">
+                        <RollingPrice
+                          key={plan.price * billingMultiplier}
+                          value={formatNumber(plan.price * billingMultiplier)}
+                          className={`min-w-0 text-base font-semibold tracking-tight sm:text-lg ${
+                            isSelected ? "text-background" : "text-foreground"
+                          }`}
+                        />
+                        <span className={`pb-px text-[10px] ${isSelected ? "text-background/60" : "text-muted-foreground"}`}>
+                          /{isYearly ? "yr" : "mo"}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          );
-        })}
-      </div>
 
-      <div className="mb-16 rounded-2xl border border-border bg-gradient-to-br from-surface-subtle to-[#1e1e1e] p-4 sm:p-6">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-2xl font-bold text-foreground">Extra Storage Add-ons</h3>
-            <p className="text-sm text-muted-foreground">Scale storage independently as your team and media library grow.</p>
-          </div>
-          <Badge variant="outline" className="w-fit border-border-strong text-muted-foreground">
-            Add-on pricing
-          </Badge>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {storageAddons.map((addon) => {
-            const billingAmount = isYearly ? addon.monthlyPrice * 10 : addon.monthlyPrice;
-            return (
-              <div
-                key={addon.name}
-                className={`rounded-xl border p-4 transition-all ${
-                  addon.highlight
-                    ? "border-zinc-500 bg-zinc-500/5 shadow-[0_0_40px_-24px_rgba(161,161,170,0.45)]"
-                    : "border-border bg-surface-card"
-                }`}
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-strong bg-surface-card">
-                      <HardDrive className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">{addon.name}</p>
-                  </div>
-                  {addon.highlight && <Badge variant="secondary">Best value</Badge>}
+            <div className="border-b border-border p-5 sm:p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold">2. Choose products for your projects</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Each foundation includes a category allowance. Each products are priced individually.
+                  </p>
                 </div>
-
-                <p className="mb-4 text-xs text-muted-foreground">{addon.storage}</p>
-
-                <div className="mb-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-foreground">{formatUsd(billingAmount)}</span>
-                    <span className="text-xs text-text-secondary">{isYearly ? "/year" : "/month"}</span>
-                  </div>
-                  {isYearly && <p className="mt-1 text-[11px] text-emerald-400">2 months free on annual add-on</p>}
-                </div>
-
-                <Button
-                  asChild
-                  className="w-full bg-surface-hover text-foreground hover:bg-surface-strong"
-                >
-                  <Link href={ctaHref}>Add Storage</Link>
-                </Button>
+                <p className="w-fit rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  {selectedProducts.length} selected
+                </p>
               </div>
-            );
-          })}
+
+              <div className="mt-6 space-y-7">
+                {productCategories.map((category) => {
+                  const categoryProducts = products.filter(
+                    (product) => product.category === category.id
+                  );
+                  const selectedCount = categoryProducts.filter((product) =>
+                    selectedProducts.includes(product.id)
+                  ).length;
+                  const allowance = selectedPlan.productAllowances[category.id];
+
+                  return (
+                    <section key={category.id} aria-labelledby={`${category.id}-products-heading`}>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6 mt-6">
+                        <div>
+                          <h3 id={`${category.id}-products-heading`} className="text-sm font-semibold">
+                            {category.name}
+                          </h3>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {category.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px]">
+                          <span className="rounded-full bg-surface-active px-2.5 py-1 font-medium text-muted-foreground">
+                            {selectedCount > allowance
+                              ? `${allowance} included / ${selectedCount - allowance} Each`
+                              : `${selectedCount}/${allowance} Included`}
+                          </span>
+                          <span className="rounded-full border border-border px-2.5 py-1 font-semibold">
+                            +${category.rate}/Each
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {categoryProducts.map((product) => {
+                          const Icon = product.icon;
+                          const isEnabled = selectedProducts.includes(product.id);
+                          return (
+                            <button
+                              key={product.id}
+                              type="button"
+                              aria-pressed={isEnabled}
+                              onClick={() => toggleProduct(product.id)}
+                              className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                isEnabled
+                                  ? "border-foreground/50 bg-surface-active"
+                                  : "border-border bg-background/45 hover:border-border-strong"
+                              }`}
+                            >
+                              <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg border ${isEnabled ? "border-foreground/20 bg-foreground text-background" : "border-border bg-surface-card text-muted-foreground"}`}>
+                                <Icon className="size-4" />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block text-sm font-semibold">{product.name}</span>
+                                <span className="block truncate text-xs text-muted-foreground">{product.detail}</span>
+                              </span>
+                              <span className={`flex size-5 items-center justify-center rounded-full border ${isEnabled ? "border-foreground bg-foreground text-background" : "border-border"}`}>
+                                {isEnabled && <Check className="size-3" />}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="p-5 sm:p-6">
+              <p className="text-sm font-semibold">3. Set your scale</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Each active projects are $5 each and Each collaborators are $1 each.
+              </p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {metricConfig.slice(0, 2).map((metric) => (
+                  <Counter
+                    key={metric.id}
+                    label={metric.label}
+                    value={metrics[metric.id]}
+                    minimum={
+                      metric.id === "projects"
+                        ? selectedPlan.projectAllowance
+                        : selectedPlan.seatAllowance
+                    }
+                    maximum={metric.max}
+                    onChange={(value) => setMetrics((current) => ({ ...current, [metric.id]: value }))}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-background/60 p-3">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-surface-active text-muted-foreground">
+                    <HardDrive className="size-4" />
+                  </span>
+                  <span>
+                    <span className="block text-xs text-muted-foreground">Base storage</span>
+                    <span className="mt-0.5 block text-sm font-semibold">
+                      {selectedPlan.storageAllowance} GB
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-background/60 p-3">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-surface-active text-muted-foreground">
+                    <Radio className="size-4" />
+                  </span>
+                  <span>
+                    <span className="block text-xs text-muted-foreground">Bandwidth included now</span>
+                    <span className="mt-0.5 block text-sm font-semibold">
+                      {metrics.storage * 5} GB
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                {metricConfig.slice(2).map((metric) => (
+                  <label key={metric.id} className="block">
+                    <span className="mb-3 flex items-center justify-between gap-4 text-sm">
+                      <span className="text-muted-foreground">{metric.label}</span>
+                      <span className="font-semibold tabular-nums">
+                        {formatNumber(metrics[metric.id])} {metric.suffix}
+                      </span>
+                    </span>
+                    <input
+                      type="range"
+                      min={
+                        metric.id === "storage"
+                          ? selectedPlan.storageAllowance
+                          : metric.id === "bandwidth"
+                            ? metrics.storage * 5
+                            : metric.id === "aiCredits"
+                              ? selectedPlan.aiAllowance
+                            : metric.min
+                      }
+                      max={metric.max}
+                      step={metric.step}
+                      value={metrics[metric.id]}
+                      aria-label={metric.label}
+                      onChange={(event) => {
+                        const value = Number(event.target.value);
+                        setMetrics((current) =>
+                          metric.id === "storage"
+                            ? {
+                                ...current,
+                                storage: value,
+                                bandwidth: Math.max(current.bandwidth, value * 5),
+                              }
+                            : { ...current, [metric.id]: value }
+                        );
+                      }}
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-surface-strong accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-surface-card"
+                    />
+                    <span className="mt-2 flex justify-between text-[10px] text-muted-foreground/70">
+                      <span>
+                        {metric.id === "Storage"
+                          ? "$0.50 per Each GB"
+                          : metric.id === "bandwidth"
+                            ? "$0.25 per Each GB"
+                            : metric.id === "edgeData"
+                              ? "Not included / $0.10 per GB across 119 PoPs"
+                              : "$10 per 1,000 Each Credits"}
+                      </span>
+                      <span>{formatNumber(metric.max)} {metric.suffix}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <aside className="top-24 overflow-hidden rounded-2xl border border-border-strong bg-[#171717] text-white shadow-2xl lg:sticky">
+            <div className="border-b border-white/10 p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+                Estimated {isYearly ? "yearly" : "monthly"} cost
+              </p>
+              <div className="mt-4 flex min-w-0 items-end gap-2" aria-live="polite">
+                <RollingPrice
+                  value={formatNumber(estimate.total * billingMultiplier)}
+                  className="text-6xl font-semibold tracking-[-0.065em]"
+                />
+                <span className="pb-2 text-sm text-white/45">USD</span>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-white/50 capitalize">
+                For {metrics.projects} {metrics.projects === 1 ? "project" : "projects"}, {metrics.seats} collaborators, {selectedProducts.length} products, {metrics.storage} GB storage, {metrics.bandwidth} GB bandwidth, and {metrics.edgeData} GB edge data.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-6 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">{selectedPlan.name} foundation</span>
+                <RollingPrice
+                  value={formatNumber(selectedPlan.price * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each products</span>
+                <RollingPrice
+                  value={formatNumber(estimate.productCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each projects</span>
+                <RollingPrice
+                  value={formatNumber(estimate.projectCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each collaborators</span>
+                <RollingPrice
+                  value={formatNumber(estimate.seatCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each storage</span>
+                <RollingPrice
+                  value={formatNumber(estimate.storageCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each bandwidth</span>
+                <RollingPrice
+                  value={formatNumber(estimate.bandwidthCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Edge / CDN usage</span>
+                <RollingPrice
+                  value={formatNumber(estimate.edgeDataCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Each AI credits</span>
+                <RollingPrice
+                  value={formatNumber(estimate.aiCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 p-4">
+              <Link
+                href={ctaHref}
+                className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717]"
+              >
+                Start with {selectedPlan.name}
+                <ArrowRight className="size-4" />
+              </Link>
+              <p className="mt-3 text-center text-[11px] text-white/40">Estimate excludes taxes.</p>
+            </div>
+          </aside>
         </div>
-      </div>
+      </section>
     </>
   );
 }

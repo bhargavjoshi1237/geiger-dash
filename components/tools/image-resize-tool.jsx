@@ -4,15 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import { Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FileDropzone } from "@/components/tools/file-dropzone";
 import { ImagePreview } from "@/components/tools/image-preview";
 import {
   Field,
-  NumberInput,
   ProcessButton,
-  RangeInput,
   ResultCard,
-  SelectInput,
 } from "@/components/tools/tool-controls";
 import {
   downloadBlob,
@@ -148,22 +154,44 @@ export function ImageResizeTool() {
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Width" hint="px">
-              <NumberInput min="1" max="12000" value={width} onChange={(event) => updateWidth(event.target.value)} />
+              <Input
+                type="number"
+                min={1}
+                max={12000}
+                value={width}
+                onChange={(e) => updateWidth(e.target.value)}
+              />
             </Field>
             <Field label="Height" hint="px">
-              <NumberInput min="1" max="12000" value={height} onChange={(event) => updateHeight(event.target.value)} />
+              <Input
+                type="number"
+                min={1}
+                max={12000}
+                value={height}
+                onChange={(e) => updateHeight(e.target.value)}
+              />
             </Field>
           </div>
           <Field label="Output format">
-            <SelectInput value={format} onChange={(event) => setFormat(event.target.value)}>
-              <option value="image/webp">WebP</option>
-              <option value="image/jpeg">JPG</option>
-              <option value="image/png">PNG</option>
-            </SelectInput>
+            <Select value={format} onValueChange={setFormat}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="image/webp">WebP</SelectItem>
+                <SelectItem value="image/jpeg">JPG</SelectItem>
+                <SelectItem value="image/png">PNG</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
           {format !== "image/png" ? (
             <Field label="Quality" hint={`${quality}%`}>
-              <RangeInput min="35" max="100" value={quality} onChange={(event) => setQuality(Number(event.target.value))} />
+              <Slider
+                min={35}
+                max={100}
+                value={[quality]}
+                onValueChange={([val]) => setQuality(val)}
+              />
             </Field>
           ) : null}
           <ProcessButton busy={busy} label="Resize image" onClick={resize} />

@@ -34,7 +34,7 @@ export default async function ChangeLogComponent() {
         )}
       </div>
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <Link href="/changelog" className="mt-12 text-white hover:underline">
+        <Link href="/changelog" className="mt-12 text-foreground hover:underline">
           See what is new in Geiger Studio -&gt;
         </Link>
       </div>

@@ -43,8 +43,9 @@ export default function ToolsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
       <PublicHeader />
-      <main>
+      <main className="relative z-10">
         <section className="border-b border-border px-4 pb-12 pt-28 sm:px-6 sm:pb-16 sm:pt-32">
           <div className="mx-auto max-w-6xl">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

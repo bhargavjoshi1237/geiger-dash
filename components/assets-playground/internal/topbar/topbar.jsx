@@ -10,6 +10,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationsDropdown } from "./dialogue/notifications_dropdown";
@@ -72,7 +73,12 @@ export function Topbar() {
                   </button>
                 </NotificationsDropdown>
                 <button className="w-8 h-8 rounded-full border border-border hover:border-border-strong overflow-hidden ml-1 transition-colors">
-                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500"></div>
+                  <Avatar className="size-full">
+                    <AvatarImage src="/cat.jpg" alt="User" />
+                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-[10px] font-semibold text-white border-0">
+                      U
+                    </AvatarFallback>
+                  </Avatar>
                 </button>
               </>
             )}

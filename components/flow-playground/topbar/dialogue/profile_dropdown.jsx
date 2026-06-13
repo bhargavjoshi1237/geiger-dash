@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "next-themes";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CachedAvatarImage } from "@/components/cached-avatar-image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   CircleUserRound,
   Settings,
@@ -54,10 +53,6 @@ export function ProfileDropdown({ children }) {
     });
   }, []);
 
-  const pfpUrl = user?.id
-    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${user.id}/latest.jpg`
-    : null;
-
   const displayName = user?.name || "User";
   const displayEmail = user?.email || "user@email.com";
   const initials = displayName
@@ -73,9 +68,7 @@ export function ProfileDropdown({ children }) {
         {children || (
           <button className="w-8 h-8 rounded-full border border-border hover:border-border-strong overflow-hidden ml-1 transition-colors">
             <Avatar className="size-full">
-              {pfpUrl && (
-                <CachedAvatarImage src={pfpUrl} cacheKey={user.id} alt={displayName} />
-              )}
+              <AvatarImage src="/cat.jpg" alt={displayName} />
               <AvatarFallback className="bg-border-strong text-white text-[10px] font-semibold border-0">
                 {initials}
               </AvatarFallback>
@@ -94,9 +87,7 @@ export function ProfileDropdown({ children }) {
           <DropdownMenuLabel className="p-0">
             <div className="flex items-center gap-3">
               <Avatar className="size-10 border border-border">
-                {pfpUrl && (
-                  <CachedAvatarImage src={pfpUrl} cacheKey={user.id} alt={displayName} />
-                )}
+                <AvatarImage src="/cat.jpg" alt={displayName} />
                 <AvatarFallback className="bg-border-strong text-white text-xs font-semibold border-0">
                   {initials}
                 </AvatarFallback>

@@ -103,6 +103,7 @@ All tables have RLS enabled with the following policies:
    -- Execute database/init/changelog.sql
    -- Execute database/init/changelog_products.sql for an existing database
    -- Execute database/init/blog.sql
+   -- Execute database/init/blog_automation.sql
    -- Execute database/init/storage_policies.sql
    ```
 

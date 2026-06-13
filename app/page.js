@@ -63,14 +63,14 @@ export default function Home() {
       <main className="relative z-10 flex flex-1 flex-col pt-16 sm:pt-20">
         <section className="mx-auto mt-10 mb-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
           <div className="max-w-3xl">
-            <h1 className="mb-4 text-2xl font-semibold text-white sm:text-3xl">Built to Manage. Designed to Create</h1>
+            <h1 className="mb-4 text-2xl font-semibold text-foreground sm:text-3xl">Built to Manage. Designed to Create</h1>
             <p className="mb-6 text-sm text-muted-foreground sm:text-base">
               Turn your ideas into something real with a single suite that combines solid management tools and
               easy-to-use creative features.
             </p>
             <Link
               href="/"
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:text-base"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
             >
               Log in to Start
               <ArrowRight className="h-4 w-4" />
@@ -133,19 +133,19 @@ export default function Home() {
             <h3 className="mb-4 text-xs font-semibold tracking-widest text-foreground0 uppercase sm:text-sm">
               Open source from day one
             </h3>
-            <h2 className="mb-8 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-3xl font-black tracking-tighter text-transparent drop-shadow-lg sm:mb-10 sm:text-5xl lg:text-6xl">
+            <h2 className="mb-8 bg-gradient-to-b from-foreground to-text-tertiary bg-clip-text text-3xl font-black tracking-tighter text-transparent drop-shadow-lg sm:mb-10 sm:text-5xl lg:text-6xl">
               TRY GEIGER NOW
             </h2>
             <div className="flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
                 href="/"
-                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:w-auto"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
               > Studio
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/"
-                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-colors hover:bg-white sm:w-auto"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
               >
                 Contact Sales
                 <ArrowRight className="h-4 w-4" />

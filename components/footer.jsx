@@ -11,9 +11,11 @@ export default function Footer() {
               <div className="w-6 h-6 flex items-center justify-center">
                 <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
               </div>
-              <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">Geiger Studios</span>
+              <span className="text-lg font-bold tracking-tight text-foreground dark:bg-gradient-to-r dark:from-zinc-100 dark:to-zinc-400 dark:bg-clip-text dark:text-transparent">
+                Geiger Studios
+              </span>
             </div>
-            <p className="text-foreground0 text-sm max-w-sm">
+            <p className="max-w-sm text-sm text-muted-foreground">
               Built to Manage. Designed to Create.
               <br /> Turn your ideas into something real with a single suite that combines solid management tools and easy-to-use creative features.
             </p>
@@ -58,7 +60,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-foreground0">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border/50 pt-8 text-sm text-muted-foreground md:flex-row">
           <p>&copy; {new Date().getFullYear()} Geiger Studios. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="hover:text-muted-foreground transition-colors">Privacy Policy</Link>

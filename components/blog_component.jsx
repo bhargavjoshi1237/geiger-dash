@@ -56,7 +56,7 @@ export default async function BlogComponent() {
                 </span>
                 {post.reading_time_minutes ? <span>{post.reading_time_minutes} min read</span> : null}
               </div>
-              <h3 className="text-xl font-semibold leading-tight text-white">{post.title}</h3>
+              <h3 className="text-xl font-semibold leading-tight text-foreground">{post.title}</h3>
               <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground">
                 Read post
@@ -70,7 +70,7 @@ export default async function BlogComponent() {
         )}
       </div>
       <div className="w-full max-w-7xl px-4 sm:px-6">
-        <Link href="/blog" className="mt-12 text-white hover:underline">
+        <Link href="/blog" className="mt-12 text-foreground hover:underline">
           Explore all blog posts -&gt;
         </Link>
       </div>

@@ -325,6 +325,7 @@ export async function deleteChangelogAction(changelogId) {
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/changelog')
+  revalidatePath(`/changelog/${id}`)
   revalidatePath('/studio/posts')
   return { ok: true }
 }
@@ -526,6 +527,7 @@ export async function saveChangelogAction(formData) {
   }
 
   revalidatePath('/changelog')
+  revalidatePath(`/changelog/${changelogId}`)
   revalidatePath('/studio/posts')
   redirect('/studio/posts?tab=changelog&saved=1')
 }

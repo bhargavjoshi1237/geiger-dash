@@ -7,6 +7,7 @@ import Footer from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { PublicPageHero } from "@/components/public-page-hero";
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -54,23 +55,12 @@ export default async function ChangelogPage() {
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
       <Header />
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
-        <section className="grid gap-8 border-b border-border/70 pb-10 lg:grid-cols-[1fr_0.65fr] lg:items-end">
-          <div>
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-foreground" />
-              <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                Ship log
-              </span>
-            </div>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
-              Every meaningful change, documented.
-            </h1>
-          </div>
-          <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">
-            A running ledger of what changed across Geiger, why it matters, and where the product is heading.
-          </p>
-        </section>
+      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
+        <PublicPageHero
+          eyebrow="Product updates"
+          title="Changelog"
+          description="A running ledger of every meaningful change across Geiger, why it matters, and where the product is heading."
+        />
 
         <section className="mt-4">
           {releases.map((release, index) => (
@@ -85,8 +75,12 @@ export default async function ChangelogPage() {
                     {formatDate(release.release_date)}
                   </time>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge variant="outline">{release.product}</Badge>
-                    <Badge variant="secondary">{release.category}</Badge>
+                    <Badge variant="outline" className="capitalize">
+                      {release.product.replaceAll("-", " ")}
+                    </Badge>
+                    <Badge variant="secondary" className="capitalize">
+                      {release.category}
+                    </Badge>
                   </div>
                 </div>
               </aside>
@@ -99,9 +93,15 @@ export default async function ChangelogPage() {
                         Latest release
                       </p>
                     ) : null}
-                    <h2 className="max-w-3xl text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
-                      {release.title}
-                    </h2>
+                    <Link
+                      href={`/changelog/${release.id}`}
+                      className="group/title inline-flex max-w-3xl items-start gap-3"
+                    >
+                      <h2 className="text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
+                        {release.title}
+                      </h2>
+                      <ArrowUpRight className="mt-1 size-5 shrink-0 text-muted-foreground transition-transform group-hover/title:-translate-y-0.5 group-hover/title:translate-x-0.5 group-hover/title:text-foreground" />
+                    </Link>
                     <p className="mt-5 max-w-3xl text-base leading-7 text-muted-foreground">
                       {release.description}
                     </p>
@@ -144,6 +144,14 @@ export default async function ChangelogPage() {
                     </div>
                   </>
                 ) : null}
+
+                <Link
+                  href={`/changelog/${release.id}`}
+                  className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  View release
+                  <ArrowUpRight className="size-4" />
+                </Link>
               </div>
             </article>
           ))}

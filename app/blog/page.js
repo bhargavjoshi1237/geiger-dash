@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { createClient } from "@/utils/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PublicPageHero } from "@/components/public-page-hero";
 
 export const metadata = {
   title: "Blog",
@@ -63,23 +64,12 @@ export default async function BlogPage() {
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
       <Header />
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
-        <section className="grid gap-8 border-b border-border/70 pb-10 lg:grid-cols-[1fr_0.65fr] lg:items-end">
-          <div>
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-10 bg-foreground" />
-              <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                Field notes
-              </span>
-            </div>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-foreground sm:text-6xl">
-              Ideas for teams that make things.
-            </h1>
-          </div>
-          <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">
-            Product decisions, working methods, and dispatches from inside Geiger Studios.
-          </p>
-        </section>
+      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
+        <PublicPageHero
+          eyebrow="Field notes"
+          title="Blog"
+          description="Ideas for teams that make things: product decisions, working methods, and dispatches from inside Geiger Studios."
+        />
 
         {lead ? (
           <Link

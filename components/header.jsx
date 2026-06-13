@@ -16,7 +16,7 @@ function HeaderContent({ user = null }) {
         avatarUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
           ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${userId}/latest.jpg`
           : "",
-        dashboardHref: `/notes/${userId}/home`,
+        dashboardHref: "/",
       }
     : null;
 
@@ -27,7 +27,9 @@ function HeaderContent({ user = null }) {
           <div className="w-8 h-8 flex items-center justify-center">
             <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`} alt="Logo" width={20} height={20} />
           </div>
-          <span className="truncate font-bold text-sm tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400 sm:text-md">Geiger Studios</span>
+          <span className="truncate text-sm font-bold tracking-tight text-foreground dark:bg-gradient-to-r dark:from-zinc-100 dark:to-zinc-400 dark:bg-clip-text dark:text-transparent sm:text-md">
+            Geiger Studios
+          </span>
         </div>
         <MegaMenu userId={userId} />
         <div className="hidden items-center gap-4 md:flex">
