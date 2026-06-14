@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { PublicHeader } from "@/components/header";
+import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
@@ -23,9 +23,6 @@ export const metadata = {
     canonical: "/",
   },
 };
-
-export const dynamic = "force-static";
-export const revalidate = 300;
 
 const showcaseBackgroundImages = [
   "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg",
@@ -58,7 +55,7 @@ export default function Home() {
       />
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808030_1px,transparent_1px),linear-gradient(to_bottom,#80808030_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-      <PublicHeader />
+      <Header />
 
       <main className="relative z-10 flex flex-1 flex-col pt-16 sm:pt-20">
         <section className="mx-auto mt-10 mb-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
