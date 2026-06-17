@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["auth", "public"]
+}
+
+model Organization {
+  id          BigInt    @id @default(autoincrement())
+  name        String?
+  description String
+  createdBy   String?   @map("created_by") @db.Uuid
+  createdAt   DateTime? @map("created_at") @db.Timestamptz(6)
+  owner       String?   @db.Uuid
+  metadata    Json?
+  isActive    Boolean?  @default(false) @map("is_active")
+  country     String?
+  phone       String?
+
+  @@map("organizations")
+  @@schema("public")
+}

@@ -3,10 +3,10 @@ import Link from "next/link";
 import { ArrowUpRight, Calendar, Clock3 } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { createClient } from "@/utils/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PublicPageHero } from "@/components/public-page-hero";
+import { getPublishedBlogPosts } from "@/lib/public-content/queries";
 
 export const metadata = {
   title: "Blog",
@@ -50,14 +50,8 @@ function PostMeta({ post }) {
 }
 
 export default async function BlogPage() {
-  const supabase = await createClient();
-  const { data: posts } = await supabase
-    .from("dash_blog_posts")
-    .select("id,title,excerpt,slug,category,featured_image,published_at,reading_time_minutes")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false });
-
-  const [lead, ...archive] = posts || [];
+  const posts = await getPublishedBlogPosts();
+  const [lead, ...archive] = posts;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">

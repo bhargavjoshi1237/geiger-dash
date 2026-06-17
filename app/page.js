@@ -10,6 +10,7 @@ import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsP
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
+import { createClient } from "@/utils/supabase/server";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -43,7 +44,12 @@ function getRandomShowcaseBackgrounds(count) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const [notesShowcaseBg, canvasShowcaseBg, flowShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
 
@@ -66,10 +72,10 @@ export default function Home() {
               easy-to-use creative features.
             </p>
             <Link
-              href="/"
+              href={user ? "/" : "/login"}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
             >
-              Log in to Start
+              {user ? "Get in Your Workspace" : "Log in to Start"}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

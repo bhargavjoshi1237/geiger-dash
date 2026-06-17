@@ -50,10 +50,6 @@ function HeaderContent({ user = null }) {
   );
 }
 
-export function PublicHeader() {
-  return <HeaderContent />;
-}
-
 export async function Header() {
   const supabase = await createClient();
   const {

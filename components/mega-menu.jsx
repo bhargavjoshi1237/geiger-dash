@@ -64,13 +64,13 @@ export function MegaMenu({ userId }) {
     {
       icon: CalendarDays,
       label: "Events",
-      description: "Schedule and manage events.",
+      description: "Organise & Manage events.",
       href: "/events",
     },
     {
       icon: Library,
       label: "Content",
-      description: "Create and organize content.",
+      description: "Deploy & Manage content.",
       href: "/content",
     },
     {
@@ -82,19 +82,19 @@ export function MegaMenu({ userId }) {
     {
       icon: MessageSquare,
       label: "Chat",
-      description: "Team messaging and communication.",
+      description: "Messaging and hangout.",
       href: "/chat",
     },
     {
       icon: PenTool,
       label: "Canvas",
-      description: "Visual collaboration workspace.",
+      description: "Visual colab workspace.",
       href: "/canvas",
     },
     {
       icon: BookOpen,
       label: "Docs",
-      description: "Create and share documents.",
+      description: "Share documents Securely.",
       href: "/docs",
     },
   ];

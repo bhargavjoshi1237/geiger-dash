@@ -5,7 +5,10 @@ import { ArrowLeft, ArrowUpRight, Calendar, Clock3, User } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/utils/supabase/server";
+import {
+  getPublishedBlogPostBySlug,
+  getRelatedBlogPosts,
+} from "@/lib/public-content/queries";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
@@ -41,15 +44,7 @@ function formatPostContent(content) {
 }
 
 async function getPost(slug) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("dash_blog_posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .maybeSingle();
-
-  return data;
+  return getPublishedBlogPostBySlug(slug);
 }
 
 export async function generateMetadata({ params }) {
@@ -81,15 +76,7 @@ export default async function BlogPostPage({ params }) {
 
   if (!post) notFound();
 
-  const supabase = await createClient();
-  const { data: relatedPosts } = await supabase
-    .from("dash_blog_posts")
-    .select("id,title,slug,excerpt,category,published_at")
-    .eq("is_published", true)
-    .eq("category", post.category)
-    .neq("id", post.id)
-    .order("published_at", { ascending: false })
-    .limit(3);
+  const relatedPosts = await getRelatedBlogPosts(post);
 
   const publishedDate = formatDate(post.published_at);
 

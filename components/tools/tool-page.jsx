@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, LockKeyhole } from "lucide-react";
-import { PublicHeader } from "@/components/header";
+import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import {
   Accordion,
@@ -71,7 +71,7 @@ export function ToolPage({ content, children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PublicHeader />
+      <Header />
       <main>
         <section className="border-b border-border pt-28 sm:pt-32">
           <div className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6 sm:pb-16">
