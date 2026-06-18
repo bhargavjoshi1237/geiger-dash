@@ -26,7 +26,7 @@ const faqs = [
   {
     question: "What is included with the Beta Tester plan?",
     answer:
-      "Beta testers get access to all 12 products for $0 while the beta program is active, along with a small included workspace allowance.",
+      "Beta testers get access to all 14 products for $0 while the beta program is active, along with a small included workspace allowance.",
   },
   {
     question: "How are usage overages handled?",

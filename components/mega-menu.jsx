@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Wrench, ChevronDown } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Podcast, RadioTower, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -78,6 +78,18 @@ export function MegaMenu({ userId }) {
       label: "Campaign",
       description: "Run marketing campaigns.",
       href: "/campaign",
+    },
+    {
+      icon: Podcast,
+      label: "Pods",
+      description: "Publish audio shows.",
+      href: "/pods",
+    },
+    {
+      icon: RadioTower,
+      label: "Comms",
+      description: "Coordinate broadcasts.",
+      href: "/comms",
     },
     {
       icon: MessageSquare,

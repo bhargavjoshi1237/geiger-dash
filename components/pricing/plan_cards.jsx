@@ -17,8 +17,10 @@ import {
   Megaphone,
   MessageSquareText,
   Minus,
+  Podcast,
   Plus,
   Radio,
+  RadioTower,
   Sparkles,
   Workflow,
 } from "lucide-react";
@@ -29,8 +31,8 @@ import { Switch } from "@/components/ui/switch";
 const betaPlan = {
   name: "Beta Tester",
   price: 0,
-  description: "Help shape Geiger with full access to all 12 products while the suite is in beta.",
-  included: ["All 12 products", "1 active project", "3 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
+  description: "Help shape Geiger with full access to all 14 products while the suite is in beta.",
+  included: ["All 14 products", "1 active project", "3 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
 };
 
 const plans = [
@@ -81,11 +83,13 @@ const products = [
   { id: "flow", name: "Flow", detail: "Projects and delivery", category: "core", icon: Workflow },
   { id: "events", name: "Events", detail: "Event operations and registration", category: "core", icon: CalendarDays },
   { id: "assets", name: "Assets", detail: "Creative asset control", category: "core", icon: Image },
+  { id: "comms", name: "Comms", detail: "Broadcast communications", category: "core", icon: RadioTower },
   { id: "forms", name: "Forms", detail: "Intake and feedback", category: "addon", icon: CheckCircle2 },
   { id: "grey", name: "Grey", detail: "AI project assistant", category: "addon", icon: Sparkles },
   { id: "office", name: "Office", detail: "Workspace operations", category: "addon", icon: BriefcaseBusiness },
   { id: "docs", name: "Docs", detail: "Published documentation", category: "addon", icon: BookOpen },
   { id: "content", name: "Content", detail: "Publishing workflows", category: "addon", icon: Code2 },
+  { id: "pods", name: "Pods", detail: "Audio publishing workflows", category: "addon", icon: Podcast },
   { id: "chat", name: "Chat", detail: "Project conversations", category: "cherry", icon: MessageSquareText },
   { id: "notes", name: "Notes", detail: "Docs and knowledge", category: "cherry", icon: FileStack },
   { id: "canvas", name: "Canvas", detail: "Visual collaboration", category: "cherry", icon: FolderKanban },
