@@ -3,18 +3,18 @@ import { Input } from "@/components/ui/input";
 
 export default function Pallet() {
   const surfaceColors = [
-    { name: 'Background App', hex: '#161616', desc: 'Main application background' },
-    { name: 'Background Content', hex: '#1a1a1a', desc: 'Standard content area' },
-    { name: 'Surface 1', hex: '#202020', desc: 'Cards, sidebars, secondary panels' },
-    { name: 'Surface 2', hex: '#242424', desc: 'Interactive elements, headers' },
-    { name: 'Surface 3', hex: '#2a2a2a', desc: 'Hover states, elevated panels' },
-    { name: 'Surface 4', hex: '#2e2e2e', desc: 'Highly elevated, dialogs, dropdowns' },
-    { name: 'Border Subtle', hex: '#333333', desc: 'Faint borders, separators' },
-    { name: 'Border Strong', hex: '#474747', desc: 'Distinct borders, active edges' },
+    { name: 'Background App', hex: '#0a0a0a', desc: 'Main application background' },
+    { name: 'Background Content', hex: '#0f0f0f', desc: 'Standard content area' },
+    { name: 'Surface 1', hex: '#161616', desc: 'Cards, sidebars, secondary panels' },
+    { name: 'Surface 2', hex: '#1a1a1a', desc: 'Interactive elements, headers' },
+    { name: 'Surface 3', hex: '#1f1f1f', desc: 'Hover states, elevated panels' },
+    { name: 'Surface 4', hex: '#262626', desc: 'Highly elevated, dialogs, dropdowns' },
+    { name: 'Border Subtle', hex: '#262626', desc: 'Faint borders, separators' },
+    { name: 'Border Strong', hex: '#404040', desc: 'Distinct borders, active edges' },
   ];
 
   const textColors = [
-    { name: 'Text Primary', hex: '#ffffff', desc: 'Headings, active text' },
+    { name: 'Text Primary', hex: '#e5e5e5', desc: 'Headings, active text' },
     { name: 'Text Secondary', hex: '#a3a3a3', desc: 'Body text, descriptions' },
     { name: 'Text Muted', hex: '#737373', desc: 'Placeholders, disabled text' },
   ];
@@ -30,7 +30,7 @@ export default function Pallet() {
             </div>
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-white">Dark Mode Theme Palette</h1>
             <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
-              A carefully curated, lighter dark style starting at #161616 minimum brightness. Use these progressive shades to build hierarchy, depth, and contrast in interfaces.
+              A carefully curated dark theme starting at #0a0a0a minimum brightness. Use these progressive shades to build hierarchy, depth, and contrast in interfaces.
             </p>
           </div>
           <section className="space-y-6">

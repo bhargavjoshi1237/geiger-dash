@@ -13,14 +13,14 @@ export function WorkflowsScreen() {
       <div className="flex items-center justify-between border-b border-border pb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Issues</h1>
-          <p className="text-muted-foreground mt-1">
-            Design and manage your automation Issues.
+          <p className="mt-1 text-muted-foreground">
+            Design and manage your automation issues.
           </p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Create New Issue
-          </Button>
+        <Button variant="default" size="default" className="h-9 px-4 py-2">
+          <Plus className="mr-2 h-4 w-4" />
+          Create New Issue
+        </Button>
       </div>
       
   <div className="space-y-2">

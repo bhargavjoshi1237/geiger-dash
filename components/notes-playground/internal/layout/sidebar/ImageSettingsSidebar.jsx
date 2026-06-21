@@ -18,6 +18,7 @@ import ImageCropDialog from "./dialogs/ImageCropDialog";
 import ImageChangeDialog from "./dialogs/ImageChangeDialog";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import { getUser } from "@/supabase/user/getUser";
 
 export default function ImageSettingsSidebar({
   selectedNode,
@@ -119,12 +120,9 @@ export default function ImageSettingsSidebar({
 
     try {
       const supabase = createClient();
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      const user = await getUser(supabase);
 
-      if (userError || !user) {
+      if (!user) {
         throw new Error("You must be logged in to upload images.");
       }
 

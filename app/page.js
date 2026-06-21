@@ -11,6 +11,7 @@ import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
 import { createClient } from "@/utils/supabase/server";
+import { getUser } from "@/supabase/user/getUser";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -46,9 +47,7 @@ function getRandomShowcaseBackgrounds(count) {
 
 export default async function Home() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser(supabase);
 
   const [notesShowcaseBg, canvasShowcaseBg, flowShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
@@ -72,7 +71,7 @@ export default async function Home() {
               easy-to-use creative features.
             </p>
             <Link
-              href={user ? "/" : "/login"}
+              href={user ? "/org" : "/login"}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
             >
               {user ? "Get in Your Workspace" : "Log in to Start"}
@@ -119,7 +118,44 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-10 sm:gap-20">
+        <section className="mx-auto mb-10 w-full max-w-6xl px-4 sm:mb-16 sm:px-6">
+          <p className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">Made for how you work</p>
+          <h2 className="mb-8 text-2xl font-semibold text-foreground sm:text-3xl">Your whole team, one workspace</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+            {[
+              {
+                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-swe.jpg",
+                label: "Corporate",
+                desc: "Structured workflows and shared visibility across every department.",
+              },
+              {
+                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-research.jpg",
+                label: "Creative",
+                desc: "A workspace that moves as faster as your ideas. & help you focus on what matters most.",
+              },
+              {
+                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-ops.jpg",
+                label: "Management",
+                desc: "Full project visibility and team progress — from a single view.",
+              },
+            ].map(({ image, label, desc }) => (
+              <div key={label} className="group relative h-[420px] overflow-hidden rounded-xl sm:h-[520px]">
+                <img
+                  src={image}
+                  alt={label}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-5 sm:p-6">
+                  <p className="text-lg font-semibold text-white sm:text-xl">{label}</p>
+                  <p className="mt-1 text-sm text-white/65">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-10 sm:gap-20 mt-10">
           <ChangeLogComponent />
 
 
@@ -141,13 +177,14 @@ export default async function Home() {
             </h2>
             <div className="flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
-                href="/"
+                href={user ? "/org" : "/login"}
                 className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
-              > Studio
+              >
+                Studio
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/"
+                href="/contact"
                 className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
               >
                 Contact Sales

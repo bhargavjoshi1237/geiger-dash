@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { requireUser } from '@/supabase/user/getUser'
 import { ContentStudio } from '@/components/content-studio/content-studio'
 
 export const dynamic = 'force-dynamic'
@@ -7,13 +8,7 @@ export const dynamic = 'force-dynamic'
 export default async function StudioPostsPage({ searchParams }) {
   const params = await searchParams
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
+  const user = await requireUser(supabase, '/login')
 
   const [{ data: categories }, { data: posts }, { data: changelogs }] = await Promise.all([
     supabase.from('dash_blog_categories').select('*').order('name'),

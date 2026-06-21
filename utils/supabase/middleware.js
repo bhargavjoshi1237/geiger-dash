@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { getUser } from '@/supabase/user/getUser'
 
 export async function updateSession(request) {
   let supabaseResponse = NextResponse.next({
@@ -35,7 +36,7 @@ export async function updateSession(request) {
     }
   )
 
-  await supabase.auth.getUser()
+  await getUser(supabase)
 
   return supabaseResponse
 }

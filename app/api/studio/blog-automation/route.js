@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getUser } from '@/supabase/user/getUser'
 import { runBlogAutomation } from '@/lib/blog-automation/pipeline'
 
 export const runtime = 'nodejs'
@@ -8,9 +9,7 @@ export const maxDuration = 300
 
 async function authenticatedClient() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   return { supabase, user }
 }
 

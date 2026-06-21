@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { getUser } from '@/supabase/user/getUser'
 
 function slugify(value) {
   return String(value || '')
@@ -173,9 +174,7 @@ async function listStorageFolder(supabase, bucket, prefix) {
 
 export async function listStudioMediaAction(contentType = 'blog', folderPath = '') {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const bucket = 'pfp'
@@ -200,9 +199,7 @@ export async function listStudioMediaAction(contentType = 'blog', folderPath = '
 
 export async function createStudioMediaFolderAction(formData) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const contentType = String(formData.get('content_type') || 'blog')
@@ -245,9 +242,7 @@ export async function createStudioMediaFolderAction(formData) {
 
 export async function uploadStudioMediaAction(formData) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const uploadFile = formData.get('media_upload')
@@ -295,9 +290,7 @@ export async function uploadStudioMediaAction(formData) {
 
 export async function deleteBlogPostAction(postId) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const id = String(postId || '').trim()
@@ -313,9 +306,7 @@ export async function deleteBlogPostAction(postId) {
 
 export async function deleteChangelogAction(changelogId) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const id = String(changelogId || '').trim()
@@ -332,9 +323,7 @@ export async function deleteChangelogAction(changelogId) {
 
 export async function saveBlogPostAction(formData) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const postId = String(formData.get('id') || '').trim()
@@ -447,9 +436,7 @@ async function upsertChangelogRecord(supabase, recordId, payload) {
 
 export async function saveChangelogAction(formData) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getUser(supabase)
   ensureAuthUser(user)
 
   const recordId = String(formData.get('id') || '').trim()

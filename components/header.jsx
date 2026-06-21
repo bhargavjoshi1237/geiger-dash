@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
+import { getUser } from "@/supabase/user/getUser";
 import { MegaMenu } from "@/components/mega-menu";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
 import ThemeToggle from "@/components/ui/theme-toggle";
 
-function HeaderContent({ user = null }) {
+function HeaderContent({ user = null, megaMenue }) {
   const userId = user?.id;
   const userProfile = userId
     ? {
@@ -16,7 +17,7 @@ function HeaderContent({ user = null }) {
         avatarUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
           ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${userId}/latest.jpg`
           : "",
-        dashboardHref: "/organizations",
+        dashboardHref: "/org",
       }
     : null;
 
@@ -31,7 +32,7 @@ function HeaderContent({ user = null }) {
             Geiger Studios
           </span>
         </div>
-        <MegaMenu userId={userId} />
+        {megaMenue ? <MegaMenu userId={userId} /> : null}
         <div className="hidden items-center gap-4 md:flex">
           <ThemeToggle />
           {userProfile ? (
@@ -50,11 +51,9 @@ function HeaderContent({ user = null }) {
   );
 }
 
-export async function Header() {
+export async function Header({ megaMenue = true }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser(supabase);
 
-  return <HeaderContent user={user} />;
+  return <HeaderContent user={user} megaMenue={megaMenue} />;
 }

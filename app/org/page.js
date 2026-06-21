@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { Header } from '@/components/header'
 import { createClient } from '@/utils/supabase/server'
+import { requireUser } from '@/supabase/user/getUser'
 import { OrganizationsClient } from './organizations-client'
 
 export const dynamic = 'force-dynamic'
@@ -24,13 +25,7 @@ function uniqueOrganizations(groups) {
 export default async function OrganizationsPage({ searchParams }) {
   const params = await searchParams
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?next=organizations')
-  }
+  const user = await requireUser(supabase, '/login?next=org')
 
   const selectFields = 'id, name, description, created_by, created_at, owner, metadata, is_active, country, phone'
   const [createdResult, ownedResult, joinedResult] = await Promise.all([
@@ -52,8 +47,8 @@ export default async function OrganizationsPage({ searchParams }) {
     (typeof params?.error === 'string' ? decodeURIComponent(params.error) : '')
 
   return (
-    <>
-      <Header />
+    <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
+      <Header megaMenue={false} />
       <OrganizationsClient
         organizations={organizations}
         userId={user.id}
@@ -63,6 +58,6 @@ export default async function OrganizationsPage({ searchParams }) {
           error,
         }}
       />
-    </>
+    </div>
   )
 }

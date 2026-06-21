@@ -104,6 +104,7 @@ All tables have RLS enabled with the following policies:
    -- Execute database/init/changelog_products.sql for an existing database
    -- Execute database/init/blog.sql
    -- Execute database/init/blog_automation.sql
+   -- Execute database/init/organization_projects.sql
    -- Execute database/init/storage_policies.sql
    ```
 
@@ -133,6 +134,20 @@ Run `database/init/docs.sql` to create the Supabase-backed docs tables:
 | `docs_content_blocks` | Ordered page sections rendered into the docs article |
 
 `docs_pages.toc` stores right-sidebar links as JSON, while `docs_content_blocks` stores section content in structured JSON fields for paragraphs, cards, feature rows, and product links.
+
+## Organization Project Access
+
+Run `database/init/organization_projects.sql` to create the tables used by `/org/[ORGID]` for listing an organization's projects and purchased product apps:
+
+A mirrored copy is also stored at `supabase/sqls/organisition/organization_projects.sql` for the Supabase SQL folder hierarchy.
+
+| Table | Purpose |
+|-------|---------|
+| `organizations` | Stores organization profile and ownership details |
+| `plan` | Stores plan JSON, including purchased product selections |
+| `projects` | Stores per-product project IDs for each workspace project |
+| `organization_users` | Links users to organizations with a role |
+| `organization_project` | Links organizations to projects and their plan records |
 
 The application uses a consistent color scheme across all Geiger products:
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { getUser } from "@/supabase/user/getUser";
 import {
   Dialog,
   DialogContent,
@@ -44,11 +45,11 @@ export default function CollaborateDilouge({
   const [mergeDiff, setMergeDiff] = useState(null);
 
   useEffect(() => {
-    async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      setCurrentUser(data.user);
+    async function loadUser() {
+      const user = await getUser(supabase);
+      setCurrentUser(user);
     }
-    getUser();
+    loadUser();
   }, [supabase]);
 
   useEffect(() => {

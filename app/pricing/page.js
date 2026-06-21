@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
+import { getUser } from "@/supabase/user/getUser";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { PlanCards } from "@/components/pricing/plan_cards";
@@ -37,9 +38,7 @@ const faqs = [
 
 export default async function PricingPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser(supabase);
   const ctaHref = user ? "/" : "/login";
 
   return (

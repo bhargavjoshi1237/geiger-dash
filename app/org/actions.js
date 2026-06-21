@@ -3,26 +3,17 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { requireUser } from '@/supabase/user/getUser'
 
 function cleanText(value) {
   return String(value || '').trim()
 }
 
+const ORG_ROUTE = '/org'
+
 function normalizeMembers(metadata) {
   const members = Array.isArray(metadata?.members) ? metadata.members : []
   return members.map(String).filter(Boolean)
-}
-
-async function requireUser(supabase) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?next=organizations')
-  }
-
-  return user
 }
 
 export async function createOrganizationAction(formData) {
@@ -35,7 +26,7 @@ export async function createOrganizationAction(formData) {
   const phone = cleanText(formData.get('phone')) || null
 
   if (!name || !description) {
-    redirect('/organizations?error=missing_required')
+    redirect(`${ORG_ROUTE}?error=missing_required`)
   }
 
   const { error } = await supabase.from('organizations').insert({
@@ -53,20 +44,20 @@ export async function createOrganizationAction(formData) {
   })
 
   if (error) {
-    redirect(`/organizations?error=${encodeURIComponent(error.message)}`)
+    redirect(`${ORG_ROUTE}?error=${encodeURIComponent(error.message)}`)
   }
 
-  revalidatePath('/organizations')
-  redirect('/organizations?created=1')
+  revalidatePath(ORG_ROUTE)
+  redirect(`${ORG_ROUTE}?created=1`)
 }
 
 export async function joinOrganizationAction(formData) {
   const supabase = await createClient()
-  const user = await requireUser(supabase)
+  const user = await requireUser(supabase, '/login?next=org')
   const organizationId = cleanText(formData.get('organization_id'))
 
   if (!organizationId) {
-    redirect('/organizations?error=missing_join_id')
+    redirect(`${ORG_ROUTE}?error=missing_join_id`)
   }
 
   const { data: organization, error: loadError } = await supabase
@@ -76,7 +67,7 @@ export async function joinOrganizationAction(formData) {
     .single()
 
   if (loadError || !organization) {
-    redirect('/organizations?error=organization_not_found')
+    redirect(`${ORG_ROUTE}?error=organization_not_found`)
   }
 
   const members = normalizeMembers(organization.metadata)
@@ -94,9 +85,9 @@ export async function joinOrganizationAction(formData) {
     .eq('id', organization.id)
 
   if (error) {
-    redirect(`/organizations?error=${encodeURIComponent(error.message)}`)
+    redirect(`${ORG_ROUTE}?error=${encodeURIComponent(error.message)}`)
   }
 
-  revalidatePath('/organizations')
-  redirect('/organizations?joined=1')
+  revalidatePath(ORG_ROUTE)
+  redirect(`${ORG_ROUTE}?joined=1`)
 }

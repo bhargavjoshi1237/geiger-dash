@@ -18,7 +18,6 @@ const Toaster = ({ ...props }) => {
       theme={theme}
       className="toaster group"
       position="bottom-right"
-      closeButton
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,

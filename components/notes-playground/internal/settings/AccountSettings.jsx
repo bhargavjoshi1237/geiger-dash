@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/utils/supabase/client";
+import { getUser } from "@/supabase/user/getUser";
 import { useRouter } from "next/navigation";
 
 export default function AccountSettings() {
@@ -16,9 +17,7 @@ export default function AccountSettings() {
 
   useEffect(() => {
     (async () => {
-      const {
-        data: { user: auth },
-      } = await supabase.auth.getUser();
+      const auth = await getUser(supabase);
       if (auth)
         setUser({
           name: auth.user_metadata?.full_name || auth.email.split("@")[0],
