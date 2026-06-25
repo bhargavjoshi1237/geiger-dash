@@ -16,12 +16,19 @@ import {
   Text,
   Link,
   Img,
-  Hr,
   Preview,
 } from "@react-email/components";
 import { theme, APP_URL } from "../../theme.js";
 
 const c = theme.color;
+
+// Footer social icons (black glyphs), mirroring the Barebones template footer.
+const SOCIALS = [
+  { alt: "X", src: `${APP_URL}/email/social-x-black.png`, href: "https://geiger.studio" },
+  { alt: "LinkedIn", src: `${APP_URL}/email/social-in-black.png`, href: "https://geiger.studio" },
+  { alt: "YouTube", src: `${APP_URL}/email/social-yt-black.png`, href: "https://geiger.studio" },
+  { alt: "GitHub", src: `${APP_URL}/email/social-gh-black.png`, href: "https://github.com/bhargavjoshi1237" },
+];
 
 const styles = {
   body: {
@@ -56,7 +63,7 @@ const styles = {
     textAlign: "left",
   },
   heading: {
-    fontSize: "26px",
+    fontSize: "28px",
     lineHeight: "1.2",
     fontWeight: 700,
     letterSpacing: "-0.02em",
@@ -86,8 +93,8 @@ const styles = {
     margin: "0 auto 16px",
     maxWidth: "320px",
   },
-  social: { fontSize: "13px", color: c.subtle, margin: "0 0 16px", textAlign: "center" },
-  socialLink: { color: c.muted, textDecoration: "none" },
+  socialRow: { textAlign: "center", margin: "0 0 18px" },
+  socialLink: { display: "inline-block", padding: "0 8px", verticalAlign: "middle", textDecoration: "none" },
   address: { fontSize: "11px", lineHeight: "18px", color: c.subtle, margin: 0 },
   addressLink: { color: c.subtle, textDecoration: "underline" },
 };
@@ -108,11 +115,11 @@ export default function TextOnly({ content = {}, data = {} }) {
               <Row>
                 <Column style={{ verticalAlign: "middle" }}>
                   <Img
-                    src={`${APP_URL}/logo.png`}
-                    width={28}
-                    height={28}
+                    src={`${APP_URL}/logo-black.png`}
+                    width={26}
+                    height={26}
                     alt="Geiger"
-                    style={{ display: "inline-block", verticalAlign: "middle", borderRadius: "6px" }}
+                    style={{ display: "inline-block", verticalAlign: "middle" }}
                   />
                   <span style={{ width: "8px", display: "inline-block" }} />
                   <span style={styles.wordmark}>Geiger</span>
@@ -145,20 +152,21 @@ export default function TextOnly({ content = {}, data = {} }) {
             {/* Footer */}
             <Section style={styles.footer}>
               <Text style={styles.slogan}>{content.slogan}</Text>
-              <Text style={styles.social}>
-                <Link href="https://geiger.studio" style={styles.socialLink}>
-                  Web
-                </Link>
-                {"  ·  "}
-                <Link href="https://github.com/bhargavjoshi1237" style={styles.socialLink}>
-                  GitHub
-                </Link>
-                {"  ·  "}
-                <Link href={APP_URL} style={styles.socialLink}>
-                  Dashboard
-                </Link>
-              </Text>
-              <Hr style={{ borderColor: c.border, margin: "0 auto 16px", maxWidth: "320px" }} />
+
+              <Section style={styles.socialRow}>
+                {SOCIALS.map((s) => (
+                  <Link key={s.alt} href={s.href} style={styles.socialLink}>
+                    <Img
+                      src={s.src}
+                      alt={s.alt}
+                      width={18}
+                      height={18}
+                      style={{ display: "inline-block" }}
+                    />
+                  </Link>
+                ))}
+              </Section>
+
               <Text style={styles.address}>{content.address}</Text>
               <Text style={styles.address}>
                 Sent by Geiger ·{" "}
