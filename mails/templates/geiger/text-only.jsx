@@ -124,7 +124,7 @@ export default function TextOnly({ content = {}, data = {} }) {
             {/* Header: logo + wordmark left, eyebrow right */}
             <Section style={styles.header}>
               <Row>
-                <Column style={{ verticalAlign: "middle" }}>
+                <Column style={{ verticalAlign: "middle", textAlign: "left" }}>
                   <Img
                     src={`${APP_URL}/logo1-black.png`}
                     width={39}
@@ -135,7 +135,7 @@ export default function TextOnly({ content = {}, data = {} }) {
                   <span style={{ width: "10px", display: "inline-block" }} />
                   <span style={styles.wordmark}>Geiger Studio</span>
                 </Column>
-                <Column style={{ verticalAlign: "middle" }}>
+                <Column style={{ verticalAlign: "middle", textAlign: "right" }}>
                   <Text style={styles.eyebrow}>{content.eyebrow}</Text>
                 </Column>
               </Row>
