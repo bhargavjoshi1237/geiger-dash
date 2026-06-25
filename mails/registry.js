@@ -406,7 +406,7 @@ export const TEMPLATES = [
       "Plain, image-light layout for concise product notes, receipts, and account updates. Ported from React Email's Barebones / text-only template.",
     subject: "A quick note from Geiger Studio",
     content: {
-      eyebrow: "Product note",
+      eyebrow: "Product Note",
       heading: "A quick note from Geiger Studio",
       intro:
         "Hi {{recipientName}}, this is the text-only layout — no hero image and no big call-to-action. Use it for concise product notes, receipts, and account updates where the message stays front and center.",

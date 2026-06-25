@@ -124,11 +124,11 @@ export default function TextOnly({ content = {}, data = {} }) {
             {/* Header: logo + wordmark left, eyebrow right */}
             <Section style={styles.header}>
               <Row>
-                <Column style={{ verticalAlign: "middle", textAlign: "left" }}>
+                <Column style={{ verticalAlign: "middle", textAlign: "left", marginLeft: "16px" }}>
                   <Img
                     src={`${APP_URL}/logo1-black.png`}
-                    width={39}
-                    height={24}
+                    width={25}
+                    height={15}
                     alt="Geiger Studio"
                     style={{ display: "inline-block", verticalAlign: "middle" }}
                   />

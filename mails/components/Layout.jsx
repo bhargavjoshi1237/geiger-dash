@@ -7,8 +7,11 @@ import {
   Body,
   Container,
   Section,
+  Row,
+  Column,
   Text,
   Link,
+  Img,
   Hr,
   Preview,
 } from "@react-email/components";
@@ -28,21 +31,23 @@ const styles = {
     padding: "0 16px",
   },
   header: {
-    padding: "4px 8px 20px",
+    padding: "4px 16px 18px",
   },
   brand: {
     fontFamily: theme.font.sans,
-    fontSize: "20px",
+    fontSize: "17px",
     fontWeight: 700,
     letterSpacing: "-0.02em",
     color: theme.color.brand,
     margin: 0,
+    verticalAlign: "middle",
   },
-  brandSub: {
+  eyebrow: {
     fontFamily: theme.font.sans,
-    fontSize: "12px",
-    color: theme.color.muted,
-    margin: "2px 0 0",
+    fontSize: "13px",
+    color: theme.color.subtle,
+    margin: 0,
+    textAlign: "right",
   },
   card: {
     backgroundColor: theme.color.card,
@@ -77,8 +82,24 @@ export function Layout({ preview, product = "Geiger Studio", children, footerNot
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Section style={styles.header}>
-            <Text style={styles.brand}>{product}</Text>
-            <Text style={styles.brandSub}>Part of the Geiger Studio suite</Text>
+            <Row>
+              <Column style={{ verticalAlign: "middle", textAlign: "left", marginLeft: "16px" }}>
+                <Img
+                  src={`${APP_URL}/logo1-black.png`}
+                  width={25}
+                  height={15}
+                  alt="Geiger Studio"
+                  style={{ display: "inline-block", verticalAlign: "middle" }}
+                />
+                <span style={{ width: "10px", display: "inline-block" }} />
+                <span style={styles.brand}>Geiger Studio</span>
+              </Column>
+              {product && product !== "Geiger Studio" ? (
+                <Column style={{ verticalAlign: "middle", textAlign: "right" }}>
+                  <Text style={styles.eyebrow}>{product}</Text>
+                </Column>
+              ) : null}
+            </Row>
           </Section>
 
           <Section style={styles.card}>{children}</Section>
