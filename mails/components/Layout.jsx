@@ -12,7 +12,7 @@ import {
   Hr,
   Preview,
 } from "@react-email/components";
-import { theme, APP_URL } from "../theme.js";
+import { theme, APP_URL, GEIST_FONT_HREF } from "../theme.js";
 
 const styles = {
   body: {
@@ -63,16 +63,18 @@ const styles = {
   },
 };
 
-export function Layout({ preview, product = "Geiger", children, footerNote }) {
+export function Layout({ preview, product = "Geiger Studio", children, footerNote }) {
   return (
     <Html>
-      <Head />
+      <Head>
+        <link rel="stylesheet" href={GEIST_FONT_HREF} />
+      </Head>
       {preview ? <Preview>{preview}</Preview> : null}
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Section style={styles.header}>
             <Text style={styles.brand}>{product}</Text>
-            <Text style={styles.brandSub}>Part of the Geiger suite</Text>
+            <Text style={styles.brandSub}>Part of the Geiger Studio suite</Text>
           </Section>
 
           <Section style={styles.card}>{children}</Section>
@@ -88,7 +90,7 @@ export function Layout({ preview, product = "Geiger", children, footerNote }) {
               }}
             />
             <Text style={styles.footerText}>
-              Sent by Geiger ·{" "}
+              Sent by Geiger Studio ·{" "}
               <Link href={APP_URL} style={styles.footerLink}>
                 geiger.studio
               </Link>

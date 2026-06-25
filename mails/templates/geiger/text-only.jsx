@@ -18,7 +18,7 @@ import {
   Img,
   Preview,
 } from "@react-email/components";
-import { theme, APP_URL } from "../../theme.js";
+import { theme, APP_URL, GEIST_FONT_HREF } from "../../theme.js";
 
 const c = theme.color;
 
@@ -105,7 +105,9 @@ export default function TextOnly({ content = {}, data = {} }) {
 
   return (
     <Html>
-      <Head />
+      <Head>
+        <link rel="stylesheet" href={GEIST_FONT_HREF} />
+      </Head>
       {content.intro ? <Preview>{content.intro}</Preview> : null}
       <Body style={styles.body}>
         <Container style={styles.container}>
@@ -118,11 +120,11 @@ export default function TextOnly({ content = {}, data = {} }) {
                     src={`${APP_URL}/logo1-black.png`}
                     width={39}
                     height={24}
-                    alt="Geiger"
+                    alt="Geiger Studio"
                     style={{ display: "inline-block", verticalAlign: "middle" }}
                   />
                   <span style={{ width: "10px", display: "inline-block" }} />
-                  <span style={styles.wordmark}>Geiger</span>
+                  <span style={styles.wordmark}>Geiger Studio</span>
                 </Column>
                 <Column style={{ verticalAlign: "middle" }}>
                   <Text style={styles.eyebrow}>{content.eyebrow}</Text>
@@ -169,7 +171,7 @@ export default function TextOnly({ content = {}, data = {} }) {
 
               <Text style={styles.address}>{content.address}</Text>
               <Text style={styles.address}>
-                Sent by Geiger ·{" "}
+                Sent by Geiger Studio ·{" "}
                 <Link href={APP_URL} style={styles.addressLink}>
                   geiger.studio
                 </Link>

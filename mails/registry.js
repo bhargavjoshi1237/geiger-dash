@@ -404,16 +404,16 @@ export const TEMPLATES = [
     name: "Text-only notice",
     description:
       "Plain, image-light layout for concise product notes, receipts, and account updates. Ported from React Email's Barebones / text-only template.",
-    subject: "A quick note from {{companyName}}",
+    subject: "A quick note from Geiger Studio",
     content: {
       eyebrow: "Product note",
-      heading: "A quick note from Geiger",
+      heading: "A quick note from Geiger Studio",
       intro:
         "Hi {{recipientName}}, this is the text-only layout — no hero image and no big call-to-action. Use it for concise product notes, receipts, and account updates where the message stays front and center.",
       body:
-        "Keep paragraphs short and easy to scan on mobile. Every word of this email is editable from the Geiger admin — change the copy here without touching code.",
+        "Keep paragraphs short and easy to scan on mobile. Every word of this email is editable from the Geiger Studio admin — change the copy here without touching code.",
       cta_label: "Open your dashboard",
-      signoff: "Thanks,\nThe Geiger Team",
+      signoff: "Thanks,\nThe Geiger Studio Team",
       slogan: "Built to manage. Designed to create.",
       address: "Geiger Studio · A suite of tools for teams to plan, create, and collaborate.",
     },
@@ -429,10 +429,9 @@ export const TEMPLATES = [
     ],
     sampleData: {
       recipientName: "Alex",
-      companyName: "Geiger",
       ctaUrl: "https://geiger.studio",
     },
-    variables: ["recipientName", "companyName", "ctaUrl"],
+    variables: ["recipientName", "ctaUrl"],
   },
 ];
 
