@@ -30,10 +30,14 @@ const SOCIALS = [
   { alt: "GitHub", src: `${APP_URL}/email/social-gh-black.png`, href: "https://github.com/bhargavjoshi1237" },
 ];
 
+// The brand font stack (Geist → system fallback). Email clients don't reliably
+// inherit font-family, so it's applied to EVERY text element below, not just body.
+const font = theme.font.sans;
+
 const styles = {
   body: {
     backgroundColor: c.background,
-    fontFamily: theme.font.sans,
+    fontFamily: font,
     margin: 0,
     padding: "32px 0",
     textAlign: "center",
@@ -47,6 +51,7 @@ const styles = {
   },
   header: { padding: "20px 16px" },
   wordmark: {
+    fontFamily: font,
     fontSize: "17px",
     fontWeight: 700,
     letterSpacing: "-0.02em",
@@ -54,7 +59,7 @@ const styles = {
     margin: 0,
     verticalAlign: "middle",
   },
-  eyebrow: { fontSize: "13px", color: c.subtle, margin: 0, textAlign: "right" },
+  eyebrow: { fontFamily: font, fontSize: "13px", color: c.subtle, margin: 0, textAlign: "right" },
   panel: {
     backgroundColor: c.panel,
     borderRadius: theme.radius,
@@ -63,6 +68,7 @@ const styles = {
     textAlign: "left",
   },
   heading: {
+    fontFamily: font,
     fontSize: "28px",
     lineHeight: "1.2",
     fontWeight: 700,
@@ -71,14 +77,16 @@ const styles = {
     margin: "0 0 24px",
   },
   paragraph: {
+    fontFamily: font,
     fontSize: "16px",
     lineHeight: "26px",
     color: c.text,
     margin: "0 0 20px",
     maxWidth: "440px",
   },
-  link: { color: c.heading, fontWeight: 600, textDecoration: "underline" },
+  link: { fontFamily: font, color: c.heading, fontWeight: 600, textDecoration: "underline" },
   signoff: {
+    fontFamily: font,
     fontSize: "14px",
     lineHeight: "22px",
     color: c.muted,
@@ -87,6 +95,7 @@ const styles = {
   },
   footer: { padding: "32px 24px 28px", textAlign: "center" },
   slogan: {
+    fontFamily: font,
     fontSize: "13px",
     lineHeight: "20px",
     color: c.muted,
@@ -95,8 +104,8 @@ const styles = {
   },
   socialRow: { textAlign: "center", margin: "0 0 18px" },
   socialLink: { display: "inline-block", padding: "0 8px", verticalAlign: "middle", textDecoration: "none" },
-  address: { fontSize: "11px", lineHeight: "18px", color: c.subtle, margin: 0 },
-  addressLink: { color: c.subtle, textDecoration: "underline" },
+  address: { fontFamily: font, fontSize: "11px", lineHeight: "18px", color: c.subtle, margin: 0 },
+  addressLink: { fontFamily: font, color: c.subtle, textDecoration: "underline" },
 };
 
 export default function TextOnly({ content = {}, data = {} }) {

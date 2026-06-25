@@ -12,11 +12,16 @@ import {
 } from "@react-email/components";
 import { theme } from "../theme.js";
 
+// Brand font stack — applied to every text element because email clients don't
+// reliably inherit font-family (Outlook falls back to Times New Roman otherwise).
+const font = theme.font.sans;
+
 export function EmailHeading({ children }) {
   return (
     <Heading
       as="h1"
       style={{
+        fontFamily: font,
         fontSize: "22px",
         lineHeight: "30px",
         fontWeight: 700,
@@ -34,6 +39,7 @@ export function Paragraph({ children, muted = false }) {
   return (
     <Text
       style={{
+        fontFamily: font,
         fontSize: "15px",
         lineHeight: "24px",
         color: muted ? theme.color.muted : theme.color.text,
@@ -55,6 +61,7 @@ export function EmailButton({ href, children, variant = "primary" }) {
           backgroundColor: isPrimary ? theme.color.accent : theme.color.card,
           color: isPrimary ? "#ffffff" : theme.color.heading,
           border: isPrimary ? "none" : `1px solid ${theme.color.border}`,
+          fontFamily: font,
           fontSize: "14px",
           fontWeight: 600,
           padding: "11px 20px",
@@ -94,6 +101,7 @@ export function DataPanel({ rows = [] }) {
           <Column style={{ width: "38%", verticalAlign: "top" }}>
             <Text
               style={{
+                fontFamily: font,
                 fontSize: "13px",
                 color: theme.color.muted,
                 margin: 0,
@@ -105,6 +113,7 @@ export function DataPanel({ rows = [] }) {
           <Column style={{ verticalAlign: "top" }}>
             <Text
               style={{
+                fontFamily: font,
                 fontSize: "13px",
                 fontWeight: 600,
                 color: theme.color.heading,
@@ -135,6 +144,7 @@ export function Quote({ children }) {
     >
       <Text
         style={{
+          fontFamily: font,
           fontSize: "14px",
           lineHeight: "22px",
           color: theme.color.text,

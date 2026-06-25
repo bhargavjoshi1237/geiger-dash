@@ -31,6 +31,7 @@ const styles = {
     padding: "4px 8px 20px",
   },
   brand: {
+    fontFamily: theme.font.sans,
     fontSize: "20px",
     fontWeight: 700,
     letterSpacing: "-0.02em",
@@ -38,6 +39,7 @@ const styles = {
     margin: 0,
   },
   brandSub: {
+    fontFamily: theme.font.sans,
     fontSize: "12px",
     color: theme.color.muted,
     margin: "2px 0 0",
@@ -52,12 +54,14 @@ const styles = {
     padding: "20px 8px 0",
   },
   footerText: {
+    fontFamily: theme.font.sans,
     fontSize: "12px",
     lineHeight: "18px",
     color: theme.color.subtle,
     margin: 0,
   },
   footerLink: {
+    fontFamily: theme.font.sans,
     color: theme.color.muted,
     textDecoration: "underline",
   },
