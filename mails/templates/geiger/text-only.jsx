@@ -45,7 +45,7 @@ const styles = {
     borderRadius: theme.radius,
     overflow: "hidden",
   },
-  header: { padding: "20px 24px" },
+  header: { padding: "20px 16px" },
   wordmark: {
     fontSize: "17px",
     fontWeight: 700,
@@ -115,13 +115,13 @@ export default function TextOnly({ content = {}, data = {} }) {
               <Row>
                 <Column style={{ verticalAlign: "middle" }}>
                   <Img
-                    src={`${APP_URL}/logo-black.png`}
-                    width={26}
-                    height={26}
+                    src={`${APP_URL}/logo1-black.png`}
+                    width={39}
+                    height={24}
                     alt="Geiger"
                     style={{ display: "inline-block", verticalAlign: "middle" }}
                   />
-                  <span style={{ width: "8px", display: "inline-block" }} />
+                  <span style={{ width: "10px", display: "inline-block" }} />
                   <span style={styles.wordmark}>Geiger</span>
                 </Column>
                 <Column style={{ verticalAlign: "middle" }}>
