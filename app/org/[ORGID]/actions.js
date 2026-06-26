@@ -14,6 +14,14 @@ function cleanText(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function slugify(value) {
+  return cleanText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
 function normalizeMembers(metadata) {
   const members = Array.isArray(metadata?.members) ? metadata.members : []
 
@@ -100,10 +108,15 @@ export async function createProjectAction(formData) {
     products: selectedProductIds,
   }
 
+  // Flow (and other products) read the display name from projects.name, so write
+  // it here — defaulting to a sensible label when no title was given.
+  const projectName = title || 'Untitled project'
   const { error: projectError } = await supabase.from('projects').insert({
     id: projectId,
     organization_id: organizationId,
     created_by: user.id,
+    name: projectName,
+    slug: slugify(projectName) || 'project',
   })
 
   if (projectError) {
@@ -167,6 +180,7 @@ export async function renameProjectAction(formData) {
   const admin = createAdminClient() || serverSupabase
   const organizationId = cleanText(formData.get('organization_id'))
   const planId = cleanText(formData.get('plan_id'))
+  const projectId = cleanText(formData.get('project_id'))
   const title = cleanText(formData.get('title'))
 
   if (!organizationId || !planId) {
@@ -176,7 +190,8 @@ export async function renameProjectAction(formData) {
     redirectWithProjectError(organizationId, 'forbidden')
   }
 
-  // The project name lives in the plan JSON (plan.title), so merge it in.
+  // The name is stored in two places kept in sync: plan.title (dash legacy) and
+  // projects.name (what Flow and other products read).
   const { data: planRow } = await admin.from('plan').select('plan').eq('id', planId).single()
   const currentPlan = planRow?.plan && typeof planRow.plan === 'object' ? planRow.plan : {}
   const nextPlan = { ...currentPlan }
@@ -189,6 +204,14 @@ export async function renameProjectAction(formData) {
   const { error } = await admin.from('plan').update({ plan: nextPlan }).eq('id', planId)
   if (error) {
     redirectWithProjectError(organizationId, 'project_rename_failed')
+  }
+
+  if (projectId) {
+    const projectName = title || 'Untitled project'
+    await admin
+      .from('projects')
+      .update({ name: projectName, slug: slugify(projectName) || 'project' })
+      .eq('id', projectId)
   }
 
   revalidatePath(`/org/${organizationId}`)

@@ -378,6 +378,7 @@ function RenameProjectDialog({ project, name, organizationId, open, onOpenChange
         <form action={renameProjectAction} className="space-y-4">
           <input type="hidden" name="organization_id" value={organizationId} />
           <input type="hidden" name="plan_id" value={project.planId || ""} />
+          <input type="hidden" name="project_id" value={project.projectId || ""} />
           <div className="space-y-2">
             <Label htmlFor={`rename-${project.id}`} className="text-xs font-medium text-muted-foreground">
               Project name
@@ -619,7 +620,7 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
   const nameById = useMemo(() => {
     const map = new Map();
     projects.forEach((project, index) => {
-      map.set(project.id, project.title?.trim() || `Project ${index + 1}`);
+      map.set(project.id, project.title?.trim() || project.name?.trim() || `Project ${index + 1}`);
     });
     return map;
   }, [projects]);
