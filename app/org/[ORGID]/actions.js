@@ -136,3 +136,93 @@ export async function createProjectAction(formData) {
   revalidatePath(`/org/${organizationId}`)
   redirect(`/org/${organizationId}?project_created=1`)
 }
+
+// Membership/ownership check for destructive project actions. Reads via the
+// admin client (RLS-bypassing) and accepts org owner/creator, a relational
+// organization_users row, or a legacy metadata.members array entry.
+async function userCanManageOrg(admin, organizationId, userId) {
+  const { data: org } = await admin
+    .from('organizations')
+    .select('owner, created_by, metadata')
+    .eq('id', organizationId)
+    .single()
+
+  if (!org) return false
+  if (org.owner === userId || org.created_by === userId) return true
+  if (normalizeMembers(org.metadata).includes(userId)) return true
+
+  const { data: membership } = await admin
+    .from('organization_users')
+    .select('id')
+    .eq('organization', organizationId)
+    .eq('user', userId)
+    .limit(1)
+
+  return Array.isArray(membership) && membership.length > 0
+}
+
+export async function renameProjectAction(formData) {
+  const serverSupabase = await createServerClient()
+  const user = await requireUser(serverSupabase, '/login?next=org')
+  const admin = createAdminClient() || serverSupabase
+  const organizationId = cleanText(formData.get('organization_id'))
+  const planId = cleanText(formData.get('plan_id'))
+  const title = cleanText(formData.get('title'))
+
+  if (!organizationId || !planId) {
+    redirectWithProjectError(organizationId, 'missing_organization_id')
+  }
+  if (!(await userCanManageOrg(admin, organizationId, user.id))) {
+    redirectWithProjectError(organizationId, 'forbidden')
+  }
+
+  // The project name lives in the plan JSON (plan.title), so merge it in.
+  const { data: planRow } = await admin.from('plan').select('plan').eq('id', planId).single()
+  const currentPlan = planRow?.plan && typeof planRow.plan === 'object' ? planRow.plan : {}
+  const nextPlan = { ...currentPlan }
+  if (title) {
+    nextPlan.title = title
+  } else {
+    delete nextPlan.title
+  }
+
+  const { error } = await admin.from('plan').update({ plan: nextPlan }).eq('id', planId)
+  if (error) {
+    redirectWithProjectError(organizationId, 'project_rename_failed')
+  }
+
+  revalidatePath(`/org/${organizationId}`)
+  redirect(`/org/${organizationId}?project_renamed=1`)
+}
+
+export async function deleteProjectAction(formData) {
+  const serverSupabase = await createServerClient()
+  const user = await requireUser(serverSupabase, '/login?next=org')
+  const admin = createAdminClient() || serverSupabase
+  const organizationId = cleanText(formData.get('organization_id'))
+  const linkId = cleanText(formData.get('organization_project_id'))
+  const projectId = cleanText(formData.get('project_id'))
+  const planId = cleanText(formData.get('plan_id'))
+
+  if (!organizationId || !linkId) {
+    redirectWithProjectError(organizationId, 'missing_organization_id')
+  }
+  if (!(await userCanManageOrg(admin, organizationId, user.id))) {
+    redirectWithProjectError(organizationId, 'forbidden')
+  }
+
+  // Remove the bridge row first (it FKs project + plan), then the orphans.
+  const { error } = await admin.from('organization_project').delete().eq('id', linkId)
+  if (error) {
+    redirectWithProjectError(organizationId, 'project_delete_failed')
+  }
+  if (planId) {
+    await admin.from('plan').delete().eq('id', planId)
+  }
+  if (projectId) {
+    await admin.from('projects').delete().eq('id', projectId)
+  }
+
+  revalidatePath(`/org/${organizationId}`)
+  redirect(`/org/${organizationId}?project_deleted=1`)
+}

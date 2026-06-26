@@ -4,32 +4,41 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowDownUp,
-  Box,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Boxes,
+  Building2,
+  CalendarDays,
   Check,
-  ChevronDown,
+  ClipboardList,
+  Copy,
   ExternalLink,
   FolderKanban,
+  FolderPlus,
+  GitBranch,
+  Images,
   LayoutGrid,
   List,
+  Megaphone,
+  MessageSquare,
+  Mic,
   MoreHorizontal,
-  Pencil,
+  NotebookPen,
+  PenLine,
+  PenTool,
   Plus,
+  Radio,
+  Rocket,
   Search,
-  Settings2,
+  SlidersHorizontal,
+  Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import {
   Dialog,
   DialogContent,
@@ -42,162 +51,352 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { PRODUCT_APPS } from "@/lib/org/product-apps";
-import { createProjectAction } from "./actions";
+import {
+  createProjectAction,
+  deleteProjectAction,
+  renameProjectAction,
+} from "./actions";
 
 const DEFAULT_SELECTED_PRODUCT_IDS = ["flow"];
 
+// Per-product identity: a Lucide icon + a static colour accent (semantic /10 bg
+// + /20 border + -400 text, per the craft guide's badge convention). Class
+// strings are written out in full so Tailwind's JIT keeps them.
+const PRODUCT_META = {
+  campaign: { Icon: Megaphone, icon: "text-pink-400", tile: "bg-pink-500/10 border-pink-500/20" },
+  flow: { Icon: GitBranch, icon: "text-blue-400", tile: "bg-blue-500/10 border-blue-500/20" },
+  events: { Icon: CalendarDays, icon: "text-orange-400", tile: "bg-orange-500/10 border-orange-500/20" },
+  assets: { Icon: Images, icon: "text-violet-400", tile: "bg-violet-500/10 border-violet-500/20" },
+  comms: { Icon: Radio, icon: "text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20" },
+  forms: { Icon: ClipboardList, icon: "text-teal-400", tile: "bg-teal-500/10 border-teal-500/20" },
+  grey: { Icon: Sparkles, icon: "text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20" },
+  office: { Icon: Building2, icon: "text-amber-400", tile: "bg-amber-500/10 border-amber-500/20" },
+  docs: { Icon: BookOpen, icon: "text-sky-400", tile: "bg-sky-500/10 border-sky-500/20" },
+  content: { Icon: PenLine, icon: "text-rose-400", tile: "bg-rose-500/10 border-rose-500/20" },
+  pods: { Icon: Mic, icon: "text-purple-400", tile: "bg-purple-500/10 border-purple-500/20" },
+  chat: { Icon: MessageSquare, icon: "text-green-400", tile: "bg-green-500/10 border-green-500/20" },
+  notes: { Icon: NotebookPen, icon: "text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20" },
+  canvas: { Icon: PenTool, icon: "text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20" },
+};
+
+function productMeta(id) {
+  return PRODUCT_META[id] || { Icon: Boxes, icon: "text-muted-foreground", tile: "bg-surface-strong border-border" };
+}
+
 function shortId(value) {
-  if (!value) return "No project ID";
+  if (!value) return "No ID";
   return String(value).slice(0, 8);
 }
 
 function formatDate(value) {
   if (!value) return "Unknown date";
-
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 }
 
 function launchHref(product) {
-  if (product.projectId) {
-    return `${product.href}/project/${product.projectId}`;
-  }
-
+  if (product.projectId) return `${product.href}/project/${product.projectId}`;
   return product.href;
-}
-
-function projectName(project, index) {
-  return `Project ${index + 1}`;
 }
 
 function projectStatus(project) {
   return project.products.length ? "active" : "empty";
 }
 
-function sortProjects(projects, sort) {
-  return [...projects].sort((a, b) => {
-    if (sort === "oldest") {
-      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-    }
+const ERROR_MESSAGES = {
+  missing_organization_id: "Organization ID is missing.",
+  organization_not_found: "That organization could not be found.",
+  forbidden: "You do not have access to manage projects for this organization.",
+  invalid_products: "One or more selected products were invalid.",
+  project_create_failed: "The project could not be created.",
+  plan_create_failed: "The project plan could not be saved.",
+  link_create_failed: "The organization link could not be saved.",
+  project_rename_failed: "The project could not be renamed.",
+  project_delete_failed: "The project could not be deleted.",
+};
 
-    if (sort === "products") {
-      return b.products.length - a.products.length;
-    }
-
-    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-  });
-}
-
-function ProjectCreateDialog({ organizationId, triggerLabel = "New project", triggerClassName = "h-9 bg-emerald-600 px-3 text-xs text-white hover:bg-emerald-700" }) {
+// ---------------------------------------------------------------------------
+// Create project — two-step dialog (details → products) with search + select-all.
+// ---------------------------------------------------------------------------
+function CreateProjectDialog({ organizationId, trigger }) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState(DEFAULT_SELECTED_PRODUCT_IDS);
+  const [productSearch, setProductSearch] = useState("");
+  const [selected, setSelected] = useState(DEFAULT_SELECTED_PRODUCT_IDS);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleOpenChange(nextOpen) {
-    setOpen(nextOpen);
-
-    if (!nextOpen) {
-      setTitle("");
-      setSelectedProducts([...DEFAULT_SELECTED_PRODUCT_IDS]);
-    }
+  function reset() {
+    setStep(0);
+    setTitle("");
+    setProductSearch("");
+    setSelected([...DEFAULT_SELECTED_PRODUCT_IDS]);
+    setSubmitting(false);
   }
 
-  function toggleProduct(productId) {
-    setSelectedProducts((current) =>
-      current.includes(productId)
-        ? current.filter((selectedProductId) => selectedProductId !== productId)
-        : [...current, productId],
-    );
+  function handleOpenChange(next) {
+    setOpen(next);
+    if (!next) reset();
   }
+
+  function toggle(id) {
+    setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+  }
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return PRODUCT_APPS;
+    return PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
+  }, [productSearch]);
+
+  const allSelected = selected.length === PRODUCT_APPS.length;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button type="button" className={triggerClassName}>
-          <Plus className="size-4" />
-          {triggerLabel}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="geiger-flow-palette max-w-3xl border-border bg-card text-foreground">
-        <DialogHeader>
-          <DialogTitle className="text-lg">Create project</DialogTitle>
-          <DialogDescription className="text-sm">
-            Create a project container for this organization and choose the products to include.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form action={createProjectAction} className="space-y-4" onSubmit={() => handleOpenChange(false)}>
-          <input type="hidden" name="organization_id" value={organizationId} />
-
-          <div className="grid gap-1.5">
-            <Label htmlFor="project-title" className="text-sm font-medium">Project title (optional)</Label>
-            <Input
-              id="project-title"
-              name="title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Enter a custom name for this project"
-              className="h-9 text-sm"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Select products</Label>
-            <div className="grid max-h-[50vh] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-              {PRODUCT_APPS.map((product) => {
-                const isSelected = selectedProducts.includes(product.id);
-
-                return (
-                  <label
-                    key={product.id}
-                    className={cn(
-                      "group flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-background p-2.5 transition hover:border-border-strong",
-                      isSelected && "border-emerald-500/50 bg-emerald-500/5",
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      name="products"
-                      value={product.id}
-                      checked={isSelected}
-                      onChange={() => toggleProduct(product.id)}
-                      className="peer sr-only"
-                    />
-                    <span
-                      className={cn(
-                        "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border border-border bg-muted text-transparent transition",
-                        isSelected && "border-emerald-600 bg-emerald-600 text-white",
-                      )}
-                    >
-                      <Check className="size-3" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-xs font-medium text-foreground">{product.name}</span>
-                      <span className="mt-0.5 block text-[11px] leading-tight text-muted-foreground">{product.detail}</span>
-                    </span>
-                  </label>
-                );
-              })}
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="geiger-flow-palette flex max-h-[88vh] max-w-2xl flex-col gap-0 overflow-hidden border-border bg-background p-0 text-foreground">
+        <DialogHeader className="space-y-3 border-b border-border bg-surface-subtle/40 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+              <FolderPlus className="size-5" />
+            </span>
+            <div>
+              <DialogTitle className="text-base">New project</DialogTitle>
+              <DialogDescription className="text-xs">
+                {step === 0 ? "Name your project container." : "Pick the products to include."}
+              </DialogDescription>
             </div>
           </div>
+          <div className="flex items-center gap-1.5">
+            {[0, 1].map((s) => (
+              <span
+                key={s}
+                className={cn("h-1 flex-1 rounded-full transition-colors", s <= step ? "bg-primary" : "bg-surface-strong")}
+              />
+            ))}
+          </div>
+        </DialogHeader>
 
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={() => handleOpenChange(false)}>
+        <form
+          action={createProjectAction}
+          onSubmit={() => setSubmitting(true)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <input type="hidden" name="organization_id" value={organizationId} />
+          {/* Title lives outside the step-0 markup so it survives the step switch. */}
+          <input type="hidden" name="title" value={title} />
+          {selected.map((id) => (
+            <input key={id} type="hidden" name="products" value={id} />
+          ))}
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            {step === 0 ? (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="project-title" className="text-xs font-medium text-muted-foreground">
+                    Project name <span className="text-tertiary">optional</span>
+                  </Label>
+                  <Input
+                    id="project-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Q3 Marketing"
+                    autoFocus
+                    className="bg-surface-card"
+                  />
+                  <p className="text-xs text-tertiary">
+                    Leave blank to auto-name it. You can rename it any time.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border bg-surface-card p-4">
+                  <p className="text-xs font-medium text-foreground">What is a project?</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    A project is a shared container that provisions a workspace in each product you
+                    select, so your team works against the same context across the suite.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      placeholder="Search products"
+                      className="bg-surface-card pl-8"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelected(allSelected ? [] : PRODUCT_APPS.map((p) => p.id))}
+                  >
+                    {allSelected ? "Clear all" : "Select all"}
+                  </Button>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {filteredProducts.map((product) => {
+                    const meta = productMeta(product.id);
+                    const Icon = meta.Icon;
+                    const isSelected = selected.includes(product.id);
+                    return (
+                      <button
+                        type="button"
+                        key={product.id}
+                        onClick={() => toggle(product.id)}
+                        aria-pressed={isSelected}
+                        className={cn(
+                          "group flex items-start gap-3 rounded-lg border p-3 text-left transition-all",
+                          isSelected
+                            ? "border-primary/40 bg-surface-card ring-1 ring-primary/20"
+                            : "border-border bg-surface-card/50 hover:border-border-strong hover:bg-surface-card",
+                        )}
+                      >
+                        <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg border", meta.tile)}>
+                          <Icon className={cn("size-4.5", meta.icon)} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-medium text-foreground">{product.name}</span>
+                          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{product.detail}</span>
+                        </span>
+                        <span
+                          className={cn(
+                            "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
+                            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border-strong",
+                          )}
+                        >
+                          {isSelected && <Check className="size-3" />}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  {filteredProducts.length === 0 && (
+                    <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
+                      No products match “{productSearch}”.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex-row items-center justify-between gap-3 border-t border-border bg-surface-subtle/40 px-6 py-4 sm:justify-between">
+            <span className="text-xs text-muted-foreground">
+              {selected.length} {selected.length === 1 ? "product" : "products"} selected
+            </span>
+            <div className="flex items-center gap-2">
+              {step === 0 ? (
+                <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
+                  Cancel
+                </Button>
+              ) : (
+                <Button type="button" variant="outline" onClick={() => setStep(0)}>
+                  <ArrowLeft className="size-4" />
+                  Back
+                </Button>
+              )}
+              {step === 0 ? (
+                <Button type="button" onClick={() => setStep(1)}>
+                  Continue
+                  <ArrowRight className="size-4" />
+                </Button>
+              ) : (
+                <Button type="submit" disabled={submitting || selected.length === 0}>
+                  {submitting ? "Creating…" : "Create project"}
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// A single product, rendered as a launch tile.
+// ---------------------------------------------------------------------------
+function ProductTile({ product }) {
+  const meta = productMeta(product.id);
+  const Icon = meta.Icon;
+  return (
+    <Link
+      href={launchHref(product)}
+      aria-label={`Open ${product.name}`}
+      className="group/tile flex items-center gap-2.5 rounded-lg border border-border bg-surface-card px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-surface-hover"
+    >
+      <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
+        <Icon className={cn("size-4", meta.icon)} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-foreground">{product.name}</span>
+        <span className="block truncate text-xs text-muted-foreground">{product.detail}</span>
+      </span>
+      <ExternalLink className="size-4 shrink-0 text-tertiary opacity-0 transition-opacity group-hover/tile:opacity-100" />
+    </Link>
+  );
+}
+
+function EmptyProducts() {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed border-border bg-black/20 py-6 text-center">
+      <Boxes className="size-5 text-tertiary" />
+      <p className="text-xs text-muted-foreground">No products in this project</p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Rename / delete dialogs (real server actions).
+// ---------------------------------------------------------------------------
+function RenameProjectDialog({ project, name, organizationId, open, onOpenChange }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="geiger-flow-palette max-w-md border-border bg-background text-foreground">
+        <DialogHeader>
+          <DialogTitle>Rename project</DialogTitle>
+          <DialogDescription>Give this project a clearer name.</DialogDescription>
+        </DialogHeader>
+        <form action={renameProjectAction} className="space-y-4">
+          <input type="hidden" name="organization_id" value={organizationId} />
+          <input type="hidden" name="plan_id" value={project.planId || ""} />
+          <div className="space-y-2">
+            <Label htmlFor={`rename-${project.id}`} className="text-xs font-medium text-muted-foreground">
+              Project name
+            </Label>
+            <Input
+              id={`rename-${project.id}`}
+              name="title"
+              defaultValue={project.title || name}
+              autoFocus
+              required
+              className="bg-surface-card"
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700">
-              Create project
+            <Button type="submit" disabled={!project.planId}>
+              Save changes
             </Button>
           </DialogFooter>
         </form>
@@ -206,218 +405,204 @@ function ProjectCreateDialog({ organizationId, triggerLabel = "New project", tri
   );
 }
 
-function ProjectProducts({ project }) {
-  if (!project.products.length) {
-    return (
-      <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-        No purchased products were found in this project plan.
-      </div>
-    );
-  }
+function DeleteProjectDialog({ project, name, organizationId, open, onOpenChange }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="geiger-flow-palette max-w-md border-border bg-background text-foreground">
+        <DialogHeader>
+          <DialogTitle>Delete {name}?</DialogTitle>
+          <DialogDescription>
+            This permanently removes the project and unlinks its {project.products.length}{" "}
+            {project.products.length === 1 ? "product" : "products"}. This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <form action={deleteProjectAction}>
+          <input type="hidden" name="organization_id" value={organizationId} />
+          <input type="hidden" name="organization_project_id" value={project.id} />
+          <input type="hidden" name="project_id" value={project.projectId || ""} />
+          <input type="hidden" name="plan_id" value={project.planId || ""} />
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="destructive">
+              <Trash2 className="size-4" />
+              Delete project
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProjectActions({ project, name, organizationId }) {
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {project.products.map((product) => (
-        <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg border bg-background p-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground">
-              <Box className="size-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{product.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{product.detail}</p>
-            </div>
-          </div>
-          <Button asChild size="sm" variant="outline" className="shrink-0">
-            <Link href={launchHref(product)} aria-label={`Launch ${product.name}`}>
-              <ExternalLink className="size-4" />
-              Launch
-            </Link>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Project actions"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <MoreHorizontal className="size-4" />
           </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem
+            onSelect={() => {
+              if (project.projectId) {
+                void navigator.clipboard?.writeText(project.projectId);
+                toast.success("Project ID copied");
+              }
+            }}
+          >
+            <Copy className="size-4" />
+            Copy project ID
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
+            <PenLine className="size-4" />
+            Rename
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => setDeleteOpen(true)}
+          >
+            <Trash2 className="size-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <RenameProjectDialog
+        project={project}
+        name={name}
+        organizationId={organizationId}
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+      />
+      <DeleteProjectDialog
+        project={project}
+        name={name}
+        organizationId={organizationId}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
+    </>
+  );
+}
+
+function ProjectHeader({ project, name }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+        <FolderKanban className="size-4.5" />
+      </span>
+      <div className="min-w-0">
+        <h3 className="truncate text-sm font-semibold text-foreground">{name}</h3>
+        <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+          <span className="rounded bg-black/20 px-1.5 py-0.5 font-mono text-[10px] text-tertiary">
+            {shortId(project.projectId)}
+          </span>
+          Added {formatDate(project.createdAt)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Grid card.
+function ProjectCard({ project, name, organizationId }) {
+  return (
+    <div className="group flex flex-col rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
+      <div className="mb-4 flex items-start justify-between gap-2">
+        <ProjectHeader project={project} name={name} />
+        <div className="flex shrink-0 items-center gap-1">
+          <Badge variant={project.products.length ? "success" : "secondary"} className="text-[10px]">
+            {project.products.length} {project.products.length === 1 ? "product" : "products"}
+          </Badge>
+          <ProjectActions project={project} name={name} organizationId={organizationId} />
         </div>
-      ))}
+      </div>
+
+      {project.products.length ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {project.products.map((product) => (
+            <ProductTile key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <EmptyProducts />
+      )}
+    </div>
+  );
+}
+
+// Compact list row (expand/collapse).
+function ProjectRow({ project, name, organizationId }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border last:border-b-0">
+      <div className="flex items-center gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          <ProjectHeader project={project} name={name} />
+        </button>
+        <Badge variant={project.products.length ? "success" : "secondary"} className="text-[10px]">
+          {project.products.length}
+        </Badge>
+        <ProjectActions project={project} name={name} organizationId={organizationId} />
+      </div>
+      {open && (
+        <div className="px-4 pb-4 pt-0 animate-in fade-in slide-in-from-top-1 duration-200">
+          {project.products.length ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {project.products.map((product) => (
+                <ProductTile key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <EmptyProducts />
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 function EmptyState({ organizationId }) {
   return (
-    <div className="flex items-center justify-center rounded-lg border border-dashed bg-card py-16">
-      <div className="flex max-w-sm flex-col items-center text-center">
-        <div className="mb-3 flex size-12 items-center justify-center rounded-lg bg-muted">
-          <FolderKanban className="size-6 text-muted-foreground" />
-        </div>
-        <h2 className="text-base font-semibold">No projects yet</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Create your first project to organize and manage products for this organization.
-        </p>
-        <div className="mt-4">
-          <ProjectCreateDialog
-            organizationId={organizationId}
-            triggerLabel="Create project"
-            triggerClassName="h-9 bg-emerald-600 px-4 text-sm text-white hover:bg-emerald-700"
-          />
-        </div>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-card py-16 text-center">
+      <span className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+        <FolderKanban className="size-7" />
+      </span>
+      <h2 className="text-base font-semibold text-foreground">No projects yet</h2>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Create your first project to provision product workspaces and launch apps for this organization.
+      </p>
+      <div className="mt-5">
+        <CreateProjectDialog
+          organizationId={organizationId}
+          trigger={
+            <Button type="button">
+              <Plus className="size-4" />
+              Create project
+            </Button>
+          }
+        />
       </div>
     </div>
-  );
-}
-
-const ERROR_MESSAGES = {
-  missing_organization_id: 'Organization ID is missing.',
-  organization_not_found: 'That organization could not be found.',
-  forbidden: 'You do not have access to create projects for this organization.',
-  invalid_products: 'One or more selected products were invalid.',
-  project_create_failed: 'The project could not be created.',
-  plan_create_failed: 'The project plan could not be saved.',
-  link_create_failed: 'The organization link could not be saved.',
-};
-
-function ProjectCard({ project, index }) {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <div 
-          className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:border-border-strong cursor-pointer"
-        >
-          {/* Project Header */}
-          <div className="mb-3 flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
-                <FolderKanban className="size-4 text-muted-foreground" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="truncate text-sm font-medium">{projectName(project, index)}</h3>
-                <p className="truncate text-xs text-muted-foreground">
-                  {shortId(project.projectId)} • Added {formatDate(project.createdAt)}
-                </p>
-              </div>
-            </div>
-            <Badge 
-              variant={project.products.length ? "success" : "secondary"}
-              className="shrink-0 text-[10px] font-medium"
-            >
-              {project.products.length} {project.products.length === 1 ? "product" : "products"}
-            </Badge>
-          </div>
-
-          {/* Products List */}
-          {project.products.length > 0 ? (
-            <div className="space-y-1.5">
-              {project.products.map((product) => (
-                <div 
-                  key={product.id} 
-                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-2.5 py-2 transition-colors hover:bg-muted"
-                >
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Box className="size-3.5 shrink-0 text-muted-foreground" />
-                    <span className="truncate text-xs font-medium">{product.name}</span>
-                  </div>
-                  <Button 
-                    asChild 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-6 shrink-0 px-2 text-xs hover:bg-muted-foreground/10"
-                  >
-                    <Link href={launchHref(product)} aria-label={`Launch ${product.name}`}>
-                      <ExternalLink className="size-3" />
-                      Launch
-                    </Link>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border border-dashed border-border bg-muted/30 py-4 text-center text-xs text-muted-foreground">
-              No products
-            </div>
-          )}
-        </div>
-      </ContextMenuTrigger>
-
-      <ContextMenuContent className="w-48 rounded-lg border-border bg-surface-subtle p-1 text-foreground">
-        <ContextMenuItem 
-          onSelect={() => setEditDialogOpen(true)}
-          className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Edit project
-        </ContextMenuItem>
-        <ContextMenuItem 
-          onSelect={() => {
-            toast.success('Project archived');
-          }}
-          className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground"
-        >
-          <Settings2 className="h-3.5 w-3.5" />
-          Archive
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-surface-hover" />
-        <ContextMenuItem 
-          onSelect={() => setDeleteDialogOpen(true)}
-          className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          Delete project
-        </ContextMenuItem>
-      </ContextMenuContent>
-
-      {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="geiger-flow-palette max-w-lg border-border bg-surface-subtle text-foreground">
-          <DialogHeader>
-            <DialogTitle>Edit project</DialogTitle>
-            <DialogDescription>Update the project details and manage products.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor={`project-title-${project.id}`}>Project title</Label>
-              <Input
-                id={`project-title-${project.id}`}
-                defaultValue={project.title || projectName(project, index)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => {
-              toast.success('Project updated.');
-              setEditDialogOpen(false);
-            }}>
-              Save changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="geiger-flow-palette max-w-md border-border bg-surface-subtle text-foreground">
-          <DialogHeader>
-            <DialogTitle>Delete project</DialogTitle>
-            <DialogDescription>
-              This will permanently remove {projectName(project, index)} and all its products. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={() => {
-              toast.success('Project deleted.');
-              setDeleteDialogOpen(false);
-            }}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </ContextMenu>
   );
 }
 
@@ -426,200 +611,211 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
   const notifiedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [productFilter, setProductFilter] = useState("all");
   const [sort, setSort] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
 
-  useEffect(() => {
-    if (notifiedRef.current) return;
+  // Stable display names independent of sort/filter order.
+  const nameById = useMemo(() => {
+    const map = new Map();
+    projects.forEach((project, index) => {
+      map.set(project.id, project.title?.trim() || `Project ${index + 1}`);
+    });
+    return map;
+  }, [projects]);
 
-    if (notificationParams?.projectCreated) {
-      notifiedRef.current = true;
-      toast.success('Project created.');
-      router.replace(`/org/${organizationId}`, { scroll: false });
-    } else if (notificationParams?.projectError) {
-      notifiedRef.current = true;
-      const errorMessage = ERROR_MESSAGES[notificationParams.projectError] || notificationParams.projectError;
-      toast.error(errorMessage);
-      router.replace(`/org/${organizationId}`, { scroll: false });
-    }
+  useEffect(() => {
+    if (notifiedRef.current || !notificationParams) return;
+    const { projectCreated, projectError, projectRenamed, projectDeleted } = notificationParams;
+    if (!projectCreated && !projectError && !projectRenamed && !projectDeleted) return;
+
+    notifiedRef.current = true;
+    if (projectCreated) toast.success("Project created.");
+    else if (projectRenamed) toast.success("Project renamed.");
+    else if (projectDeleted) toast.success("Project deleted.");
+    else if (projectError) toast.error(ERROR_MESSAGES[projectError] || projectError);
+    router.replace(`/org/${organizationId}`, { scroll: false });
   }, [notificationParams, organizationId, router]);
 
   const visibleProjects = useMemo(() => {
-    const filtered = projects.filter((project, index) => {
-      const query = search.trim().toLowerCase();
-      const name = projectName(project, index).toLowerCase();
-      const productText = project.products.map((product) => product.name).join(" ").toLowerCase();
-      const idText = `${project.projectId || ""} ${project.planId || ""} ${project.title || ""}`.toLowerCase();
+    const query = search.trim().toLowerCase();
+    const filtered = projects.filter((project) => {
+      const name = (nameById.get(project.id) || "").toLowerCase();
+      const productText = project.products.map((p) => p.name).join(" ").toLowerCase();
+      const idText = `${project.projectId || ""} ${project.title || ""}`.toLowerCase();
       const matchesSearch = !query || name.includes(query) || productText.includes(query) || idText.includes(query);
       const matchesStatus = statusFilter === "all" || projectStatus(project) === statusFilter;
-
-      return matchesSearch && matchesStatus;
+      const matchesProduct = productFilter === "all" || project.products.some((p) => p.id === productFilter);
+      return matchesSearch && matchesStatus && matchesProduct;
     });
 
-    return sortProjects(filtered, sort);
-  }, [projects, search, sort, statusFilter]);
+    return [...filtered].sort((a, b) => {
+      if (sort === "oldest") return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      if (sort === "products") return b.products.length - a.products.length;
+      if (sort === "name") return (nameById.get(a.id) || "").localeCompare(nameById.get(b.id) || "");
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+  }, [projects, search, sort, statusFilter, productFilter, nameById]);
+
+  const hasFilters = search.trim() || statusFilter !== "all" || productFilter !== "all";
+
+  function clearFilters() {
+    setSearch("");
+    setStatusFilter("all");
+    setProductFilter("all");
+  }
 
   if (!projects.length) {
     return <EmptyState organizationId={organizationId} />;
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 sm:max-w-sm">
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-xs">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search for a project"
+            placeholder="Search projects"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="h-9 bg-background pl-8 text-sm"
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-surface-card pl-8"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-1 text-xs">
-                <span className="capitalize">{statusFilter === "all" ? "All" : statusFilter}</span>
-                <ChevronDown className="size-3.5 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36">
-              <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
-                <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="active">Active</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="empty">Empty</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger size="sm" className="w-[120px] bg-surface-card">
+              <SlidersHorizontal className="size-3.5" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="empty">Empty</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-1 text-xs">
-                <ArrowDownUp className="size-3.5 text-muted-foreground" />
-                {sort === "newest" ? "Newest" : sort === "oldest" ? "Oldest" : "Products"}
-                <ChevronDown className="size-3.5 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-40">
-              <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
-                <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="products">Most products</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Select value={productFilter} onValueChange={setProductFilter}>
+            <SelectTrigger size="sm" className="w-[150px] bg-surface-card">
+              <SelectValue placeholder="All products" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All products</SelectItem>
+              {PRODUCT_APPS.map((product) => {
+                const meta = productMeta(product.id);
+                const Icon = meta.Icon;
+                return (
+                  <SelectItem key={product.id} value={product.id}>
+                    <span className="flex items-center gap-2">
+                      <Icon className={cn("size-4", meta.icon)} />
+                      {product.name}
+                    </span>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
 
-          <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted p-0.5">
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger size="sm" className="w-[140px] bg-surface-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest first</SelectItem>
+              <SelectItem value="oldest">Oldest first</SelectItem>
+              <SelectItem value="products">Most products</SelectItem>
+              <SelectItem value="name">Name A–Z</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               aria-label="Grid view"
               aria-pressed={viewMode === "grid"}
               onClick={() => setViewMode("grid")}
-              className={cn(
-                "h-7 w-7 p-0 hover:bg-background",
-                viewMode === "grid" && "bg-background shadow-sm"
-              )}
+              className={cn("hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
             >
               <LayoutGrid className="size-3.5" />
             </Button>
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               aria-label="List view"
               aria-pressed={viewMode === "list"}
               onClick={() => setViewMode("list")}
-              className={cn(
-                "h-7 w-7 p-0 hover:bg-background",
-                viewMode === "list" && "bg-background shadow-sm"
-              )}
+              className={cn("hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
             >
               <List className="size-3.5" />
             </Button>
           </div>
 
-          <ProjectCreateDialog 
+          <CreateProjectDialog
             organizationId={organizationId}
-            triggerLabel="New project"
-            triggerClassName="h-9 bg-emerald-600 px-3 text-xs text-white hover:bg-emerald-700"
+            trigger={
+              <Button type="button" size="sm">
+                <Plus className="size-4" />
+                New project
+              </Button>
+            }
           />
         </div>
       </div>
 
+      {/* Result meta */}
+      <div className="flex items-center justify-between px-0.5 text-xs text-muted-foreground">
+        <span>
+          {visibleProjects.length} of {projects.length} {projects.length === 1 ? "project" : "projects"}
+        </span>
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <X className="size-3" />
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      {/* Results */}
       {!visibleProjects.length ? (
-        <div className="rounded-lg border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
-          No projects match the current filters.
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-card py-14 text-center">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-black/20 text-muted-foreground">
+            <Rocket className="size-6" />
+          </span>
+          <p className="text-sm font-medium text-foreground">No projects match your filters</p>
+          <p className="mt-1 text-xs text-muted-foreground">Try a different search or clear the filters.</p>
+          <Button type="button" variant="outline" size="sm" className="mt-4" onClick={clearFilters}>
+            Clear filters
+          </Button>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {visibleProjects.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
+        <div className="grid gap-3 lg:grid-cols-2">
+          {visibleProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              name={nameById.get(project.id)}
+              organizationId={organizationId}
+            />
           ))}
         </div>
       ) : (
-        <div className="space-y-1 rounded-lg border border-border bg-card overflow-hidden">
-          {visibleProjects.map((project, index) => (
-            <Accordion key={project.id} type="single" collapsible>
-              <AccordionItem value={project.id} className="border-0">
-                <AccordionTrigger className="px-3 py-2.5 hover:bg-muted hover:no-underline">
-                  <div className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
-                      <FolderKanban className="size-4 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium">{projectName(project, index)}</span>
-                        <Badge 
-                          variant={project.products.length ? "success" : "secondary"}
-                          className="shrink-0 text-[10px] font-medium"
-                        >
-                          {project.products.length}
-                        </Badge>
-                      </div>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {shortId(project.projectId)} • Added {formatDate(project.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-3 pb-3">
-                  {project.products.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {project.products.map((product) => (
-                        <div 
-                          key={product.id} 
-                          className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-2.5 py-2 transition-colors hover:bg-muted"
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <Box className="size-3.5 shrink-0 text-muted-foreground" />
-                            <span className="truncate text-xs font-medium">{product.name}</span>
-                          </div>
-                          <Button 
-                            asChild 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-6 shrink-0 px-2 text-xs hover:bg-muted-foreground/10"
-                          >
-                            <Link href={launchHref(product)} aria-label={`Launch ${product.name}`}>
-                              <ExternalLink className="size-3" />
-                              Launch
-                            </Link>
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="rounded-md border border-dashed border-border bg-muted/30 py-4 text-center text-xs text-muted-foreground">
-                      No products
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+        <div className="overflow-hidden rounded-xl border border-border bg-surface-card">
+          {visibleProjects.map((project) => (
+            <ProjectRow
+              key={project.id}
+              project={project}
+              name={nameById.get(project.id)}
+              organizationId={organizationId}
+            />
           ))}
         </div>
       )}
