@@ -102,6 +102,8 @@ export async function createProjectAction(formData) {
 
   const { error: projectError } = await supabase.from('projects').insert({
     id: projectId,
+    organization_id: organizationId,
+    created_by: user.id,
   })
 
   if (projectError) {

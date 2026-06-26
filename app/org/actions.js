@@ -11,11 +11,6 @@ function cleanText(value) {
 
 const ORG_ROUTE = '/org'
 
-function normalizeMembers(metadata) {
-  const members = Array.isArray(metadata?.members) ? metadata.members : []
-  return members.map(String).filter(Boolean)
-}
-
 export async function createOrganizationAction(formData) {
   const supabase = await createClient()
   const user = await requireUser(supabase)
@@ -53,39 +48,23 @@ export async function createOrganizationAction(formData) {
 
 export async function joinOrganizationAction(formData) {
   const supabase = await createClient()
-  const user = await requireUser(supabase, '/login?next=org')
+  await requireUser(supabase, '/login?next=org')
   const organizationId = cleanText(formData.get('organization_id'))
 
   if (!organizationId) {
     redirect(`${ORG_ROUTE}?error=missing_join_id`)
   }
 
-  const { data: organization, error: loadError } = await supabase
-    .from('organizations')
-    .select('id, metadata')
-    .eq('id', organizationId)
-    .single()
-
-  if (loadError || !organization) {
-    redirect(`${ORG_ROUTE}?error=organization_not_found`)
-  }
-
-  const members = normalizeMembers(organization.metadata)
-  const nextMembers = members.includes(user.id) ? members : [...members, user.id]
-  const nextMetadata = {
-    ...(organization.metadata && typeof organization.metadata === 'object'
-      ? organization.metadata
-      : {}),
-    members: nextMembers,
-  }
-
-  const { error } = await supabase
-    .from('organizations')
-    .update({ metadata: nextMetadata })
-    .eq('id', organization.id)
+  // Join through the SECURITY DEFINER RPC: under RLS a non-member can't read the
+  // org row directly, and the RPC keeps organization_users + metadata in sync.
+  const { data, error } = await supabase.rpc('join_organization', { q: organizationId })
 
   if (error) {
     redirect(`${ORG_ROUTE}?error=${encodeURIComponent(error.message)}`)
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  if (!row) {
+    redirect(`${ORG_ROUTE}?error=organization_not_found`)
   }
 
   revalidatePath(ORG_ROUTE)

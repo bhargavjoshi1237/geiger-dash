@@ -2,48 +2,26 @@ import { redirect } from 'next/navigation'
 import { Header } from '@/components/header'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
+import { getUserOrganizations } from '@/lib/org/membership'
 import { OrganizationsClient } from './organizations-client'
 
 export const dynamic = 'force-dynamic'
-
-function uniqueOrganizations(groups) {
-  const seen = new Map()
-
-  for (const group of groups) {
-    for (const organization of group || []) {
-      seen.set(String(organization.id), organization)
-    }
-  }
-
-  return Array.from(seen.values()).sort((a, b) => {
-    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
-    return bTime - aTime
-  })
-}
 
 export default async function OrganizationsPage({ searchParams }) {
   const params = await searchParams
   const supabase = await createClient()
   const user = await requireUser(supabase, '/login?next=org')
 
-  const selectFields = 'id, name, description, created_by, created_at, owner, metadata, is_active, country, phone'
-  const [createdResult, ownedResult, joinedResult] = await Promise.all([
-    supabase.from('organizations').select(selectFields).eq('created_by', user.id),
-    supabase.from('organizations').select(selectFields).eq('owner', user.id),
-    supabase.from('organizations').select(selectFields).contains('metadata', { members: [user.id] }),
-  ])
+  const { organizations, error: loadError } = await getUserOrganizations(supabase, user.id)
 
-  const organizations = uniqueOrganizations([
-    createdResult.data,
-    ownedResult.data,
-    joinedResult.data,
-  ])
+  // New users with no organization are routed through the onboarding wizard.
+  // Only redirect on a clean read — never bounce away because a query errored.
+  if (!loadError && organizations.length === 0) {
+    redirect('/onboarding')
+  }
 
   const error =
-    createdResult.error?.message ||
-    ownedResult.error?.message ||
-    joinedResult.error?.message ||
+    loadError ||
     (typeof params?.error === 'string' ? decodeURIComponent(params.error) : '')
 
   return (

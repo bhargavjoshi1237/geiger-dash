@@ -149,7 +149,7 @@ export function AuthForm({ next }) {
         <p className="text-center text-xs text-foreground0 mt-8">
           Don&apos;t have an account?{" "}
           <a
-            href="#"
+            href="/signup"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             Sign up
