@@ -48,6 +48,20 @@ export async function updateSession(request) {
 
   const user = await getUser(supabase)
 
+  // Accept an invite captured before the user had a session (set by the invite
+  // accept route). Best-effort and cleared regardless so a bad token can't loop.
+  const pendingInvite = request.cookies.get('pending_invite')?.value
+  if (user && pendingInvite) {
+    await supabase.rpc('accept_invite', { p_token: pendingInvite })
+    supabaseResponse.cookies.set('pending_invite', '', { path: '/', maxAge: 0 })
+    supabaseResponse.cookies.set(HAS_ORG_COOKIE, '1', {
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+    })
+  }
+
   const segment = request.nextUrl.pathname.split('/')[1] || ''
   if (!GATED_SEGMENTS.has(segment)) {
     return supabaseResponse

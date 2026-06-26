@@ -1,8 +1,19 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
+import { sendTemplateEmail } from '@/lib/email/send'
+
+async function requestOrigin() {
+  const h = await headers()
+  const host = h.get('x-forwarded-host') || h.get('host')
+  const proto = h.get('x-forwarded-proto') || 'https'
+  return host ? `${proto}://${host}` : ''
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Wizard actions return plain result objects ({ ok, error, ... }) instead of
 // redirecting, so the client wizard can show inline errors and animate to the
@@ -24,6 +35,7 @@ export async function createOrganization(input) {
 
   const name = cleanText(input?.name)
   const description = cleanText(input?.description)
+  const teamSize = cleanText(input?.teamSize)
 
   if (!name) {
     return { ok: false, error: 'Please enter an organization name.' }
@@ -32,6 +44,7 @@ export async function createOrganization(input) {
   const { data, error } = await supabase.rpc('create_organization', {
     p_name: name,
     p_description: description,
+    p_team_size: teamSize || null,
   })
 
   if (error) {
@@ -44,6 +57,52 @@ export async function createOrganization(input) {
 
   revalidatePath('/org')
   return { ok: true, organizationId: row.id, slug: row.slug }
+}
+
+// Invite teammates by email: create invite rows (with tokens) via the RPC, then
+// send each an "org.invite" email carrying an accept link. Skippable from the
+// wizard, so an empty list is a no-op success.
+export async function inviteTeammates({ organizationId, organizationName, emails, role = 'User' }) {
+  const supabase = await createClient()
+  const user = await requireUser(supabase, '/login?next=org')
+
+  const list = Array.from(
+    new Set((Array.isArray(emails) ? emails : []).map((e) => cleanText(e).toLowerCase()).filter((e) => EMAIL_RE.test(e)))
+  )
+  if (!organizationId || list.length === 0) {
+    return { ok: true, sent: 0 }
+  }
+
+  const { data, error } = await supabase.rpc('invite_to_organization', {
+    p_org: organizationId,
+    p_emails: list,
+    p_role: role,
+  })
+  if (error) {
+    return { ok: false, error: error.message }
+  }
+
+  const origin = await requestOrigin()
+  const inviterName =
+    cleanText(user.user_metadata?.full_name || user.user_metadata?.name) || user.email || 'A teammate'
+
+  let sent = 0
+  for (const row of data || []) {
+    const result = await sendTemplateEmail({
+      key: 'org.invite',
+      to: row.email,
+      project: 'geiger-dash',
+      data: {
+        inviterName,
+        orgName: cleanText(organizationName) || 'your organization',
+        role,
+        acceptUrl: `${origin}/invite/${row.token}`,
+      },
+    })
+    if (result?.ok) sent += 1
+  }
+
+  return { ok: true, sent }
 }
 
 // Look up an org by UUID or slug so the join step can confirm "you're joining X"

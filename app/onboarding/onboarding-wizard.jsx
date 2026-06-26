@@ -18,7 +18,10 @@ import {
   createOrganization,
   findOrganization,
   joinOrganization,
+  inviteTeammates,
 } from "./actions";
+
+const TEAM_SIZES = ["Just me", "2–10", "11–50", "51–200", "200+"];
 
 function slugPreview(value) {
   return String(value || "")
@@ -86,24 +89,29 @@ function PathCard({ icon: Icon, title, description, selected, onSelect }) {
 export function OnboardingWizard({ email }) {
   const router = useRouter();
 
-  // step: "choose" | "create" | "join"
+  // step: "choose" | "create" | "join" | "invite"
   const [step, setStep] = useState("choose");
   const [path, setPath] = useState("create");
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [teamSize, setTeamSize] = useState("");
 
   const [joinQuery, setJoinQuery] = useState("");
   const [found, setFound] = useState(null);
 
+  const [created, setCreated] = useState(null); // { id, name } after org creation
+  const [inviteEmails, setInviteEmails] = useState("");
+
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(null); // { label } once an org is created/joined
+  const [done, setDone] = useState(null); // { label } once onboarding completes
 
   const nameRef = useRef(null);
   const joinRef = useRef(null);
 
-  const activeIndex = step === "choose" ? 0 : 1;
+  const stepCount = path === "create" ? 3 : 2;
+  const activeIndex = step === "choose" ? 0 : step === "invite" ? 2 : 1;
 
   useEffect(() => {
     if (step === "create") nameRef.current?.focus();
@@ -141,13 +149,43 @@ export function OnboardingWizard({ email }) {
     }
     setPending(true);
     setError("");
-    const result = await createOrganization({ name, description });
+    const result = await createOrganization({ name, description, teamSize });
     if (!result?.ok) {
       setPending(false);
       setError(result?.error || "Something went wrong. Please try again.");
       return;
     }
-    finish(name.trim());
+    // Org exists — move to the (skippable) invite step.
+    setCreated({ id: result.organizationId, name: name.trim() });
+    setPending(false);
+    setError("");
+    setStep("invite");
+  }
+
+  async function handleInvite(skip) {
+    if (pending) return;
+    const emails = skip
+      ? []
+      : inviteEmails.split(/[\s,;]+/).map((e) => e.trim()).filter(Boolean);
+
+    if (emails.length === 0) {
+      finish(created?.name || "your organization");
+      return;
+    }
+
+    setPending(true);
+    setError("");
+    const result = await inviteTeammates({
+      organizationId: created?.id,
+      organizationName: created?.name,
+      emails,
+    });
+    if (!result?.ok) {
+      setPending(false);
+      setError(result?.error || "Could not send invites. You can invite people later from settings.");
+      return;
+    }
+    finish(created?.name || "your organization");
   }
 
   async function handleFind() {
@@ -202,7 +240,7 @@ export function OnboardingWizard({ email }) {
   return (
     <Shell email={email}>
       <div className="mb-8 flex flex-col items-center gap-4">
-        <StepDots count={2} active={activeIndex} />
+        <StepDots count={stepCount} active={activeIndex} />
       </div>
 
       {step === "choose" && (
@@ -272,6 +310,25 @@ export function OnboardingWizard({ email }) {
                 rows={3}
                 className="flex w-full resize-none rounded-md border border-border bg-surface-card px-3 py-2 text-sm text-foreground placeholder:text-tertiary outline-none transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               />
+            </Field>
+            <Field label="How many people will use this?" optional>
+              <div className="flex flex-wrap gap-2">
+                {TEAM_SIZES.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setTeamSize((cur) => (cur === size ? "" : size))}
+                    className={cn(
+                      "rounded-md border px-3 py-1.5 text-sm transition-colors",
+                      teamSize === size
+                        ? "border-foreground/40 bg-foreground/10 text-foreground"
+                        : "border-border bg-surface-card text-muted-foreground hover:border-border-strong hover:text-foreground"
+                    )}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </Field>
           </div>
 
@@ -376,6 +433,58 @@ export function OnboardingWizard({ email }) {
                 <>
                   Find organization
                   <Search className="h-4 w-4" />
+                </>
+              )}
+            </PrimaryButton>
+          </div>
+        </div>
+      )}
+
+      {step === "invite" && (
+        <div
+          key="invite"
+          className="animate-in fade-in slide-in-from-right-2 duration-300"
+        >
+          <Heading
+            title="Invite your team"
+            subtitle={`Add people to ${created?.name || "your organization"}. You can always do this later.`}
+          />
+          <div className="mt-8 space-y-5 text-left">
+            <Field label="Email addresses" optional>
+              <textarea
+                value={inviteEmails}
+                onChange={(e) => setInviteEmails(e.target.value)}
+                placeholder="anna@acme.com, sam@acme.com"
+                rows={4}
+                className="flex w-full resize-none rounded-md border border-border bg-surface-card px-3 py-2 text-sm text-foreground placeholder:text-tertiary outline-none transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              />
+              <p className="mt-2 text-xs text-tertiary">
+                Separate addresses with commas, spaces, or new lines.
+              </p>
+            </Field>
+          </div>
+
+          <ErrorNote error={error} />
+
+          <div className="mt-8 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleInvite(true)}
+              disabled={pending}
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground disabled:opacity-50"
+            >
+              Skip for now
+            </button>
+            <PrimaryButton onClick={() => handleInvite(false)} disabled={pending} className="flex-1">
+              {pending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending…
+                </>
+              ) : (
+                <>
+                  Send invites
+                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </PrimaryButton>
