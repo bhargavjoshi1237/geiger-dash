@@ -14,47 +14,13 @@ function cleanText(value) {
   return String(value || '').trim()
 }
 
-function slugify(value) {
-  return cleanText(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48)
-}
-
-// Best-effort unique slug. `slug` has no DB unique constraint, so we just avoid
-// obvious visual collisions by appending a short suffix when the base is taken.
-async function uniqueSlug(supabase, base) {
-  const root = slugify(base) || 'workspace'
-  const { data } = await supabase
-    .from('organizations')
-    .select('slug')
-    .ilike('slug', `${root}%`)
-
-  const taken = new Set((data || []).map((row) => row.slug))
-  if (!taken.has(root)) return root
-
-  for (let i = 2; i < 1000; i++) {
-    const candidate = `${root}-${i}`
-    if (!taken.has(candidate)) return candidate
-  }
-  return `${root}-${Date.now().toString(36)}`
-}
-
-// Mirror membership into organization_users. Non-fatal: metadata.members is the
-// source the dashboard reads, so a failure here shouldn't sink the whole flow.
-async function linkMember(supabase, organizationId, userId, role) {
-  const { error } = await supabase
-    .from('organization_users')
-    .insert({ organization: organizationId, user: userId, role })
-  if (error) {
-    console.error('[onboarding.linkMember]', error.message)
-  }
-}
-
+// Creation goes through the create_organization RPC (SECURITY DEFINER): an
+// `insert ... returning` under RLS trips the SELECT policy against the row being
+// inserted, so the definer function does the insert past RLS and returns id/slug
+// while atomically seeding the owner's organization_users membership.
 export async function createOrganization(input) {
   const supabase = await createClient()
-  const user = await requireUser(supabase, '/login?next=org')
+  await requireUser(supabase, '/login?next=org')
 
   const name = cleanText(input?.name)
   const description = cleanText(input?.description)
@@ -63,34 +29,21 @@ export async function createOrganization(input) {
     return { ok: false, error: 'Please enter an organization name.' }
   }
 
-  const slug = await uniqueSlug(supabase, name)
+  const { data, error } = await supabase.rpc('create_organization', {
+    p_name: name,
+    p_description: description,
+  })
 
-  const { data, error } = await supabase
-    .from('organizations')
-    .insert({
-      name,
-      description,
-      slug,
-      created_by: user.id,
-      owner: user.id,
-      created_at: new Date().toISOString(),
-      is_active: true,
-      metadata: {
-        members: [user.id],
-        onboarding: { source: 'wizard', completedAt: new Date().toISOString() },
-      },
-    })
-    .select('id, slug')
-    .single()
-
-  if (error || !data) {
-    return { ok: false, error: error?.message || 'Could not create the organization.' }
+  if (error) {
+    return { ok: false, error: error.message }
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  if (!row) {
+    return { ok: false, error: 'Could not create the organization.' }
   }
 
-  await linkMember(supabase, data.id, user.id, 'Owner')
-
   revalidatePath('/org')
-  return { ok: true, organizationId: data.id, slug: data.slug }
+  return { ok: true, organizationId: row.id, slug: row.slug }
 }
 
 // Look up an org by UUID or slug so the join step can confirm "you're joining X"
