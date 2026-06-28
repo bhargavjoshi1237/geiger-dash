@@ -1,3 +1,4 @@
+import { Building2, Hash } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Badge } from '@/components/ui/badge'
 import { getOrganizationProjects } from '@/lib/org/projects'
@@ -24,24 +25,32 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
     <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
       <Header megaMenue={false} />
 
-      <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col bg-background px-4 py-24 sm:px-6 lg:px-8">
-        <header className="border-b border-border pb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {organization?.name || 'Organization'}
-            </h1>
-            {organization ? (
-              <Badge variant={organization.is_active ? 'success' : 'secondary'}>
-                {organization.is_active ? 'Active' : 'Inactive'}
-              </Badge>
-            ) : null}
-            <span className="ml-auto rounded bg-black/20 px-2 py-1 font-mono text-[11px] text-tertiary">
-              {ORGID}
+      <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col bg-background px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-subtle text-foreground">
+              <Building2 className="size-6" />
             </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="truncate text-2xl font-semibold tracking-tight">
+                  {organization?.name || 'Organization'}
+                </h1>
+                {organization ? (
+                  <Badge variant={organization.is_active ? 'success' : 'secondary'}>
+                    {organization.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="mt-1 truncate text-sm text-muted-foreground">
+                {projectCount} {projectCount === 1 ? 'project' : 'projects'} · Shared workspaces across the Geiger suite
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {projectCount} {projectCount === 1 ? 'project' : 'projects'} · create or open a project to launch its products.
-          </p>
+          <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-md border border-border bg-surface-subtle px-2.5 py-1.5 font-mono text-[11px] text-tertiary sm:self-auto">
+            <Hash className="size-3" />
+            {ORGID}
+          </span>
         </header>
 
         {error ? (

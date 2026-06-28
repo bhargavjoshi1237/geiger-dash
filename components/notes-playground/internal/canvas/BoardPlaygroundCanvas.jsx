@@ -20,6 +20,12 @@ import "@xyflow/react/dist/style.css";
 
 export default function BoardPlaygroundCanvas({ className = "" }) {
   const { resolvedTheme } = useTheme();
+
+  // next-themes can't resolve the theme during SSR, so gate the color mode on a
+  // mount flag to keep the first client render matching the server (avoids a
+  // hydration mismatch on ReactFlow's light/dark class).
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
   const {
     nodes,
     edges,
@@ -287,7 +293,7 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
         onNodeDoubleClick={onNodeDoubleClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        colorMode={resolvedTheme === "dark" ? "dark" : "light"}
+        colorMode={mounted && resolvedTheme === "dark" ? "dark" : "light"}
         defaultViewport={viewport}
         className="bg-background touch-none"
         proOptions={{ hideAttribution: true }}

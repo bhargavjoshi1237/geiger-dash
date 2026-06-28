@@ -163,11 +163,29 @@ function ActionDialogs() {
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
+
+      <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="h-9 border-border bg-surface-subtle text-foreground hover:bg-surface-hover">
+            <UserPlus className="h-4 w-4" />
+            
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Join organization</DialogTitle>
+            <DialogDescription>Use an organization ID shared by an owner or admin.</DialogDescription>
+          </DialogHeader>
+          <JoinForm onSubmitted={() => setJoinOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
+
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogTrigger asChild>
           <Button className="h-9 bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="h-4 w-4" />
-            Create
+             Create
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -179,21 +197,7 @@ function ActionDialogs() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="h-9 border-border bg-surface-subtle text-foreground hover:bg-surface-hover">
-            <UserPlus className="h-4 w-4" />
-            Join
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Join organization</DialogTitle>
-            <DialogDescription>Use an organization ID shared by an owner or admin.</DialogDescription>
-          </DialogHeader>
-          <JoinForm onSubmitted={() => setJoinOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      
     </div>
   )
 }
