@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { HomeIcon, LogOut } from "lucide-react";
+import { CreditCard, HomeIcon, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CachedAvatarImage } from "@/components/cached-avatar-image";
 import {
@@ -66,6 +66,16 @@ export function UserProfileDropdown({ user }) {
               <span>Dashboard</span>
             </Link>
           </DropdownMenuItem >
+
+          <DropdownMenuItem
+            asChild
+            className="text-muted-foreground focus:bg-surface-hover focus:text-foreground cursor-pointer gap-2"
+          >
+            <Link href="/billing">
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>Billing</span>
+            </Link>
+          </DropdownMenuItem>
 
           <form action={logout} onSubmit={() => clearProfileImageCache()}>
             <DropdownMenuItem

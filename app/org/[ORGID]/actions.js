@@ -7,6 +7,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { PRODUCT_APPS } from '@/lib/org/product-apps'
 import { createClient as createServerClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
+import { getOrgEntitlements, canAddProject, isProductUnlocked } from '@/lib/billing/entitlements'
 
 const PRODUCT_ID_SET = new Set(PRODUCT_APPS.map((product) => product.id))
 
@@ -99,6 +100,29 @@ export async function createProjectAction(formData) {
   }
 
   const selectedProductIds = Array.from(new Set(rawProductIds))
+
+  // Plan enforcement — gate against the org's recorded subscription. No active
+  // subscription is treated as unrestricted (see lib/billing/entitlements.js).
+  const entitlements = getOrgEntitlements(organization)
+
+  const lockedSelected = selectedProductIds.filter(
+    (productId) => !isProductUnlocked(entitlements, productId),
+  )
+  if (lockedSelected.length) {
+    redirectWithProjectError(organizationId, 'plan_product_locked')
+  }
+
+  if (entitlements.limits.projects !== Infinity) {
+    const { count: projectCount } = await supabase
+      .from('projects')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('deleted_at', null)
+    if (!canAddProject(entitlements, projectCount || 0)) {
+      redirectWithProjectError(organizationId, 'plan_limit_projects')
+    }
+  }
+
   const projectId = randomUUID()
   const planId = randomUUID()
   const organizationProjectId = randomUUID()

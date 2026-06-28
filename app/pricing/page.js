@@ -41,6 +41,18 @@ export default async function PricingPage() {
   const user = await getUser(supabase);
   const isAuthed = Boolean(user);
 
+  // RLS scopes this to the user's own organizations; used by the checkout org
+  // picker so a purchase can be applied to a specific organization.
+  let organizations = [];
+  if (isAuthed) {
+    const { data } = await supabase
+      .from("organizations")
+      .select("id, name")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true });
+    organizations = (data || []).map((org) => ({ id: org.id, name: org.name || "Untitled organization" }));
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
@@ -68,7 +80,7 @@ export default async function PricingPage() {
             </div>
           </div>
 
-          <PlanCards isAuthed={isAuthed} />
+          <PlanCards isAuthed={isAuthed} organizations={organizations} />
 
           <section className="border-t border-border py-16 sm:py-20" aria-labelledby="faq-heading">
             <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">

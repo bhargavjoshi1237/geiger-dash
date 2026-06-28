@@ -1,7 +1,10 @@
-import { Building2, Hash } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowUpRight, Building2, Hash, Sparkles } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { getOrganizationProjects } from '@/lib/org/projects'
+import { getOrgEntitlements } from '@/lib/billing/entitlements'
 import { OrganizationProjectsClient } from './organization-projects-client'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +23,20 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
   }
 
   const projectCount = projects?.length || 0
+  const entitlements = organization ? getOrgEntitlements(organization) : null
+  const projectLimit = entitlements?.limits?.projects
+  const projectLimitLabel = projectLimit === Infinity || projectLimit == null ? '∞' : projectLimit
+
+  // Client-safe shape: Infinity isn't JSON-serializable, so unlimited => null.
+  const clientEntitlements = entitlements
+    ? {
+        hasSubscription: entitlements.hasSubscription,
+        planName: entitlements.planName,
+        planKey: entitlements.planKey,
+        unlockedProducts: entitlements.unlockedProducts, // null = all unlocked
+        projectLimit: entitlements.limits.projects === Infinity ? null : entitlements.limits.projects,
+      }
+    : null
 
   return (
     <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
@@ -53,6 +70,32 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
           </span>
         </header>
 
+        {organization ? (
+          <div className="mt-6 flex flex-col gap-3 rounded-xl border border-border bg-surface-card p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                <Sparkles className="size-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {entitlements?.hasSubscription ? `${entitlements.planName} plan` : 'No active plan'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {entitlements?.hasSubscription
+                    ? `${projectCount}/${projectLimitLabel} projects · ${entitlements.unlockedProducts.length} product${entitlements.unlockedProducts.length === 1 ? '' : 's'} unlocked`
+                    : 'All products available. Choose a plan to set limits and billing.'}
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="outline" size="sm" className="shrink-0">
+              <Link href="/pricing">
+                {entitlements?.hasSubscription ? 'Manage plan' : 'Choose a plan'}
+                <ArrowUpRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        ) : null}
+
         {error ? (
           <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
             {error}
@@ -65,6 +108,7 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
               organizationId={ORGID}
               projects={projects}
               notificationParams={notificationParams}
+              entitlements={clientEntitlements}
             />
           </section>
         ) : null}

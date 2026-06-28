@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
 import { computeEstimate, YEARLY_MULTIPLIER, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { recordPendingCheckout } from "@/lib/billing/store";
 
 const PRODUCT_NAMES = new Map(PRODUCT_CATALOG.map((p) => [p.id, p.name]));
 
@@ -34,7 +35,18 @@ export async function createCheckoutAction(payload = {}) {
 
   if (!isStripeConfigured()) return { error: "stripe_unconfigured" };
 
-  const { planId, selectedProducts = [], metrics = {}, isYearly = false } = payload;
+  const { planId, selectedProducts = [], metrics = {}, isYearly = false, organizationId = null } = payload;
+
+  // Validate org membership through the user's own (RLS-scoped) client: a select
+  // that returns the row proves the user belongs to it.
+  if (!organizationId) return { error: "invalid_org" };
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("id", organizationId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!org) return { error: "invalid_org" };
 
   const { selectedPlan, total } = computeEstimate({ planId, selectedProducts, metrics });
   const multiplier = isYearly ? YEARLY_MULTIPLIER : 1;
@@ -46,9 +58,10 @@ export async function createCheckoutAction(payload = {}) {
   }
 
   const interval = isYearly ? "year" : "month";
-  const productList = (Array.isArray(selectedProducts) ? selectedProducts : [])
-    .map((id) => PRODUCT_NAMES.get(id))
-    .filter(Boolean);
+  const productIds = (Array.isArray(selectedProducts) ? selectedProducts : []).filter((id) =>
+    PRODUCT_NAMES.has(id),
+  );
+  const productList = productIds.map((id) => PRODUCT_NAMES.get(id));
   const description = productList.length
     ? `${selectedPlan.name} foundation · ${productList.join(", ")}`
     : `${selectedPlan.name} foundation`;
@@ -77,6 +90,7 @@ export async function createCheckoutAction(payload = {}) {
       // tied to the account and the configured plan.
       metadata: {
         userId: user.id,
+        organizationId,
         planId: selectedPlan.id,
         billing: interval,
         products: productList.join(","),
@@ -87,6 +101,23 @@ export async function createCheckoutAction(payload = {}) {
     });
 
     if (!session?.url) return { error: "session_failed" };
+
+    // Record a pending payment + purchase keyed by the session id. The webhook
+    // / success-page finalizer flips these to paid/completed and sets the plan.
+    // Best-effort: a logging failure must not block the user reaching Stripe.
+    await recordPendingCheckout({
+      userId: user.id,
+      sessionId: session.id,
+      amountCents,
+      currency: "usd",
+      planKey: selectedPlan.id,
+      billingInterval: interval,
+      products: productIds,
+      metrics,
+      organizationId,
+      customerEmail: user.email || null,
+    });
+
     return { url: session.url };
   } catch (error) {
     console.error("[pricing.checkout]", error?.message || error);

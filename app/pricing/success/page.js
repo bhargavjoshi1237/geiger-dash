@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
+import { completeCheckout } from "@/lib/billing/store";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,19 @@ export default async function CheckoutSuccessPage({ searchParams }) {
   const session = await retrieveSession(sessionId);
 
   const paid = session?.payment_status === "paid";
+
+  // Finalize here too (idempotent) so a successful payment is persisted even
+  // when the Stripe webhook secret isn't configured. The webhook remains the
+  // authoritative path; this is the belt-and-suspenders fallback.
+  if (session && paid) {
+    await completeCheckout({
+      sessionId: session.id,
+      paymentIntent: typeof session.payment_intent === "string" ? session.payment_intent : null,
+      amountCents: session.amount_total,
+      customerEmail: session.customer_details?.email || null,
+    });
+  }
+
   const amount = session ? formatUsd(session.amount_total) : null;
   const email = session?.customer_details?.email || null;
   const planName = session?.metadata?.planId

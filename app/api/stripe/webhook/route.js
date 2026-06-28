@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
+import { completeCheckout } from "@/lib/billing/store";
 
 // Stripe needs the Node runtime (raw body + crypto) — not Edge.
 export const runtime = "nodejs";
@@ -35,14 +36,15 @@ export async function POST(request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
-        // Payment succeeded. session.metadata carries { userId, planId, billing,
-        // products, estimateUsd }. Persist/grant entitlements here when ready.
-        console.log("[stripe.webhook] checkout completed", {
-          sessionId: session.id,
-          email: session.customer_details?.email,
-          amountTotal: session.amount_total,
-          metadata: session.metadata,
-        });
+        if (session.payment_status === "paid") {
+          await completeCheckout({
+            sessionId: session.id,
+            paymentIntent:
+              typeof session.payment_intent === "string" ? session.payment_intent : null,
+            amountCents: session.amount_total,
+            customerEmail: session.customer_details?.email || null,
+          });
+        }
         break;
       }
       case "payment_intent.payment_failed": {

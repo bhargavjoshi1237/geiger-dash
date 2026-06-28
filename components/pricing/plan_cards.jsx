@@ -24,10 +24,18 @@ import {
   Workflow,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   plans,
   products,
@@ -184,10 +192,11 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
   );
 }
 
-export function PlanCards({ isAuthed }) {
+export function PlanCards({ isAuthed, organizations = [] }) {
   const router = useRouter();
   const [isYearly, setIsYearly] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState(organizations[0]?.id || "");
   const [selectedPlanId, setSelectedPlanId] = useState("plus");
   const [selectedProducts, setSelectedProducts] = useState([
     "campaign",
@@ -216,6 +225,15 @@ export function PlanCards({ isAuthed }) {
       router.push(`/login?next=${encodeURIComponent("/pricing")}`);
       return;
     }
+    if (!organizations.length) {
+      toast.error("Create an organization first to purchase a plan.");
+      router.push("/org");
+      return;
+    }
+    if (!selectedOrgId) {
+      toast.error("Select an organization for this plan.");
+      return;
+    }
     setCheckingOut(true);
     try {
       const result = await createCheckoutAction({
@@ -223,6 +241,7 @@ export function PlanCards({ isAuthed }) {
         selectedProducts,
         metrics,
         isYearly,
+        organizationId: selectedOrgId,
       });
       if (result?.url) {
         window.location.href = result.url;
@@ -230,6 +249,8 @@ export function PlanCards({ isAuthed }) {
       }
       if (result?.error === "auth") {
         router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      } else if (result?.error === "invalid_org") {
+        toast.error("You don't have access to that organization.");
       } else if (result?.error === "stripe_unconfigured") {
         toast.error("Payments aren't enabled yet — add your Stripe keys to finish setup.");
       } else if (result?.error === "amount_too_low") {
@@ -682,6 +703,34 @@ export function PlanCards({ isAuthed }) {
             </div>
 
             <div className="border-t border-white/10 p-4">
+              {isAuthed && organizations.length > 0 ? (
+                <div className="mb-3">
+                  <label className="mb-1.5 block text-xs font-medium text-white/55">
+                    Apply to organization
+                  </label>
+                  <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                    <SelectTrigger className="w-full border-white/15 bg-white/5 text-white">
+                      <SelectValue placeholder="Select organization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizations.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null}
+              {isAuthed && organizations.length === 0 ? (
+                <p className="mb-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/55">
+                  You&apos;ll need an organization to apply this plan to.{" "}
+                  <Link href="/org" className="font-medium text-white underline-offset-2 hover:underline">
+                    Create one
+                  </Link>
+                  .
+                </p>
+              ) : null}
               <button
                 type="button"
                 onClick={handleCheckout}

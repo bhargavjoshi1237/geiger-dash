@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +20,7 @@ import {
   Images,
   LayoutGrid,
   List,
+  Lock,
   Megaphone,
   MessageSquare,
   Mic,
@@ -79,6 +80,20 @@ import {
 
 const DEFAULT_SELECTED_PRODUCT_IDS = ["flow"];
 
+// Entitlements (which products are unlocked by the org's plan) are provided once
+// and read by the deep launch/create components without prop-threading.
+const EntitlementsContext = createContext(null);
+function useEntitlements() {
+  return useContext(EntitlementsContext);
+}
+
+// null unlockedProducts => everything unlocked (grandfathered / no plan).
+function productLocked(entitlements, productId) {
+  const unlocked = entitlements?.unlockedProducts;
+  if (unlocked == null) return false;
+  return !unlocked.includes(productId);
+}
+
 // Per-product identity: a Lucide icon + a static colour accent (semantic /10 bg
 // + /20 border + -400 text, per the craft guide's badge convention). Class
 // strings are written out in full so Tailwind's JIT keeps them.
@@ -132,24 +147,37 @@ const ERROR_MESSAGES = {
   link_create_failed: "The organization link could not be saved.",
   project_rename_failed: "The project could not be renamed.",
   project_delete_failed: "The project could not be deleted.",
+  plan_product_locked: "One or more selected products aren't in your plan.",
+  plan_limit_projects: "You've reached your plan's project limit. Upgrade to add more.",
 };
 
 // ---------------------------------------------------------------------------
 // Create project — two-step dialog (details → products) with search + select-all.
 // ---------------------------------------------------------------------------
 function CreateProjectDialog({ organizationId, trigger }) {
+  const entitlements = useEntitlements();
+  // Only products the org's plan unlocks may be selected.
+  const unlockedProducts = useMemo(
+    () => PRODUCT_APPS.filter((p) => !productLocked(entitlements, p.id)),
+    [entitlements],
+  );
+  const defaultSelected = useMemo(
+    () => DEFAULT_SELECTED_PRODUCT_IDS.filter((id) => !productLocked(entitlements, id)),
+    [entitlements],
+  );
+
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
   const [productSearch, setProductSearch] = useState("");
-  const [selected, setSelected] = useState(DEFAULT_SELECTED_PRODUCT_IDS);
+  const [selected, setSelected] = useState(defaultSelected);
   const [submitting, setSubmitting] = useState(false);
 
   function reset() {
     setStep(0);
     setTitle("");
     setProductSearch("");
-    setSelected([...DEFAULT_SELECTED_PRODUCT_IDS]);
+    setSelected([...defaultSelected]);
     setSubmitting(false);
   }
 
@@ -159,6 +187,7 @@ function CreateProjectDialog({ organizationId, trigger }) {
   }
 
   function toggle(id) {
+    if (productLocked(entitlements, id)) return; // locked products can't be selected
     setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
@@ -168,7 +197,7 @@ function CreateProjectDialog({ organizationId, trigger }) {
     return PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
   }, [productSearch]);
 
-  const allSelected = selected.length === PRODUCT_APPS.length;
+  const allSelected = unlockedProducts.length > 0 && selected.length === unlockedProducts.length;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -251,7 +280,7 @@ function CreateProjectDialog({ organizationId, trigger }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelected(allSelected ? [] : PRODUCT_APPS.map((p) => p.id))}
+                    onClick={() => setSelected(allSelected ? [] : unlockedProducts.map((p) => p.id))}
                   >
                     {allSelected ? "Clear all" : "Select all"}
                   </Button>
@@ -261,35 +290,57 @@ function CreateProjectDialog({ organizationId, trigger }) {
                   {filteredProducts.map((product) => {
                     const meta = productMeta(product.id);
                     const Icon = meta.Icon;
+                    const locked = productLocked(entitlements, product.id);
                     const isSelected = selected.includes(product.id);
                     return (
                       <button
                         type="button"
                         key={product.id}
                         onClick={() => toggle(product.id)}
+                        disabled={locked}
                         aria-pressed={isSelected}
+                        title={locked ? `${product.name} isn't in your plan — upgrade to unlock` : undefined}
                         className={cn(
                           "group flex items-start gap-3 rounded-lg border p-3 text-left transition-all",
-                          isSelected
-                            ? "border-primary/40 bg-surface-card ring-1 ring-primary/20"
-                            : "border-border bg-surface-card/50 hover:border-border-strong hover:bg-surface-card",
+                          locked
+                            ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-60"
+                            : isSelected
+                              ? "border-primary/40 bg-surface-card ring-1 ring-primary/20"
+                              : "border-border bg-surface-card/50 hover:border-border-strong hover:bg-surface-card",
                         )}
                       >
-                        <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg border", meta.tile)}>
-                          <Icon className={cn("size-4.5", meta.icon)} />
+                        <span
+                          className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-lg border",
+                            locked ? "border-border bg-surface-card" : meta.tile,
+                          )}
+                        >
+                          {locked ? (
+                            <Lock className="size-4 text-tertiary" />
+                          ) : (
+                            <Icon className={cn("size-4.5", meta.icon)} />
+                          )}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-medium text-foreground">{product.name}</span>
-                          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{product.detail}</span>
+                          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+                            {locked ? "Not in your plan" : product.detail}
+                          </span>
                         </span>
-                        <span
-                          className={cn(
-                            "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
-                            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border-strong",
-                          )}
-                        >
-                          {isSelected && <Check className="size-3" />}
-                        </span>
+                        {locked ? (
+                          <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
+                            <Lock className="size-3 text-tertiary" />
+                          </span>
+                        ) : (
+                          <span
+                            className={cn(
+                              "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
+                              isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border-strong",
+                            )}
+                          >
+                            {isSelected && <Check className="size-3" />}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -342,6 +393,26 @@ function CreateProjectDialog({ organizationId, trigger }) {
 function ProductTile({ product }) {
   const meta = productMeta(product.id);
   const Icon = meta.Icon;
+  const entitlements = useEntitlements();
+  const locked = productLocked(entitlements, product.id);
+
+  if (locked) {
+    return (
+      <div
+        title={`${product.name} isn't in your plan — upgrade to unlock`}
+        className="flex cursor-not-allowed items-center gap-2.5 rounded-lg border border-dashed border-border bg-surface-subtle px-3 py-2.5 opacity-70"
+      >
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
+          <Lock className="size-4 text-tertiary" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-muted-foreground">{product.name}</span>
+          <span className="block truncate text-xs text-tertiary">Not in your plan</span>
+        </span>
+      </div>
+    );
+  }
+
   return (
     <Link
       href={launchHref(product)}
@@ -365,6 +436,23 @@ function ProductTile({ product }) {
 function ProductLaunchChip({ product }) {
   const meta = productMeta(product.id);
   const Icon = meta.Icon;
+  const entitlements = useEntitlements();
+  const locked = productLocked(entitlements, product.id);
+
+  if (locked) {
+    return (
+      <span
+        title={`${product.name} isn't in your plan — upgrade to unlock`}
+        className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-border bg-surface-subtle py-1.5 pl-1.5 pr-2.5 opacity-70"
+      >
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
+          <Lock className="size-3 text-tertiary" />
+        </span>
+        <span className="text-xs font-medium text-muted-foreground">{product.name}</span>
+      </span>
+    );
+  }
+
   return (
     <Link
       href={launchHref(product)}
@@ -733,7 +821,7 @@ function FilterPopover({ statusFilter, setStatusFilter, productFilter, setProduc
   );
 }
 
-export function OrganizationProjectsClient({ organizationId, projects, notificationParams }) {
+export function OrganizationProjectsClient({ organizationId, projects, notificationParams, entitlements = null }) {
   const router = useRouter();
   const notifiedRef = useRef(false);
   const [search, setSearch] = useState("");
@@ -792,11 +880,19 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
     setProductFilter("all");
   }
 
+  const projectLimit = entitlements?.projectLimit ?? null;
+  const atProjectLimit = projectLimit != null && projects.length >= projectLimit;
+
   if (!projects.length) {
-    return <EmptyState organizationId={organizationId} />;
+    return (
+      <EntitlementsContext.Provider value={entitlements}>
+        <EmptyState organizationId={organizationId} />
+      </EntitlementsContext.Provider>
+    );
   }
 
   return (
+    <EntitlementsContext.Provider value={entitlements}>
     <div className="space-y-5">
       {/* Toolbar — search on the left, all controls + primary action grouped on the right */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -856,15 +952,29 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
             </Button>
           </div>
 
-          <CreateProjectDialog
-            organizationId={organizationId}
-            trigger={
-              <Button type="button" className="h-9 flex-1 lg:flex-none">
-                <Plus className="size-4" />
-                New project
-              </Button>
-            }
-          />
+          {atProjectLimit ? (
+            <Button
+              asChild
+              variant="outline"
+              className="h-9 flex-1 lg:flex-none"
+              title={`Your plan allows ${projectLimit} project${projectLimit === 1 ? "" : "s"}. Upgrade to add more.`}
+            >
+              <Link href="/pricing">
+                <Lock className="size-4" />
+                Project limit reached
+              </Link>
+            </Button>
+          ) : (
+            <CreateProjectDialog
+              organizationId={organizationId}
+              trigger={
+                <Button type="button" className="h-9 flex-1 lg:flex-none">
+                  <Plus className="size-4" />
+                  New project
+                </Button>
+              }
+            />
+          )}
         </div>
       </div>
 
@@ -921,5 +1031,6 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
         </div>
       )}
     </div>
+    </EntitlementsContext.Provider>
   );
 }
