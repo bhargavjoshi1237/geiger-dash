@@ -56,6 +56,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -355,6 +360,26 @@ function ProductTile({ product }) {
   );
 }
 
+// Compact, always-visible launch affordance used in list rows — one click opens
+// the product's workspace for this project.
+function ProductLaunchChip({ product }) {
+  const meta = productMeta(product.id);
+  const Icon = meta.Icon;
+  return (
+    <Link
+      href={launchHref(product)}
+      aria-label={`Open ${product.name}`}
+      className="group/chip inline-flex items-center gap-2 rounded-lg border border-border bg-surface-card py-1.5 pl-1.5 pr-2.5 transition-colors hover:border-border-strong hover:bg-surface-hover"
+    >
+      <span className={cn("flex size-6 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
+        <Icon className={cn("size-3.5", meta.icon)} />
+      </span>
+      <span className="text-xs font-medium text-foreground">{product.name}</span>
+      <ExternalLink className="size-3 shrink-0 text-tertiary opacity-0 transition-opacity group-hover/chip:opacity-100" />
+    </Link>
+  );
+}
+
 function EmptyProducts() {
   return (
     <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed border-border bg-black/20 py-6 text-center">
@@ -534,10 +559,13 @@ function ProjectCard({ project, name, organizationId }) {
       </div>
 
       {project.products.length ? (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {project.products.map((product) => (
-            <ProductTile key={product.id} product={product} />
-          ))}
+        <div className="space-y-2">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-tertiary">Open a product</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {project.products.map((product) => (
+              <ProductTile key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       ) : (
         <EmptyProducts />
@@ -546,38 +574,28 @@ function ProjectCard({ project, name, organizationId }) {
   );
 }
 
-// Compact list row (expand/collapse).
+// List row — project info on the left, its products as inline launch chips on
+// the right. No expanding: every product is one click away.
 function ProjectRow({ project, name, organizationId }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-border last:border-b-0">
-      <div className="flex items-center gap-2 px-4 py-3">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
-        >
-          <ProjectHeader project={project} name={name} />
-        </button>
-        <Badge variant={project.products.length ? "success" : "secondary"} className="text-[10px]">
-          {project.products.length}
-        </Badge>
+    <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-surface-hover/40 sm:flex-row sm:items-center sm:gap-4">
+      <div className="min-w-0 flex-1">
+        <ProjectHeader project={project} name={name} />
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3">
+        {project.products.length ? (
+          <div className="flex flex-wrap items-center gap-1.5 sm:max-w-md sm:justify-end">
+            {project.products.map((product) => (
+              <ProductLaunchChip key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <span className="rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-tertiary">
+            No products
+          </span>
+        )}
         <ProjectActions project={project} name={name} organizationId={organizationId} />
       </div>
-      {open && (
-        <div className="px-4 pb-4 pt-0 animate-in fade-in slide-in-from-top-1 duration-200">
-          {project.products.length ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {project.products.map((product) => (
-                <ProductTile key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <EmptyProducts />
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -604,6 +622,114 @@ function EmptyState({ organizationId }) {
         />
       </div>
     </div>
+  );
+}
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "empty", label: "Empty" },
+];
+
+// Status + product filters consolidated behind one tidy control so the toolbar
+// stays readable instead of a row of cramped, truncating dropdowns.
+function FilterPopover({ statusFilter, setStatusFilter, productFilter, setProductFilter }) {
+  const activeCount = (statusFilter !== "all" ? 1 : 0) + (productFilter !== "all" ? 1 : 0);
+  const productOptions = [{ id: "all", name: "All products" }, ...PRODUCT_APPS];
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline" className="h-9 gap-2 bg-surface-card">
+          <SlidersHorizontal className="size-4" />
+          Filters
+          {activeCount > 0 && (
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+              {activeCount}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="z-50 w-72 overflow-hidden rounded-lg border border-border bg-surface-subtle text-foreground shadow-xl outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+      >
+        <div className="space-y-4 p-4">
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Status</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {STATUS_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setStatusFilter(option.value)}
+                  aria-pressed={statusFilter === option.value}
+                  className={cn(
+                    "rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
+                    statusFilter === option.value
+                      ? "border-primary/40 bg-primary/10 text-foreground"
+                      : "border-border bg-surface-card text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Product</p>
+            <div className="max-h-52 space-y-0.5 overflow-y-auto pr-1">
+              {productOptions.map((product) => {
+                const isAll = product.id === "all";
+                const meta = isAll ? null : productMeta(product.id);
+                const Icon = meta?.Icon;
+                const selected = productFilter === product.id;
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => setProductFilter(product.id)}
+                    aria-pressed={selected}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                      selected
+                        ? "bg-surface-active text-foreground"
+                        : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
+                    )}
+                  >
+                    {Icon ? (
+                      <Icon className={cn("size-4 shrink-0", meta.icon)} />
+                    ) : (
+                      <Boxes className="size-4 shrink-0 text-tertiary" />
+                    )}
+                    <span className="flex-1 truncate">{product.name}</span>
+                    {selected && <Check className="size-4 shrink-0 text-primary" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border bg-surface-card/40 px-4 py-2.5">
+          <button
+            type="button"
+            disabled={activeCount === 0}
+            onClick={() => {
+              setStatusFilter("all");
+              setProductFilter("all");
+            }}
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+          >
+            Clear filters
+          </button>
+          <span className="text-xs text-tertiary">
+            {activeCount} active
+          </span>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -671,56 +797,30 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
   }
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full lg:max-w-xs">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="space-y-5">
+      {/* Toolbar — search on the left, all controls + primary action grouped on the right */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="relative w-full lg:flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search projects"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-surface-card pl-8"
+            className="h-9 bg-surface-card pl-9"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger size="sm" className="w-[120px] bg-surface-card">
-              <SlidersHorizontal className="size-3.5" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="empty">Empty</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={productFilter} onValueChange={setProductFilter}>
-            <SelectTrigger size="sm" className="w-[150px] bg-surface-card">
-              <SelectValue placeholder="All products" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All products</SelectItem>
-              {PRODUCT_APPS.map((product) => {
-                const meta = productMeta(product.id);
-                const Icon = meta.Icon;
-                return (
-                  <SelectItem key={product.id} value={product.id}>
-                    <span className="flex items-center gap-2">
-                      <Icon className={cn("size-4", meta.icon)} />
-                      {product.name}
-                    </span>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <FilterPopover
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            productFilter={productFilter}
+            setProductFilter={setProductFilter}
+          />
 
           <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger size="sm" className="w-[140px] bg-surface-card">
+            <SelectTrigger className="h-9 w-[150px] bg-surface-card">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -731,7 +831,7 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
+          <div className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
             <Button
               type="button"
               variant="ghost"
@@ -739,9 +839,9 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
               aria-label="Grid view"
               aria-pressed={viewMode === "grid"}
               onClick={() => setViewMode("grid")}
-              className={cn("hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
+              className={cn("size-7 hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
             >
-              <LayoutGrid className="size-3.5" />
+              <LayoutGrid className="size-4" />
             </Button>
             <Button
               type="button"
@@ -750,16 +850,16 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
               aria-label="List view"
               aria-pressed={viewMode === "list"}
               onClick={() => setViewMode("list")}
-              className={cn("hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
+              className={cn("size-7 hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
             >
-              <List className="size-3.5" />
+              <List className="size-4" />
             </Button>
           </div>
 
           <CreateProjectDialog
             organizationId={organizationId}
             trigger={
-              <Button type="button" size="sm">
+              <Button type="button" className="h-9 flex-1 lg:flex-none">
                 <Plus className="size-4" />
                 New project
               </Button>

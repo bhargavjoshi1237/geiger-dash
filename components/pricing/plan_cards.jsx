@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   ArrowDown,
   ArrowRight,
@@ -25,112 +24,39 @@ import {
   Workflow,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import {
+  plans,
+  products,
+  productCategories,
+  metricConfig,
+  computeEstimate,
+  YEARLY_MULTIPLIER,
+} from "@/lib/pricing/plans";
+import { createCheckoutAction } from "@/app/pricing/actions";
 
-const betaPlan = {
-  name: "Beta Tester",
-  price: 0,
-  description: "Help shape Geiger with full access to all 14 products while the suite is in beta.",
-  included: ["All 14 products", "1 active project", "3 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
+// Pricing data lives in lib/pricing/plans.js (shared with the server checkout
+// action). The catalog there is icon-free; map each product id to its Lucide
+// icon for rendering here.
+const PRODUCT_ICONS = {
+  campaign: Megaphone,
+  flow: Workflow,
+  events: CalendarDays,
+  assets: Image,
+  comms: RadioTower,
+  forms: CheckCircle2,
+  grey: Sparkles,
+  office: BriefcaseBusiness,
+  docs: BookOpen,
+  content: Code2,
+  pods: Podcast,
+  chat: MessageSquareText,
+  notes: FileStack,
+  canvas: FolderKanban,
 };
-
-const plans = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: 19,
-    description: "A focused workspace for small teams shipping one active project.",
-    eyebrow: "For Smaller Teams",
-    included: ["1 Core + 1 Add-on + 2 Cherry", "1 active project", "5 collaborators", "5 GB storage", "25 GB bandwidth", "50 AI credits"],
-    productAllowances: { core: 1, addon: 1, cherry: 2 },
-    projectAllowance: 1,
-    seatAllowance: 5,
-    storageAllowance: 5,
-    aiAllowance: 50,
-  },
-  {
-    id: "plus",
-    name: "Plus",
-    price: 79,
-    description: "More products, people, and room for teams managing parallel work.",
-    eyebrow: "Most popular",
-    included: ["2 Core + 2 Add-on + all Cherry", "3 active projects", "12 collaborators", "50 GB storage", "250 GB bandwidth", "200 AI credits"],
-    productAllowances: { core: 2, addon: 2, cherry: 3 },
-    projectAllowance: 3,
-    seatAllowance: 12,
-    storageAllowance: 50,
-    aiAllowance: 200,
-    featured: true,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: 119,
-    description: "The complete suite for teams coordinating complex, multi-project delivery.",
-    eyebrow: "For growing studios",
-    included: ["3 Core + 4 Add-on + all Cherry", "10 active projects", "25 collaborators", "100 GB storage", "500 GB bandwidth", "300 AI credits"],
-    productAllowances: { core: 3, addon: 4, cherry: 3 },
-    projectAllowance: 10,
-    seatAllowance: 25,
-    storageAllowance: 100,
-    aiAllowance: 300,
-  },
-];
-
-const products = [
-  { id: "campaign", name: "Campaign", detail: "Campaign planning and delivery", category: "core", icon: Megaphone },
-  { id: "flow", name: "Flow", detail: "Projects and delivery", category: "core", icon: Workflow },
-  { id: "events", name: "Events", detail: "Event operations and registration", category: "core", icon: CalendarDays },
-  { id: "assets", name: "Assets", detail: "Creative asset control", category: "core", icon: Image },
-  { id: "comms", name: "Comms", detail: "Broadcast communications", category: "core", icon: RadioTower },
-  { id: "forms", name: "Forms", detail: "Intake and feedback", category: "addon", icon: CheckCircle2 },
-  { id: "grey", name: "Grey", detail: "AI project assistant", category: "addon", icon: Sparkles },
-  { id: "office", name: "Office", detail: "Workspace operations", category: "addon", icon: BriefcaseBusiness },
-  { id: "docs", name: "Docs", detail: "Published documentation", category: "addon", icon: BookOpen },
-  { id: "content", name: "Content", detail: "Publishing workflows", category: "addon", icon: Code2 },
-  { id: "pods", name: "Pods", detail: "Audio publishing workflows", category: "addon", icon: Podcast },
-  { id: "chat", name: "Chat", detail: "Project conversations", category: "cherry", icon: MessageSquareText },
-  { id: "notes", name: "Notes", detail: "Docs and knowledge", category: "cherry", icon: FileStack },
-  { id: "canvas", name: "Canvas", detail: "Visual collaboration", category: "cherry", icon: FolderKanban },
-];
-
-const productCategories = [
-  {
-    id: "core",
-    name: "Core products",
-    description: "The operational foundation of your workspace.",
-    rate: 10,
-  },
-  {
-    id: "addon",
-    name: "Add-on products",
-    description: "Specialized tools to extend your workflow.",
-    rate: 5,
-  },
-  {
-    id: "cherry",
-    name: "Cherry products",
-    description: "Lightweight collaboration tools for the finishing touch.",
-    rate: 3,
-  },
-];
-
-const metricConfig = [
-  { id: "projects", label: "Active projects", min: 1, max: 30, step: 1 },
-  { id: "seats", label: "Collaborators", min: 1, max: 100, step: 1 },
-  { id: "storage", label: "Storage", min: 0, max: 1000, step: 3, suffix: "GB" },
-  { id: "bandwidth", label: "Bandwidth", min: 0, max: 5000, step: 3, suffix: "GB" },
-  { id: "edgeData", label: "Edge / CDN Serving", min: 0, max: 5000, step: 3, suffix: "GB" },
-  { id: "aiCredits", label: "AI credits", min: 0, max: 5000, step: 10, suffix: "credits" },
-];
-
-const PROJECT_RATE = 5;
-const COLLABORATOR_RATE = 1;
-const STORAGE_RATE = 0.5;
-const BANDWIDTH_RATE = 0.25;
-const EDGE_DATA_RATE = 0.1;
-const AI_RATE_PER_1000 = 10;
 
 function formatNumber(value) {
   return new Intl.NumberFormat("en-US").format(value);
@@ -258,8 +184,10 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
   );
 }
 
-export function PlanCards({ ctaHref }) {
+export function PlanCards({ isAuthed }) {
+  const router = useRouter();
   const [isYearly, setIsYearly] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState("plus");
   const [selectedProducts, setSelectedProducts] = useState([
     "campaign",
@@ -280,8 +208,41 @@ export function PlanCards({ ctaHref }) {
   });
 
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) || plans[0];
-  const billingMultiplier = isYearly ? 10 : 1;
+  const billingMultiplier = isYearly ? YEARLY_MULTIPLIER : 1;
   const billingPeriod = isYearly ? "year" : "month";
+
+  async function handleCheckout() {
+    if (!isAuthed) {
+      router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      return;
+    }
+    setCheckingOut(true);
+    try {
+      const result = await createCheckoutAction({
+        planId: selectedPlanId,
+        selectedProducts,
+        metrics,
+        isYearly,
+      });
+      if (result?.url) {
+        window.location.href = result.url;
+        return;
+      }
+      if (result?.error === "auth") {
+        router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      } else if (result?.error === "stripe_unconfigured") {
+        toast.error("Payments aren't enabled yet — add your Stripe keys to finish setup.");
+      } else if (result?.error === "amount_too_low") {
+        toast.error("That total is below the minimum charge amount.");
+      } else {
+        toast.error("Couldn't start checkout. Please try again.");
+      }
+    } catch {
+      toast.error("Couldn't start checkout. Please try again.");
+    } finally {
+      setCheckingOut(false);
+    }
+  }
 
   const selectPlan = (plan) => {
     setSelectedPlanId(plan.id);
@@ -311,48 +272,10 @@ export function PlanCards({ ctaHref }) {
     );
   };
 
-  const estimate = useMemo(() => {
-    const productCosts = productCategories.reduce((costs, category) => {
-      const selectedCount = products.filter(
-        (product) =>
-          product.category === category.id && selectedProducts.includes(product.id)
-      ).length;
-      const includedCount = selectedPlan.productAllowances[category.id];
-      return {
-        ...costs,
-        [category.id]: Math.max(0, selectedCount - includedCount) * category.rate,
-      };
-    }, {});
-    const productCost = Object.values(productCosts).reduce((total, cost) => total + cost, 0);
-    const projectCost = Math.max(0, metrics.projects - selectedPlan.projectAllowance) * PROJECT_RATE;
-    const seatCost = Math.max(0, metrics.seats - selectedPlan.seatAllowance) * COLLABORATOR_RATE;
-    const storageCost = Math.max(0, metrics.storage - selectedPlan.storageAllowance) * STORAGE_RATE;
-    const includedBandwidth = metrics.storage * 5;
-    const bandwidthCost = Math.max(0, metrics.bandwidth - includedBandwidth) * BANDWIDTH_RATE;
-    const edgeDataCost = metrics.edgeData * EDGE_DATA_RATE;
-    const aiCost =
-      (Math.max(0, metrics.aiCredits - selectedPlan.aiAllowance) / 1000) *
-      AI_RATE_PER_1000;
-
-    return {
-      total:
-        selectedPlan.price +
-        productCost +
-        projectCost +
-        seatCost +
-        storageCost +
-        bandwidthCost +
-        edgeDataCost +
-        aiCost,
-      productCost,
-      projectCost,
-      seatCost,
-      storageCost,
-      bandwidthCost,
-      edgeDataCost,
-      aiCost,
-    };
-  }, [metrics, selectedPlan, selectedProducts]);
+  const estimate = useMemo(
+    () => computeEstimate({ planId: selectedPlanId, selectedProducts, metrics }),
+    [metrics, selectedPlanId, selectedProducts],
+  );
 
   return (
     <>
@@ -545,7 +468,7 @@ export function PlanCards({ ctaHref }) {
 
                       <div className="mt-3 grid gap-2 sm:grid-cols-2">
                         {categoryProducts.map((product) => {
-                          const Icon = product.icon;
+                          const Icon = PRODUCT_ICONS[product.id];
                           const isEnabled = selectedProducts.includes(product.id);
                           return (
                             <button
@@ -759,14 +682,18 @@ export function PlanCards({ ctaHref }) {
             </div>
 
             <div className="border-t border-white/10 p-4">
-              <Link
-                href={ctaHref}
-                className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717]"
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={checkingOut}
+                className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Start with {selectedPlan.name}
-                <ArrowRight className="size-4" />
-              </Link>
-              <p className="mt-3 text-center text-[11px] text-white/40">Estimate excludes taxes.</p>
+                {checkingOut ? "Starting checkout…" : `Pay for ${selectedPlan.name}`}
+                {!checkingOut && <ArrowRight className="size-4" />}
+              </button>
+              <p className="mt-3 text-center text-[11px] text-white/40">
+                Secure checkout via Stripe · estimate excludes taxes.
+              </p>
             </div>
           </aside>
         </div>

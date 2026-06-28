@@ -39,7 +39,7 @@ const faqs = [
 export default async function PricingPage() {
   const supabase = await createClient();
   const user = await getUser(supabase);
-  const ctaHref = user ? "/" : "/login";
+  const isAuthed = Boolean(user);
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
@@ -68,7 +68,7 @@ export default async function PricingPage() {
             </div>
           </div>
 
-          <PlanCards ctaHref={ctaHref} />
+          <PlanCards isAuthed={isAuthed} />
 
           <section className="border-t border-border py-16 sm:py-20" aria-labelledby="faq-heading">
             <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
