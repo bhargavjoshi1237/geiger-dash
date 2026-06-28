@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Podcast, RadioTower, ChevronDown } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Podcast, RadioTower, Headphones, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -108,6 +108,12 @@ export function MegaMenu({ userId }) {
       label: "Docs",
       description: "Share documents Securely.",
       href: "/docs",
+    },
+    {
+      icon: Headphones,
+      label: "Audio",
+      description: "Surround sound 3D renderer.",
+      href: "/audio",
     },
   ];
 
