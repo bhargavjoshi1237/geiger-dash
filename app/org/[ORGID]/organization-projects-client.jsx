@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -10,16 +11,17 @@ import {
   Boxes,
   Building2,
   CalendarDays,
+  Camera,
   Check,
   ClipboardList,
   Copy,
-  ExternalLink,
   FolderKanban,
   FolderPlus,
   GitBranch,
   Images,
   LayoutGrid,
   List,
+  Loader2,
   Lock,
   Megaphone,
   MessageSquare,
@@ -32,13 +34,11 @@ import {
   Radio,
   Rocket,
   Search,
-  SlidersHorizontal,
   Sparkles,
   Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -56,18 +56,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -75,14 +63,32 @@ import { PRODUCT_APPS } from "@/lib/org/product-apps";
 import {
   createProjectAction,
   deleteProjectAction,
-  renameProjectAction,
+  updateProjectAction,
+  updateProjectAvatarAction,
 } from "./actions";
 
 const DEFAULT_SELECTED_PRODUCT_IDS = ["flow"];
 
+// Per-project avatar fallback colors — full class strings so Tailwind's JIT keeps them.
+const PROJECT_AVATAR_COLORS = [
+  { bg: "bg-blue-500/15", border: "border-blue-500/25", text: "text-blue-400" },
+  { bg: "bg-violet-500/15", border: "border-violet-500/25", text: "text-violet-400" },
+  { bg: "bg-emerald-500/15", border: "border-emerald-500/25", text: "text-emerald-400" },
+  { bg: "bg-orange-500/15", border: "border-orange-500/25", text: "text-orange-400" },
+  { bg: "bg-pink-500/15", border: "border-pink-500/25", text: "text-pink-400" },
+  { bg: "bg-cyan-500/15", border: "border-cyan-500/25", text: "text-cyan-400" },
+  { bg: "bg-amber-500/15", border: "border-amber-500/25", text: "text-amber-400" },
+  { bg: "bg-rose-500/15", border: "border-rose-500/25", text: "text-rose-400" },
+];
+function projectAvatarColor(id = "") {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffffff;
+  return PROJECT_AVATAR_COLORS[h % PROJECT_AVATAR_COLORS.length];
+}
+
 // Entitlements (which products are unlocked by the org's plan) are provided once
 // and read by the deep launch/create components without prop-threading.
-const EntitlementsContext = createContext(null);
+export const EntitlementsContext = createContext(null);
 function useEntitlements() {
   return useContext(EntitlementsContext);
 }
@@ -92,6 +98,15 @@ function productLocked(entitlements, productId) {
   const unlocked = entitlements?.unlockedProducts;
   if (unlocked == null) return false;
   return !unlocked.includes(productId);
+}
+
+// Returns true when a product is already allocated to another project.
+// Pass ownIds (the current project's products) to exempt them in the edit dialog.
+function productUsedElsewhere(entitlements, productId, ownIds = []) {
+  const used = entitlements?.usedProductIds;
+  if (!used || !used.length) return false;
+  if (ownIds.includes(productId)) return false;
+  return used.includes(productId);
 }
 
 // Per-product identity: a Lucide icon + a static colour accent (semantic /10 bg
@@ -118,11 +133,6 @@ function productMeta(id) {
   return PRODUCT_META[id] || { Icon: Boxes, icon: "text-muted-foreground", tile: "bg-surface-strong border-border" };
 }
 
-function shortId(value) {
-  if (!value) return "No ID";
-  return String(value).slice(0, 8);
-}
-
 function formatDate(value) {
   if (!value) return "Unknown date";
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
@@ -131,10 +141,6 @@ function formatDate(value) {
 function launchHref(product) {
   if (product.projectId) return `${product.href}/project/${product.projectId}`;
   return product.href;
-}
-
-function projectStatus(project) {
-  return project.products.length ? "active" : "empty";
 }
 
 const ERROR_MESSAGES = {
@@ -146,6 +152,7 @@ const ERROR_MESSAGES = {
   plan_create_failed: "The project plan could not be saved.",
   link_create_failed: "The organization link could not be saved.",
   project_rename_failed: "The project could not be renamed.",
+  project_update_failed: "The project could not be updated.",
   project_delete_failed: "The project could not be deleted.",
   plan_product_locked: "One or more selected products aren't in your plan.",
   plan_limit_projects: "You've reached your plan's project limit. Upgrade to add more.",
@@ -154,15 +161,19 @@ const ERROR_MESSAGES = {
 // ---------------------------------------------------------------------------
 // Create project — two-step dialog (details → products) with search + select-all.
 // ---------------------------------------------------------------------------
-function CreateProjectDialog({ organizationId, trigger }) {
+export function CreateProjectDialog({ organizationId, trigger }) {
   const entitlements = useEntitlements();
-  // Only products the org's plan unlocks may be selected.
-  const unlockedProducts = useMemo(
-    () => PRODUCT_APPS.filter((p) => !productLocked(entitlements, p.id)),
+  // Products selectable in this dialog: in the plan AND not used in another project.
+  const selectableProducts = useMemo(
+    () => PRODUCT_APPS.filter(
+      (p) => !productLocked(entitlements, p.id) && !productUsedElsewhere(entitlements, p.id),
+    ),
     [entitlements],
   );
   const defaultSelected = useMemo(
-    () => DEFAULT_SELECTED_PRODUCT_IDS.filter((id) => !productLocked(entitlements, id)),
+    () => DEFAULT_SELECTED_PRODUCT_IDS.filter(
+      (id) => !productLocked(entitlements, id) && !productUsedElsewhere(entitlements, id),
+    ),
     [entitlements],
   );
 
@@ -187,7 +198,8 @@ function CreateProjectDialog({ organizationId, trigger }) {
   }
 
   function toggle(id) {
-    if (productLocked(entitlements, id)) return; // locked products can't be selected
+    if (productLocked(entitlements, id)) return;
+    if (productUsedElsewhere(entitlements, id)) return;
     setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
@@ -197,7 +209,7 @@ function CreateProjectDialog({ organizationId, trigger }) {
     return PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
   }, [productSearch]);
 
-  const allSelected = unlockedProducts.length > 0 && selected.length === unlockedProducts.length;
+  const allSelected = selectableProducts.length > 0 && selected.length === selectableProducts.length;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -227,7 +239,10 @@ function CreateProjectDialog({ organizationId, trigger }) {
 
         <form
           action={createProjectAction}
-          onSubmit={() => setSubmitting(true)}
+          onSubmit={(e) => {
+            if (step === 0) { e.preventDefault(); setStep(1); return; }
+            setSubmitting(true);
+          }}
           className="flex min-h-0 flex-1 flex-col"
         >
           <input type="hidden" name="organization_id" value={organizationId} />
@@ -280,7 +295,7 @@ function CreateProjectDialog({ organizationId, trigger }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelected(allSelected ? [] : unlockedProducts.map((p) => p.id))}
+                    onClick={() => setSelected(allSelected ? [] : selectableProducts.map((p) => p.id))}
                   >
                     {allSelected ? "Clear all" : "Select all"}
                   </Button>
@@ -291,18 +306,26 @@ function CreateProjectDialog({ organizationId, trigger }) {
                     const meta = productMeta(product.id);
                     const Icon = meta.Icon;
                     const locked = productLocked(entitlements, product.id);
+                    const usedElsewhere = !locked && productUsedElsewhere(entitlements, product.id);
+                    const isBlocked = locked || usedElsewhere;
                     const isSelected = selected.includes(product.id);
                     return (
                       <button
                         type="button"
                         key={product.id}
                         onClick={() => toggle(product.id)}
-                        disabled={locked}
+                        disabled={isBlocked}
                         aria-pressed={isSelected}
-                        title={locked ? `${product.name} isn't in your plan — upgrade to unlock` : undefined}
+                        title={
+                          locked
+                            ? `${product.name} isn't in your plan`
+                            : usedElsewhere
+                              ? `${product.name} is already in another project`
+                              : undefined
+                        }
                         className={cn(
                           "group flex items-start gap-3 rounded-lg border p-3 text-left transition-all",
-                          locked
+                          isBlocked
                             ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-60"
                             : isSelected
                               ? "border-primary/40 bg-surface-card ring-1 ring-primary/20"
@@ -312,11 +335,13 @@ function CreateProjectDialog({ organizationId, trigger }) {
                         <span
                           className={cn(
                             "flex size-9 shrink-0 items-center justify-center rounded-lg border",
-                            locked ? "border-border bg-surface-card" : meta.tile,
+                            isBlocked ? "border-border bg-surface-card" : meta.tile,
                           )}
                         >
                           {locked ? (
                             <Lock className="size-4 text-tertiary" />
+                          ) : usedElsewhere ? (
+                            <FolderKanban className="size-4 text-tertiary" />
                           ) : (
                             <Icon className={cn("size-4.5", meta.icon)} />
                           )}
@@ -324,12 +349,20 @@ function CreateProjectDialog({ organizationId, trigger }) {
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-medium text-foreground">{product.name}</span>
                           <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
-                            {locked ? "Not in your plan" : product.detail}
+                            {locked
+                              ? "Not in your plan"
+                              : usedElsewhere
+                                ? "Already in another project"
+                                : product.detail}
                           </span>
                         </span>
-                        {locked ? (
+                        {isBlocked ? (
                           <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
-                            <Lock className="size-3 text-tertiary" />
+                            {locked ? (
+                              <Lock className="size-3 text-tertiary" />
+                            ) : (
+                              <FolderKanban className="size-3 text-tertiary" />
+                            )}
                           </span>
                         ) : (
                           <span
@@ -388,132 +421,296 @@ function CreateProjectDialog({ organizationId, trigger }) {
 }
 
 // ---------------------------------------------------------------------------
-// A single product, rendered as a launch tile.
+// Edit dialog — name + product selector, pre-filled from current state.
+// Inner form is keyed by open state so it remounts fresh on each open.
 // ---------------------------------------------------------------------------
-function ProductTile({ product }) {
-  const meta = productMeta(product.id);
-  const Icon = meta.Icon;
+function EditProjectForm({ project, name, organizationId, onClose }) {
   const entitlements = useEntitlements();
-  const locked = productLocked(entitlements, product.id);
+  // IDs of products already in THIS project — exempt from the "used elsewhere" check.
+  const ownProductIds = useMemo(() => project.products.map((p) => p.id), [project.products]);
+  // Products selectable in this dialog: in the plan AND (own OR not used in another project).
+  const selectableProducts = useMemo(
+    () => PRODUCT_APPS.filter(
+      (p) =>
+        !productLocked(entitlements, p.id) &&
+        !productUsedElsewhere(entitlements, p.id, ownProductIds),
+    ),
+    [entitlements, ownProductIds],
+  );
 
-  if (locked) {
-    return (
-      <div
-        title={`${product.name} isn't in your plan — upgrade to unlock`}
-        className="flex cursor-not-allowed items-center gap-2.5 rounded-lg border border-dashed border-border bg-surface-subtle px-3 py-2.5 opacity-70"
-      >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
-          <Lock className="size-4 text-tertiary" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-muted-foreground">{product.name}</span>
-          <span className="block truncate text-xs text-tertiary">Not in your plan</span>
-        </span>
-      </div>
-    );
+  const [title, setTitle] = useState(name || "");
+  const [productSearch, setProductSearch] = useState("");
+  const [selected, setSelected] = useState(() => project.products.map((p) => p.id));
+  const [submitting, setSubmitting] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(project.avatarUrl || null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef(null);
+  const [, startTransition] = useTransition();
+
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarUploading(true);
+    const fd = new FormData();
+    fd.append("project_id", project.projectId || "");
+    fd.append("organization_id", organizationId);
+    fd.append("avatar", file);
+    startTransition(async () => {
+      const result = await updateProjectAvatarAction(fd);
+      setAvatarUploading(false);
+      if (result?.ok) {
+        setAvatarPreview(result.url);
+        toast.success("Avatar updated");
+      } else {
+        setAvatarPreview(project.avatarUrl || null);
+        toast.error(result?.error || "Upload failed");
+      }
+    });
   }
 
-  return (
-    <Link
-      href={launchHref(product)}
-      aria-label={`Open ${product.name}`}
-      className="group/tile flex items-center gap-2.5 rounded-lg border border-border bg-surface-card px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-surface-hover"
-    >
-      <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
-        <Icon className={cn("size-4", meta.icon)} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">{product.name}</span>
-        <span className="block truncate text-xs text-muted-foreground">{product.detail}</span>
-      </span>
-      <ExternalLink className="size-4 shrink-0 text-tertiary opacity-0 transition-opacity group-hover/tile:opacity-100" />
-    </Link>
-  );
-}
+  const avatarColor = projectAvatarColor(project.projectId || project.id);
 
-// Compact, always-visible launch affordance used in list rows — one click opens
-// the product's workspace for this project.
-function ProductLaunchChip({ product }) {
-  const meta = productMeta(product.id);
-  const Icon = meta.Icon;
-  const entitlements = useEntitlements();
-  const locked = productLocked(entitlements, product.id);
-
-  if (locked) {
-    return (
-      <span
-        title={`${product.name} isn't in your plan — upgrade to unlock`}
-        className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-border bg-surface-subtle py-1.5 pl-1.5 pr-2.5 opacity-70"
-      >
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
-          <Lock className="size-3 text-tertiary" />
-        </span>
-        <span className="text-xs font-medium text-muted-foreground">{product.name}</span>
-      </span>
-    );
+  function toggle(id) {
+    if (productLocked(entitlements, id)) return;
+    if (productUsedElsewhere(entitlements, id, ownProductIds)) return;
+    setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return PRODUCT_APPS;
+    return PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
+  }, [productSearch]);
+
+  const allSelected = selectableProducts.length > 0 && selected.length === selectableProducts.length;
+
   return (
-    <Link
-      href={launchHref(product)}
-      aria-label={`Open ${product.name}`}
-      className="group/chip inline-flex items-center gap-2 rounded-lg border border-border bg-surface-card py-1.5 pl-1.5 pr-2.5 transition-colors hover:border-border-strong hover:bg-surface-hover"
+    <form
+      action={updateProjectAction}
+      onSubmit={() => setSubmitting(true)}
+      className="flex min-h-0 flex-1 flex-col"
     >
-      <span className={cn("flex size-6 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
-        <Icon className={cn("size-3.5", meta.icon)} />
-      </span>
-      <span className="text-xs font-medium text-foreground">{product.name}</span>
-      <ExternalLink className="size-3 shrink-0 text-tertiary opacity-0 transition-opacity group-hover/chip:opacity-100" />
-    </Link>
-  );
-}
+      <input type="hidden" name="organization_id" value={organizationId} />
+      <input type="hidden" name="plan_id" value={project.planId || ""} />
+      <input type="hidden" name="project_id" value={project.projectId || ""} />
+      <input type="hidden" name="title" value={title} />
+      {selected.map((id) => (
+        <input key={id} type="hidden" name="products" value={id} />
+      ))}
 
-function EmptyProducts() {
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed border-border bg-black/20 py-6 text-center">
-      <Boxes className="size-5 text-tertiary" />
-      <p className="text-xs text-muted-foreground">No products in this project</p>
-    </div>
-  );
-}
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+        {/* Avatar */}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            aria-label="Upload project avatar"
+            className="group relative flex size-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border text-lg font-semibold transition-opacity hover:opacity-90"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <span
+              className={cn(
+                "absolute inset-0 flex items-center justify-center",
+                avatarPreview ? "bg-surface-subtle" : cn(avatarColor.bg),
+              )}
+            >
+              {avatarPreview ? (
+                <Image src={avatarPreview} alt="" fill className="object-cover" unoptimized />
+              ) : (
+                <span className={cn("text-lg font-semibold", avatarColor.text)}>
+                  {(title || name || "P")[0].toUpperCase()}
+                </span>
+              )}
+            </span>
+            {avatarUploading ? (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/60">
+                <Loader2 className="size-4 animate-spin text-white" />
+              </span>
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                <Camera className="size-4 text-white" />
+              </span>
+            )}
+          </button>
+          <div>
+            <p className="text-sm font-medium text-foreground">Project avatar</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG or WebP · Max 2 MB</p>
+          </div>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </div>
 
-// ---------------------------------------------------------------------------
-// Rename / delete dialogs (real server actions).
-// ---------------------------------------------------------------------------
-function RenameProjectDialog({ project, name, organizationId, open, onOpenChange }) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="geiger-flow-palette max-w-md border-border bg-background text-foreground">
-        <DialogHeader>
-          <DialogTitle>Rename project</DialogTitle>
-          <DialogDescription>Give this project a clearer name.</DialogDescription>
-        </DialogHeader>
-        <form action={renameProjectAction} className="space-y-4">
-          <input type="hidden" name="organization_id" value={organizationId} />
-          <input type="hidden" name="plan_id" value={project.planId || ""} />
-          <input type="hidden" name="project_id" value={project.projectId || ""} />
-          <div className="space-y-2">
-            <Label htmlFor={`rename-${project.id}`} className="text-xs font-medium text-muted-foreground">
-              Project name
-            </Label>
+        {/* Name */}
+        <div className="space-y-2">
+          <Label htmlFor={`edit-title-${project.id}`} className="text-xs font-medium text-muted-foreground">
+            Project name
+          </Label>
+          <Input
+            id={`edit-title-${project.id}`}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Q3 Marketing"
+            autoFocus
+            className="bg-surface-card"
+          />
+        </div>
+
+        {/* Products */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">Products</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSelected(allSelected ? [] : selectableProducts.map((p) => p.id))}
+            >
+              {allSelected ? "Clear all" : "Select all"}
+            </Button>
+          </div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              id={`rename-${project.id}`}
-              name="title"
-              defaultValue={project.title || name}
-              autoFocus
-              required
-              className="bg-surface-card"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Search products"
+              className="bg-surface-card pl-8"
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!project.planId}>
-              Save changes
-            </Button>
-          </DialogFooter>
-        </form>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {filteredProducts.map((product) => {
+              const meta = productMeta(product.id);
+              const Icon = meta.Icon;
+              const locked = productLocked(entitlements, product.id);
+              const usedElsewhere = !locked && productUsedElsewhere(entitlements, product.id, ownProductIds);
+              const isBlocked = locked || usedElsewhere;
+              const isSelected = selected.includes(product.id);
+              return (
+                <button
+                  type="button"
+                  key={product.id}
+                  onClick={() => toggle(product.id)}
+                  disabled={isBlocked}
+                  aria-pressed={isSelected}
+                  title={
+                    locked
+                      ? `${product.name} isn't in your plan`
+                      : usedElsewhere
+                        ? `${product.name} is already in another project`
+                        : undefined
+                  }
+                  className={cn(
+                    "group flex items-start gap-3 rounded-lg border p-3 text-left transition-all",
+                    isBlocked
+                      ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-60"
+                      : isSelected
+                        ? "border-primary/40 bg-surface-card ring-1 ring-primary/20"
+                        : "border-border bg-surface-card/50 hover:border-border-strong hover:bg-surface-card",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-lg border",
+                      isBlocked ? "border-border bg-surface-card" : meta.tile,
+                    )}
+                  >
+                    {locked ? (
+                      <Lock className="size-4 text-tertiary" />
+                    ) : usedElsewhere ? (
+                      <FolderKanban className="size-4 text-tertiary" />
+                    ) : (
+                      <Icon className={cn("size-4.5", meta.icon)} />
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-foreground">{product.name}</span>
+                    <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+                      {locked
+                        ? "Not in your plan"
+                        : usedElsewhere
+                          ? "Already in another project"
+                          : product.detail}
+                    </span>
+                  </span>
+                  {isBlocked ? (
+                    <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
+                      {locked ? (
+                        <Lock className="size-3 text-tertiary" />
+                      ) : (
+                        <FolderKanban className="size-3 text-tertiary" />
+                      )}
+                    </span>
+                  ) : (
+                    <span
+                      className={cn(
+                        "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-all",
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border-strong",
+                      )}
+                    >
+                      {isSelected && <Check className="size-3" />}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+            {filteredProducts.length === 0 && (
+              <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
+                No products match &ldquo;{productSearch}&rdquo;.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <DialogFooter className="flex-row items-center justify-between gap-3 border-t border-border bg-surface-subtle/40 px-6 py-4 sm:justify-between">
+        <span className="text-xs text-muted-foreground">
+          {selected.length} {selected.length === 1 ? "product" : "products"} selected
+        </span>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={submitting || selected.length === 0}>
+            {submitting ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+      </DialogFooter>
+    </form>
+  );
+}
+
+function EditProjectDialog({ project, name, organizationId, open, onOpenChange }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="geiger-flow-palette flex max-h-[88vh] max-w-2xl flex-col gap-0 overflow-hidden border-border bg-background p-0 text-foreground">
+        <DialogHeader className="border-b border-border bg-surface-subtle/40 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+              <PenLine className="size-5" />
+            </span>
+            <div>
+              <DialogTitle className="text-base">Edit project</DialogTitle>
+              <DialogDescription className="text-xs">
+                Update the name and products for this project.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+        <EditProjectForm
+          key={open ? project.id : undefined}
+          project={project}
+          name={name}
+          organizationId={organizationId}
+          onClose={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -551,8 +748,13 @@ function DeleteProjectDialog({ project, name, organizationId, open, onOpenChange
 }
 
 function ProjectActions({ project, name, organizationId }) {
-  const [renameOpen, setRenameOpen] = useState(false);
+  const entitlements = useEntitlements();
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const launchableProducts = project.products.filter(
+    (p) => !productLocked(entitlements, p.id),
+  );
 
   return (
     <>
@@ -568,7 +770,22 @@ function ProjectActions({ project, name, organizationId }) {
             <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuContent align="end" className="w-52">
+          {launchableProducts.map((product) => {
+            const { Icon } = productMeta(product.id);
+            return (
+              <DropdownMenuItem key={product.id} asChild>
+                <Link href={launchHref(product)}>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-surface-subtle">
+                    <Icon className="size-3.5 text-muted-foreground" />
+                  </span>
+                  <span className="flex-1">{product.name}</span>
+                  <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+          {launchableProducts.length > 0 && <DropdownMenuSeparator />}
           <DropdownMenuItem
             onSelect={() => {
               if (project.projectId) {
@@ -580,9 +797,9 @@ function ProjectActions({ project, name, organizationId }) {
             <Copy className="size-4" />
             Copy project ID
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
+          <DropdownMenuItem onSelect={() => setEditOpen(true)}>
             <PenLine className="size-4" />
-            Rename
+            Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -595,12 +812,12 @@ function ProjectActions({ project, name, organizationId }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <RenameProjectDialog
+      <EditProjectDialog
         project={project}
         name={name}
         organizationId={organizationId}
-        open={renameOpen}
-        onOpenChange={setRenameOpen}
+        open={editOpen}
+        onOpenChange={setEditOpen}
       />
       <DeleteProjectDialog
         project={project}
@@ -614,17 +831,24 @@ function ProjectActions({ project, name, organizationId }) {
 }
 
 function ProjectHeader({ project, name }) {
+  const color = projectAvatarColor(project.projectId || project.id);
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-        <FolderKanban className="size-4.5" />
+      <span
+        className={cn(
+          "relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-sm font-semibold",
+          project.avatarUrl ? "border-border bg-surface-subtle" : cn(color.bg, color.border, color.text),
+        )}
+      >
+        {project.avatarUrl ? (
+          <Image src={project.avatarUrl} alt="" fill className="object-cover" unoptimized />
+        ) : (
+          (name || "P")[0].toUpperCase()
+        )}
       </span>
       <div className="min-w-0">
         <h3 className="truncate text-sm font-semibold text-foreground">{name}</h3>
-        <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
-          <span className="rounded bg-black/20 px-1.5 py-0.5 font-mono text-[10px] text-tertiary">
-            {shortId(project.projectId)}
-          </span>
+        <p className="truncate text-xs text-muted-foreground">
           Added {formatDate(project.createdAt)}
         </p>
       </div>
@@ -635,55 +859,21 @@ function ProjectHeader({ project, name }) {
 // Grid card.
 function ProjectCard({ project, name, organizationId }) {
   return (
-    <div className="group flex flex-col rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
-      <div className="mb-4 flex items-start justify-between gap-2">
-        <ProjectHeader project={project} name={name} />
-        <div className="flex shrink-0 items-center gap-1">
-          <Badge variant={project.products.length ? "success" : "secondary"} className="text-[10px]">
-            {project.products.length} {project.products.length === 1 ? "product" : "products"}
-          </Badge>
-          <ProjectActions project={project} name={name} organizationId={organizationId} />
-        </div>
-      </div>
-
-      {project.products.length ? (
-        <div className="space-y-2">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-tertiary">Open a product</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {project.products.map((product) => (
-              <ProductTile key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <EmptyProducts />
-      )}
+    <div className="group flex items-start justify-between gap-2 rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
+      <ProjectHeader project={project} name={name} />
+      <ProjectActions project={project} name={name} organizationId={organizationId} />
     </div>
   );
 }
 
-// List row — project info on the left, its products as inline launch chips on
-// the right. No expanding: every product is one click away.
+// List row.
 function ProjectRow({ project, name, organizationId }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-surface-hover/40 sm:flex-row sm:items-center sm:gap-4">
+    <div className="flex items-center gap-4 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-surface-hover/40">
       <div className="min-w-0 flex-1">
         <ProjectHeader project={project} name={name} />
       </div>
-      <div className="flex items-center gap-2 sm:gap-3">
-        {project.products.length ? (
-          <div className="flex flex-wrap items-center gap-1.5 sm:max-w-md sm:justify-end">
-            {project.products.map((product) => (
-              <ProductLaunchChip key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <span className="rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-tertiary">
-            No products
-          </span>
-        )}
-        <ProjectActions project={project} name={name} organizationId={organizationId} />
-      </div>
+      <ProjectActions project={project} name={name} organizationId={organizationId} />
     </div>
   );
 }
@@ -713,120 +903,10 @@ function EmptyState({ organizationId }) {
   );
 }
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "empty", label: "Empty" },
-];
-
-// Status + product filters consolidated behind one tidy control so the toolbar
-// stays readable instead of a row of cramped, truncating dropdowns.
-function FilterPopover({ statusFilter, setStatusFilter, productFilter, setProductFilter }) {
-  const activeCount = (statusFilter !== "all" ? 1 : 0) + (productFilter !== "all" ? 1 : 0);
-  const productOptions = [{ id: "all", name: "All products" }, ...PRODUCT_APPS];
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="h-9 gap-2 bg-surface-card">
-          <SlidersHorizontal className="size-4" />
-          Filters
-          {activeCount > 0 && (
-            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
-              {activeCount}
-            </span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className="z-50 w-72 overflow-hidden rounded-lg border border-border bg-surface-subtle text-foreground shadow-xl outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
-      >
-        <div className="space-y-4 p-4">
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Status</p>
-            <div className="grid grid-cols-3 gap-1.5">
-              {STATUS_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setStatusFilter(option.value)}
-                  aria-pressed={statusFilter === option.value}
-                  className={cn(
-                    "rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
-                    statusFilter === option.value
-                      ? "border-primary/40 bg-primary/10 text-foreground"
-                      : "border-border bg-surface-card text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Product</p>
-            <div className="max-h-52 space-y-0.5 overflow-y-auto pr-1">
-              {productOptions.map((product) => {
-                const isAll = product.id === "all";
-                const meta = isAll ? null : productMeta(product.id);
-                const Icon = meta?.Icon;
-                const selected = productFilter === product.id;
-                return (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => setProductFilter(product.id)}
-                    aria-pressed={selected}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                      selected
-                        ? "bg-surface-active text-foreground"
-                        : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
-                    )}
-                  >
-                    {Icon ? (
-                      <Icon className={cn("size-4 shrink-0", meta.icon)} />
-                    ) : (
-                      <Boxes className="size-4 shrink-0 text-tertiary" />
-                    )}
-                    <span className="flex-1 truncate">{product.name}</span>
-                    {selected && <Check className="size-4 shrink-0 text-primary" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-border bg-surface-card/40 px-4 py-2.5">
-          <button
-            type="button"
-            disabled={activeCount === 0}
-            onClick={() => {
-              setStatusFilter("all");
-              setProductFilter("all");
-            }}
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
-          >
-            Clear filters
-          </button>
-          <span className="text-xs text-tertiary">
-            {activeCount} active
-          </span>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 export function OrganizationProjectsClient({ organizationId, projects, notificationParams, entitlements = null }) {
   const router = useRouter();
   const notifiedRef = useRef(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [productFilter, setProductFilter] = useState("all");
   const [sort, setSort] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
 
@@ -841,13 +921,14 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
 
   useEffect(() => {
     if (notifiedRef.current || !notificationParams) return;
-    const { projectCreated, projectError, projectRenamed, projectDeleted } = notificationParams;
-    if (!projectCreated && !projectError && !projectRenamed && !projectDeleted) return;
+    const { projectCreated, projectError, projectRenamed, projectDeleted, projectUpdated } = notificationParams;
+    if (!projectCreated && !projectError && !projectRenamed && !projectDeleted && !projectUpdated) return;
 
     notifiedRef.current = true;
     if (projectCreated) toast.success("Project created.");
     else if (projectRenamed) toast.success("Project renamed.");
     else if (projectDeleted) toast.success("Project deleted.");
+    else if (projectUpdated) toast.success("Project updated.");
     else if (projectError) toast.error(ERROR_MESSAGES[projectError] || projectError);
     router.replace(`/org/${organizationId}`, { scroll: false });
   }, [notificationParams, organizationId, router]);
@@ -858,10 +939,7 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
       const name = (nameById.get(project.id) || "").toLowerCase();
       const productText = project.products.map((p) => p.name).join(" ").toLowerCase();
       const idText = `${project.projectId || ""} ${project.title || ""}`.toLowerCase();
-      const matchesSearch = !query || name.includes(query) || productText.includes(query) || idText.includes(query);
-      const matchesStatus = statusFilter === "all" || projectStatus(project) === statusFilter;
-      const matchesProduct = productFilter === "all" || project.products.some((p) => p.id === productFilter);
-      return matchesSearch && matchesStatus && matchesProduct;
+      return !query || name.includes(query) || productText.includes(query) || idText.includes(query);
     });
 
     return [...filtered].sort((a, b) => {
@@ -870,18 +948,13 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
       if (sort === "name") return (nameById.get(a.id) || "").localeCompare(nameById.get(b.id) || "");
       return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
-  }, [projects, search, sort, statusFilter, productFilter, nameById]);
+  }, [projects, search, sort, nameById]);
 
-  const hasFilters = search.trim() || statusFilter !== "all" || productFilter !== "all";
+  const hasFilters = !!search.trim();
 
   function clearFilters() {
     setSearch("");
-    setStatusFilter("all");
-    setProductFilter("all");
   }
-
-  const projectLimit = entitlements?.projectLimit ?? null;
-  const atProjectLimit = projectLimit != null && projects.length >= projectLimit;
 
   if (!projects.length) {
     return (
@@ -894,87 +967,42 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
   return (
     <EntitlementsContext.Provider value={entitlements}>
     <div className="space-y-5">
-      {/* Toolbar — search on the left, all controls + primary action grouped on the right */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="relative w-full lg:flex-1">
+      {/* Toolbar */}
+      <div className="sticky top-0 z-10 -mx-1 flex items-center gap-2 bg-background/95 px-1 py-2 backdrop-blur">
+        <div className="relative w-[300px] shrink-0 mr-auto">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search projects"
+            placeholder="Search Projects"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 bg-surface-card pl-9"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <FilterPopover
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            productFilter={productFilter}
-            setProductFilter={setProductFilter}
-          />
-
-          <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="h-9 w-[150px] bg-surface-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest first</SelectItem>
-              <SelectItem value="oldest">Oldest first</SelectItem>
-              <SelectItem value="products">Most products</SelectItem>
-              <SelectItem value="name">Name A–Z</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Grid view"
-              aria-pressed={viewMode === "grid"}
-              onClick={() => setViewMode("grid")}
-              className={cn("size-7 hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
-            >
-              <LayoutGrid className="size-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="List view"
-              aria-pressed={viewMode === "list"}
-              onClick={() => setViewMode("list")}
-              className={cn("size-7 hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
-            >
-              <List className="size-4" />
-            </Button>
-          </div>
-
-          {atProjectLimit ? (
-            <Button
-              asChild
-              variant="outline"
-              className="h-9 flex-1 lg:flex-none"
-              title={`Your plan allows ${projectLimit} project${projectLimit === 1 ? "" : "s"}. Upgrade to add more.`}
-            >
-              <Link href="/pricing">
-                <Lock className="size-4" />
-                Project limit reached
-              </Link>
-            </Button>
-          ) : (
-            <CreateProjectDialog
-              organizationId={organizationId}
-              trigger={
-                <Button type="button" className="h-9 flex-1 lg:flex-none">
-                  <Plus className="size-4" />
-                  New project
-                </Button>
-              }
-            />
-          )}
+        <div className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Grid view"
+            aria-pressed={viewMode === "grid"}
+            onClick={() => setViewMode("grid")}
+            className={cn("size-7 hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
+          >
+            <LayoutGrid className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="List view"
+            aria-pressed={viewMode === "list"}
+            onClick={() => setViewMode("list")}
+            className={cn("size-7 hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
+          >
+            <List className="size-4" />
+          </Button>
         </div>
       </div>
 

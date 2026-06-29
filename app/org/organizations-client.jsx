@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
   Archive,
   Building2,
+  Camera,
+  Copy,
+  ExternalLink,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -15,7 +20,7 @@ import {
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createOrganizationAction, joinOrganizationAction } from './actions'
+import { createOrganizationAction, joinOrganizationAction, updateOrgAvatarAction } from './actions'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -240,6 +245,28 @@ function OrganizationCard({ organization, userId }) {
     country: organization.country || '',
     phone: organization.phone || '',
   })
+  const [avatarPreview, setAvatarPreview] = useState(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const avatarInputRef = useRef(null)
+
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarPreview(URL.createObjectURL(file))
+    setAvatarUploading(true)
+    const fd = new FormData()
+    fd.set('organization_id', organization.id)
+    fd.set('avatar', file)
+    const result = await updateOrgAvatarAction(fd)
+    setAvatarUploading(false)
+    if (result.ok) {
+      toast.success('Icon updated.')
+    } else {
+      setAvatarPreview(null)
+      toast.error(result.error || 'Upload failed.')
+    }
+    e.target.value = ''
+  }
 
   function handleEditSave(event) {
     event.preventDefault()
@@ -284,6 +311,20 @@ function OrganizationCard({ organization, userId }) {
             <CardContent className="space-y-4 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-card">
+                    {avatarPreview || organization.avatar_url ? (
+                      <Image
+                        src={avatarPreview || organization.avatar_url}
+                        alt=""
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="select-none text-sm font-semibold text-foreground">
+                        {(organization.name || 'O').slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="truncate text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-foreground">
@@ -316,23 +357,40 @@ function OrganizationCard({ organization, userId }) {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 rounded-lg border-border bg-surface-subtle text-foreground">
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onSelect={() => setEditOpen(true)}>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48 rounded-lg border-border bg-surface-subtle text-foreground"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => handleOpenOrganization()}>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-surface-hover" />
+                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setEditOpen(true)}>
                       <Pencil className="h-3.5 w-3.5" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onSelect={() => setArchiveOpen(true)}>
+                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setArchiveOpen(true)}>
                       <Archive className="h-3.5 w-3.5" />
                       Archive
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onSelect={() => setDeactivateOpen(true)}>
+                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setDeactivateOpen(true)}>
                       <Power className="h-3.5 w-3.5" />
                       Deactivate
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-surface-hover" />
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onSelect={() => setSettingsOpen(true)}>
+                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setSettingsOpen(true)}>
                       <Settings2 className="h-3.5 w-3.5" />
                       Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-surface-hover" />
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground"
+                      onClick={() => { navigator.clipboard?.writeText(organization.id); toast.success('ID copied.') }}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy ID
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -353,22 +411,35 @@ function OrganizationCard({ organization, userId }) {
         </ContextMenuTrigger>
 
         <ContextMenuContent className="w-48 rounded-lg border-border bg-surface-subtle p-1 text-foreground">
-          <ContextMenuItem onSelect={() => setEditOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+          <ContextMenuItem onClick={() => handleOpenOrganization()} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+            <ExternalLink className="h-3.5 w-3.5" />
+            Open
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-surface-hover" />
+          <ContextMenuItem onClick={() => setEditOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
             <Pencil className="h-3.5 w-3.5" />
             Edit
           </ContextMenuItem>
-          <ContextMenuItem onSelect={() => setArchiveOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+          <ContextMenuItem onClick={() => setArchiveOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
             <Archive className="h-3.5 w-3.5" />
             Archive
           </ContextMenuItem>
-          <ContextMenuItem onSelect={() => setDeactivateOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+          <ContextMenuItem onClick={() => setDeactivateOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
             <Power className="h-3.5 w-3.5" />
             Deactivate
           </ContextMenuItem>
           <ContextMenuSeparator className="bg-surface-hover" />
-          <ContextMenuItem onSelect={() => setSettingsOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+          <ContextMenuItem onClick={() => setSettingsOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
             <Settings2 className="h-3.5 w-3.5" />
             Settings
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-surface-hover" />
+          <ContextMenuItem
+            onClick={() => { navigator.clipboard?.writeText(organization.id); toast.success('ID copied.') }}
+            className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            Copy ID
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
@@ -490,6 +561,55 @@ function OrganizationCard({ organization, userId }) {
           <div className="max-h-[460px] overflow-y-auto bg-surface-subtle p-6">
             {activeSettingsTab === 'general' && (
               <div className="space-y-4">
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-surface-card p-4">
+                  <div className="group/avatar relative shrink-0">
+                    <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-subtle">
+                      {avatarPreview || organization.avatar_url ? (
+                        <Image
+                          src={avatarPreview || organization.avatar_url}
+                          alt=""
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="select-none text-2xl font-semibold text-foreground">
+                          {(organization.name || 'O').slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={avatarUploading}
+                      aria-label="Change organization icon"
+                      className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 opacity-0 transition-opacity group-hover/avatar:opacity-100 disabled:pointer-events-none"
+                    >
+                      {avatarUploading
+                        ? <Loader2 className="size-5 animate-spin text-white" />
+                        : <Camera className="size-5 text-white" />
+                      }
+                    </button>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground">Organization icon</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">PNG, JPG, or WebP · max 2 MB</p>
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={avatarUploading}
+                      className="mt-2 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none"
+                    >
+                      {avatarUploading ? 'Uploading…' : 'Upload image'}
+                    </button>
+                  </div>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                </div>
                 <div className="grid gap-2">
                   <Label htmlFor={`settings-name-${organization.id}`}>Workspace name</Label>
                   <Input id={`settings-name-${organization.id}`} defaultValue={organization.name || ''} />

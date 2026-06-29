@@ -280,7 +280,6 @@ export function OnboardingWizard({ email }) {
         <div
           key="create"
           className="animate-in fade-in slide-in-from-right-2 duration-300"
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleCreate()}
         >
           <Heading
             title="Create your organization"

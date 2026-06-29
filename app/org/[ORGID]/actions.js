@@ -3,9 +3,9 @@
 import { randomUUID } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { PRODUCT_APPS } from '@/lib/org/product-apps'
 import { createClient as createServerClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
 import { getOrgEntitlements, canAddProject, isProductUnlocked } from '@/lib/billing/entitlements'
 
@@ -37,22 +37,6 @@ function redirectWithProjectError(organizationId, errorCode) {
   redirect(`${basePath}?project_error=${encodeURIComponent(errorCode)}`)
 }
 
-function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    return null
-  }
-
-  return createSupabaseClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  })
-}
 
 async function rollbackProjectCreation(supabase, projectId, planId) {
   if (planId) {
@@ -240,6 +224,113 @@ export async function renameProjectAction(formData) {
 
   revalidatePath(`/org/${organizationId}`)
   redirect(`/org/${organizationId}?project_renamed=1`)
+}
+
+export async function updateProjectAction(formData) {
+  const serverSupabase = await createServerClient()
+  const user = await requireUser(serverSupabase, '/login?next=org')
+  const admin = createAdminClient() || serverSupabase
+  const organizationId = cleanText(formData.get('organization_id'))
+  const planId = cleanText(formData.get('plan_id'))
+  const projectId = cleanText(formData.get('project_id'))
+  const title = cleanText(formData.get('title'))
+
+  if (!organizationId || !planId) {
+    redirectWithProjectError(organizationId, 'missing_organization_id')
+  }
+  if (!(await userCanManageOrg(admin, organizationId, user.id))) {
+    redirectWithProjectError(organizationId, 'forbidden')
+  }
+
+  const rawProductIds = formData.getAll('products').map(cleanText).filter(Boolean)
+  const invalidProductIds = rawProductIds.filter((id) => !PRODUCT_ID_SET.has(id))
+  if (invalidProductIds.length) {
+    redirectWithProjectError(organizationId, 'invalid_products')
+  }
+  const selectedProductIds = Array.from(new Set(rawProductIds))
+
+  // Validate against the org's plan entitlements.
+  const { data: orgRow } = await admin
+    .from('organizations')
+    .select('metadata')
+    .eq('id', organizationId)
+    .single()
+  const entitlements = getOrgEntitlements(orgRow || {})
+  const lockedSelected = selectedProductIds.filter((id) => !isProductUnlocked(entitlements, id))
+  if (lockedSelected.length) {
+    redirectWithProjectError(organizationId, 'plan_product_locked')
+  }
+
+  const { data: planRow } = await admin.from('plan').select('plan').eq('id', planId).single()
+  const currentPlan = planRow?.plan && typeof planRow.plan === 'object' ? planRow.plan : {}
+  const nextPlan = { ...currentPlan, products: selectedProductIds, selectedProducts: selectedProductIds }
+  if (title) {
+    nextPlan.title = title
+  } else {
+    delete nextPlan.title
+  }
+
+  const { error } = await admin.from('plan').update({ plan: nextPlan }).eq('id', planId)
+  if (error) {
+    redirectWithProjectError(organizationId, 'project_update_failed')
+  }
+
+  if (projectId) {
+    const projectName = title || 'Untitled project'
+    await admin
+      .from('projects')
+      .update({ name: projectName, slug: slugify(projectName) || 'project' })
+      .eq('id', projectId)
+  }
+
+  revalidatePath(`/org/${organizationId}`)
+  redirect(`/org/${organizationId}?project_updated=1`)
+}
+
+export async function updateProjectAvatarAction(formData) {
+  const serverSupabase = await createServerClient()
+  const user = await requireUser(serverSupabase, '/login?next=org')
+  const organizationId = cleanText(formData.get('organization_id'))
+  const projectId = cleanText(formData.get('project_id'))
+  const file = formData.get('avatar')
+
+  if (!projectId || !file || file.size === 0) {
+    return { ok: false, error: 'Missing file or project.' }
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    return { ok: false, error: 'File must be under 2 MB.' }
+  }
+
+  const admin = createAdminClient()
+  if (!admin) return { ok: false, error: 'Storage is not configured.' }
+
+  if (!(await userCanManageOrg(admin, organizationId, user.id))) {
+    return { ok: false, error: 'You do not have permission to update this project.' }
+  }
+
+  await admin.storage.createBucket('projects', { public: true }).catch(() => {})
+
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const path = `${projectId}/avatar.${ext}`
+  const bytes = await file.arrayBuffer()
+
+  const { error: uploadError } = await admin.storage
+    .from('projects')
+    .upload(path, bytes, { contentType: file.type, upsert: true })
+
+  if (uploadError) return { ok: false, error: uploadError.message }
+
+  const { data: { publicUrl } } = admin.storage.from('projects').getPublicUrl(path)
+
+  const { error: updateError } = await admin
+    .from('projects')
+    .update({ avatar_url: publicUrl })
+    .eq('id', projectId)
+
+  if (updateError) return { ok: false, error: updateError.message }
+
+  revalidatePath(`/org/${organizationId}`)
+  return { ok: true, url: publicUrl }
 }
 
 export async function deleteProjectAction(formData) {

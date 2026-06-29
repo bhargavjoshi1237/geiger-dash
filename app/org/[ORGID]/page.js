@@ -1,11 +1,11 @@
-import Link from 'next/link'
-import { ArrowUpRight, Building2, Hash, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { Building2, Hash } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { getOrganizationProjects } from '@/lib/org/projects'
 import { getOrgEntitlements } from '@/lib/billing/entitlements'
 import { OrganizationProjectsClient } from './organization-projects-client'
+import { NewProjectButton } from './new-project-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,13 +19,16 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
     projectCreated: query?.project_created === '1',
     projectRenamed: query?.project_renamed === '1',
     projectDeleted: query?.project_deleted === '1',
+    projectUpdated: query?.project_updated === '1',
     projectError: typeof query?.project_error === 'string' ? query.project_error : null,
   }
 
   const projectCount = projects?.length || 0
   const entitlements = organization ? getOrgEntitlements(organization) : null
-  const projectLimit = entitlements?.limits?.projects
-  const projectLimitLabel = projectLimit === Infinity || projectLimit == null ? '∞' : projectLimit
+
+  // Collect every product ID already allocated across existing projects so the
+  // create / edit dialogs can block double-allocation.
+  const usedProductIds = (projects || []).flatMap((p) => (p.products || []).map((prod) => prod.id))
 
   // Client-safe shape: Infinity isn't JSON-serializable, so unlimited => null.
   const clientEntitlements = entitlements
@@ -35,6 +38,7 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
         planKey: entitlements.planKey,
         unlockedProducts: entitlements.unlockedProducts, // null = all unlocked
         projectLimit: entitlements.limits.projects === Infinity ? null : entitlements.limits.projects,
+        usedProductIds, // products already allocated to a project in this org
       }
     : null
 
@@ -45,8 +49,12 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
       <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col bg-background px-4 pb-20 pt-24 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-4">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-subtle text-foreground">
-              <Building2 className="size-6" />
+            <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-subtle text-foreground">
+              {organization?.avatar_url ? (
+                <Image src={organization.avatar_url} alt="" fill className="object-cover" />
+              ) : (
+                <Building2 className="size-6" />
+              )}
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
@@ -64,37 +72,10 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
               </p>
             </div>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-md border border-border bg-surface-subtle px-2.5 py-1.5 font-mono text-[11px] text-tertiary sm:self-auto">
-            <Hash className="size-3" />
-            {ORGID}
-          </span>
-        </header>
-
-        {organization ? (
-          <div className="mt-6 flex flex-col gap-3 rounded-xl border border-border bg-surface-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-                <Sparkles className="size-5" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {entitlements?.hasSubscription ? `${entitlements.planName} plan` : 'No active plan'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {entitlements?.hasSubscription
-                    ? `${projectCount}/${projectLimitLabel} projects · ${entitlements.unlockedProducts.length} product${entitlements.unlockedProducts.length === 1 ? '' : 's'} unlocked`
-                    : 'All products available. Choose a plan to set limits and billing.'}
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="outline" size="sm" className="shrink-0">
-              <Link href="/pricing">
-                {entitlements?.hasSubscription ? 'Manage plan' : 'Choose a plan'}
-                <ArrowUpRight className="size-4" />
-              </Link>
-            </Button>
+          <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+            <NewProjectButton organizationId={ORGID} entitlements={clientEntitlements} />
           </div>
-        ) : null}
+        </header>
 
         {error ? (
           <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
