@@ -396,6 +396,49 @@ export const TEMPLATES = [
     variables: ["recipientName", "projectName", "addedBy", "role", "projectUrl"],
   },
 
+  // ---- Geiger Events ------------------------------------------------------
+  {
+    key: "events.ticket_purchase_confirmation",
+    project: "geiger-events",
+    category: "Tickets",
+    name: "Ticket purchase confirmation",
+    description: "Sent to the buyer once a paid ticket order completes.",
+    subject: "Your tickets for {{eventName}}",
+    content: {
+      heading: "You're going!",
+      intro:
+        "Hi {{buyerName}}, thanks for your order — here's your confirmation for {{eventName}}.",
+      cta_label: "View event",
+      outro: "Save this email as your receipt. See you there!",
+    },
+    fields: [
+      text("heading", "Heading"),
+      area("intro", "Intro paragraph"),
+      text("cta_label", "Button label"),
+      area("outro", "Footer note"),
+    ],
+    sampleData: {
+      buyerName: "Alex",
+      eventName: "Founders Summer Mixer",
+      eventDate: "Jun 30, 2026",
+      ticketType: "General Admission",
+      quantity: "2",
+      orderTotal: "90.00",
+      orderId: "a1b2c3d4",
+      eventUrl: "https://events.geiger.studio/e/demo",
+    },
+    variables: [
+      "buyerName",
+      "eventName",
+      "eventDate",
+      "ticketType",
+      "quantity",
+      "orderTotal",
+      "orderId",
+      "eventUrl",
+    ],
+  },
+
   // ---- Suite / General ---------------------------------------------------
   {
     key: "geiger.text_only",

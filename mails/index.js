@@ -16,6 +16,7 @@ import TaskAssigned from "./templates/geiger-flow/task-assigned.jsx";
 import TaskDueReminder from "./templates/geiger-flow/task-due-reminder.jsx";
 import TaskCompleted from "./templates/geiger-flow/task-completed.jsx";
 import ProjectAdded from "./templates/geiger-flow/project-added.jsx";
+import TicketPurchaseConfirmation from "./templates/geiger-events/ticket-purchase-confirmation.jsx";
 import TextOnly from "./templates/geiger/text-only.jsx";
 
 export const COMPONENTS = {
@@ -31,6 +32,7 @@ export const COMPONENTS = {
   "flow.task_due_reminder": TaskDueReminder,
   "flow.task_completed": TaskCompleted,
   "flow.project_added": ProjectAdded,
+  "events.ticket_purchase_confirmation": TicketPurchaseConfirmation,
   "geiger.text_only": TextOnly,
 };
 
