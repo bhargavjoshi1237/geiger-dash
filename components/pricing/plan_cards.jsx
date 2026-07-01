@@ -13,6 +13,7 @@ import {
   FolderKanban,
   HardDrive,
   Image,
+  Lock,
   Megaphone,
   MessageSquareText,
   Minus,
@@ -42,6 +43,7 @@ import {
   productCategories,
   metricConfig,
   computeEstimate,
+  getPlanRank,
   YEARLY_MULTIPLIER,
 } from "@/lib/pricing/plans";
 import { createCheckoutAction } from "@/app/pricing/actions";
@@ -192,33 +194,74 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
   );
 }
 
-export function PlanCards({ isAuthed, organizations = [] }) {
+// Starter selection when an org has no purchased plan yet — unchanged from
+// the previous hardcoded defaults.
+const DEFAULT_CONFIG = {
+  planId: "plus",
+  products: ["campaign", "flow", "forms", "grey", "chat", "notes", "canvas"],
+  metrics: { projects: 3, seats: 12, storage: 50, bandwidth: 250, edgeData: 0, aiCredits: 200 },
+};
+
+// An org with an active subscription opens the calculator pre-filled with
+// what it already owns, so those selections can be locked in as floors.
+function configForEntitlements(entitlements) {
+  if (!entitlements?.hasSubscription) return DEFAULT_CONFIG;
+  return {
+    planId: entitlements.planKey,
+    products: entitlements.unlockedProducts,
+    metrics: entitlements.currentMetrics,
+  };
+}
+
+export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {} }) {
   const router = useRouter();
   const [isYearly, setIsYearly] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState(organizations[0]?.id || "");
-  const [selectedPlanId, setSelectedPlanId] = useState("plus");
-  const [selectedProducts, setSelectedProducts] = useState([
-    "campaign",
-    "flow",
-    "forms",
-    "grey",
-    "chat",
-    "notes",
-    "canvas",
-  ]);
-  const [metrics, setMetrics] = useState({
-    projects: 3,
-    seats: 12,
-    storage: 50,
-    bandwidth: 250,
-    edgeData: 0,
-    aiCredits: 200,
-  });
+  const initialConfig = configForEntitlements(entitlementsByOrg[organizations[0]?.id]);
+  const [selectedPlanId, setSelectedPlanId] = useState(initialConfig.planId);
+  const [selectedProducts, setSelectedProducts] = useState(initialConfig.products);
+  const [metrics, setMetrics] = useState(initialConfig.metrics);
+
+  const currentEntitlements = entitlementsByOrg[selectedOrgId] || null;
+  const hasSubscription = Boolean(currentEntitlements?.hasSubscription);
+
+  // Switching organizations re-opens the calculator on that org's own plan —
+  // carrying over a different org's configuration would be meaningless.
+  useEffect(() => {
+    const config = configForEntitlements(entitlementsByOrg[selectedOrgId]);
+    setSelectedPlanId(config.planId);
+    setSelectedProducts(config.products);
+    setMetrics(config.metrics);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOrgId]);
 
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) || plans[0];
   const billingMultiplier = isYearly ? YEARLY_MULTIPLIER : 1;
   const billingPeriod = isYearly ? "year" : "month";
+
+  const ownedMetric = (metricId) =>
+    hasSubscription ? currentEntitlements.currentMetrics?.[metricId] ?? 0 : 0;
+
+  const metricFloor = (metricId) => {
+    const planFloor =
+      metricId === "projects"
+        ? selectedPlan.projectAllowance
+        : metricId === "seats"
+          ? selectedPlan.seatAllowance
+          : metricId === "storage"
+            ? selectedPlan.storageAllowance
+            : metricId === "bandwidth"
+              ? metrics.storage * 5
+              : metricId === "aiCredits"
+                ? selectedPlan.aiAllowance
+                : 0;
+    return Math.max(planFloor, ownedMetric(metricId));
+  };
+
+  const isPlanDowngrade = (plan) => hasSubscription && getPlanRank(plan.id) < currentEntitlements.planRank;
+  const isPlanUpgrade = (plan) => hasSubscription && getPlanRank(plan.id) > currentEntitlements.planRank;
+  const isCurrentPlan = (plan) => hasSubscription && plan.id === currentEntitlements.planKey;
 
   async function handleCheckout() {
     if (!isAuthed) {
@@ -255,6 +298,10 @@ export function PlanCards({ isAuthed, organizations = [] }) {
         toast.error("Payments aren't enabled yet — add your Stripe keys to finish setup.");
       } else if (result?.error === "amount_too_low") {
         toast.error("That total is below the minimum charge amount.");
+      } else if (result?.error === "no_change") {
+        toast.error("There's nothing new to purchase for this configuration.");
+      } else if (result?.error === "downgrade_blocked") {
+        toast.error("Downgrading a plan or removing owned products isn't allowed.");
       } else {
         toast.error("Couldn't start checkout. Please try again.");
       }
@@ -266,26 +313,30 @@ export function PlanCards({ isAuthed, organizations = [] }) {
   }
 
   const selectPlan = (plan) => {
+    if (isPlanDowngrade(plan)) return; // downgrades aren't offered
     setSelectedPlanId(plan.id);
     setMetrics({
-      projects: plan.projectAllowance,
-      seats: plan.seatAllowance,
-      storage: plan.storageAllowance,
-      bandwidth: plan.storageAllowance * 5,
-      edgeData: 0,
-      aiCredits: plan.aiAllowance,
+      projects: Math.max(plan.projectAllowance, ownedMetric("projects")),
+      seats: Math.max(plan.seatAllowance, ownedMetric("seats")),
+      storage: Math.max(plan.storageAllowance, ownedMetric("storage")),
+      bandwidth: Math.max(plan.storageAllowance * 5, ownedMetric("bandwidth")),
+      edgeData: ownedMetric("edgeData"),
+      aiCredits: Math.max(plan.aiAllowance, ownedMetric("aiCredits")),
     });
-    setSelectedProducts(
-      products
-        .filter((product) => {
-          const categoryProducts = products.filter((item) => item.category === product.category);
-          return categoryProducts.indexOf(product) < plan.productAllowances[product.category];
-        })
-        .map((product) => product.id)
-    );
+    const planDefaults = products
+      .filter((product) => {
+        const categoryProducts = products.filter((item) => item.category === product.category);
+        return categoryProducts.indexOf(product) < plan.productAllowances[product.category];
+      })
+      .map((product) => product.id);
+    // Already-owned products can never drop out of the selection, even when
+    // switching to a foundation whose default mix wouldn't include them.
+    const ownedProducts = hasSubscription ? currentEntitlements.unlockedProducts : [];
+    setSelectedProducts(Array.from(new Set([...ownedProducts, ...planDefaults])));
   };
 
   const toggleProduct = (productId) => {
+    if (hasSubscription && currentEntitlements.unlockedProducts.includes(productId)) return; // owned, locked on
     setSelectedProducts((current) =>
       current.includes(productId)
         ? current.filter((id) => id !== productId)
@@ -297,6 +348,16 @@ export function PlanCards({ isAuthed, organizations = [] }) {
     () => computeEstimate({ planId: selectedPlanId, selectedProducts, metrics }),
     [metrics, selectedPlanId, selectedProducts],
   );
+
+  // "Due today" mirrors the server's delta charge (app/pricing/actions.js):
+  // the org already paid currentMonthlyTotal, so only the increase is billed.
+  const currentMonthlyTotal = hasSubscription
+    ? (currentEntitlements.amountTotal / 100) /
+      (currentEntitlements.billingInterval === "year" ? YEARLY_MULTIPLIER : 1)
+    : 0;
+  const dueTodayMonthly = Math.max(0, estimate.total - currentMonthlyTotal);
+  const dueToday = dueTodayMonthly * billingMultiplier;
+  const noChangeToUpgrade = hasSubscription && dueTodayMonthly <= 0;
 
   return (
     <>
@@ -327,24 +388,34 @@ export function PlanCards({ isAuthed, organizations = [] }) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const currentPlan = isCurrentPlan(plan);
+            const upgrade = isPlanUpgrade(plan);
+            const downgrade = isPlanDowngrade(plan);
+            return (
             <article
               key={plan.id}
               className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-2xl border p-5 transition duration-300 sm:p-6 ${
-                plan.featured
-                  ? "border-foreground/30 bg-foreground text-background shadow-[0_28px_80px_-48px_rgba(255,255,255,0.4)] dark:bg-[#eeeeec] dark:text-[#151515]"
-                  : "border-border bg-surface-card hover:-translate-y-1 hover:border-border-strong"
+                downgrade
+                  ? "border-border bg-surface-card opacity-60"
+                  : plan.featured
+                    ? "border-foreground/30 bg-foreground text-background shadow-[0_28px_80px_-48px_rgba(255,255,255,0.4)] dark:bg-[#eeeeec] dark:text-[#151515]"
+                    : "border-border bg-surface-card hover:-translate-y-1 hover:border-border-strong"
               }`}
             >
               <div className="flex items-center justify-between gap-4">
-                <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${plan.featured ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
+                <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${plan.featured && !downgrade ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
                   {plan.eyebrow}
                 </p>
-                {plan.featured && (
+                {currentPlan ? (
+                  <span className="rounded-full bg-background/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider dark:bg-[#151515]/10">
+                    Current plan
+                  </span>
+                ) : plan.featured && !downgrade ? (
                   <span className="rounded-full bg-background/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider dark:bg-[#151515]/10">
                     Recommended
                   </span>
-                )}
+                ) : null}
               </div>
 
               <h3 className="mt-7 text-2xl font-semibold tracking-tight">{plan.name}</h3>
@@ -374,21 +445,32 @@ export function PlanCards({ isAuthed, organizations = [] }) {
               </ul>
 
               <div className="mt-auto pt-6">
-                <a
-                  href="#plan-calculator"
-                  onClick={() => selectPlan(plan)}
-                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                    plan.featured
-                      ? "border-background/15 bg-background text-foreground hover:bg-background/90 dark:border-[#151515]/15 dark:bg-[#151515] dark:text-white"
-                      : "border-border bg-surface-subtle hover:border-border-strong hover:bg-surface-hover"
-                  }`}
-                >
-                  Configure this plan
-                  <ArrowDown className="size-4" />
-                </a>
+                {downgrade ? (
+                  <span
+                    aria-disabled="true"
+                    title="Downgrading isn't available — cancel your current plan first."
+                    className="flex w-full cursor-not-allowed items-center justify-between rounded-xl border border-border bg-surface-subtle px-4 py-3 text-sm font-semibold text-muted-foreground"
+                  >
+                    Not available as a downgrade
+                  </span>
+                ) : (
+                  <a
+                    href="#plan-calculator"
+                    onClick={() => selectPlan(plan)}
+                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      plan.featured
+                        ? "border-background/15 bg-background text-foreground hover:bg-background/90 dark:border-[#151515]/15 dark:bg-[#151515] dark:text-white"
+                        : "border-border bg-surface-subtle hover:border-border-strong hover:bg-surface-hover"
+                    }`}
+                  >
+                    {currentPlan ? "Manage this plan" : upgrade ? `Upgrade to ${plan.name}` : "Configure this plan"}
+                    <ArrowDown className="size-4" />
+                  </a>
+                )}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -410,16 +492,21 @@ export function PlanCards({ isAuthed, organizations = [] }) {
               <div className="mt-4 grid min-w-0 grid-cols-3 gap-2">
                 {plans.map((plan) => {
                   const isSelected = selectedPlanId === plan.id;
+                  const downgrade = isPlanDowngrade(plan);
                   return (
                     <button
                       key={plan.id}
                       type="button"
                       onClick={() => selectPlan(plan)}
+                      disabled={downgrade}
                       aria-pressed={isSelected}
+                      title={downgrade ? "Downgrading isn't available" : undefined}
                       className={`min-w-0 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-4 ${
-                        isSelected
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background/50 hover:border-border-strong"
+                        downgrade
+                          ? "cursor-not-allowed border-border bg-background/30 opacity-50"
+                          : isSelected
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border bg-background/50 hover:border-border-strong"
                       }`}
                     >
                       <span className="block truncate text-xs font-semibold sm:text-sm">{plan.name}</span>
@@ -490,25 +577,32 @@ export function PlanCards({ isAuthed, organizations = [] }) {
                       <div className="mt-3 grid gap-2 sm:grid-cols-2">
                         {categoryProducts.map((product) => {
                           const Icon = PRODUCT_ICONS[product.id];
-                          const isEnabled = selectedProducts.includes(product.id);
+                          const isOwned = hasSubscription && currentEntitlements.unlockedProducts.includes(product.id);
+                          const isEnabled = isOwned || selectedProducts.includes(product.id);
                           return (
                             <button
                               key={product.id}
                               type="button"
                               aria-pressed={isEnabled}
+                              disabled={isOwned}
+                              title={isOwned ? `${product.name} is already on your plan` : undefined}
                               onClick={() => toggleProduct(product.id)}
                               className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                isEnabled
-                                  ? "border-foreground/50 bg-surface-active"
-                                  : "border-border bg-background/45 hover:border-border-strong"
+                                isOwned
+                                  ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-70"
+                                  : isEnabled
+                                    ? "border-foreground/50 bg-surface-active"
+                                    : "border-border bg-background/45 hover:border-border-strong"
                               }`}
                             >
-                              <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg border ${isEnabled ? "border-foreground/20 bg-foreground text-background" : "border-border bg-surface-card text-muted-foreground"}`}>
-                                <Icon className="size-4" />
+                              <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg border ${isOwned ? "border-border bg-surface-card text-muted-foreground" : isEnabled ? "border-foreground/20 bg-foreground text-background" : "border-border bg-surface-card text-muted-foreground"}`}>
+                                {isOwned ? <Lock className="size-4" /> : <Icon className="size-4" />}
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="block text-sm font-semibold">{product.name}</span>
-                                <span className="block truncate text-xs text-muted-foreground">{product.detail}</span>
+                                <span className="block truncate text-xs text-muted-foreground">
+                                  {isOwned ? "Owned — included in your plan" : product.detail}
+                                </span>
                               </span>
                               <span className={`flex size-5 items-center justify-center rounded-full border ${isEnabled ? "border-foreground bg-foreground text-background" : "border-border"}`}>
                                 {isEnabled && <Check className="size-3" />}
@@ -534,11 +628,7 @@ export function PlanCards({ isAuthed, organizations = [] }) {
                     key={metric.id}
                     label={metric.label}
                     value={metrics[metric.id]}
-                    minimum={
-                      metric.id === "projects"
-                        ? selectedPlan.projectAllowance
-                        : selectedPlan.seatAllowance
-                    }
+                    minimum={metricFloor(metric.id)}
                     maximum={metric.max}
                     onChange={(value) => setMetrics((current) => ({ ...current, [metric.id]: value }))}
                   />
@@ -581,15 +671,7 @@ export function PlanCards({ isAuthed, organizations = [] }) {
                     </span>
                     <input
                       type="range"
-                      min={
-                        metric.id === "storage"
-                          ? selectedPlan.storageAllowance
-                          : metric.id === "bandwidth"
-                            ? metrics.storage * 5
-                            : metric.id === "aiCredits"
-                              ? selectedPlan.aiAllowance
-                            : metric.min
-                      }
+                      min={metricFloor(metric.id)}
                       max={metric.max}
                       step={metric.step}
                       value={metrics[metric.id]}
@@ -641,6 +723,12 @@ export function PlanCards({ isAuthed, organizations = [] }) {
               <p className="mt-3 text-xs leading-5 text-white/50 capitalize">
                 For {metrics.projects} {metrics.projects === 1 ? "project" : "projects"}, {metrics.seats} collaborators, {selectedProducts.length} products, {metrics.storage} GB storage, {metrics.bandwidth} GB bandwidth, and {metrics.edgeData} GB edge data.
               </p>
+              {hasSubscription && (
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+                  <span className="text-xs text-white/55">Due today (upgrade)</span>
+                  <RollingPrice value={formatNumber(dueToday)} className="text-base font-semibold" />
+                </div>
+              )}
             </div>
 
             <div className="space-y-3 p-6 text-sm">
@@ -734,11 +822,17 @@ export function PlanCards({ isAuthed, organizations = [] }) {
               <button
                 type="button"
                 onClick={handleCheckout}
-                disabled={checkingOut}
+                disabled={checkingOut || noChangeToUpgrade}
                 className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {checkingOut ? "Starting checkout…" : `Pay for ${selectedPlan.name}`}
-                {!checkingOut && <ArrowRight className="size-4" />}
+                {checkingOut
+                  ? "Starting checkout…"
+                  : noChangeToUpgrade
+                    ? "No changes to purchase"
+                    : hasSubscription
+                      ? `Upgrade to ${selectedPlan.name}`
+                      : `Pay for ${selectedPlan.name}`}
+                {!checkingOut && !noChangeToUpgrade && <ArrowRight className="size-4" />}
               </button>
               <p className="mt-3 text-center text-[11px] text-white/40">
                 Secure checkout via Stripe · estimate excludes taxes.

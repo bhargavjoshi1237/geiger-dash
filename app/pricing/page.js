@@ -7,6 +7,7 @@ import Footer from "@/components/footer";
 import { PlanCards } from "@/components/pricing/plan_cards";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { Button } from "@/components/ui/button";
+import { getOrgEntitlements } from "@/lib/billing/entitlements";
 
 const faqs = [
   {
@@ -42,15 +43,21 @@ export default async function PricingPage() {
   const isAuthed = Boolean(user);
 
   // RLS scopes this to the user's own organizations; used by the checkout org
-  // picker so a purchase can be applied to a specific organization.
+  // picker so a purchase can be applied to a specific organization. metadata
+  // is fetched too so we can compute each org's current-plan entitlements
+  // (what's already purchased) for the no-downgrade UI.
   let organizations = [];
+  let entitlementsByOrg = {};
   if (isAuthed) {
     const { data } = await supabase
       .from("organizations")
-      .select("id, name")
+      .select("id, name, metadata")
       .is("deleted_at", null)
       .order("created_at", { ascending: true });
     organizations = (data || []).map((org) => ({ id: org.id, name: org.name || "Untitled organization" }));
+    entitlementsByOrg = Object.fromEntries(
+      (data || []).map((org) => [org.id, getOrgEntitlements(org)]),
+    );
   }
 
   return (
@@ -80,7 +87,7 @@ export default async function PricingPage() {
             </div>
           </div>
 
-          <PlanCards isAuthed={isAuthed} organizations={organizations} />
+          <PlanCards isAuthed={isAuthed} organizations={organizations} entitlementsByOrg={entitlementsByOrg} />
 
           <section className="border-t border-border py-16 sm:py-20" aria-labelledby="faq-heading">
             <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">

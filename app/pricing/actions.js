@@ -4,8 +4,9 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
-import { computeEstimate, YEARLY_MULTIPLIER, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { computeEstimate, getPlanRank, YEARLY_MULTIPLIER, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
 import { recordPendingCheckout } from "@/lib/billing/store";
+import { getOrgEntitlements } from "@/lib/billing/entitlements";
 
 const PRODUCT_NAMES = new Map(PRODUCT_CATALOG.map((p) => [p.id, p.name]));
 
@@ -38,19 +39,48 @@ export async function createCheckoutAction(payload = {}) {
   const { planId, selectedProducts = [], metrics = {}, isYearly = false, organizationId = null } = payload;
 
   // Validate org membership through the user's own (RLS-scoped) client: a select
-  // that returns the row proves the user belongs to it.
+  // that returns the row proves the user belongs to it. metadata is fetched too
+  // so entitlements (current plan/products/metrics) can be re-derived here —
+  // the client's view of "what's already owned" is never trusted.
   if (!organizationId) return { error: "invalid_org" };
   const { data: org } = await supabase
     .from("organizations")
-    .select("id")
+    .select("id, metadata")
     .eq("id", organizationId)
     .is("deleted_at", null)
     .maybeSingle();
   if (!org) return { error: "invalid_org" };
 
+  const entitlements = getOrgEntitlements(org);
+
+  // No downgrades: the plan tier, every previously-owned product, and every
+  // previously-purchased metric floor must all be present in this submission.
+  if (entitlements.hasSubscription) {
+    if (getPlanRank(planId) < entitlements.planRank) return { error: "downgrade_blocked" };
+    const submittedProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
+    const missingOwnedProduct = entitlements.unlockedProducts.some((id) => !submittedProducts.includes(id));
+    if (missingOwnedProduct) return { error: "downgrade_blocked" };
+    const belowMetricFloor = Object.entries(entitlements.currentMetrics || {}).some(
+      ([key, ownedValue]) => Number(metrics?.[key]) < Number(ownedValue),
+    );
+    if (belowMetricFloor) return { error: "downgrade_blocked" };
+  }
+
   const { selectedPlan, total } = computeEstimate({ planId, selectedProducts, metrics });
   const multiplier = isYearly ? YEARLY_MULTIPLIER : 1;
-  const amountCents = Math.round(total * multiplier * 100);
+
+  // Charge only the incremental difference over what the org already paid —
+  // normalize both totals to a monthly figure before comparing so switching
+  // billing interval (monthly <-> yearly) mid-upgrade can't skew the delta.
+  const currentMonthlyTotal = entitlements.hasSubscription
+    ? entitlements.amountTotal / 100 / (entitlements.billingInterval === "year" ? YEARLY_MULTIPLIER : 1)
+    : 0;
+  const deltaMonthly = Math.max(0, total - currentMonthlyTotal);
+  const amountCents = Math.round(deltaMonthly * multiplier * 100);
+
+  if (entitlements.hasSubscription && deltaMonthly <= 0) {
+    return { error: "no_change" };
+  }
 
   // Stripe rejects charges under $0.50.
   if (!Number.isFinite(amountCents) || amountCents < 50) {
@@ -62,9 +92,10 @@ export async function createCheckoutAction(payload = {}) {
     PRODUCT_NAMES.has(id),
   );
   const productList = productIds.map((id) => PRODUCT_NAMES.get(id));
+  const descriptionPrefix = entitlements.hasSubscription ? "Upgrade — " : "";
   const description = productList.length
-    ? `${selectedPlan.name} foundation · ${productList.join(", ")}`
-    : `${selectedPlan.name} foundation`;
+    ? `${descriptionPrefix}${selectedPlan.name} foundation · ${productList.join(", ")}`
+    : `${descriptionPrefix}${selectedPlan.name} foundation`;
 
   try {
     const stripe = getStripe();
@@ -95,6 +126,7 @@ export async function createCheckoutAction(payload = {}) {
         billing: interval,
         products: productList.join(","),
         estimateUsd: String(amountCents / 100),
+        isUpgrade: String(entitlements.hasSubscription),
       },
       success_url: `${origin}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?checkout=canceled`,
