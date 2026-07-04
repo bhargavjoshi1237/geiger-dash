@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "node --env-file=.env scripts/run-sqls.mjs",
+    "db:push:all": "node --env-file=.env scripts/run-sqls.mjs --all",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:studio": "prisma studio",

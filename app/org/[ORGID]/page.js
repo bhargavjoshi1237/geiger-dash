@@ -1,5 +1,6 @@
 import Image from 'next/image'
-import { Building2, Hash } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowLeft, Building2 } from 'lucide-react'
 import { Header } from '@/components/header'
 import { Badge } from '@/components/ui/badge'
 import { getOrganizationProjects } from '@/lib/org/projects'
@@ -47,6 +48,14 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
       <Header megaMenue={false} />
 
       <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col bg-background px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+        <Link
+          href="/org"
+          className="mb-6 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          All organizations
+        </Link>
+
         <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-4">
             <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-subtle text-foreground">
@@ -72,9 +81,13 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
-            <NewProjectButton organizationId={ORGID} entitlements={clientEntitlements} />
-          </div>
+          {/* Project management is member-only; a non-member gets no org row
+              back from RLS, so hide the create action for them entirely. */}
+          {organization ? (
+            <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+              <NewProjectButton organizationId={ORGID} entitlements={clientEntitlements} />
+            </div>
+          ) : null}
         </header>
 
         {error ? (

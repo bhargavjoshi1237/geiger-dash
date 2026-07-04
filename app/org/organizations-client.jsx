@@ -229,9 +229,17 @@ function EmptyState() {
 function OrganizationCard({ organization, userId }) {
   const router = useRouter()
   const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
-  const memberCount = Math.max(members.length, 1)
+  // Prefer the authoritative count computed in the data layer (union of the
+  // relational members, owner/creator, and legacy metadata list); fall back to
+  // the legacy array only when it wasn't provided.
+  const memberCount = Number.isFinite(organization.memberCount)
+    ? Math.max(organization.memberCount, 1)
+    : Math.max(members.length, 1)
   const isOwner = organization.owner === userId
   const isCreator = organization.created_by === userId
+  // Org administration (edit / archive / deactivate / settings) is owner-only,
+  // matching the RLS model where `org.*` abilities aren't an open module.
+  const canManage = isOwner || isCreator
   const role = isOwner ? 'Owner' : isCreator ? 'Creator' : 'Member'
   const statusLabel = organization.is_active ? 'Active' : 'Inactive'
   const [editOpen, setEditOpen] = useState(false)
@@ -366,24 +374,28 @@ function OrganizationCard({ organization, userId }) {
                       <ExternalLink className="h-3.5 w-3.5" />
                       Open
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-surface-hover" />
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setEditOpen(true)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setArchiveOpen(true)}>
-                      <Archive className="h-3.5 w-3.5" />
-                      Archive
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setDeactivateOpen(true)}>
-                      <Power className="h-3.5 w-3.5" />
-                      Deactivate
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-surface-hover" />
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setSettingsOpen(true)}>
-                      <Settings2 className="h-3.5 w-3.5" />
-                      Settings
-                    </DropdownMenuItem>
+                    {canManage ? (
+                      <>
+                        <DropdownMenuSeparator className="bg-surface-hover" />
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setEditOpen(true)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setArchiveOpen(true)}>
+                          <Archive className="h-3.5 w-3.5" />
+                          Archive
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setDeactivateOpen(true)}>
+                          <Power className="h-3.5 w-3.5" />
+                          Deactivate
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-surface-hover" />
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => setSettingsOpen(true)}>
+                          <Settings2 className="h-3.5 w-3.5" />
+                          Settings
+                        </DropdownMenuItem>
+                      </>
+                    ) : null}
                     <DropdownMenuSeparator className="bg-surface-hover" />
                     <DropdownMenuItem
                       className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground"
@@ -415,24 +427,28 @@ function OrganizationCard({ organization, userId }) {
             <ExternalLink className="h-3.5 w-3.5" />
             Open
           </ContextMenuItem>
-          <ContextMenuSeparator className="bg-surface-hover" />
-          <ContextMenuItem onClick={() => setEditOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
-            <Pencil className="h-3.5 w-3.5" />
-            Edit
-          </ContextMenuItem>
-          <ContextMenuItem onClick={() => setArchiveOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
-            <Archive className="h-3.5 w-3.5" />
-            Archive
-          </ContextMenuItem>
-          <ContextMenuItem onClick={() => setDeactivateOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
-            <Power className="h-3.5 w-3.5" />
-            Deactivate
-          </ContextMenuItem>
-          <ContextMenuSeparator className="bg-surface-hover" />
-          <ContextMenuItem onClick={() => setSettingsOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
-            <Settings2 className="h-3.5 w-3.5" />
-            Settings
-          </ContextMenuItem>
+          {canManage ? (
+            <>
+              <ContextMenuSeparator className="bg-surface-hover" />
+              <ContextMenuItem onClick={() => setEditOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => setArchiveOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+                <Archive className="h-3.5 w-3.5" />
+                Archive
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => setDeactivateOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+                <Power className="h-3.5 w-3.5" />
+                Deactivate
+              </ContextMenuItem>
+              <ContextMenuSeparator className="bg-surface-hover" />
+              <ContextMenuItem onClick={() => setSettingsOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+                <Settings2 className="h-3.5 w-3.5" />
+                Settings
+              </ContextMenuItem>
+            </>
+          ) : null}
           <ContextMenuSeparator className="bg-surface-hover" />
           <ContextMenuItem
             onClick={() => { navigator.clipboard?.writeText(organization.id); toast.success('ID copied.') }}
@@ -444,6 +460,8 @@ function OrganizationCard({ organization, userId }) {
         </ContextMenuContent>
       </ContextMenu>
 
+      {canManage ? (
+        <>
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="geiger-flow-palette max-w-lg border-border bg-surface-subtle text-foreground">
           <DialogHeader>
@@ -670,6 +688,8 @@ function OrganizationCard({ organization, userId }) {
           </div>
         </DialogContent>
       </Dialog>
+        </>
+      ) : null}
     </>
   )
 }
@@ -678,11 +698,6 @@ export function OrganizationsClient({ organizations, userId, searchState }) {
   const router = useRouter()
   const message = useMemo(() => getMessage(searchState), [searchState])
   const notifiedMessage = useRef(null)
-  const activeCount = organizations.filter((organization) => organization.is_active).length
-  const memberCount = organizations.reduce((total, organization) => {
-    const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
-    return total + Math.max(members.length, 1)
-  }, 0)
 
   useEffect(() => {
     if (!message || notifiedMessage.current === message.id) return
