@@ -108,13 +108,7 @@ export function MegaMenu({ userId }) {
       label: "Docs",
       description: "Send and sign documents.",
       href: "/docs",
-    },
-    {
-      icon: Headphones,
-      label: "Audio",
-      description: "Surround sound 3D renderer.",
-      href: "/audio",
-    },
+    }
   ];
 
   const resources = [

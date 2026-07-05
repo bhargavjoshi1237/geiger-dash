@@ -36,8 +36,7 @@ export default function FooterProducts() {
                 <li><Link href="/chat" className={linkCls}>Geiger Chat</Link></li>
                 <li><Link href="/canvas" className={linkCls}>Geiger Canvas</Link></li>
                 <li><Link href="/docs" className={linkCls}>Geiger Docs</Link></li>
-                <li><Link href="/audio" className={linkCls}>Geiger Audio</Link></li>
-              </ul>
+               </ul>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
