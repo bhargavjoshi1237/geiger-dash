@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, BookOpen, Library, Podcast, RadioTower, Headphones, ChevronDown } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, FileSignature, LayoutGrid, Webhook, Headset, Headphones, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -68,9 +68,9 @@ export function MegaMenu({ userId }) {
       href: "/events",
     },
     {
-      icon: Library,
+      icon: LayoutGrid,
       label: "Content",
-      description: "Deploy & Manage content.",
+      description: "Your content operating system.",
       href: "/content",
     },
     {
@@ -80,15 +80,15 @@ export function MegaMenu({ userId }) {
       href: "/campaign",
     },
     {
-      icon: Podcast,
+      icon: Webhook,
       label: "Pods",
-      description: "Publish audio shows.",
+      description: "Edge functions for API calls.",
       href: "/pods",
     },
     {
-      icon: RadioTower,
+      icon: Headset,
       label: "Comms",
-      description: "Coordinate broadcasts.",
+      description: "Message and support customers.",
       href: "/comms",
     },
     {
@@ -104,9 +104,9 @@ export function MegaMenu({ userId }) {
       href: "/canvas",
     },
     {
-      icon: BookOpen,
+      icon: FileSignature,
       label: "Docs",
-      description: "Share documents Securely.",
+      description: "Send and sign documents.",
       href: "/docs",
     },
     {
