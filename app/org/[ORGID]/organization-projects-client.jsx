@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowUpRight,
   BookOpen,
   Boxes,
   Building2,
@@ -20,8 +19,6 @@ import {
   FolderPlus,
   GitBranch,
   Images,
-  LayoutGrid,
-  List,
   Loader2,
   Lock,
   Megaphone,
@@ -844,62 +841,70 @@ function ProjectHeader({ project, name }) {
   );
 }
 
-// A single product as a quiet launch row: a dim monochrome icon + label at
-// rest; on hover the row lifts, the icon warms to the product's own accent and
-// a launch arrow slides in. Colour is earned by intent — one accent at a time.
-function ProductRow({ product, entitlements }) {
+// A product as a quiet launch pill in the horizontal strip: a dim monochrome
+// icon + label at rest; on hover it warms to the product's own accent. Colour
+// is earned by intent — one accent at a time.
+function ProductPill({ product, entitlements }) {
   const meta = productMeta(product.id);
   const Icon = meta.Icon;
 
   if (productLocked(entitlements, product.id)) {
     return (
-      <div
+      <span
         title={`${product.name} isn't in your plan`}
-        className="flex items-center gap-2.5 rounded-md px-2 py-1.5 opacity-45"
+        className="inline-flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 opacity-45"
       >
         <Lock className="size-4 shrink-0 text-text-tertiary" />
-        <span className="min-w-0 flex-1 truncate text-[13px] text-text-secondary">{product.name}</span>
-      </div>
+        <span className="whitespace-nowrap text-[13px] text-text-secondary">{product.name}</span>
+      </span>
     );
   }
 
   return (
     <Link
       href={launchHref(product)}
-      className="group/row flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-hover"
+      className="group/row inline-flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-surface-hover"
     >
       <Icon className={cn("size-4 shrink-0 text-text-tertiary transition-colors", meta.hover)} />
-      <span className="min-w-0 flex-1 truncate text-[13px] text-text-secondary transition-colors group-hover/row:text-foreground">
+      <span className="whitespace-nowrap text-[13px] text-text-secondary transition-colors group-hover/row:text-foreground">
         {product.name}
       </span>
-      <ArrowUpRight className="size-3.5 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-150 group-hover/row:translate-x-0 group-hover/row:opacity-100" />
     </Link>
   );
 }
 
-// Project card: a header (avatar, name, actions) over a quiet list of product
-// launch rows. Every product a project holds is shown; the card grows to fit.
-function ProjectCard({ project, name, organizationId }) {
+// Project row: a compact full-width band — identity (avatar, name, count) on the
+// left, the ⋯ menu on the right, and a horizontally scrollable product strip in
+// the center. Stacks tightly so many projects don't crowd the screen.
+function ProjectRow({ project, name, organizationId }) {
   const entitlements = useEntitlements();
   const products = project.products || [];
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface-card transition-colors hover:border-border-strong">
-      <div className="flex items-start justify-between gap-2 px-4 pb-3 pt-4">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-card px-3 py-3 transition-colors hover:border-border-strong sm:gap-4 sm:px-4">
+      <div className="w-40 shrink-0 sm:w-56">
         <ProjectHeader project={project} name={name} />
-        <ProjectActions project={project} name={name} organizationId={organizationId} />
       </div>
-      {products.length ? (
-        <div className="grid gap-x-2 gap-y-0.5 border-t border-border p-2 sm:grid-cols-2">
-          {products.map((product) => (
-            <ProductRow key={product.id} product={product} entitlements={entitlements} />
-          ))}
-        </div>
-      ) : (
-        <p className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground">
-          No products yet. Edit this project to add some.
-        </p>
-      )}
+
+      <div className="h-9 w-px shrink-0 bg-border" />
+
+      <div className="relative min-w-0 flex-1">
+        {products.length ? (
+          <>
+            <div className="flex items-center gap-0.5 overflow-x-auto pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {products.map((product) => (
+                <ProductPill key={product.id} product={product} entitlements={entitlements} />
+              ))}
+            </div>
+            {/* Right-edge fade hints there's more to scroll; blends into empty space when everything fits. */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface-card to-transparent" />
+          </>
+        ) : (
+          <span className="text-xs text-muted-foreground">No products yet.</span>
+        )}
+      </div>
+
+      <ProjectActions project={project} name={name} organizationId={organizationId} />
     </div>
   );
 }
@@ -934,7 +939,6 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
   const notifiedRef = useRef(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
-  const [viewMode, setViewMode] = useState("grid");
 
   // Stable display names independent of sort/filter order.
   const nameById = useMemo(() => {
@@ -995,7 +999,7 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
     <div className="space-y-5">
       {/* Toolbar */}
       <div className="sticky top-0 z-10 -mx-1 flex items-center gap-2 bg-background/95 px-1 py-2 backdrop-blur">
-        <div className="relative w-[300px] shrink-0 mr-auto">
+        <div className="relative w-[300px] shrink-0">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -1004,31 +1008,6 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
             onChange={(e) => setSearch(e.target.value)}
             className="h-9 bg-surface-card pl-9"
           />
-        </div>
-
-        <div className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-surface-card p-0.5">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Grid view"
-            aria-pressed={viewMode === "grid"}
-            onClick={() => setViewMode("grid")}
-            className={cn("size-7 hover:bg-surface-hover", viewMode === "grid" && "bg-surface-active text-foreground")}
-          >
-            <LayoutGrid className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="List view"
-            aria-pressed={viewMode === "list"}
-            onClick={() => setViewMode("list")}
-            className={cn("size-7 hover:bg-surface-hover", viewMode === "list" && "bg-surface-active text-foreground")}
-          >
-            <List className="size-4" />
-          </Button>
         </div>
       </div>
 
@@ -1062,9 +1041,9 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
           </Button>
         </div>
       ) : (
-        <div className={cn("grid gap-3", viewMode === "grid" && "lg:grid-cols-2")}>
+        <div className="space-y-2.5">
           {visibleProjects.map((project) => (
-            <ProjectCard
+            <ProjectRow
               key={project.id}
               project={project}
               name={nameById.get(project.id)}
