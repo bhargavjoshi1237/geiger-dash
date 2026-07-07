@@ -114,24 +114,31 @@ function productUsedElsewhere(entitlements, productId, ownIds = []) {
 // + /20 border + -400 text, per the craft guide's badge convention). Class
 // strings are written out in full so Tailwind's JIT keeps them.
 const PRODUCT_META = {
-  campaign: { Icon: Megaphone, icon: "text-pink-400", tile: "bg-pink-500/10 border-pink-500/20" },
-  flow: { Icon: GitBranch, icon: "text-blue-400", tile: "bg-blue-500/10 border-blue-500/20" },
-  events: { Icon: CalendarDays, icon: "text-orange-400", tile: "bg-orange-500/10 border-orange-500/20" },
-  assets: { Icon: Images, icon: "text-violet-400", tile: "bg-violet-500/10 border-violet-500/20" },
-  comms: { Icon: Radio, icon: "text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20" },
-  forms: { Icon: ClipboardList, icon: "text-teal-400", tile: "bg-teal-500/10 border-teal-500/20" },
-  grey: { Icon: Sparkles, icon: "text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20" },
-  office: { Icon: Building2, icon: "text-amber-400", tile: "bg-amber-500/10 border-amber-500/20" },
-  docs: { Icon: BookOpen, icon: "text-sky-400", tile: "bg-sky-500/10 border-sky-500/20" },
-  content: { Icon: PenLine, icon: "text-rose-400", tile: "bg-rose-500/10 border-rose-500/20" },
-  pods: { Icon: Mic, icon: "text-purple-400", tile: "bg-purple-500/10 border-purple-500/20" },
-  chat: { Icon: MessageSquare, icon: "text-green-400", tile: "bg-green-500/10 border-green-500/20" },
-  notes: { Icon: NotebookPen, icon: "text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20" },
-  canvas: { Icon: PenTool, icon: "text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20" },
+  campaign: { Icon: Megaphone, icon: "text-pink-400", tile: "bg-pink-500/10 border-pink-500/20", hover: "group-hover/row:text-pink-400" },
+  flow: { Icon: GitBranch, icon: "text-blue-400", tile: "bg-blue-500/10 border-blue-500/20", hover: "group-hover/row:text-blue-400" },
+  events: { Icon: CalendarDays, icon: "text-orange-400", tile: "bg-orange-500/10 border-orange-500/20", hover: "group-hover/row:text-orange-400" },
+  assets: { Icon: Images, icon: "text-violet-400", tile: "bg-violet-500/10 border-violet-500/20", hover: "group-hover/row:text-violet-400" },
+  comms: { Icon: Radio, icon: "text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20", hover: "group-hover/row:text-cyan-400" },
+  forms: { Icon: ClipboardList, icon: "text-teal-400", tile: "bg-teal-500/10 border-teal-500/20", hover: "group-hover/row:text-teal-400" },
+  grey: { Icon: Sparkles, icon: "text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20", hover: "group-hover/row:text-indigo-400" },
+  office: { Icon: Building2, icon: "text-amber-400", tile: "bg-amber-500/10 border-amber-500/20", hover: "group-hover/row:text-amber-400" },
+  docs: { Icon: BookOpen, icon: "text-sky-400", tile: "bg-sky-500/10 border-sky-500/20", hover: "group-hover/row:text-sky-400" },
+  content: { Icon: PenLine, icon: "text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-400" },
+  pods: { Icon: Mic, icon: "text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-400" },
+  chat: { Icon: MessageSquare, icon: "text-green-400", tile: "bg-green-500/10 border-green-500/20", hover: "group-hover/row:text-green-400" },
+  notes: { Icon: NotebookPen, icon: "text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20", hover: "group-hover/row:text-yellow-400" },
+  canvas: { Icon: PenTool, icon: "text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20", hover: "group-hover/row:text-emerald-400" },
 };
 
 function productMeta(id) {
-  return PRODUCT_META[id] || { Icon: Boxes, icon: "text-muted-foreground", tile: "bg-surface-strong border-border" };
+  return (
+    PRODUCT_META[id] || {
+      Icon: Boxes,
+      icon: "text-muted-foreground",
+      tile: "bg-surface-strong border-border",
+      hover: "group-hover/row:text-foreground",
+    }
+  );
 }
 
 function formatDate(value) {
@@ -830,160 +837,67 @@ function ProjectHeader({ project, name }) {
       <div className="min-w-0">
         <h3 className="truncate text-sm font-semibold text-foreground">{name}</h3>
         <p className="truncate text-xs text-muted-foreground">
-          Added {formatDate(project.createdAt)}
+          {project.products?.length || 0} {(project.products?.length || 0) === 1 ? "product" : "products"} · Added {formatDate(project.createdAt)}
         </p>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Product launchers — three candidate patterns for launching a project's
-// products directly from its card (replacing the old ⋯-menu launch list).
-// Rendered side by side per project so one can be picked and the rest dropped.
-// Locked (not-in-plan) products render disabled; the rest are one-click links.
-// ---------------------------------------------------------------------------
+// A single product as a quiet launch row: a dim monochrome icon + label at
+// rest; on hover the row lifts, the icon warms to the product's own accent and
+// a launch arrow slides in. Colour is earned by intent — one accent at a time.
+function ProductRow({ product, entitlements }) {
+  const meta = productMeta(product.id);
+  const Icon = meta.Icon;
 
-// A: labeled launch tiles in a two-column grid.
-function ProductTiles({ products, entitlements }) {
+  if (productLocked(entitlements, product.id)) {
+    return (
+      <div
+        title={`${product.name} isn't in your plan`}
+        className="flex items-center gap-2.5 rounded-md px-2 py-1.5 opacity-45"
+      >
+        <Lock className="size-4 shrink-0 text-text-tertiary" />
+        <span className="min-w-0 flex-1 truncate text-[13px] text-text-secondary">{product.name}</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {products.map((product) => {
-        const meta = productMeta(product.id);
-        const Icon = meta.Icon;
-        if (productLocked(entitlements, product.id)) {
-          return (
-            <div
-              key={product.id}
-              title={`${product.name} isn't in your plan`}
-              className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface-subtle px-2.5 py-2 opacity-60"
-            >
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
-                <Lock className="size-3.5 text-tertiary" />
-              </span>
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground">{product.name}</span>
-            </div>
-          );
-        }
-        return (
-          <Link
-            key={product.id}
-            href={launchHref(product)}
-            className="group/tile flex items-center gap-2 rounded-lg border border-border bg-surface-card px-2.5 py-2 transition-colors hover:border-border-strong hover:bg-surface-hover"
-          >
-            <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
-              <Icon className={cn("size-4", meta.icon)} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{product.name}</span>
-            <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/tile:opacity-100" />
-          </Link>
-        );
-      })}
-    </div>
+    <Link
+      href={launchHref(product)}
+      className="group/row flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-hover"
+    >
+      <Icon className={cn("size-4 shrink-0 text-text-tertiary transition-colors", meta.hover)} />
+      <span className="min-w-0 flex-1 truncate text-[13px] text-text-secondary transition-colors group-hover/row:text-foreground">
+        {product.name}
+      </span>
+      <ArrowUpRight className="size-3.5 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-150 group-hover/row:translate-x-0 group-hover/row:opacity-100" />
+    </Link>
   );
 }
 
-// B: compact icon strip; the name shows on hover (title/aria-label).
-function ProductIconStrip({ products, entitlements }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {products.map((product) => {
-        const meta = productMeta(product.id);
-        const Icon = meta.Icon;
-        if (productLocked(entitlements, product.id)) {
-          return (
-            <span
-              key={product.id}
-              title={`${product.name} — not in your plan`}
-              className="flex size-9 items-center justify-center rounded-lg border border-dashed border-border bg-surface-subtle opacity-60"
-            >
-              <Lock className="size-4 text-tertiary" />
-            </span>
-          );
-        }
-        return (
-          <Link
-            key={product.id}
-            href={launchHref(product)}
-            aria-label={`Launch ${product.name}`}
-            title={product.name}
-            className={cn(
-              "flex size-9 items-center justify-center rounded-lg border transition-transform hover:-translate-y-0.5",
-              meta.tile,
-            )}
-          >
-            <Icon className={cn("size-4.5", meta.icon)} />
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-// C: named pill chips that wrap onto multiple lines.
-function ProductChips({ products, entitlements }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {products.map((product) => {
-        const meta = productMeta(product.id);
-        const Icon = meta.Icon;
-        if (productLocked(entitlements, product.id)) {
-          return (
-            <span
-              key={product.id}
-              title={`${product.name} — not in your plan`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-surface-subtle px-2.5 py-1 opacity-60"
-            >
-              <Lock className="size-3 text-tertiary" />
-              <span className="text-xs font-medium text-muted-foreground">{product.name}</span>
-            </span>
-          );
-        }
-        return (
-          <Link
-            key={product.id}
-            href={launchHref(product)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-card px-2.5 py-1 transition-colors hover:border-border-strong hover:bg-surface-hover"
-          >
-            <Icon className={cn("size-3.5", meta.icon)} />
-            <span className="text-xs font-medium text-foreground">{product.name}</span>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-const LAUNCH_VARIANTS = {
-  tiles: { label: "Tiles", Launcher: ProductTiles },
-  strip: { label: "Icon strip", Launcher: ProductIconStrip },
-  chips: { label: "Chips", Launcher: ProductChips },
-};
-const LAUNCH_VARIANT_ORDER = ["tiles", "strip", "chips"];
-
-// Project card with an inline product launcher. `variant` selects which of the
-// three launch patterns to render so they can be compared per project.
-function ProjectLaunchCard({ project, name, organizationId, variant }) {
+// Project card: a header (avatar, name, actions) over a quiet list of product
+// launch rows. Every product a project holds is shown; the card grows to fit.
+function ProjectCard({ project, name, organizationId }) {
   const entitlements = useEntitlements();
-  const { label, Launcher } = LAUNCH_VARIANTS[variant];
   const products = project.products || [];
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
-      <div className="flex items-start justify-between gap-2">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface-card transition-colors hover:border-border-strong">
+      <div className="flex items-start justify-between gap-2 px-4 pb-3 pt-4">
         <ProjectHeader project={project} name={name} />
-        <div className="flex shrink-0 items-center gap-1.5">
-          <span className="rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {label}
-          </span>
-          <ProjectActions project={project} name={name} organizationId={organizationId} />
-        </div>
+        <ProjectActions project={project} name={name} organizationId={organizationId} />
       </div>
       {products.length ? (
-        <Launcher products={products} entitlements={entitlements} />
+        <div className="grid gap-x-2 gap-y-0.5 border-t border-border p-2 sm:grid-cols-2">
+          {products.map((product) => (
+            <ProductRow key={product.id} product={product} entitlements={entitlements} />
+          ))}
+        </div>
       ) : (
-        <p className="rounded-lg border border-dashed border-border bg-surface-subtle px-3 py-4 text-center text-xs text-muted-foreground">
-          No products in this project.
+        <p className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground">
+          No products yet. Edit this project to add some.
         </p>
       )}
     </div>
@@ -1147,34 +1061,15 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
             Clear filters
           </Button>
         </div>
-      ) : viewMode === "grid" ? (
-        <div className="grid gap-3 lg:grid-cols-3">
-          {visibleProjects.flatMap((project) =>
-            LAUNCH_VARIANT_ORDER.map((variant) => (
-              <ProjectLaunchCard
-                key={`${project.id}-${variant}`}
-                project={project}
-                name={nameById.get(project.id)}
-                organizationId={organizationId}
-                variant={variant}
-              />
-            )),
-          )}
-        </div>
       ) : (
-        <div className="space-y-3">
+        <div className={cn("grid gap-3", viewMode === "grid" && "lg:grid-cols-2")}>
           {visibleProjects.map((project) => (
-            <div key={project.id} className="grid gap-3 sm:grid-cols-3">
-              {LAUNCH_VARIANT_ORDER.map((variant) => (
-                <ProjectLaunchCard
-                  key={variant}
-                  project={project}
-                  name={nameById.get(project.id)}
-                  organizationId={organizationId}
-                  variant={variant}
-                />
-              ))}
-            </div>
+            <ProjectCard
+              key={project.id}
+              project={project}
+              name={nameById.get(project.id)}
+              organizationId={organizationId}
+            />
           ))}
         </div>
       )}
