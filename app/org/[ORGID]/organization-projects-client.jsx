@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   BookOpen,
   Boxes,
   Building2,
@@ -748,13 +749,8 @@ function DeleteProjectDialog({ project, name, organizationId, open, onOpenChange
 }
 
 function ProjectActions({ project, name, organizationId }) {
-  const entitlements = useEntitlements();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const launchableProducts = project.products.filter(
-    (p) => !productLocked(entitlements, p.id),
-  );
 
   return (
     <>
@@ -770,22 +766,7 @@ function ProjectActions({ project, name, organizationId }) {
             <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-52">
-          {launchableProducts.map((product) => {
-            const { Icon } = productMeta(product.id);
-            return (
-              <DropdownMenuItem key={product.id} asChild>
-                <Link href={launchHref(product)}>
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-surface-subtle">
-                    <Icon className="size-3.5 text-muted-foreground" />
-                  </span>
-                  <span className="flex-1">{product.name}</span>
-                  <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
-                </Link>
-              </DropdownMenuItem>
-            );
-          })}
-          {launchableProducts.length > 0 && <DropdownMenuSeparator />}
+        <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem
             onSelect={() => {
               if (project.projectId) {
@@ -856,24 +837,155 @@ function ProjectHeader({ project, name }) {
   );
 }
 
-// Grid card.
-function ProjectCard({ project, name, organizationId }) {
+// ---------------------------------------------------------------------------
+// Product launchers — three candidate patterns for launching a project's
+// products directly from its card (replacing the old ⋯-menu launch list).
+// Rendered side by side per project so one can be picked and the rest dropped.
+// Locked (not-in-plan) products render disabled; the rest are one-click links.
+// ---------------------------------------------------------------------------
+
+// A: labeled launch tiles in a two-column grid.
+function ProductTiles({ products, entitlements }) {
   return (
-    <div className="group flex items-start justify-between gap-2 rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
-      <ProjectHeader project={project} name={name} />
-      <ProjectActions project={project} name={name} organizationId={organizationId} />
+    <div className="grid grid-cols-2 gap-2">
+      {products.map((product) => {
+        const meta = productMeta(product.id);
+        const Icon = meta.Icon;
+        if (productLocked(entitlements, product.id)) {
+          return (
+            <div
+              key={product.id}
+              title={`${product.name} isn't in your plan`}
+              className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface-subtle px-2.5 py-2 opacity-60"
+            >
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card">
+                <Lock className="size-3.5 text-tertiary" />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground">{product.name}</span>
+            </div>
+          );
+        }
+        return (
+          <Link
+            key={product.id}
+            href={launchHref(product)}
+            className="group/tile flex items-center gap-2 rounded-lg border border-border bg-surface-card px-2.5 py-2 transition-colors hover:border-border-strong hover:bg-surface-hover"
+          >
+            <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-md border", meta.tile)}>
+              <Icon className={cn("size-4", meta.icon)} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{product.name}</span>
+            <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/tile:opacity-100" />
+          </Link>
+        );
+      })}
     </div>
   );
 }
 
-// List row.
-function ProjectRow({ project, name, organizationId }) {
+// B: compact icon strip; the name shows on hover (title/aria-label).
+function ProductIconStrip({ products, entitlements }) {
   return (
-    <div className="flex items-center gap-4 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-surface-hover/40">
-      <div className="min-w-0 flex-1">
+    <div className="flex flex-wrap gap-1.5">
+      {products.map((product) => {
+        const meta = productMeta(product.id);
+        const Icon = meta.Icon;
+        if (productLocked(entitlements, product.id)) {
+          return (
+            <span
+              key={product.id}
+              title={`${product.name} — not in your plan`}
+              className="flex size-9 items-center justify-center rounded-lg border border-dashed border-border bg-surface-subtle opacity-60"
+            >
+              <Lock className="size-4 text-tertiary" />
+            </span>
+          );
+        }
+        return (
+          <Link
+            key={product.id}
+            href={launchHref(product)}
+            aria-label={`Launch ${product.name}`}
+            title={product.name}
+            className={cn(
+              "flex size-9 items-center justify-center rounded-lg border transition-transform hover:-translate-y-0.5",
+              meta.tile,
+            )}
+          >
+            <Icon className={cn("size-4.5", meta.icon)} />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+// C: named pill chips that wrap onto multiple lines.
+function ProductChips({ products, entitlements }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {products.map((product) => {
+        const meta = productMeta(product.id);
+        const Icon = meta.Icon;
+        if (productLocked(entitlements, product.id)) {
+          return (
+            <span
+              key={product.id}
+              title={`${product.name} — not in your plan`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-surface-subtle px-2.5 py-1 opacity-60"
+            >
+              <Lock className="size-3 text-tertiary" />
+              <span className="text-xs font-medium text-muted-foreground">{product.name}</span>
+            </span>
+          );
+        }
+        return (
+          <Link
+            key={product.id}
+            href={launchHref(product)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-card px-2.5 py-1 transition-colors hover:border-border-strong hover:bg-surface-hover"
+          >
+            <Icon className={cn("size-3.5", meta.icon)} />
+            <span className="text-xs font-medium text-foreground">{product.name}</span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+const LAUNCH_VARIANTS = {
+  tiles: { label: "Tiles", Launcher: ProductTiles },
+  strip: { label: "Icon strip", Launcher: ProductIconStrip },
+  chips: { label: "Chips", Launcher: ProductChips },
+};
+const LAUNCH_VARIANT_ORDER = ["tiles", "strip", "chips"];
+
+// Project card with an inline product launcher. `variant` selects which of the
+// three launch patterns to render so they can be compared per project.
+function ProjectLaunchCard({ project, name, organizationId, variant }) {
+  const entitlements = useEntitlements();
+  const { label, Launcher } = LAUNCH_VARIANTS[variant];
+  const products = project.products || [];
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-card p-4 transition-colors hover:border-border-strong">
+      <div className="flex items-start justify-between gap-2">
         <ProjectHeader project={project} name={name} />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </span>
+          <ProjectActions project={project} name={name} organizationId={organizationId} />
+        </div>
       </div>
-      <ProjectActions project={project} name={name} organizationId={organizationId} />
+      {products.length ? (
+        <Launcher products={products} entitlements={entitlements} />
+      ) : (
+        <p className="rounded-lg border border-dashed border-border bg-surface-subtle px-3 py-4 text-center text-xs text-muted-foreground">
+          No products in this project.
+        </p>
+      )}
     </div>
   );
 }
@@ -1036,25 +1148,33 @@ export function OrganizationProjectsClient({ organizationId, projects, notificat
           </Button>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {visibleProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              name={nameById.get(project.id)}
-              organizationId={organizationId}
-            />
-          ))}
+        <div className="grid gap-3 lg:grid-cols-3">
+          {visibleProjects.flatMap((project) =>
+            LAUNCH_VARIANT_ORDER.map((variant) => (
+              <ProjectLaunchCard
+                key={`${project.id}-${variant}`}
+                project={project}
+                name={nameById.get(project.id)}
+                organizationId={organizationId}
+                variant={variant}
+              />
+            )),
+          )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface-card">
+        <div className="space-y-3">
           {visibleProjects.map((project) => (
-            <ProjectRow
-              key={project.id}
-              project={project}
-              name={nameById.get(project.id)}
-              organizationId={organizationId}
-            />
+            <div key={project.id} className="grid gap-3 sm:grid-cols-3">
+              {LAUNCH_VARIANT_ORDER.map((variant) => (
+                <ProjectLaunchCard
+                  key={variant}
+                  project={project}
+                  name={nameById.get(project.id)}
+                  organizationId={organizationId}
+                  variant={variant}
+                />
+              ))}
+            </div>
           ))}
         </div>
       )}
