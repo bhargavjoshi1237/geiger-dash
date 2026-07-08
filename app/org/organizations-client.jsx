@@ -7,20 +7,46 @@ import {
   Archive,
   Building2,
   Camera,
+  Check,
   Copy,
+  Crown,
   ExternalLink,
+  KeyRound,
+  Link2,
   Loader2,
+  Mail,
   MoreHorizontal,
   Pencil,
   Plus,
   Power,
+  RefreshCw,
   Settings2,
   ShieldCheck,
+  Trash2,
+  UserMinus,
   UserPlus,
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createOrganizationAction, joinOrganizationAction, updateOrgAvatarAction } from './actions'
+import {
+  createOrganizationAction,
+  inviteOrgMembersAction,
+  joinOrganizationAction,
+  listOrgMembersAction,
+  removeOrgMemberAction,
+  revokeOrgInviteAction,
+  setOrgMemberRoleAction,
+  updateOrgAvatarAction,
+} from './actions'
+import {
+  getOrgOAuthProviderAction,
+  saveOrgOAuthProviderAction,
+  setOrgOAuthEnabledAction,
+  deleteOrgOAuthProviderAction,
+  resolveOAuthDiscoveryAction,
+} from './oauth-actions'
+import { getOrgEntitlements, isProductUnlocked } from '@/lib/billing/entitlements'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -226,6 +252,858 @@ function EmptyState() {
   )
 }
 
+const MEMBER_ROLE_OPTIONS = ['Manager', 'User', 'Leader', 'Technical Officer', 'Financial Officer']
+
+// Stable avatar tint from a key (mirrors the project-avatar palette idea).
+const MEMBER_TINTS = [
+  'bg-blue-500/15 text-blue-400',
+  'bg-violet-500/15 text-violet-400',
+  'bg-emerald-500/15 text-emerald-400',
+  'bg-orange-500/15 text-orange-400',
+  'bg-pink-500/15 text-pink-400',
+  'bg-cyan-500/15 text-cyan-400',
+  'bg-amber-500/15 text-amber-400',
+  'bg-rose-500/15 text-rose-400',
+]
+function memberTint(key = '') {
+  let h = 0
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) & 0xffffff
+  return MEMBER_TINTS[h % MEMBER_TINTS.length]
+}
+function memberInitials(name, email) {
+  const src = (name || email || '').trim()
+  if (!src) return '?'
+  const parts = src.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return src.slice(0, 2).toUpperCase()
+}
+function memberRoleLabel(member) {
+  if (member.isOwner) return 'Owner'
+  if (member.isCreator) return 'Creator'
+  return member.role || 'Member'
+}
+
+// Polished "Your role" summary — an icon chip, the role badge, and the concrete
+// things that role can do as check chips.
+function YourRoleCard({ roleLabel }) {
+  const privileged = roleLabel === 'Owner' || roleLabel === 'Creator'
+  const Icon = privileged ? Crown : ShieldCheck
+  const blurb = privileged
+    ? 'You have full control of this workspace — manage members, projects, billing, and settings.'
+    : 'You have member access to this workspace and its shared projects.'
+  const caps = privileged
+    ? ['Manage members', 'Manage projects', 'Billing & plan', 'Workspace settings']
+    : ['Access shared projects', 'Launch products']
+
+  return (
+    <div className="rounded-lg border border-border bg-surface-card p-4">
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            'flex size-10 shrink-0 items-center justify-center rounded-lg border',
+            privileged
+              ? 'border-primary/20 bg-primary/10 text-primary'
+              : 'border-border bg-surface-subtle text-muted-foreground',
+          )}
+        >
+          <Icon className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-foreground">Your role</p>
+            <Badge variant={privileged ? 'success' : 'secondary'}>{roleLabel}</Badge>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">{blurb}</p>
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {caps.map((c) => (
+          <span
+            key={c}
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs text-muted-foreground"
+          >
+            <Check className="size-3 text-emerald-400" />
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MemberAvatar({ member }) {
+  if (member.avatarUrl) {
+    return (
+      <span className="relative flex size-9 shrink-0 overflow-hidden rounded-full border border-border">
+        <Image src={member.avatarUrl} alt="" fill className="object-cover" unoptimized />
+      </span>
+    )
+  }
+  return (
+    <span
+      className={cn(
+        'flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+        memberTint(member.userId || member.email),
+      )}
+    >
+      {memberInitials(member.name, member.email)}
+    </span>
+  )
+}
+
+// Members tab: fetches the directory + pending invites on open, renders the role
+// card, an invite form, the member list (with role + remove for managers), and
+// pending invites. Reads through server actions; owns its own toasts.
+function MembersTab({ organization, userId, roleLabel, canManage }) {
+  const [loading, setLoading] = useState(true)
+  const [members, setMembers] = useState([])
+  const [invites, setInvites] = useState([])
+  const [busyId, setBusyId] = useState(null)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('User')
+  const [inviting, setInviting] = useState(false)
+  const [removeTarget, setRemoveTarget] = useState(null)
+  const [removing, setRemoving] = useState(false)
+
+  async function reload() {
+    const result = await listOrgMembersAction(organization.id)
+    if (result?.ok) {
+      setMembers(result.members)
+      setInvites(result.invites)
+    }
+  }
+
+  // MembersTab mounts fresh each time the tab opens (Dialog + tab conditional
+  // both unmount on close), so `loading` starts true and we just fetch on mount.
+  useEffect(() => {
+    let active = true
+    listOrgMembersAction(organization.id).then((result) => {
+      if (!active) return
+      if (result?.ok) {
+        setMembers(result.members)
+        setInvites(result.invites)
+      } else if (result?.error) {
+        toast.error(result.error)
+      }
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [organization.id])
+
+  const currentMember = members.find((m) => m.userId === userId)
+  const preciseRole = currentMember ? memberRoleLabel(currentMember) : roleLabel
+
+  async function handleInvite(e) {
+    e.preventDefault()
+    const email = inviteEmail.trim()
+    if (!email) return
+    setInviting(true)
+    const result = await inviteOrgMembersAction({
+      organizationId: organization.id,
+      organizationName: organization.name,
+      emails: [email],
+      role: inviteRole,
+    })
+    setInviting(false)
+    if (result?.ok) {
+      toast.success(result.sent ? `Invite sent to ${email}.` : `Invite created for ${email}.`)
+      setInviteEmail('')
+      reload()
+    } else {
+      toast.error(result?.error || 'Could not send the invite.')
+    }
+  }
+
+  async function handleRole(member, nextRole) {
+    if (nextRole === member.role) return
+    setBusyId(member.userId)
+    setMembers((prev) => prev.map((m) => (m.userId === member.userId ? { ...m, role: nextRole } : m)))
+    const result = await setOrgMemberRoleAction({
+      organizationId: organization.id,
+      userId: member.userId,
+      role: nextRole,
+    })
+    setBusyId(null)
+    if (result?.ok) {
+      toast.success('Role updated.')
+    } else {
+      toast.error(result?.error || 'Could not update the role.')
+      reload()
+    }
+  }
+
+  async function handleRemoveConfirm() {
+    if (!removeTarget) return
+    setRemoving(true)
+    const result = await removeOrgMemberAction({
+      organizationId: organization.id,
+      userId: removeTarget.userId,
+    })
+    setRemoving(false)
+    if (result?.ok) {
+      setMembers((prev) => prev.filter((m) => m.userId !== removeTarget.userId))
+      toast.success('Member removed.')
+      setRemoveTarget(null)
+    } else {
+      toast.error(result?.error || 'Could not remove the member.')
+    }
+  }
+
+  async function handleRevoke(invite) {
+    setBusyId(invite.id)
+    const result = await revokeOrgInviteAction({ organizationId: organization.id, inviteId: invite.id })
+    setBusyId(null)
+    if (result?.ok) {
+      setInvites((prev) => prev.filter((i) => i.id !== invite.id))
+      toast.success('Invite revoked.')
+    } else {
+      toast.error(result?.error || 'Could not revoke the invite.')
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <YourRoleCard roleLabel={preciseRole} />
+
+      {canManage && (
+        <form onSubmit={handleInvite} className="rounded-lg border border-border bg-surface-card p-4">
+          <div className="flex items-center gap-2">
+            <UserPlus className="size-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">Invite a teammate</p>
+          </div>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <Input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="name@company.com"
+              className="flex-1 bg-surface-subtle"
+            />
+            <Select value={inviteRole} onValueChange={setInviteRole}>
+              <SelectTrigger className="w-full bg-surface-subtle sm:w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MEMBER_ROLE_OPTIONS.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="submit" disabled={inviting || !inviteEmail.trim()}>
+              {inviting ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+              Invite
+            </Button>
+          </div>
+        </form>
+      )}
+
+      <div className="overflow-hidden rounded-lg border border-border bg-surface-card">
+        <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Users className="size-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">Members</p>
+          </div>
+          <span className="text-xs text-muted-foreground">{members.length}</span>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Loading members…
+          </div>
+        ) : members.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">No members found.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {members.map((m) => {
+              const isSelf = m.userId === userId
+              const fixed = m.isOwner || m.isCreator
+              const manageable = canManage && !fixed && !isSelf
+              return (
+                <div key={m.userId || m.email} className="flex items-center gap-3 px-3 py-2.5">
+                  <MemberAvatar member={m} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {m.name || m.email || 'Unknown user'}
+                      </p>
+                      {isSelf && (
+                        <span className="rounded-full border border-border bg-surface-subtle px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          You
+                        </span>
+                      )}
+                    </div>
+                    {m.name && m.email && <p className="truncate text-xs text-muted-foreground">{m.email}</p>}
+                  </div>
+
+                  {manageable ? (
+                    <div className="flex items-center gap-1.5">
+                      <Select
+                        value={MEMBER_ROLE_OPTIONS.includes(m.role) ? m.role : 'User'}
+                        onValueChange={(v) => handleRole(m, v)}
+                        disabled={busyId === m.userId}
+                      >
+                        <SelectTrigger className="h-8 w-[150px] bg-surface-subtle text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MEMBER_ROLE_OPTIONS.map((r) => (
+                            <SelectItem key={r} value={r}>
+                              {r}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Member actions"
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuItem variant="destructive" onSelect={() => setRemoveTarget(m)}>
+                            <UserMinus className="size-4" />
+                            Remove from workspace
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  ) : (
+                    <Badge variant={fixed ? 'success' : 'secondary'} className="gap-1">
+                      {fixed && <Crown className="size-3" />}
+                      {memberRoleLabel(m)}
+                    </Badge>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {canManage && invites.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-border bg-surface-card">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <Mail className="size-4 text-muted-foreground" />
+              <p className="text-sm font-medium text-foreground">Pending invites</p>
+            </div>
+            <span className="text-xs text-muted-foreground">{invites.length}</span>
+          </div>
+          <div className="divide-y divide-border">
+            {invites.map((i) => (
+              <div key={i.id} className="flex items-center gap-3 px-3 py-2.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-surface-subtle text-muted-foreground">
+                  <Mail className="size-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{i.email}</p>
+                  <p className="truncate text-xs text-muted-foreground">Invited as {i.role}</p>
+                </div>
+                <Badge variant="secondary">Invited</Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={busyId === i.id}
+                  onClick={() => handleRevoke(i)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  {busyId === i.id ? <Loader2 className="size-4 animate-spin" /> : 'Revoke'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Dialog open={Boolean(removeTarget)} onOpenChange={(o) => !o && setRemoveTarget(null)}>
+        <DialogContent className="geiger-flow-palette max-w-md border-border bg-background text-foreground">
+          <DialogHeader>
+            <DialogTitle>Remove member?</DialogTitle>
+            <DialogDescription>
+              {removeTarget ? (
+                <>
+                  Remove{' '}
+                  <span className="font-medium text-foreground">
+                    {removeTarget.name || removeTarget.email}
+                  </span>{' '}
+                  from {organization.name || 'this workspace'}? They&rsquo;ll lose access to its projects.
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveConfirm} disabled={removing}>
+              {removing ? <Loader2 className="size-4 animate-spin" /> : <UserMinus className="size-4" />}
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+const EMPTY_OAUTH_DRAFT = {
+  providerName: '',
+  providerType: 'oidc',
+  emailDomains: '',
+  discoveryUrl: '',
+  authorizationUrl: '',
+  tokenUrl: '',
+  userinfoUrl: '',
+  clientId: '',
+  clientSecret: '',
+  scopes: 'openid email profile',
+  mapEmail: '',
+  mapName: '',
+  mapAvatar: '',
+  pkceEnabled: true,
+}
+
+// Read-only value + copy button (redirect URI / SSO login link).
+function CopyRow({ label, value }) {
+  return (
+    <div className="grid gap-1.5">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <div className="flex items-center gap-2">
+        <Input readOnly value={value} className="flex-1 bg-surface-subtle text-xs" />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          aria-label={`Copy ${label}`}
+          className="shrink-0 border-border bg-surface-subtle"
+          onClick={() => {
+            navigator.clipboard?.writeText(value)
+            toast.success(`${label} copied.`)
+          }}
+        >
+          <Copy className="size-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// OAuth settings tab: configure a per-org OAuth2/OIDC provider (setup form) or
+// manage an existing one. Only rendered for owners of orgs that bought the
+// OAuth add-on. Reads/writes through the oauth server actions; owns its toasts.
+function OAuthTab({ organization }) {
+  const [loading, setLoading] = useState(true)
+  const [provider, setProvider] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [fetchingDiscovery, setFetchingDiscovery] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [origin] = useState(() => (typeof window !== 'undefined' ? window.location.origin : ''))
+  const [draft, setDraft] = useState(EMPTY_OAUTH_DRAFT)
+
+  useEffect(() => {
+    let active = true
+    getOrgOAuthProviderAction(organization.id).then((res) => {
+      if (!active) return
+      if (res?.ok) setProvider(res.provider)
+      else if (res?.error) toast.error(res.error)
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [organization.id])
+
+  const redirectUri = origin ? `${origin}/api/oauth/${organization.id}/callback` : ''
+  const loginUrl = origin ? `${origin}/api/oauth/${organization.id}/start` : ''
+  const set = (key) => (value) => setDraft((d) => ({ ...d, [key]: value }))
+
+  function startEdit() {
+    setDraft(
+      provider
+        ? {
+            providerName: provider.providerName || '',
+            providerType: provider.providerType || 'oidc',
+            emailDomains: (provider.emailDomains || []).join(', '),
+            discoveryUrl: provider.discoveryUrl || '',
+            authorizationUrl: provider.authorizationUrl || '',
+            tokenUrl: provider.tokenUrl || '',
+            userinfoUrl: provider.userinfoUrl || '',
+            clientId: provider.clientId || '',
+            clientSecret: '',
+            scopes: (provider.scopes || []).join(' '),
+            mapEmail: provider.attributeMapping?.email || '',
+            mapName: provider.attributeMapping?.name || '',
+            mapAvatar: provider.attributeMapping?.avatar || '',
+            pkceEnabled: provider.pkceEnabled !== false,
+          }
+        : EMPTY_OAUTH_DRAFT,
+    )
+    setEditing(true)
+  }
+
+  async function handleFetchDiscovery() {
+    if (!draft.discoveryUrl.trim()) {
+      toast.error('Enter a discovery or issuer URL first.')
+      return
+    }
+    setFetchingDiscovery(true)
+    const res = await resolveOAuthDiscoveryAction(organization.id, draft.discoveryUrl)
+    setFetchingDiscovery(false)
+    if (res?.ok) {
+      setDraft((d) => ({
+        ...d,
+        authorizationUrl: res.endpoints.authorizationUrl || d.authorizationUrl,
+        tokenUrl: res.endpoints.tokenUrl || d.tokenUrl,
+        userinfoUrl: res.endpoints.userinfoUrl || d.userinfoUrl,
+      }))
+      toast.success('Endpoints filled from discovery URL.')
+    } else {
+      toast.error(res?.error || 'Could not read that discovery URL.')
+    }
+  }
+
+  async function handleSave(e) {
+    e.preventDefault()
+    setSaving(true)
+    const attributeMapping = {}
+    if (draft.mapEmail.trim()) attributeMapping.email = draft.mapEmail.trim()
+    if (draft.mapName.trim()) attributeMapping.name = draft.mapName.trim()
+    if (draft.mapAvatar.trim()) attributeMapping.avatar = draft.mapAvatar.trim()
+    const res = await saveOrgOAuthProviderAction(organization.id, {
+      providerName: draft.providerName,
+      providerType: draft.providerType,
+      emailDomains: draft.emailDomains,
+      discoveryUrl: draft.discoveryUrl,
+      authorizationUrl: draft.authorizationUrl,
+      tokenUrl: draft.tokenUrl,
+      userinfoUrl: draft.userinfoUrl,
+      clientId: draft.clientId,
+      clientSecret: draft.clientSecret,
+      scopes: draft.scopes,
+      attributeMapping,
+      pkceEnabled: draft.pkceEnabled,
+    })
+    setSaving(false)
+    if (res?.ok) {
+      setProvider(res.provider)
+      setEditing(false)
+      toast.success('OAuth provider saved.')
+    } else {
+      toast.error(res?.error || 'Could not save the provider.')
+    }
+  }
+
+  async function handleToggleEnabled(nextEnabled) {
+    setProvider((p) => (p ? { ...p, enabled: nextEnabled } : p))
+    const res = await setOrgOAuthEnabledAction(organization.id, nextEnabled)
+    if (!res?.ok) {
+      setProvider((p) => (p ? { ...p, enabled: !nextEnabled } : p))
+      toast.error(res?.error || 'Could not update the provider.')
+    } else {
+      toast.success(nextEnabled ? 'OAuth sign-in enabled.' : 'OAuth sign-in disabled.')
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    const res = await deleteOrgOAuthProviderAction(organization.id)
+    setDeleting(false)
+    if (res?.ok) {
+      setProvider(null)
+      setEditing(false)
+      toast.success('OAuth provider removed.')
+    } else {
+      toast.error(res?.error || 'Could not remove the provider.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading OAuth settings…
+      </div>
+    )
+  }
+
+  // Setup / edit form.
+  if (editing || !provider) {
+    return (
+      <form onSubmit={handleSave} className="space-y-4">
+        <div className="rounded-lg border border-border bg-surface-card p-4">
+          <div className="flex items-center gap-2">
+            <KeyRound className="size-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">
+              {provider ? 'Edit OAuth provider' : 'Set up OAuth'}
+            </p>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Connect an OAuth2 / OIDC identity provider so your members can sign in through it.
+            Register the redirect URI below at your provider.
+          </p>
+        </div>
+
+        <div className="grid gap-4 rounded-lg border border-border bg-surface-card p-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label>Provider name</Label>
+              <Input
+                value={draft.providerName}
+                onChange={(e) => set('providerName')(e.target.value)}
+                placeholder="Acme SSO"
+                className="bg-surface-subtle"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Protocol</Label>
+              <Select value={draft.providerType} onValueChange={set('providerType')}>
+                <SelectTrigger className="bg-surface-subtle">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="oidc">OpenID Connect</SelectItem>
+                  <SelectItem value="oauth2">OAuth 2.0</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Email domains</Label>
+            <Input
+              value={draft.emailDomains}
+              onChange={(e) => set('emailDomains')(e.target.value)}
+              placeholder="acme.com, acme.io"
+              className="bg-surface-subtle"
+            />
+            <p className="text-xs text-muted-foreground">
+              Members with these email domains are routed to this provider at sign-in.
+            </p>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Discovery / issuer URL (optional)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                value={draft.discoveryUrl}
+                onChange={(e) => set('discoveryUrl')(e.target.value)}
+                placeholder="https://idp.example.com/.well-known/openid-configuration"
+                className="flex-1 bg-surface-subtle"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleFetchDiscovery}
+                disabled={fetchingDiscovery}
+                className="shrink-0 border-border bg-surface-subtle"
+              >
+                {fetchingDiscovery ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="size-4" />
+                )}
+                Fetch
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Authorization URL</Label>
+            <Input
+              value={draft.authorizationUrl}
+              onChange={(e) => set('authorizationUrl')(e.target.value)}
+              placeholder="https://idp.example.com/authorize"
+              className="bg-surface-subtle"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Token URL</Label>
+            <Input
+              value={draft.tokenUrl}
+              onChange={(e) => set('tokenUrl')(e.target.value)}
+              placeholder="https://idp.example.com/token"
+              className="bg-surface-subtle"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Userinfo URL (optional)</Label>
+            <Input
+              value={draft.userinfoUrl}
+              onChange={(e) => set('userinfoUrl')(e.target.value)}
+              placeholder="https://idp.example.com/userinfo"
+              className="bg-surface-subtle"
+            />
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label>Client ID</Label>
+              <Input
+                value={draft.clientId}
+                onChange={(e) => set('clientId')(e.target.value)}
+                className="bg-surface-subtle"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Client secret</Label>
+              <Input
+                type="password"
+                value={draft.clientSecret}
+                onChange={(e) => set('clientSecret')(e.target.value)}
+                placeholder={provider?.hasSecret ? '•••••• (leave blank to keep)' : ''}
+                className="bg-surface-subtle"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Scopes</Label>
+            <Input
+              value={draft.scopes}
+              onChange={(e) => set('scopes')(e.target.value)}
+              placeholder="openid email profile"
+              className="bg-surface-subtle"
+            />
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Email claim</Label>
+              <Input
+                value={draft.mapEmail}
+                onChange={(e) => set('mapEmail')(e.target.value)}
+                placeholder="email"
+                className="bg-surface-subtle"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Name claim</Label>
+              <Input
+                value={draft.mapName}
+                onChange={(e) => set('mapName')(e.target.value)}
+                placeholder="name"
+                className="bg-surface-subtle"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Avatar claim</Label>
+              <Input
+                value={draft.mapAvatar}
+                onChange={(e) => set('mapAvatar')(e.target.value)}
+                placeholder="picture"
+                className="bg-surface-subtle"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface-subtle p-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Use PKCE</p>
+              <p className="text-xs text-muted-foreground">Recommended for OIDC providers.</p>
+            </div>
+            <Switch checked={draft.pkceEnabled} onCheckedChange={set('pkceEnabled')} />
+          </div>
+
+          {redirectUri && <CopyRow label="Redirect URI" value={redirectUri} />}
+        </div>
+
+        <div className="flex justify-end gap-2">
+          {provider && (
+            <Button type="button" variant="ghost" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+            Save provider
+          </Button>
+        </div>
+      </form>
+    )
+  }
+
+  // Management view.
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-surface-card p-4">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+            <KeyRound className="size-5" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-foreground">{provider.providerName || 'OAuth provider'}</p>
+              <Badge variant={provider.enabled ? 'success' : 'secondary'}>
+                {provider.enabled ? 'Enabled' : 'Disabled'}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground uppercase">{provider.providerType}</p>
+          </div>
+        </div>
+        <Switch checked={provider.enabled} onCheckedChange={handleToggleEnabled} />
+      </div>
+
+      <div className="grid gap-4 rounded-lg border border-border bg-surface-card p-4">
+        <div className="grid gap-1.5">
+          <Label className="text-xs text-muted-foreground">Email domains</Label>
+          {provider.emailDomains?.length ? (
+            <div className="flex flex-wrap gap-1.5">
+              {provider.emailDomains.map((d) => (
+                <span
+                  key={d}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs text-muted-foreground"
+                >
+                  <Mail className="size-3" />@{d}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">None — members can only sign in via the direct link.</p>
+          )}
+        </div>
+        <CopyRow label="Redirect URI" value={redirectUri} />
+        <CopyRow label="SSO login link" value={loginUrl} />
+        <div className="grid gap-1.5">
+          <Label className="text-xs text-muted-foreground">Client ID</Label>
+          <Input readOnly value={provider.clientId || ''} className="bg-surface-subtle text-xs" />
+        </div>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link2 className="size-3.5" />
+          Share the SSO login link with members, or wire it from the login page.
+        </p>
+      </div>
+
+      <div className="flex justify-between gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleDelete}
+          disabled={deleting}
+          className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+        >
+          {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+          Remove
+        </Button>
+        <Button type="button" onClick={startEdit}>
+          <Pencil className="size-4" />
+          Edit provider
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function OrganizationCard({ organization, userId }) {
   const router = useRouter()
   const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
@@ -240,6 +1118,12 @@ function OrganizationCard({ organization, userId }) {
   // Org administration (edit / archive / deactivate / settings) is owner-only,
   // matching the RLS model where `org.*` abilities aren't an open module.
   const canManage = isOwner || isCreator
+  // Show the OAuth tab only when this org bought the OAuth add-on (derived from
+  // its recorded subscription) and the viewer can manage the org.
+  const hasOauthAddon = useMemo(
+    () => isProductUnlocked(getOrgEntitlements(organization), 'oauth'),
+    [organization],
+  )
   const role = isOwner ? 'Owner' : isCreator ? 'Creator' : 'Member'
   const statusLabel = organization.is_active ? 'Active' : 'Inactive'
   const [editOpen, setEditOpen] = useState(false)
@@ -564,6 +1448,7 @@ function OrganizationCard({ organization, userId }) {
               { id: 'general', label: 'General' },
               { id: 'members', label: 'Members' },
               { id: 'security', label: 'Security' },
+              ...(hasOauthAddon ? [{ id: 'oauth', label: 'OAuth' }] : []),
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -644,18 +1529,12 @@ function OrganizationCard({ organization, userId }) {
             )}
 
             {activeSettingsTab === 'members' && (
-              <div className="space-y-4">
-                <div className="rounded-lg border border-border bg-surface-subtle p-4">
-                  <p className="text-sm font-medium text-foreground">Member access</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {memberCount} {memberCount === 1 ? 'member' : 'members'} currently in this workspace.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface-subtle p-4">
-                  <p className="text-sm font-medium text-foreground">Your role</p>
-                  <p className="mt-1 text-sm text-muted-foreground">You currently have {role.toLowerCase()} access.</p>
-                </div>
-              </div>
+              <MembersTab
+                organization={organization}
+                userId={userId}
+                roleLabel={role}
+                canManage={canManage}
+              />
             )}
 
             {activeSettingsTab === 'security' && (
@@ -676,6 +1555,8 @@ function OrganizationCard({ organization, userId }) {
                 </div>
               </div>
             )}
+
+            {activeSettingsTab === 'oauth' && hasOauthAddon && <OAuthTab organization={organization} />}
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border bg-surface-subtle p-4">

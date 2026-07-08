@@ -66,6 +66,7 @@ const PRODUCT_ICONS = {
   chat: MessageSquareText,
   notes: FileStack,
   canvas: FolderKanban,
+  oauth: Lock,
 };
 
 function formatNumber(value) {

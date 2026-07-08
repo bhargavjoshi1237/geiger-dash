@@ -8,6 +8,7 @@ export default async function LoginPage({ searchParams }) {
   const params = await searchParams
   const next = params?.next
   const safeNext = typeof next === 'string' ? next : ''
+  const error = typeof params?.error === 'string' ? params.error : ''
   const redirectPath = resolveLoginRedirectPath(next)
   const supabase = await createClient()
   const user = await getUser(supabase)
@@ -16,5 +17,5 @@ export default async function LoginPage({ searchParams }) {
     redirect(redirectPath)
   }
 
-  return <AuthForm next={safeNext} />
+  return <AuthForm next={safeNext} initialError={error} />
 }

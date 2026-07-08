@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, MailCheck } from "lucide-react";
 import { signUp } from "./actions";
+import { SsoSignIn } from "@/components/auth/sso-signin";
 
 export function SignupForm() {
   const router = useRouter();
@@ -124,6 +125,14 @@ export function SignupForm() {
               <span>Create account</span>
             )}
           </button>
+
+          <div className="flex items-center gap-3 py-1">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-xs text-foreground0">or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <SsoSignIn next="/onboarding" />
         </form>
 
         <p className="mt-8 text-center text-xs text-foreground0">

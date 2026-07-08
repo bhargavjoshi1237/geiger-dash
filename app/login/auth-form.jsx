@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { login } from "./actions";
 import { Github, Mail, Loader2, AlertCircle, Apple } from "lucide-react";
+import { SsoSignIn } from "@/components/auth/sso-signin";
 
 // Mock Google Icon since it's not in Lucide
 const GoogleIcon = ({ className }) => (
@@ -26,10 +27,20 @@ const GoogleIcon = ({ className }) => (
   </svg>
 );
 
-export function AuthForm({ next }) {
+const ERROR_MESSAGES = {
+  sso_not_found: "No SSO provider is set up for that email domain.",
+  sso_invalid_email: "Enter a valid email address.",
+  oauth_failed: "SSO sign-in failed. Please try again.",
+  oauth_state: "SSO sign-in failed. Please try again.",
+  oauth_unavailable: "SSO isn't available for that organization right now.",
+  oauth_no_email: "Your provider didn't return an email address.",
+  auth_callback_failed: "That sign-in link was invalid or expired.",
+};
+
+export function AuthForm({ next, initialError = "" }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(ERROR_MESSAGES[initialError] || "");
   const showPassword = email.length > 0;
 
   async function handleSubmit(e) {
@@ -79,6 +90,7 @@ export function AuthForm({ next }) {
             <Apple className="mr-2 h-4 w-4" />
             Continue with Apple
           </button>
+          <SsoSignIn next={next} />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left mt-6">
