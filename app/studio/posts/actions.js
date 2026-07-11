@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
-import { fetchArticleText, extractArticleText } from '@/lib/blog-import/extract-article'
+import { fetchArticle, extractArticleText, extractArticleImages } from '@/lib/blog-import/extract-article'
 
 function slugify(value) {
   return String(value || '')
@@ -370,12 +370,14 @@ export async function extractArticleAction({ url, html } = {}) {
 
   try {
     if (url && String(url).trim()) {
-      return { ok: true, text: await fetchArticleText(url) }
+      const { text, images } = await fetchArticle(url)
+      return { ok: true, text, images }
     }
     if (html && String(html).trim()) {
       const text = extractArticleText(html)
       if (!text.trim()) return { ok: false, error: 'No readable text found in that file.' }
-      return { ok: true, text }
+      const images = extractArticleImages(html)
+      return { ok: true, text, images }
     }
     return { ok: false, error: 'Provide a URL or a file.' }
   } catch (error) {

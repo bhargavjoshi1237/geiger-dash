@@ -39,13 +39,14 @@ function readFileText(file) {
   })
 }
 
-// Turn a source blog/benchmark URL or file into readable article text: URLs and
-// HTML go through the server extractor; md/txt are used verbatim.
-async function resolveSourceText({ url, file }) {
+// Turn a source blog/benchmark URL or file into readable article text plus any
+// image links: URLs and HTML go through the server extractor; md/txt are used
+// verbatim (their inline image URLs already survive in the text).
+async function resolveSource({ url, file }) {
   if (url) {
     const result = await extractArticleAction({ url })
     if (!result.ok) throw new Error(result.error)
-    return result.text
+    return { text: result.text, images: result.images || [] }
   }
 
   const ext = fileExtension(file)
@@ -55,9 +56,9 @@ async function resolveSourceText({ url, file }) {
   if (ext === 'html' || ext === 'htm') {
     const result = await extractArticleAction({ html: raw })
     if (!result.ok) throw new Error(result.error)
-    return result.text
+    return { text: result.text, images: result.images || [] }
   }
-  return raw
+  return { text: raw, images: [] }
 }
 
 // Import a source article, rewrite it into an original post with the configured
@@ -103,7 +104,8 @@ export function BlogImportDialog({ open, onOpenChange, categories = [], onPublis
     setIsBusy(true)
     try {
       setStatus(trimmedUrl ? 'Downloading source article…' : 'Reading file…')
-      const sourceText = await resolveSourceText({ url: trimmedUrl, file })
+      const { text: sourceText, images } = await resolveSource({ url: trimmedUrl, file })
+      const categoryNames = categories.map((category) => category.name)
 
       setStatus('Writing the post with AI…')
       const text = await callLlmChat({
@@ -115,14 +117,16 @@ export function BlogImportDialog({ open, onOpenChange, categories = [], onPublis
             role: 'user',
             content: buildBlogImportUserPrompt({
               sourceText,
-              categories: categories.map((category) => category.name),
+              categories: categoryNames,
+              images,
             }),
           },
         ],
       })
 
       const post = normalizeImportedPost(extractJson(text), {
-        categories: categories.map((category) => category.name),
+        categories: categoryNames,
+        images,
       })
       if (!post) throw new Error('The model did not return a usable post. Try again.')
 
