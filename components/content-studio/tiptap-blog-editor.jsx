@@ -289,11 +289,16 @@ function AiAssist({ editor }) {
   )
 }
 
-export function TiptapBlogEditor({ name, defaultValue }) {
+export function TiptapBlogEditor({ name, defaultValue, onChange }) {
   const [html, setHtml] = useState(defaultValue || '')
   const [imageSrc, setImageSrc] = useState('')
   const [activeView, setActiveView] = useState('write')
   const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // Surface content changes to the parent (e.g. live reading-time estimate).
+  useEffect(() => {
+    onChange?.(html)
+  }, [html, onChange])
 
   const editor = useEditor({
     extensions: [

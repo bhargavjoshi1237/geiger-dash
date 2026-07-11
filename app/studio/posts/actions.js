@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
+import { fetchArticleText, extractArticleText } from '@/lib/blog-import/extract-article'
 
 function slugify(value) {
   return String(value || '')
@@ -26,6 +27,18 @@ function parseTags(value) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+// Estimate reading minutes from content by counting words (~200 wpm), stripping
+// any HTML so both editor HTML and plain text measure consistently.
+function readingTimeFromContent(content) {
+  const text = String(content || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const words = text ? text.split(/\s+/).filter(Boolean).length : 0
+  return Math.max(1, Math.round(words / 200))
 }
 
 function isMissingColumnError(error, columnName) {
@@ -321,6 +334,125 @@ export async function deleteChangelogAction(changelogId) {
   return { ok: true }
 }
 
+export async function createBlogCategoryAction(name) {
+  const supabase = await createClient()
+  const user = await getUser(supabase)
+  ensureAuthUser(user)
+
+  const clean = String(name || '').trim()
+  if (!clean) return { ok: false, error: 'Enter a category name.' }
+  const slug = slugify(clean)
+  if (!slug) return { ok: false, error: 'Enter a valid category name.' }
+
+  const { data, error } = await supabase
+    .from('dash_blog_categories')
+    .insert({ name: clean, slug })
+    .select('id, name, slug')
+    .single()
+
+  if (error) {
+    if (error.code === '23505' || /duplicate|unique/i.test(error.message)) {
+      return { ok: false, error: 'That category already exists.' }
+    }
+    return { ok: false, error: error.message }
+  }
+
+  revalidatePath('/studio/posts')
+  return { ok: true, category: data }
+}
+
+// Fetch + strip a source URL, or strip an uploaded HTML file, into readable
+// article text for the AI import flow. Plain md/txt files are read on the client.
+export async function extractArticleAction({ url, html } = {}) {
+  const supabase = await createClient()
+  const user = await getUser(supabase)
+  ensureAuthUser(user)
+
+  try {
+    if (url && String(url).trim()) {
+      return { ok: true, text: await fetchArticleText(url) }
+    }
+    if (html && String(html).trim()) {
+      const text = extractArticleText(html)
+      if (!text.trim()) return { ok: false, error: 'No readable text found in that file.' }
+      return { ok: true, text }
+    }
+    return { ok: false, error: 'Provide a URL or a file.' }
+  } catch (error) {
+    return { ok: false, error: error.message || 'Could not extract the article.' }
+  }
+}
+
+// Directly publish an AI-generated post so it goes live immediately and can be
+// edited afterwards from the list.
+export async function createImportedBlogPostAction(input) {
+  const supabase = await createClient()
+  const user = await getUser(supabase)
+  ensureAuthUser(user)
+
+  const title = String(input?.title || '').trim()
+  const content = String(input?.content || '').trim()
+  if (!title || !content) {
+    return { ok: false, error: 'The generated post is missing a title or content.' }
+  }
+
+  const normalizedSlug = slugify(String(input?.slug || '').trim() || title)
+  const tags = Array.isArray(input?.tags)
+    ? input.tags.map((tag) => String(tag || '').trim()).filter(Boolean)
+    : parseTags(input?.tags)
+  const providedReading = Number(input?.readingTimeMinutes)
+  const readingMinutes =
+    Number.isFinite(providedReading) && providedReading > 0
+      ? Math.round(providedReading)
+      : readingTimeFromContent(content)
+
+  const displayName =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email?.split('@')[0] ||
+    'Geiger Author'
+  const authorAvatar = buildPublicObjectUrl('pfp', `${user.id}/latest.jpg`)
+
+  const payload = {
+    title,
+    slug: normalizedSlug,
+    excerpt: String(input?.excerpt || '').trim() || title,
+    content,
+    category: String(input?.category || '').trim() || 'Uncategorized',
+    tags,
+    author_id: user.id,
+    author_name: displayName,
+    author_avatar: authorAvatar,
+    featured_image: null,
+    is_published: true,
+    is_featured: false,
+    published_at: new Date().toISOString(),
+    reading_time_minutes: readingMinutes,
+  }
+
+  let { data, error } = await supabase
+    .from('dash_blog_posts')
+    .insert(payload)
+    .select('id, slug')
+    .single()
+
+  // Retry once with a unique suffix if the slug already exists.
+  if (error && (error.code === '23505' || /duplicate|unique/i.test(error.message))) {
+    payload.slug = `${normalizedSlug}-${Date.now().toString(36).slice(-4)}`
+    ;({ data, error } = await supabase
+      .from('dash_blog_posts')
+      .insert(payload)
+      .select('id, slug')
+      .single())
+  }
+
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/blog')
+  revalidatePath('/studio/posts')
+  return { ok: true, id: data.id, slug: data.slug }
+}
+
 export async function saveBlogPostAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
@@ -334,7 +466,12 @@ export async function saveBlogPostAction(formData) {
   const manualSlug = String(formData.get('slug') || '').trim()
   const normalizedSlug = slugify(manualSlug || title)
   const tags = parseTags(formData.get('tags'))
-  const readingMinutes = Number(formData.get('reading_time_minutes') || 5)
+  const readingAuto = formData.get('reading_time_auto') === 'on'
+  const manualReading = Number(formData.get('reading_time_minutes'))
+  const readingMinutes =
+    readingAuto || !Number.isFinite(manualReading) || manualReading < 1
+      ? readingTimeFromContent(content)
+      : Math.round(manualReading)
   const isPublished = formData.get('is_published') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
   const providedPublishedAt = String(formData.get('published_at') || '').trim()
@@ -386,7 +523,7 @@ export async function saveBlogPostAction(formData) {
     is_published: isPublished,
     is_featured: isFeatured,
     published_at: publishedAt,
-    reading_time_minutes: Number.isFinite(readingMinutes) ? readingMinutes : 5,
+    reading_time_minutes: readingMinutes,
   }
 
   let query

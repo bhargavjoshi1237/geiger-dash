@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Circle,
   Copy,
+  Download,
   FileText,
   Folder,
   FolderPlus,
@@ -17,6 +18,7 @@ import {
   LayoutGrid,
   Loader2,
   Megaphone,
+  Plus,
   PlusCircle,
   RefreshCw,
   Save,
@@ -62,6 +64,8 @@ import {
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
 import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dialog'
 import { CommitChangelogDialog } from '@/components/content-studio/commit-changelog-dialog'
+import { AddCategoryDialog } from '@/components/content-studio/add-category-dialog'
+import { BlogImportDialog } from '@/components/content-studio/blog-import-dialog'
 import { useLlmConfig } from '@/components/content-studio/llm-config'
 
 const inputClassName = "bg-background text-foreground placeholder:text-muted-foreground"
@@ -119,6 +123,17 @@ const formatFileSize = (value) => {
   if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`
   if (size >= 1024) return `${Math.round(size / 1024)} KB`
   return `${size} B`
+}
+
+// Estimate reading minutes from editor HTML (~200 wpm), matching the server.
+const readingMinutesFromHtml = (value) => {
+  const text = String(value || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const words = text ? text.split(/\s+/).filter(Boolean).length : 0
+  return Math.max(1, Math.round(words / 200))
 }
 
 // Data transformation functions
@@ -352,10 +367,17 @@ const CoverImageUpload = ({ draft, existingUrl }) => {
 }
 
 // BlogForm Component
-const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
+const BlogForm = ({ blogDraft, categories, onReset, onCategoryCreated, formKey }) => {
   const [category, setCategory] = useState(blogDraft.category || '')
   const [isPublished, setIsPublished] = useState(blogDraft.is_published)
   const [isFeatured, setIsFeatured] = useState(blogDraft.is_featured)
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
+  const [content, setContent] = useState(blogDraft.content || '')
+  const [autoReadingTime, setAutoReadingTime] = useState(true)
+  const [manualMinutes, setManualMinutes] = useState(blogDraft.reading_time_minutes || 5)
+
+  const autoMinutes = useMemo(() => readingMinutesFromHtml(content), [content])
+  const readingValue = autoReadingTime ? autoMinutes : manualMinutes
 
   return (
     <form key={formKey} action={saveBlogPostAction} className="min-w-0 max-w-full space-y-6 overflow-x-clip">
@@ -363,6 +385,7 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
       <input type="hidden" name="category" value={category} readOnly />
       <input type="hidden" name="is_published" value={isPublished ? 'on' : ''} readOnly />
       <input type="hidden" name="is_featured" value={isFeatured ? 'on' : ''} readOnly />
+      <input type="hidden" name="reading_time_auto" value={autoReadingTime ? 'on' : ''} readOnly />
 
       <CollapsibleSection value="post-details" icon={FileText} title="Post Details">
         <div className="space-y-4">
@@ -399,46 +422,80 @@ const BlogForm = ({ blogDraft, categories, onReset, formKey }) => {
 
           <div className="grid gap-4 md:grid-cols-3">
             <FormField label="Category" required>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className={inputClassName}>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className={`${inputClassName} flex-1`}>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id || cat.name} value={cat.name}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => setCategoryDialogOpen(true)}
+                  aria-label="Add category"
+                  title="Add category"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </FormField>
             <FormField label="Tags" hint="Comma separated">
-              <Input 
-                name="tags" 
-                defaultValue={blogDraft.tags} 
+              <Input
+                name="tags"
+                defaultValue={blogDraft.tags}
                 placeholder="tag1, tag2, tag3"
                 className={inputClassName}
               />
             </FormField>
-            <FormField label="Reading Time (min)">
-              <Input 
-                type="number" 
-                min={1} 
-                name="reading_time_minutes" 
-                defaultValue={blogDraft.reading_time_minutes}
-                className={inputClassName}
-              />
+            <FormField label="Reading Time (min)" hint={autoReadingTime ? 'Auto from content length' : 'Manual override'}>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  name="reading_time_minutes"
+                  value={readingValue}
+                  readOnly={autoReadingTime}
+                  onChange={(e) => setManualMinutes(Math.max(1, Number(e.target.value) || 1))}
+                  className={`${inputClassName} flex-1 ${autoReadingTime ? 'opacity-70' : ''}`}
+                />
+                <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+                  <Switch
+                    checked={autoReadingTime}
+                    onCheckedChange={setAutoReadingTime}
+                    className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
+                  />
+                  Auto
+                </label>
+              </div>
             </FormField>
           </div>
         </div>
       </CollapsibleSection>
+
+      <AddCategoryDialog
+        open={categoryDialogOpen}
+        onOpenChange={setCategoryDialogOpen}
+        onCreated={(cat) => {
+          onCategoryCreated?.(cat)
+          if (cat?.name) setCategory(cat.name)
+        }}
+      />
 
       <Card className="min-w-0 max-w-full overflow-hidden rounded-lg border-border bg-card/45 shadow-none">
         <CardHeader className="p-4">
           <CardTitle className="text-base">Content</CardTitle>
         </CardHeader>
         <CardContent className="min-w-0 max-w-full overflow-hidden p-4 pt-0">
-          <TiptapBlogEditor name="content" defaultValue={blogDraft.content} />
+          <TiptapBlogEditor name="content" defaultValue={blogDraft.content} onChange={setContent} />
         </CardContent>
       </Card>
 
@@ -1186,6 +1243,7 @@ export function ContentStudio({
   const hasShownRouteToast = useRef(false)
   const [activeTab, setActiveTab] = useState(initialTab)
   const [llmOpen, setLlmOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const { isConfigured } = useLlmConfig()
   const [editingBlogId, setEditingBlogId] = useState('')
   const [editingChangelogId, setEditingChangelogId] = useState('')
@@ -1193,8 +1251,37 @@ export function ContentStudio({
   const [changelogRevision, setChangelogRevision] = useState(0)
   const [blogQuery, setBlogQuery] = useState('')
   const [changelogQuery, setChangelogQuery] = useState('')
+  const [addedCategories, setAddedCategories] = useState([])
+  const [importedPosts, setImportedPosts] = useState([])
 
-  const editingBlog = useMemo(() => posts.find((post) => post.id === editingBlogId), [editingBlogId, posts])
+  // Merge server categories with any added this session, de-duped by name, so a
+  // freshly created category is selectable immediately without a full reload.
+  const categoryList = useMemo(() => {
+    const seen = new Set()
+    const merged = []
+    for (const cat of [...categories, ...addedCategories]) {
+      const key = String(cat?.name || '').toLowerCase()
+      if (!key || seen.has(key)) continue
+      seen.add(key)
+      merged.push(cat)
+    }
+    return merged
+  }, [categories, addedCategories])
+
+  // Merge just-imported posts with the server list (de-duped by id) so a live
+  // import is selectable and editable immediately, before the RSC refetch lands.
+  const postList = useMemo(() => {
+    const seen = new Set()
+    const merged = []
+    for (const post of [...importedPosts, ...posts]) {
+      if (!post?.id || seen.has(post.id)) continue
+      seen.add(post.id)
+      merged.push(post)
+    }
+    return merged
+  }, [importedPosts, posts])
+
+  const editingBlog = useMemo(() => postList.find((post) => post.id === editingBlogId), [editingBlogId, postList])
   const editingChangelog = useMemo(
     () => changelogs.find((entry) => entry.id === editingChangelogId),
     [editingChangelogId, changelogs]
@@ -1202,9 +1289,9 @@ export function ContentStudio({
 
   const filteredPosts = useMemo(() => {
     const q = blogQuery.toLowerCase().trim()
-    if (!q) return posts
-    return posts.filter((post) => `${post.title} ${post.slug} ${post.category}`.toLowerCase().includes(q))
-  }, [blogQuery, posts])
+    if (!q) return postList
+    return postList.filter((post) => `${post.title} ${post.slug} ${post.category}`.toLowerCase().includes(q))
+  }, [blogQuery, postList])
 
   const filteredChangelogs = useMemo(() => {
     const q = changelogQuery.toLowerCase().trim()
@@ -1214,7 +1301,7 @@ export function ContentStudio({
 
   const blogDraft = getBlogDraft(editingBlog)
   const changelogDraft = getChangelogDraft(editingChangelog)
-  const publishedCount = posts.filter((post) => post.is_published).length
+  const publishedCount = postList.filter((post) => post.is_published).length
 
   useEffect(() => {
     const previousHtmlOverflow = document.documentElement.style.overflow
@@ -1242,6 +1329,22 @@ export function ContentStudio({
 
     router.replace(`/studio/posts?tab=${initialTab}`, { scroll: false })
   }, [error, initialTab, router, saved])
+
+  const handleCategoryCreated = (category) => {
+    if (category?.name) setAddedCategories((prev) => [...prev, category])
+  }
+
+  // Add the imported post to the local list, open it for editing, and refresh
+  // so the server row reconciles in.
+  const handleImported = (record) => {
+    if (record?.id) {
+      setImportedPosts((prev) => [record, ...prev.filter((post) => post.id !== record.id)])
+      setActiveTab('blog')
+      setEditingBlogId(record.id)
+      setBlogRevision((value) => value + 1)
+    }
+    router.refresh()
+  }
 
   const deleteBlogPost = async (post) => {
     const result = await deleteBlogPostAction(post.id)
@@ -1274,6 +1377,12 @@ export function ContentStudio({
   return (
     <div className="fixed inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-background text-foreground">
       <LlmSettingsDialog open={llmOpen} onOpenChange={setLlmOpen} />
+      <BlogImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        categories={categoryList}
+        onPublished={handleImported}
+      />
 
       <header className="flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur sm:px-4">
         <div className="flex min-w-0 items-center gap-3">
@@ -1297,6 +1406,10 @@ export function ContentStudio({
               View live
               <ArrowUpRight className="size-3.5" />
             </Link>
+          </Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => setImportOpen(true)} className="gap-1.5">
+            <Download className="size-3.5" />
+            <span className="hidden sm:inline">Import</span>
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={() => setLlmOpen(true)}>
             <Sparkles className={isConfigured ? 'text-emerald-400' : ''} />
@@ -1393,7 +1506,8 @@ export function ContentStudio({
             {activeTab === 'blog' ? (
               <BlogForm
                 blogDraft={blogDraft}
-                categories={categories}
+                categories={categoryList}
+                onCategoryCreated={handleCategoryCreated}
                 formKey={`${editingBlogId || 'new'}-${blogRevision}`}
                 onReset={() => {
                   setEditingBlogId('')
