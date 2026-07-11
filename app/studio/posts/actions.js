@@ -108,7 +108,10 @@ async function resolveImageUrl({
 
   if (uploadFile && uploadFile.size > 0) {
     const ext = extensionFromFile(uploadFile)
-    const objectPath = `${userId}/${contentType}/${slug}/latest.${ext}`
+    // Unique filename per upload so a replaced cover yields a new URL — a fixed
+    // "latest.ext" path kept the same URL, so the DB value and the cached image
+    // never changed on update.
+    const objectPath = `${userId}/${contentType}/${slug}/${Date.now()}.${ext}`
     const bytes = Buffer.from(await uploadFile.arrayBuffer())
     const { error: uploadError } = await supabase.storage
       .from(selectedBucket)
@@ -425,7 +428,7 @@ export async function createImportedBlogPostAction(input) {
     author_id: user.id,
     author_name: displayName,
     author_avatar: authorAvatar,
-    featured_image: null,
+    featured_image: String(input?.featuredImage || '').trim() || null,
     is_published: true,
     is_featured: false,
     published_at: new Date().toISOString(),

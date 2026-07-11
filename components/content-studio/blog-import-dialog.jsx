@@ -145,7 +145,7 @@ export function BlogImportDialog({ open, onOpenChange, categories = [], onPublis
         content: post.content,
         category: post.category,
         tags: post.tags,
-        featured_image: null,
+        featured_image: post.featuredImage || null,
         is_published: true,
         is_featured: false,
         published_at: new Date().toISOString(),
