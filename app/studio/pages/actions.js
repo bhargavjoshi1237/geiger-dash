@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 import { isValidPageType, PAGE_TYPE_PATH } from '@/lib/pages-studio/skills'
+import { resolveProductApp } from '@/lib/pages-studio/products'
 
 function slugify(value) {
   return String(value || '')
@@ -76,10 +77,16 @@ async function resolveImageUrl({ supabase, userId, slug, uploadFile, bucket, ima
   return String(fallbackUrl || '').trim() || null
 }
 
-function revalidatePublic(pageType, slug) {
+function revalidatePublic(pageType, product, slug) {
   const segment = PAGE_TYPE_PATH[pageType] || 'solutions'
+  const productId = resolveProductApp(product)?.id
   revalidatePath(`/${segment}`)
-  if (slug) revalidatePath(`/${segment}/${slug}`)
+  if (productId) {
+    revalidatePath(`/${segment}/${productId}`)
+    if (slug) revalidatePath(`/${segment}/${productId}/${slug}`)
+  } else if (slug) {
+    revalidatePath(`/${segment}/${slug}`)
+  }
   revalidatePath('/studio/pages')
 }
 
@@ -183,7 +190,7 @@ export async function saveSeoPageAction(formData) {
     redirect(`/studio/pages?error=${encodeURIComponent(error.message)}`)
   }
 
-  revalidatePublic(validType, normalizedSlug)
+  revalidatePublic(validType, product, normalizedSlug)
   redirect('/studio/pages?saved=1')
 }
 
@@ -199,11 +206,11 @@ export async function deleteSeoPageAction(pageId) {
     .from('dash_seo_pages')
     .delete()
     .eq('id', id)
-    .select('page_type, slug')
+    .select('page_type, product, slug')
     .maybeSingle()
   if (error) return { ok: false, error: error.message }
 
-  if (data) revalidatePublic(data.page_type, data.slug)
+  if (data) revalidatePublic(data.page_type, data.product, data.slug)
   return { ok: true }
 }
 

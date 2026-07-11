@@ -4,7 +4,11 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { resolveProductApp } from "@/lib/pages-studio/products";
-import { PAGE_TYPE_HUB } from "@/lib/pages-studio/skills";
+import {
+  PAGE_TYPE_HUB,
+  buildSeoPagePath,
+  buildSeoProductHubPath,
+} from "@/lib/pages-studio/skills";
 
 const SITE_URL = "https://geiger.studio";
 
@@ -37,7 +41,8 @@ export function SeoPageView({ page, pageType }) {
   const heroSubheading = page.hero_subheading || page.excerpt;
   const ctaLabel =
     page.hero_cta_text || (productApp ? `Explore ${productApp.name}` : "Get started");
-  const pageUrl = `${SITE_URL}/${hub.path}/${page.slug}`;
+  const productHubPath = buildSeoProductHubPath(pageType, page.product);
+  const pageUrl = `${SITE_URL}${buildSeoPagePath(pageType, page.product, page.slug)}`;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -45,7 +50,17 @@ export function SeoPageView({ page, pageType }) {
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: hub.label, item: `${SITE_URL}/${hub.path}` },
-      { "@type": "ListItem", position: 3, name: page.title, item: pageUrl },
+      ...(productApp
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: productApp.name,
+              item: `${SITE_URL}${productHubPath}`,
+            },
+            { "@type": "ListItem", position: 4, name: page.title, item: pageUrl },
+          ]
+        : [{ "@type": "ListItem", position: 3, name: page.title, item: pageUrl }]),
     ],
   };
 
@@ -65,6 +80,14 @@ export function SeoPageView({ page, pageType }) {
           <Link href={`/${hub.path}`} className="transition-colors hover:text-foreground">
             {hub.label}
           </Link>
+          {productApp ? (
+            <>
+              <ChevronRight className="size-3.5" aria-hidden="true" />
+              <Link href={productHubPath} className="transition-colors hover:text-foreground">
+                {productApp.name}
+              </Link>
+            </>
+          ) : null}
           <ChevronRight className="size-3.5" aria-hidden="true" />
           <span className="text-foreground">{page.title}</span>
         </nav>

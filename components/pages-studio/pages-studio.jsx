@@ -36,7 +36,7 @@ import { useLlmConfig } from '@/components/content-studio/llm-config'
 import { PageGenerateDialog } from '@/components/pages-studio/page-generate-dialog'
 import { saveSeoPageAction, deleteSeoPageAction } from '@/app/studio/pages/actions'
 import { PAGE_PRODUCTS } from '@/lib/pages-studio/products'
-import { PAGE_TYPE_OPTIONS, PAGE_TYPE_LABEL, PAGE_TYPE_PATH } from '@/lib/pages-studio/skills'
+import { PAGE_TYPE_OPTIONS, PAGE_TYPE_LABEL, PAGE_TYPE_PATH, buildSeoPagePath } from '@/lib/pages-studio/skills'
 
 const MEDIA_TYPES = [{ value: 'pages', label: 'Pages' }]
 
@@ -96,7 +96,7 @@ const SeoPageForm = ({ pageDraft, onReset, formKey }) => {
   const [isPublished, setIsPublished] = useState(pageDraft.is_published)
   const [isFeatured, setIsFeatured] = useState(pageDraft.is_featured)
 
-  const publicPath = `/${PAGE_TYPE_PATH[pageType] || 'solutions'}/${pageDraft.slug || '…'}`
+  const publicPath = buildSeoPagePath(pageType, product, pageDraft.slug || '…')
 
   return (
     <form key={formKey} action={saveSeoPageAction} className="min-w-0 max-w-full space-y-6 overflow-x-clip">

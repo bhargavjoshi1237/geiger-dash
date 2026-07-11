@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { getPublishedSeoPagesByType } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";
-import { PAGE_TYPE_HUB } from "@/lib/pages-studio/skills";
+import { PAGE_TYPE_HUB, buildSeoPagePath } from "@/lib/pages-studio/skills";
 
-// Hub page listing every published page of one type — the middle rung of the
-// breadcrumb and the internal-linking anchor for the type's pages.
-export async function SeoHubPage({ pageType }) {
+// Hub page listing published pages of one type — the middle rung of the
+// breadcrumb and the internal-linking anchor for the type's pages. Pass a
+// product (stored value) to render the product-scoped /<type>/<product> hub.
+export async function SeoHubPage({ pageType, product }) {
   const hub = PAGE_TYPE_HUB[pageType] || PAGE_TYPE_HUB.solution;
-  const pages = await getPublishedSeoPagesByType(pageType);
+  const pages = await getPublishedSeoPagesByType(pageType, product);
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -30,7 +31,7 @@ export async function SeoHubPage({ pageType }) {
               return (
                 <Link
                   key={page.id}
-                  href={`/${hub.path}/${page.slug}`}
+                  href={buildSeoPagePath(pageType, page.product, page.slug)}
                   className="group flex min-h-64 flex-col bg-background p-6 transition-colors hover:bg-muted/40"
                 >
                   {page.cover_image ? (

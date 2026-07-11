@@ -30,9 +30,11 @@ CREATE TABLE IF NOT EXISTS public.dash_seo_pages (
   CONSTRAINT dash_seo_pages_type_check CHECK (page_type IN ('product', 'solution', 'feature'))
 );
 
--- Slug is unique per type so /product/x and /solutions/x can coexist while a
--- given type never has two pages at the same URL.
-CREATE UNIQUE INDEX IF NOT EXISTS idx_seo_pages_type_slug ON public.dash_seo_pages(page_type, slug);
+-- Slug is unique per (product, type) so each suite product owns its own slug
+-- space and pages nest under /<type>/<product>/<slug> (e.g. /solutions/events/x
+-- and /solutions/flow/x can coexist). Replaces the older (page_type, slug) key.
+DROP INDEX IF EXISTS public.idx_seo_pages_type_slug;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_seo_pages_product_type_slug ON public.dash_seo_pages(product, page_type, slug);
 CREATE INDEX IF NOT EXISTS idx_seo_pages_published_at ON public.dash_seo_pages(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_seo_pages_is_published ON public.dash_seo_pages(is_published);
 CREATE INDEX IF NOT EXISTS idx_seo_pages_product ON public.dash_seo_pages(product);
