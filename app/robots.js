@@ -3,7 +3,7 @@ export default function robots() {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/studio/"],
+      disallow: ["/api/", "/studio/", "/admin/"],
     },
     sitemap: "https://geiger.studio/sitemap.xml",
     host: "https://geiger.studio",
