@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, FileSignature, LayoutGrid, Webhook, Headset, Headphones, ChevronDown } from "lucide-react";
+import { ArrowRight, Zap, Layers, Cpu, ContainerIcon, Menu, BriefcaseBusiness, FileText, CalendarDays, Megaphone, MessageSquare, PenTool, FileSignature, LayoutGrid, Webhook, Headset, Headphones, Building2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -108,6 +108,12 @@ export function MegaMenu({ userId }) {
       label: "Docs",
       description: "Send and sign documents.",
       href: "/docs",
+    },
+    {
+      icon: Building2,
+      label: "Property",
+      description: "Manage real estate & property.",
+      href: "/property",
     }
   ];
 

@@ -5,6 +5,7 @@ import {
   ArrowRight,
   BookOpen,
   BriefcaseBusiness,
+  Building2,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -66,6 +67,7 @@ const PRODUCT_ICONS = {
   chat: MessageSquareText,
   notes: FileStack,
   canvas: FolderKanban,
+  property: Building2,
   oauth: Lock,
 };
 
