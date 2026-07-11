@@ -112,6 +112,8 @@ export function MegaMenu({ userId }) {
   ];
 
   const resources = [
+    { label: "Solutions", href: "/solutions" },
+    { label: "Features", href: "/features" },
     { label: "Documentation", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Blog", href: "/blog" },
