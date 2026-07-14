@@ -18,8 +18,21 @@ function redirectWithCookies(url, base) {
   return res
 }
 
-export async function updateSession(request) {
-  let supabaseResponse = NextResponse.next({ request })
+export async function updateSession(request, requestHeaders) {
+  // Forward any headers the outer middleware injected (e.g. x-geiger-subdomain)
+  // to the downstream request while preserving Supabase's cookie refresh.
+  const headers = requestHeaders || new Headers(request.headers)
+  const syncCookieHeader = () => {
+    headers.set(
+      'cookie',
+      request.cookies
+        .getAll()
+        .map((c) => `${c.name}=${c.value}`)
+        .join('; '),
+    )
+  }
+
+  let supabaseResponse = NextResponse.next({ request: { headers } })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -31,7 +44,8 @@ export async function updateSession(request) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
+          syncCookieHeader()
+          supabaseResponse = NextResponse.next({ request: { headers } })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, {
               ...options,

@@ -12,8 +12,10 @@ import {
   Code2,
   FileStack,
   FolderKanban,
+  Globe,
   HardDrive,
   Image,
+  Link2,
   Lock,
   Megaphone,
   MessageSquareText,
@@ -69,6 +71,8 @@ const PRODUCT_ICONS = {
   canvas: FolderKanban,
   property: Building2,
   oauth: Lock,
+  subdomain: Link2,
+  domain: Globe,
 };
 
 function formatNumber(value) {
@@ -581,17 +585,25 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
                         {categoryProducts.map((product) => {
                           const Icon = PRODUCT_ICONS[product.id];
                           const isOwned = hasSubscription && currentEntitlements.unlockedProducts.includes(product.id);
+                          const comingSoon = Boolean(product.comingSoon) && !isOwned;
                           const isEnabled = isOwned || selectedProducts.includes(product.id);
+                          const disabled = isOwned || comingSoon;
                           return (
                             <button
                               key={product.id}
                               type="button"
                               aria-pressed={isEnabled}
-                              disabled={isOwned}
-                              title={isOwned ? `${product.name} is already on your plan` : undefined}
+                              disabled={disabled}
+                              title={
+                                isOwned
+                                  ? `${product.name} is already on your plan`
+                                  : comingSoon
+                                    ? `${product.name} is coming soon`
+                                    : undefined
+                              }
                               onClick={() => toggleProduct(product.id)}
                               className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                isOwned
+                                disabled
                                   ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-70"
                                   : isEnabled
                                     ? "border-foreground/50 bg-surface-active"
@@ -602,9 +614,20 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
                                 {isOwned ? <Lock className="size-4" /> : <Icon className="size-4" />}
                               </span>
                               <span className="min-w-0 flex-1">
-                                <span className="block text-sm font-semibold">{product.name}</span>
+                                <span className="flex items-center gap-2">
+                                  <span className="text-sm font-semibold">{product.name}</span>
+                                  {typeof product.price === "number" && (
+                                    <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                      ${product.price}/mo
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="block truncate text-xs text-muted-foreground">
-                                  {isOwned ? "Owned — included in your plan" : product.detail}
+                                  {isOwned
+                                    ? "Owned — included in your plan"
+                                    : comingSoon
+                                      ? "Coming soon"
+                                      : product.detail}
                                 </span>
                               </span>
                               <span className={`flex size-5 items-center justify-center rounded-full border ${isEnabled ? "border-foreground bg-foreground text-background" : "border-border"}`}>

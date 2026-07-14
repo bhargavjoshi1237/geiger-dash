@@ -11,6 +11,7 @@ import {
   Copy,
   Crown,
   ExternalLink,
+  Globe,
   KeyRound,
   Link2,
   Loader2,
@@ -45,6 +46,12 @@ import {
   deleteOrgOAuthProviderAction,
   resolveOAuthDiscoveryAction,
 } from './oauth-actions'
+import {
+  getOrgDomainAction,
+  checkSubdomainAvailabilityAction,
+  saveOrgSubdomainAction,
+  removeOrgSubdomainAction,
+} from './domain-actions'
 import { getOrgEntitlements, isProductUnlocked } from '@/lib/billing/entitlements'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -1104,6 +1111,269 @@ function OAuthTab({ organization }) {
   )
 }
 
+// Root domain subdomains are hosted under. Inlined at build from the env var.
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'geiger.studio'
+
+// Domain settings tab: claim/change/remove the org's custom subdomain. Only
+// rendered for owners of orgs that bought the subdomain add-on. Debounced live
+// availability + preview; reads/writes through the domain server actions and
+// owns its toasts.
+function DomainTab({ organization }) {
+  const [loading, setLoading] = useState(true)
+  const [domain, setDomain] = useState(null) // active row or null
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState('')
+  const [status, setStatus] = useState('idle') // idle | checking | available | unavailable
+  const [reason, setReason] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [removing, setRemoving] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    getOrgDomainAction(organization.id).then((res) => {
+      if (!active) return
+      if (res?.ok) setDomain(res.domain || null)
+      else if (res?.error) toast.error(res.error)
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [organization.id])
+
+  // The form is active for a brand-new claim (no domain) or when changing one.
+  const formActive = editing || !domain
+
+  // Debounced availability check as the user types. All state is set inside the
+  // async timer callback (never synchronously in the effect body).
+  useEffect(() => {
+    if (!formActive) return
+    const clean = value.trim()
+    const timer = setTimeout(async () => {
+      if (!clean) {
+        setStatus('idle')
+        setReason('')
+        return
+      }
+      setStatus('checking')
+      const res = await checkSubdomainAvailabilityAction(organization.id, clean)
+      if (res?.ok) {
+        setStatus(res.available ? 'available' : 'unavailable')
+        setReason(res.reason || '')
+      } else {
+        setStatus('idle')
+        setReason(res?.error || '')
+      }
+    }, clean ? 450 : 0)
+    return () => clearTimeout(timer)
+  }, [value, formActive, organization.id])
+
+  function startEdit() {
+    setValue(domain?.subdomain || '')
+    setStatus('idle')
+    setReason('')
+    setEditing(true)
+  }
+
+  // Mirror the server's sanitiser so the preview + stored value stay host-legal.
+  function handleChange(e) {
+    setValue(
+      e.target.value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/^-+/, '')
+        .slice(0, 63),
+    )
+  }
+
+  const unchanged = value === (domain?.subdomain || '')
+  const canSave = status === 'available' && !unchanged && !saving
+
+  async function handleSave() {
+    setSaving(true)
+    const res = await saveOrgSubdomainAction(organization.id, value)
+    setSaving(false)
+    if (res?.ok) {
+      setDomain(res.domain)
+      setEditing(false)
+      toast.success('Subdomain saved.')
+    } else {
+      toast.error(res?.error || 'Could not save the subdomain.')
+    }
+  }
+
+  async function handleRemove() {
+    setRemoving(true)
+    const res = await removeOrgSubdomainAction(organization.id)
+    setRemoving(false)
+    if (res?.ok) {
+      setDomain(null)
+      setEditing(false)
+      setValue('')
+      toast.success('Subdomain removed.')
+    } else {
+      toast.error(res?.error || 'Could not remove the subdomain.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading domain settings…
+      </div>
+    )
+  }
+
+  const previewHost = `${value || 'yourname'}.${ROOT_DOMAIN}`
+
+  // Live view — an active subdomain exists and we're not changing it.
+  if (domain && !editing) {
+    const host = `${domain.subdomain}.${ROOT_DOMAIN}`
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg border border-border bg-surface-card p-4">
+          <div className="flex items-center gap-2">
+            <Globe className="size-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">Your subdomain is live</p>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            This workspace is reachable at the address below. Opening it shows only this organization.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-card p-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-subtle text-emerald-400">
+            <Globe className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold text-foreground">{host}</span>
+            <span className="block text-xs text-emerald-400">Active</span>
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label="Copy address"
+            className="shrink-0 border-border bg-surface-subtle"
+            onClick={() => {
+              navigator.clipboard?.writeText(host)
+              toast.success('Address copied.')
+            }}
+          >
+            <Copy className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label="Visit workspace"
+            asChild
+            className="shrink-0 border-border bg-surface-subtle"
+          >
+            <a href={`https://${host}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="size-4" />
+            </a>
+          </Button>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleRemove}
+            disabled={removing}
+            className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          >
+            {removing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+            Remove
+          </Button>
+          <Button type="button" onClick={startEdit}>
+            <Pencil className="size-4" />
+            Change
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Setup / change form.
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-surface-card p-4">
+        <div className="flex items-center gap-2">
+          <Globe className="size-4 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">
+            {domain ? 'Change your subdomain' : 'Claim your subdomain'}
+          </p>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Pick a subdomain to host this workspace. Visitors to it see only this organization.
+        </p>
+      </div>
+
+      <div className="grid gap-2 rounded-lg border border-border bg-surface-card p-4">
+        <Label htmlFor={`subdomain-${organization.id}`}>Subdomain</Label>
+        <div className="flex items-stretch overflow-hidden rounded-md border border-border bg-surface-subtle focus-within:ring-2 focus-within:ring-ring">
+          <input
+            id={`subdomain-${organization.id}`}
+            value={value}
+            onChange={handleChange}
+            placeholder="yourname"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-text-tertiary"
+          />
+          <span className="flex items-center border-l border-border bg-surface-active px-3 text-sm text-muted-foreground">
+            .{ROOT_DOMAIN}
+          </span>
+        </div>
+
+        <div className="flex min-h-[1.25rem] items-center gap-2 text-xs">
+          {status === 'checking' && (
+            <>
+              <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+              <span className="text-muted-foreground">Checking availability…</span>
+            </>
+          )}
+          {status === 'available' && (
+            <>
+              <Check className="size-3.5 text-emerald-400" />
+              <span className="text-emerald-400">{previewHost} is available</span>
+            </>
+          )}
+          {status === 'unavailable' && <span className="text-red-400">{reason || 'Not available.'}</span>}
+          {status === 'idle' && value && <span className="text-muted-foreground">Preview: {previewHost}</span>}
+          {status === 'idle' && !value && (
+            <span className="text-text-tertiary">3–63 characters · letters, numbers, and hyphens</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        {editing && domain && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setEditing(false)
+              setValue('')
+            }}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button type="button" onClick={handleSave} disabled={!canSave}>
+          {saving ? <Loader2 className="size-4 animate-spin" /> : <Globe className="size-4" />}
+          {domain ? 'Save changes' : 'Claim subdomain'}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function OrganizationCard({ organization, userId }) {
   const router = useRouter()
   const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
@@ -1122,6 +1392,11 @@ function OrganizationCard({ organization, userId }) {
   // its recorded subscription) and the viewer can manage the org.
   const hasOauthAddon = useMemo(
     () => isProductUnlocked(getOrgEntitlements(organization), 'oauth'),
+    [organization],
+  )
+  // Show the Domain tab only when this org bought the subdomain add-on.
+  const hasSubdomainAddon = useMemo(
+    () => isProductUnlocked(getOrgEntitlements(organization), 'subdomain'),
     [organization],
   )
   const role = isOwner ? 'Owner' : isCreator ? 'Creator' : 'Member'
@@ -1448,6 +1723,7 @@ function OrganizationCard({ organization, userId }) {
               { id: 'general', label: 'General' },
               { id: 'members', label: 'Members' },
               { id: 'security', label: 'Security' },
+              ...(hasSubdomainAddon ? [{ id: 'domain', label: 'Domain' }] : []),
               ...(hasOauthAddon ? [{ id: 'oauth', label: 'OAuth' }] : []),
             ].map((tab) => (
               <button
@@ -1556,6 +1832,8 @@ function OrganizationCard({ organization, userId }) {
               </div>
             )}
 
+            {activeSettingsTab === 'domain' && hasSubdomainAddon && <DomainTab organization={organization} />}
+
             {activeSettingsTab === 'oauth' && hasOauthAddon && <OAuthTab organization={organization} />}
           </div>
 
@@ -1575,7 +1853,37 @@ function OrganizationCard({ organization, userId }) {
   )
 }
 
-export function OrganizationsClient({ organizations, userId, searchState }) {
+// Shown on a subdomain host when the signed-in user can't see the pinned org.
+function SubdomainNotice({ scope }) {
+  const notFound = scope.status === 'not-found'
+  const host = `${scope.subdomain}.${ROOT_DOMAIN}`
+  return (
+    <div className="flex min-h-[52vh] items-center justify-center">
+      <div className="mx-auto flex max-w-md flex-col items-center rounded-xl border border-dashed border-border bg-surface-subtle px-8 py-12 text-center">
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-md border border-border bg-background">
+          <Globe className="h-6 w-6 text-text-secondary" />
+        </div>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {notFound ? 'Workspace not found' : "You're not a member"}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {notFound
+            ? `No workspace is connected to ${host}.`
+            : `${scope.orgName || 'This workspace'} is hosted at ${host}, but your account isn't a member of it.`}
+        </p>
+        <a
+          href={`https://${ROOT_DOMAIN}/org`}
+          className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-muted-foreground"
+        >
+          <ExternalLink className="size-4" />
+          Go to all organizations
+        </a>
+      </div>
+    </div>
+  )
+}
+
+export function OrganizationsClient({ organizations, userId, searchState, scope = null }) {
   const router = useRouter()
   const message = useMemo(() => getMessage(searchState), [searchState])
   const notifiedMessage = useRef(null)
@@ -1588,23 +1896,34 @@ export function OrganizationsClient({ organizations, userId, searchState }) {
     router.replace(ORG_ROUTE, { scroll: false })
   }, [message, router])
 
+  // On a subdomain host the page is pinned to a single organization: no create /
+  // join affordances, and a tailored notice when the user can't see it.
+  const scoped = Boolean(scope)
+  const scopedBlocked = scoped && scope.status !== 'member'
+
   return (
     <main className="min-h-screen bg-background pt-12 text-foreground">
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-2xl mt-6">
-            <h1 className="text-3xl font-bold text-foreground">Organizations</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {scoped ? scope.orgName || 'Workspace' : 'Organizations'}
+            </h1>
             <p className="mt-1 text-muted-foreground">
-              Manage the teams, ownership boundaries, and shared workspaces connected to your Geiger tools.
+              {scoped
+                ? `You're viewing this workspace on ${scope.subdomain}.${ROOT_DOMAIN}.`
+                : 'Manage the teams, ownership boundaries, and shared workspaces connected to your Geiger tools.'}
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:items-end">
-            {organizations.length > 0 ? <ActionDialogs /> : null}
+            {!scoped && organizations.length > 0 ? <ActionDialogs /> : null}
           </div>
         </div>
 
-        {organizations.length === 0 ? (
+        {scopedBlocked ? (
+          <SubdomainNotice scope={scope} />
+        ) : organizations.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">

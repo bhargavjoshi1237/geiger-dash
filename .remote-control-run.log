@@ -1,0 +1,43 @@
+I now have a complete, precise picture. Let me present the design for your approval before writing any code.
+
+---
+
+## Design: Custom Subdomain add-on (+ Own Domain purchase option)
+
+### What the codebase gives me (so I mirror it, not reinvent)
+There's an **exact precedent**: the `oauth` "$10 add-on" (`security` category). It's config-driven pricing → entitlement in `organizations.metadata.subscription.products` → gated `isProductUnlocked(getOrgEntitlements(org), 'oauth')` → a conditionally-rendered **OAuth tab** in the org-settings dialog, backed by a dedicated table + server actions. I'll follow this pattern beat-for-beat. Orgs are `uuid`-keyed in the live DB (Prisma is vestigial), schema is applied via `npm run db:push`, and Supabase-js is the real data layer.
+
+### 1. Pricing (`lib/pricing/plans.js`) — both options, no new Stripe code
+- Two new products: `{ id: "subdomain", …, category: "subdomain" }` and `{ id: "custom_domain", …, category: "domain" }`.
+- Two new `productCategories`: `subdomain` (**rate 5**) and `domain` (**rate 10**) — separate categories because the prices differ and the calculator prices per-category.
+- Add `subdomain: 0, domain: 0` to every plan's `productAllowances` (so they're never free / never `NaN`). `betaPlan` has no allowances object — unaffected, matching the oauth note.
+- Add icons to `PRODUCT_ICONS` in `plan_cards.jsx` (`Globe` / `Link`). The calculator renders new categories automatically. Billed as a delta through existing Stripe checkout.
+
+### 2. Storage — a real `subdomain` column (needs a global uniqueness check → promote, don't bag it)
+- New idempotent DDL: `alter table public.organizations add column if not exists subdomain text;` + a **unique index** on `lower(subdomain)` where not null. Applied via `db:push`.
+- I'll add `subdomain` to `ORG_SELECT_FIELDS` so it flows through `getUserOrganizations`.
+
+### 3. Settings — a new "Domain" tab (gated), only the subdomain part functional
+- Gate exactly like oauth: `hasDomainAddon = isProductUnlocked(getOrgEntitlements(org), 'subdomain')`; conditionally add `{ id: 'domain', label: 'Domain' }` to the tab array.
+- New `DomainTab` component: subdomain input, **live preview** (`yourname.geiger.studio` updates as you type), inline validation (3–63 chars, `[a-z0-9-]`, no leading/trailing hyphen, reserved-word blocklist), **debounced availability check** (green "available" / red "taken"), a **Claim** button, and once claimed a copyable live link + "Release" action.
+- Because `custom_domain` is purchased but **not built yet**, the tab shows a functional Subdomain section and a **"Custom domain — coming soon"** placeholder section (only if that product is owned).
+
+### 4. Data layer + server actions (mirror `oauth-actions.js`)
+- `app/org/subdomain-actions.js` (`"use server"`): `checkSubdomainAvailableAction(sub)`, `setOrgSubdomainAction(orgId, sub)`, `clearOrgSubdomainAction(orgId)`. Each verifies **ownership** via the user's RLS client **and** re-derives entitlement (`isProductUnlocked`) server-side, then does the global-uniqueness check + write via the **service-role admin client** (RLS hides other orgs from anon) — same split the oauth actions use. Returns `{ ok, … }`; the client owns toasts.
+
+### 5. Wildcard subdomain routing — the tenant view
+- **Session across subdomains:** set `NEXT_PUBLIC_COOKIE_DOMAIN=.geiger.studio` (already wired into all three Supabase clients) so the auth session works on `*.geiger.studio`.
+- **Filtering the org list:** in `app/org/page.js` (server component), read the host via `headers()`, extract the subdomain, and if it's a real org subdomain, **show only that org** and skip the empty→`/onboarding` redirect. Everything else is untouched — all product routes are path-based and host-agnostic, so "everything is the same" holds. A tiny pure helper `lib/tenant/subdomain.js` (`extractSubdomain(host)`, ignoring `www`, `localhost`, bare apex, and `*.vercel.app` preview hosts) keeps this testable.
+
+### 6. Vercel (I cannot fully do this here — flagging honestly)
+The Vercel CLI is **not installed** and the Vercel MCP needs auth I can't complete in this non-interactive session. So I will **write all the code**, and hand you the exact required steps: `vercel link`, add wildcard domain `*.geiger.studio` (`vercel domains add` / dashboard), and set the `NEXT_PUBLIC_COOKIE_DOMAIN` env (`vercel env add`). I'll offer to run them once the CLI is installed + authed.
+
+---
+
+### The few choices I want you to confirm (I've picked defaults):
+1. **Base domain = `geiger.studio`, wildcard `*.geiger.studio`.** ✅ assumed. Local dev via `*.localhost:3000`. OK?
+2. **Own-domain ($10):** appears on pricing now, but its settings surface is a **"coming soon" placeholder** (only subdomain is built). OK, or omit the own-domain toggle entirely for now?
+3. **Subdomain page auth:** keep the existing `/org` auth+membership gate, just filtered to the one org (a non-member logged-in visitor sees an empty list). OK?
+4. **Storage:** real `subdomain` column on `organizations` (my recommendation) vs. a separate table — column is cleaner for the uniqueness index + lookup. OK?
+
+Once you confirm (or adjust), I'll write the spec doc, then implement in one pass.

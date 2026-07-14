@@ -38,6 +38,13 @@ export async function createCheckoutAction(payload = {}) {
 
   const { planId, selectedProducts = [], metrics = {}, isYearly = false, organizationId = null } = payload;
 
+  // Coming-soon catalog items aren't purchasable yet — drop them so a tampered
+  // payload can't buy an unbuilt add-on (e.g. the "Own domain" product).
+  const COMING_SOON = new Set(PRODUCT_CATALOG.filter((p) => p.comingSoon).map((p) => p.id));
+  const purchasableProducts = (Array.isArray(selectedProducts) ? selectedProducts : []).filter(
+    (id) => !COMING_SOON.has(id),
+  );
+
   // Validate org membership through the user's own (RLS-scoped) client: a select
   // that returns the row proves the user belongs to it. metadata is fetched too
   // so entitlements (current plan/products/metrics) can be re-derived here —
@@ -57,8 +64,7 @@ export async function createCheckoutAction(payload = {}) {
   // previously-purchased metric floor must all be present in this submission.
   if (entitlements.hasSubscription) {
     if (getPlanRank(planId) < entitlements.planRank) return { error: "downgrade_blocked" };
-    const submittedProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
-    const missingOwnedProduct = entitlements.unlockedProducts.some((id) => !submittedProducts.includes(id));
+    const missingOwnedProduct = entitlements.unlockedProducts.some((id) => !purchasableProducts.includes(id));
     if (missingOwnedProduct) return { error: "downgrade_blocked" };
     const belowMetricFloor = Object.entries(entitlements.currentMetrics || {}).some(
       ([key, ownedValue]) => Number(metrics?.[key]) < Number(ownedValue),
@@ -66,7 +72,7 @@ export async function createCheckoutAction(payload = {}) {
     if (belowMetricFloor) return { error: "downgrade_blocked" };
   }
 
-  const { selectedPlan, total } = computeEstimate({ planId, selectedProducts, metrics });
+  const { selectedPlan, total } = computeEstimate({ planId, selectedProducts: purchasableProducts, metrics });
   const multiplier = isYearly ? YEARLY_MULTIPLIER : 1;
 
   // Charge only the incremental difference over what the org already paid —
@@ -88,9 +94,7 @@ export async function createCheckoutAction(payload = {}) {
   }
 
   const interval = isYearly ? "year" : "month";
-  const productIds = (Array.isArray(selectedProducts) ? selectedProducts : []).filter((id) =>
-    PRODUCT_NAMES.has(id),
-  );
+  const productIds = purchasableProducts.filter((id) => PRODUCT_NAMES.has(id));
   const productList = productIds.map((id) => PRODUCT_NAMES.get(id));
   const descriptionPrefix = entitlements.hasSubscription ? "Upgrade — " : "";
   const description = productList.length
