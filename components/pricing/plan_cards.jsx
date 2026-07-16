@@ -33,6 +33,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -50,6 +59,7 @@ import {
   YEARLY_MULTIPLIER,
 } from "@/lib/pricing/plans";
 import { createCheckoutAction } from "@/app/pricing/actions";
+import { startTrialAction } from "@/app/pricing/trial-actions";
 
 // Pricing data lives in lib/pricing/plans.js (shared with the server checkout
 // action). The catalog there is icon-free; map each product id to its Lucide
@@ -220,10 +230,18 @@ function configForEntitlements(entitlements) {
   };
 }
 
-export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {} }) {
+export function PlanCards({
+  isAuthed,
+  organizations = [],
+  entitlementsByOrg = {},
+  canStartTrial = false,
+}) {
   const router = useRouter();
   const [isYearly, setIsYearly] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [trialOpen, setTrialOpen] = useState(false);
+  const [trialOrgId, setTrialOrgId] = useState(organizations[0]?.id || "");
+  const [startingTrial, setStartingTrial] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState(organizations[0]?.id || "");
   const initialConfig = configForEntitlements(entitlementsByOrg[organizations[0]?.id]);
   const [selectedPlanId, setSelectedPlanId] = useState(initialConfig.planId);
@@ -316,6 +334,51 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
       toast.error("Couldn't start checkout. Please try again.");
     } finally {
       setCheckingOut(false);
+    }
+  }
+
+  function openTrial() {
+    if (!isAuthed) {
+      router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      return;
+    }
+    if (!organizations.length) {
+      toast.error("Create an organization first to start a trial.");
+      router.push("/org");
+      return;
+    }
+    setTrialOrgId(organizations[0]?.id || "");
+    setTrialOpen(true);
+  }
+
+  async function handleStartTrial() {
+    if (!trialOrgId) {
+      toast.error("Select an organization for your trial.");
+      return;
+    }
+    setStartingTrial(true);
+    try {
+      const result = await startTrialAction({ organizationId: trialOrgId });
+      if (result?.ok) {
+        toast.success("Your 15-day Basic trial has started.");
+        router.push("/billing");
+        return;
+      }
+      if (result?.error === "auth") {
+        router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      } else if (result?.error === "trial_used") {
+        toast.error("You've already used your free trial.");
+      } else if (result?.error === "already_subscribed") {
+        toast.error("You already have an active plan.");
+      } else if (result?.error === "invalid_org") {
+        toast.error("You don't have access to that organization.");
+      } else {
+        toast.error("Couldn't start your trial. Please try again.");
+      }
+    } catch {
+      toast.error("Couldn't start your trial. Please try again.");
+    } finally {
+      setStartingTrial(false);
     }
   }
 
@@ -451,7 +514,7 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
                 ))}
               </ul>
 
-              <div className="mt-auto pt-6">
+              <div className="mt-auto space-y-2 pt-6">
                 {downgrade ? (
                   <span
                     aria-disabled="true"
@@ -461,18 +524,36 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
                     Not available as a downgrade
                   </span>
                 ) : (
-                  <a
-                    href="#plan-calculator"
-                    onClick={() => selectPlan(plan)}
-                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      plan.featured
-                        ? "border-background/15 bg-background text-foreground hover:bg-background/90 dark:border-[#151515]/15 dark:bg-[#151515] dark:text-white"
-                        : "border-border bg-surface-subtle hover:border-border-strong hover:bg-surface-hover"
-                    }`}
-                  >
-                    {currentPlan ? "Manage this plan" : upgrade ? `Upgrade to ${plan.name}` : "Configure this plan"}
-                    <ArrowDown className="size-4" />
-                  </a>
+                  <>
+                    <a
+                      href="#plan-calculator"
+                      onClick={() => selectPlan(plan)}
+                      className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                        plan.featured
+                          ? "border-background/15 bg-background text-foreground hover:bg-background/90 dark:border-[#151515]/15 dark:bg-[#151515] dark:text-white"
+                          : "border-border bg-surface-subtle hover:border-border-strong hover:bg-surface-hover"
+                      }`}
+                    >
+                      {currentPlan ? "Manage this plan" : upgrade ? `Upgrade to ${plan.name}` : "Configure this plan"}
+                      <ArrowDown className="size-4" />
+                    </a>
+                    {plan.id === "basic" && !currentPlan ? (
+                      <button
+                        type="button"
+                        onClick={openTrial}
+                        disabled={isAuthed && !canStartTrial}
+                        title={
+                          isAuthed && !canStartTrial
+                            ? "You've already used your free trial or have an active plan."
+                            : "15 days free — no card required"
+                        }
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-transparent px-4 py-3 text-sm font-semibold text-muted-foreground transition hover:border-border-strong hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Sparkles className="size-4" />
+                        Start free trial
+                      </button>
+                    ) : null}
+                  </>
                 )}
               </div>
             </article>
@@ -867,6 +948,66 @@ export function PlanCards({ isAuthed, organizations = [], entitlementsByOrg = {}
           </aside>
         </div>
       </section>
+
+      <Dialog open={trialOpen} onOpenChange={setTrialOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start your 15-day free trial</DialogTitle>
+            <DialogDescription>
+              Full Basic access for 15 days. No card required — we won&apos;t charge you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            {organizations.length > 1 ? (
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Apply trial to organization
+                </label>
+                <Select value={trialOrgId} onValueChange={setTrialOrgId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        {org.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <p className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-sm text-muted-foreground">
+                Trial will apply to{" "}
+                <span className="font-medium text-foreground">{organizations[0]?.name}</span>.
+              </p>
+            )}
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Check className="size-3.5 text-foreground" /> 15 days of Basic access
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-3.5 text-foreground" /> No credit card required
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-3.5 text-foreground" /> Ends automatically — no surprise charge
+              </li>
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setTrialOpen(false)} disabled={startingTrial}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleStartTrial}
+              disabled={startingTrial}
+              className="bg-primary text-primary-foreground"
+            >
+              {startingTrial ? "Starting…" : "Start free trial"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

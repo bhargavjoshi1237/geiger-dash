@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, ReceiptText, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CreditCard, ReceiptText, Sparkles } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
 import { getPlan, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
 import { getUserPlan, listPurchases } from "@/lib/billing/store";
+import { derivePlanState } from "@/lib/billing/plan_state";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,14 @@ const PURCHASE_STATUS = {
   pending: { label: "Pending", variant: "secondary" },
   refunded: { label: "Refunded", variant: "secondary" },
   canceled: { label: "Canceled", variant: "secondary" },
+};
+
+const PLAN_PHASE_BADGE = {
+  trialing: { label: "Trial", variant: "warning" },
+  active: { label: "Active", variant: "success" },
+  grace: { label: "Ended", variant: "destructive" },
+  expired: { label: "Expired", variant: "secondary" },
+  none: { label: "Inactive", variant: "secondary" },
 };
 
 function formatUsd(cents, currency = "usd") {
@@ -46,6 +55,8 @@ export default async function BillingPage() {
   const user = await requireUser(supabase, "/login?next=/billing");
 
   const [plan, purchases] = await Promise.all([getUserPlan(user.id), listPurchases(user.id)]);
+  const planState = derivePlanState(plan);
+  const phaseBadge = PLAN_PHASE_BADGE[planState.phase] || PLAN_PHASE_BADGE.none;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
@@ -81,17 +92,44 @@ export default async function BillingPage() {
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-lg font-semibold">{planLabel(plan.planKey)}</h3>
-                      <Badge variant={plan.status === "active" ? "success" : "secondary"}>
-                        {plan.status === "active" ? "Active" : plan.status}
-                      </Badge>
+                      <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {formatUsd(plan.amountTotal, plan.currency)} / {plan.billingInterval} · since{" "}
-                      {formatDate(plan.startedAt)}
+                      {planState.isTrial
+                        ? "Free trial"
+                        : `${formatUsd(plan.amountTotal, plan.currency)} / ${plan.billingInterval}`}{" "}
+                      · since {formatDate(plan.startedAt)}
                     </p>
+                    {planState.phase === "trialing" ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Trial ends {formatDate(planState.periodEnd)} ({planState.daysRemaining}{" "}
+                        {planState.daysRemaining === 1 ? "day" : "days"} left)
+                      </p>
+                    ) : planState.phase === "active" && planState.periodEnd ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Ends {formatDate(planState.periodEnd)}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>
+
+              {planState.phase === "grace" ? (
+                <div className="mt-5 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      Your plan ended. Your data will be deleted in{" "}
+                      {planState.deletionDaysRemaining}{" "}
+                      {planState.deletionDaysRemaining === 1 ? "day" : "days"} (
+                      {formatDate(planState.deletionDate)}) unless you renew.
+                    </p>
+                    <Button asChild size="sm" variant="destructive" className="mt-3">
+                      <Link href="/pricing">Renew plan</Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
               {plan.products?.length ? (
                 <div className="mt-5 flex flex-wrap gap-1.5">
                   {productNames(plan.products).map((name) => (

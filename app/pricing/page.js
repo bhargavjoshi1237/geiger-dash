@@ -8,6 +8,7 @@ import { PlanCards } from "@/components/pricing/plan_cards";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { Button } from "@/components/ui/button";
 import { getOrgEntitlements } from "@/lib/billing/entitlements";
+import { getUserPlan } from "@/lib/billing/store";
 
 const faqs = [
   {
@@ -48,6 +49,9 @@ export default async function PricingPage() {
   // (what's already purchased) for the no-downgrade UI.
   let organizations = [];
   let entitlementsByOrg = {};
+  // A user may start the cardless trial once, ever, and only when they don't
+  // already hold a live plan (trialing/active). Gated on the per-user user_plan.
+  let canStartTrial = false;
   if (isAuthed) {
     const { data } = await supabase
       .from("organizations")
@@ -58,6 +62,12 @@ export default async function PricingPage() {
     entitlementsByOrg = Object.fromEntries(
       (data || []).map((org) => [org.id, getOrgEntitlements(org)]),
     );
+
+    const userPlan = await getUserPlan(user.id);
+    canStartTrial =
+      !userPlan?.trialStartedAt &&
+      userPlan?.status !== "active" &&
+      userPlan?.status !== "trialing";
   }
 
   return (
@@ -87,7 +97,12 @@ export default async function PricingPage() {
             </div>
           </div>
 
-          <PlanCards isAuthed={isAuthed} organizations={organizations} entitlementsByOrg={entitlementsByOrg} />
+          <PlanCards
+            isAuthed={isAuthed}
+            organizations={organizations}
+            entitlementsByOrg={entitlementsByOrg}
+            canStartTrial={canStartTrial}
+          />
 
           <section className="border-t border-border py-16 sm:py-20" aria-labelledby="faq-heading">
             <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">

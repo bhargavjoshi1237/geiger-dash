@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SystemFavicon } from "@/components/system-favicon";
+import { PlanBanner } from "@/components/billing/plan_banner";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -44,6 +46,9 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           {children}
+          <Suspense fallback={null}>
+            <PlanBanner />
+          </Suspense>
           <Toaster />
         </ThemeProvider>
       </body>
