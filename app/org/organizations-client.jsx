@@ -11,6 +11,7 @@ import {
   Copy,
   Crown,
   ExternalLink,
+  Gauge,
   Globe,
   KeyRound,
   Link2,
@@ -52,6 +53,12 @@ import {
   saveOrgSubdomainAction,
   removeOrgSubdomainAction,
 } from './domain-actions'
+import {
+  listOrgEmailTemplatesAction,
+  createOrgEmailTemplateAction,
+  updateOrgEmailTemplateAction,
+  deleteOrgEmailTemplateAction,
+} from './email-actions'
 import { getOrgEntitlements, isProductUnlocked } from '@/lib/billing/entitlements'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -1374,6 +1381,281 @@ function DomainTab({ organization }) {
   )
 }
 
+const EMPTY_TEMPLATE_DRAFT = {
+  name: '',
+  eventName: '',
+  subject: '',
+  body: '',
+  status: 'draft',
+}
+
+// Emails settings tab: create and manage the org's branded email templates. Only
+// rendered for owners of orgs that bought the "Custom email templates" add-on.
+// Reads/writes through the email server actions; optimistic + owns its toasts.
+function EmailTemplatesTab({ organization }) {
+  const [loading, setLoading] = useState(true)
+  const [templates, setTemplates] = useState([])
+  const [mode, setMode] = useState('list') // list | form
+  const [editingId, setEditingId] = useState(null)
+  const [draft, setDraft] = useState(EMPTY_TEMPLATE_DRAFT)
+  const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    listOrgEmailTemplatesAction(organization.id).then((res) => {
+      if (!active) return
+      if (res?.ok) setTemplates(res.templates)
+      else if (res?.error) toast.error(res.error)
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [organization.id])
+
+  const set = (key) => (value) => setDraft((d) => ({ ...d, [key]: value }))
+
+  function startCreate() {
+    setEditingId(null)
+    setDraft(EMPTY_TEMPLATE_DRAFT)
+    setMode('form')
+  }
+
+  function startEdit(template) {
+    setEditingId(template.id)
+    setDraft({
+      name: template.name || '',
+      eventName: template.eventName || '',
+      subject: template.subject || '',
+      body: template.body || '',
+      status: template.status || 'draft',
+    })
+    setMode('form')
+  }
+
+  async function handleSave(e) {
+    e.preventDefault()
+    if (!draft.name.trim()) {
+      toast.error('Give the template a name.')
+      return
+    }
+    setSaving(true)
+    const res = editingId
+      ? await updateOrgEmailTemplateAction(organization.id, editingId, draft)
+      : await createOrgEmailTemplateAction(organization.id, draft)
+    setSaving(false)
+    if (res?.ok) {
+      setTemplates((prev) =>
+        editingId
+          ? prev.map((t) => (t.id === res.template.id ? res.template : t))
+          : [res.template, ...prev],
+      )
+      toast.success(editingId ? 'Template saved.' : 'Template created.')
+      setMode('list')
+      setEditingId(null)
+    } else {
+      toast.error(res?.error || 'Could not save the template.')
+    }
+  }
+
+  async function handleDelete(template) {
+    setDeletingId(template.id)
+    const res = await deleteOrgEmailTemplateAction(organization.id, template.id)
+    setDeletingId(null)
+    if (res?.ok) {
+      setTemplates((prev) => prev.filter((t) => t.id !== template.id))
+      toast.success('Template deleted.')
+    } else {
+      toast.error(res?.error || 'Could not delete the template.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading templates…
+      </div>
+    )
+  }
+
+  // Create / edit form.
+  if (mode === 'form') {
+    return (
+      <form onSubmit={handleSave} className="space-y-4">
+        <div className="rounded-lg border border-border bg-surface-card p-4">
+          <div className="flex items-center gap-2">
+            <Mail className="size-4 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">
+              {editingId ? 'Edit email template' : 'New email template'}
+            </p>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Design a reusable, branded email for one of your events. Sends draw from your organization&apos;s shared email purse.
+          </p>
+        </div>
+
+        <div className="grid gap-4 rounded-lg border border-border bg-surface-card p-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label>Template name</Label>
+              <Input
+                value={draft.name}
+                onChange={(e) => set('name')(e.target.value)}
+                placeholder="Launch invite"
+                className="bg-surface-subtle"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Event / purpose</Label>
+              <Input
+                value={draft.eventName}
+                onChange={(e) => set('eventName')(e.target.value)}
+                placeholder="Summer Launch 2026"
+                className="bg-surface-subtle"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Subject line</Label>
+            <Input
+              value={draft.subject}
+              onChange={(e) => set('subject')(e.target.value)}
+              placeholder="You're invited to our launch"
+              className="bg-surface-subtle"
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Body</Label>
+            <Textarea
+              value={draft.body}
+              onChange={(e) => set('body')(e.target.value)}
+              placeholder="Write your email. Use {{name}} to personalize."
+              className="min-h-40 resize-y bg-surface-subtle"
+            />
+            <p className="text-xs text-muted-foreground">
+              Plain text or HTML. Merge fields like <code>{'{{name}}'}</code> are filled in when the email is sent.
+            </p>
+          </div>
+
+          <div className="grid gap-1.5 sm:max-w-[200px]">
+            <Label>Status</Label>
+            <Select value={draft.status} onValueChange={set('status')}>
+              <SelectTrigger className="bg-surface-subtle">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setMode('list')
+              setEditingId(null)
+            }}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+            {editingId ? 'Save template' : 'Create template'}
+          </Button>
+        </div>
+      </form>
+    )
+  }
+
+  // List view.
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-card p-4">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+            <Mail className="size-5" />
+          </span>
+          <div>
+            <p className="text-sm font-medium text-foreground">Email templates</p>
+            <p className="text-xs text-muted-foreground">Reusable branded emails for your events.</p>
+          </div>
+        </div>
+        <Button type="button" onClick={startCreate}>
+          <Plus className="size-4" />
+          New template
+        </Button>
+      </div>
+
+      {templates.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-surface-card px-6 py-10 text-center">
+          <Mail className="size-6 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">No templates yet</p>
+          <p className="max-w-xs text-xs text-muted-foreground">
+            Create your first branded email template to reuse across your events.
+          </p>
+          <Button type="button" variant="outline" className="mt-2 border-border bg-surface-subtle" onClick={startCreate}>
+            <Plus className="size-4" />
+            New template
+          </Button>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border bg-surface-card">
+          <div className="divide-y divide-border">
+            {templates.map((t) => (
+              <div key={t.id} className="flex items-center gap-3 px-3 py-2.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-subtle text-muted-foreground">
+                  <Mail className="size-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium text-foreground">{t.name}</p>
+                    <Badge variant={t.status === 'active' ? 'success' : 'secondary'}>
+                      {t.status === 'active' ? 'Active' : 'Draft'}
+                    </Badge>
+                  </div>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {t.eventName ? `${t.eventName} · ` : ''}
+                    {t.subject || 'No subject'}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Edit template"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => startEdit(t)}
+                >
+                  <Pencil className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Delete template"
+                  disabled={deletingId === t.id}
+                  className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+                  onClick={() => handleDelete(t)}
+                >
+                  {deletingId === t.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function OrganizationCard({ organization, userId }) {
   const router = useRouter()
   const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
@@ -1397,6 +1679,11 @@ function OrganizationCard({ organization, userId }) {
   // Show the Domain tab only when this org bought the subdomain add-on.
   const hasSubdomainAddon = useMemo(
     () => isProductUnlocked(getOrgEntitlements(organization), 'subdomain'),
+    [organization],
+  )
+  // Show the Emails tab only when this org bought the email templates add-on.
+  const hasEmailTemplateAddon = useMemo(
+    () => isProductUnlocked(getOrgEntitlements(organization), 'emailTemplate'),
     [organization],
   )
   const role = isOwner ? 'Owner' : isCreator ? 'Creator' : 'Member'
@@ -1553,6 +1840,10 @@ function OrganizationCard({ organization, userId }) {
                           <Settings2 className="h-3.5 w-3.5" />
                           Settings
                         </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-xs focus:bg-surface-active focus:text-foreground" onClick={() => router.push(`/org/${organization.id}/usage`)}>
+                          <Gauge className="h-3.5 w-3.5" />
+                          Usage
+                        </DropdownMenuItem>
                       </>
                     ) : null}
                     <DropdownMenuSeparator className="bg-surface-hover" />
@@ -1605,6 +1896,10 @@ function OrganizationCard({ organization, userId }) {
               <ContextMenuItem onClick={() => setSettingsOpen(true)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
                 <Settings2 className="h-3.5 w-3.5" />
                 Settings
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => router.push(`/org/${organization.id}/usage`)} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+                <Gauge className="h-3.5 w-3.5" />
+                Usage
               </ContextMenuItem>
             </>
           ) : null}
@@ -1724,6 +2019,7 @@ function OrganizationCard({ organization, userId }) {
               { id: 'members', label: 'Members' },
               { id: 'security', label: 'Security' },
               ...(hasSubdomainAddon ? [{ id: 'domain', label: 'Domain' }] : []),
+              ...(hasEmailTemplateAddon ? [{ id: 'emails', label: 'Emails' }] : []),
               ...(hasOauthAddon ? [{ id: 'oauth', label: 'OAuth' }] : []),
             ].map((tab) => (
               <button
@@ -1833,6 +2129,8 @@ function OrganizationCard({ organization, userId }) {
             )}
 
             {activeSettingsTab === 'domain' && hasSubdomainAddon && <DomainTab organization={organization} />}
+
+            {activeSettingsTab === 'emails' && hasEmailTemplateAddon && <EmailTemplatesTab organization={organization} />}
 
             {activeSettingsTab === 'oauth' && hasOauthAddon && <OAuthTab organization={organization} />}
           </div>

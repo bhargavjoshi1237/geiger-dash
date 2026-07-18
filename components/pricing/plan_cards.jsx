@@ -17,6 +17,8 @@ import {
   Image,
   Link2,
   Lock,
+  Mail,
+  MailPlus,
   Megaphone,
   MessageSquareText,
   Minus,
@@ -83,6 +85,7 @@ const PRODUCT_ICONS = {
   oauth: Lock,
   subdomain: Link2,
   domain: Globe,
+  emailTemplate: MailPlus,
 };
 
 function formatNumber(value) {
@@ -216,7 +219,7 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
 const DEFAULT_CONFIG = {
   planId: "plus",
   products: ["campaign", "flow", "forms", "grey", "chat", "notes", "canvas"],
-  metrics: { projects: 3, seats: 12, storage: 50, bandwidth: 250, edgeData: 0, aiCredits: 200 },
+  metrics: { projects: 3, seats: 12, storage: 50, bandwidth: 250, edgeData: 0, aiCredits: 200, emails: 0 },
 };
 
 // An org with an active subscription opens the calculator pre-filled with
@@ -280,7 +283,9 @@ export function PlanCards({
               ? metrics.storage * 5
               : metricId === "aiCredits"
                 ? selectedPlan.aiAllowance
-                : 0;
+                : metricId === "emails"
+                  ? selectedPlan.emailAllowance
+                  : 0;
     return Math.max(planFloor, ownedMetric(metricId));
   };
 
@@ -392,6 +397,7 @@ export function PlanCards({
       bandwidth: Math.max(plan.storageAllowance * 5, ownedMetric("bandwidth")),
       edgeData: ownedMetric("edgeData"),
       aiCredits: Math.max(plan.aiAllowance, ownedMetric("aiCredits")),
+      emails: Math.max(plan.emailAllowance, ownedMetric("emails")),
     });
     const planDefaults = products
       .filter((product) => {
@@ -495,11 +501,11 @@ export function PlanCards({
                   value={formatNumber(plan.price * billingMultiplier)}
                   className="text-5xl font-semibold tracking-[-0.06em]"
                 />
-                <span className={`pb-1 text-sm ${plan.featured ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
+                <span className={`pb-1 text-sm ${plan.featured && !downgrade ? "text-background/60 dark:text-[#151515]/60" : "text-muted-foreground"}`}>
                   / {billingPeriod}
                 </span>
               </div>
-              <p className={`mt-5 min-h-12 text-sm leading-6 ${plan.featured ? "text-background/70 dark:text-[#151515]/70" : "text-muted-foreground"}`}>
+              <p className={`mt-5 min-h-12 text-sm leading-6 ${plan.featured && !downgrade ? "text-background/70 dark:text-[#151515]/70" : "text-muted-foreground"}`}>
                 {plan.description}
               </p>
 
@@ -805,10 +811,20 @@ export function PlanCards({
                             ? "$0.25 per Each GB"
                             : metric.id === "edgeData"
                               ? "Not included / $0.10 per GB across 119 PoPs"
-                              : "$10 per 1,000 Each Credits"}
+                              : metric.id === "emails"
+                                ? "$0.35 per 1,000 emails"
+                                : "$10 per 1,000 Each Credits"}
                       </span>
                       <span>{formatNumber(metric.max)} {metric.suffix}</span>
                     </span>
+                    {metric.id === "emails" ? (
+                      <span className="mt-3 flex items-start gap-2 rounded-lg border border-border bg-background/60 p-3 text-[11px] leading-5 text-muted-foreground">
+                        <Mail className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                        <span>
+                          A single, global email purse for your whole organization — these emails aren&apos;t tied to any one product. Any Geiger product that sends email draws from this shared balance as it&apos;s used.
+                        </span>
+                      </span>
+                    ) : null}
                   </label>
                 ))}
               </div>
@@ -892,6 +908,13 @@ export function PlanCards({
                 <span className="text-white/55">Each AI credits</span>
                 <RollingPrice
                   value={formatNumber(estimate.aiCost * billingMultiplier)}
+                  className="font-medium"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-white/55">Monthly emails</span>
+                <RollingPrice
+                  value={formatNumber(estimate.emailCost * billingMultiplier)}
                   className="font-medium"
                 />
               </div>
