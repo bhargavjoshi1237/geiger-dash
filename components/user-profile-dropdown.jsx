@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, HomeIcon, LogOut } from "lucide-react";
+import { CreditCard, HomeIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CachedAvatarImage } from "@/components/cached-avatar-image";
 import {
@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout } from "@/app/login/actions";
-import { clearProfileImageCache } from "@/lib/profile-image-cache";
+import { SignOutMenuItem } from "@/components/sign-out-menu-item";
 
 export function UserProfileDropdown({ user }) {
   const displayName =
@@ -77,17 +76,7 @@ export function UserProfileDropdown({ user }) {
             </Link>
           </DropdownMenuItem>
 
-          <form action={logout} onSubmit={() => clearProfileImageCache()}>
-            <DropdownMenuItem
-              asChild
-              className="text-text-secondary focus:bg-surface-hover focus:text-foreground cursor-pointer gap-2"
-            >
-              <button type="submit" className="w-full">
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign out</span>
-              </button>
-            </DropdownMenuItem>
-          </form>
+          <SignOutMenuItem className="text-text-secondary focus:bg-surface-hover focus:text-foreground" />
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

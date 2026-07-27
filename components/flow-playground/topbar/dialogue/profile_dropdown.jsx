@@ -18,7 +18,6 @@ import {
   CircleUserRound,
   Settings,
   Wallet,
-  LogOut,
   Moon,
   Sun,
   UsersRound,
@@ -29,8 +28,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { getUser } from "@/lib/supabase/user-demo";
-import { logout } from "@/app/login/actions";
-import { clearProfileImageCache } from "@/lib/profile-image-cache";
+import { SignOutMenuItem } from "@/components/sign-out-menu-item";
 
 const surfaceStyle = {
   backgroundColor: "var(--surface-dialog)",
@@ -194,17 +192,9 @@ export function ProfileDropdown({ children }) {
               <LifeBuoy className="w-3.5 h-3.5" />
               <span>Help & Support</span>
             </DropdownMenuItem>
-            <form action={logout} onSubmit={() => clearProfileImageCache()}>
-              <DropdownMenuItem
-                asChild
-                className={`${itemBaseStyle} text-text-secondary hover:bg-surface-hover hover:text-foreground focus:bg-surface-hover focus:text-foreground`}
-              >
-                <button type="submit" className="w-full">
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign out</span>
-                </button>
-              </DropdownMenuItem>
-            </form>
+            <SignOutMenuItem
+              className={`${itemBaseStyle} text-text-secondary hover:bg-surface-hover hover:text-foreground focus:bg-surface-hover focus:text-foreground`}
+            />
           </DropdownMenuGroup>
         </div>
 
