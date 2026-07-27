@@ -4,6 +4,8 @@ import { useState } from "react";
 import { login } from "./actions";
 import { Github, Loader2, AlertCircle, Apple, KeyRound, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
+import { resolveLoginRedirectPath } from "@/lib/product-routes.mjs";
 
 // Mock Google Icon since it's not in Lucide
 const GoogleIcon = ({ className }) => (
@@ -35,6 +37,7 @@ const ERROR_MESSAGES = {
   oauth_unavailable: "SSO isn't available for that organization right now.",
   oauth_no_email: "Your provider didn't return an email address.",
   auth_callback_failed: "That sign-in link was invalid or expired.",
+  provider_failed: "Couldn't start that sign-in. Please try again.",
 };
 
 const INPUT =
@@ -44,6 +47,7 @@ export function AuthForm({ next, initialError = "" }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState("");
   const [error, setError] = useState(ERROR_MESSAGES[initialError] || "");
   // View state: cross-fade between the standard sign-in and the enterprise SSO
   // panel. `fading` hides the current content, we swap views while invisible,
@@ -72,6 +76,28 @@ export function AuthForm({ next, initialError = "" }) {
     if (result && result.error) {
       setIsLoading(false);
       setError(result.error);
+    }
+  }
+
+  // Supabase-hosted social sign-in: starts the PKCE flow and returns the browser
+  // to /auth/callback, which exchanges the code for a session. On success this
+  // navigates away, so the loading state is only cleared on failure.
+  async function handleOAuth(provider) {
+    setOauthLoading(provider);
+    setError("");
+    const path = resolveLoginRedirectPath(next);
+    // Only forward a real destination — a bare /auth/callback defaults to
+    // /onboarding, which bounces existing members on to their org.
+    const query = path === "/" ? "" : `?next=${encodeURIComponent(path)}`;
+    const supabase = createClient();
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback${query}` },
+    });
+
+    if (oauthError) {
+      setOauthLoading("");
+      setError(oauthError.message || ERROR_MESSAGES.provider_failed);
     }
   }
 
@@ -166,20 +192,33 @@ export function AuthForm({ next, initialError = "" }) {
                 <button
                   className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => handleOAuth("google")}
+                  disabled={Boolean(oauthLoading)}
                 >
-                  <GoogleIcon className="mr-2 h-4 w-4" />
+                  {oauthLoading === "google" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <GoogleIcon className="mr-2 h-4 w-4" />
+                  )}
                   Continue with Google
                 </button>
                 <button
                   className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  onClick={() => handleOAuth("github")}
+                  disabled={Boolean(oauthLoading)}
                 >
-                  <Github className="mr-2 h-4 w-4" />
+                  {oauthLoading === "github" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Github className="mr-2 h-4 w-4" />
+                  )}
                   Continue with GitHub
                 </button>
                 <button
                   className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
                   type="button"
+                  disabled={Boolean(oauthLoading)}
                 >
                   <Apple className="mr-2 h-4 w-4" />
                   Continue with Apple
@@ -187,6 +226,7 @@ export function AuthForm({ next, initialError = "" }) {
                 <button
                   type="button"
                   onClick={() => switchMode(true)}
+                  disabled={Boolean(oauthLoading)}
                   className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
