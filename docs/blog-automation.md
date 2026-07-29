@@ -25,8 +25,9 @@ The cron endpoint is `GET /api/cron/blog-automation` and requires:
 Authorization: Bearer <CRON_SECRET>
 ```
 
-Vercel invokes it every two hours. The database-backed daily limit defaults to
-10, so the last two invocations each UTC day are skipped.
+Vercel invokes it once a day at 00:00 UTC (see `vercel.json`). Runs are capped
+per UTC day by `BLOG_AUTOMATION_DAILY_LIMIT` (default 10), counted from the
+database; manual Studio runs count toward it but are never skipped.
 
 Authenticated Studio users can inspect recent usage with
 `GET /api/studio/blog-automation` and trigger a manual run with
