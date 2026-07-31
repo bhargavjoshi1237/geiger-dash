@@ -7,6 +7,7 @@
 export const theme = {
   color: {
     background: "#f4f4f5", // page canvas behind the card
+    canvasStrong: "#e4e4e7", // heavier canvas, for full-bleed cards with no radius
     card: "#ffffff",
     border: "#e4e4e7",
     heading: "#18181b",
@@ -20,6 +21,18 @@ export const theme = {
     warning: "#d97706",
     danger: "#dc2626",
     panel: "#fafafa",
+  },
+  // Inverted surfaces for templates with a dark hero/footer (ticket receipts).
+  dark: {
+    surface: "#161616", // hero + footer canvas
+    surfaceStrong: "#212121", // seam strip between hero and body
+    border: "#333333",
+    borderStrong: "#3a3a3a",
+    heading: "#fafafa",
+    text: "#a3a3a3",
+    muted: "#8a8a8a",
+    onSurface: "#e7e7e7", // logo / emphasised inline text
+    footerText: "#737373",
   },
   font: {
     // Match the app, which loads Geist / Geist Mono via next/font. Email clients
