@@ -1,3 +1,7 @@
+-- Imported from changelog_products.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Expand the release product constraint for existing Geiger Dash databases.
 ALTER TABLE public.dash_changelog
   DROP CONSTRAINT IF EXISTS dash_changelog_product_check;

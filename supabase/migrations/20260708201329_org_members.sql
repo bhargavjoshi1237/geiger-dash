@@ -1,3 +1,7 @@
+-- Imported from 0006_org_members.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Organization member directory + management RPCs.
 --
 -- Members reference auth.users, which the anon client can't read, so listing a

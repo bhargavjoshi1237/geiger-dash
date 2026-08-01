@@ -106,9 +106,23 @@ BLOG_SEARCH_API_KEY=...
 
 ### Database
 
+Schema changes are timestamped SQL migrations in `supabase/migrations/`, applied
+in version order by [`@geiger/orm`](https://github.com/bhargavjoshi1237/geiger-orm)
+and recorded in `public.geiger_migrations`:
+
 ```bash
-npm run db:push          # run pending SQL migrations
-npm run db:push:all      # re-run every migration
+npm run db:status                     # applied vs pending
+npm run db:new -- <name>              # scaffold a migration
+npm run db:push                       # apply everything pending
+npm run db:seed                       # re-runnable data
+```
+
+See [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) before writing any DDL.
+
+Part of Dash's data is Prisma-managed; Prisma owns those tables and `@geiger/orm`
+owns the rest:
+
+```bash
 npm run db:generate      # generate the Prisma client
 npm run db:migrate       # apply Prisma migrations
 npm run db:studio        # open Prisma Studio
@@ -165,8 +179,8 @@ lib/
   sitemap/, seo        SEO generation
   prisma.js            Prisma client
 prisma/                Prisma schema and migrations
-supabase/sqls/         SQL migrations
-scripts/               Migration, sitemap, and email seed runners
+supabase/migrations/   Timestamped @up/@down migrations (npm run db:push)
+scripts/               Sitemap and email seed runners
 docs/                  Automation and pricing documentation
 ```
 
@@ -182,6 +196,7 @@ This codebase follows a consistent set of patterns. Read these before contributi
 
 - [`MODULE_CONVENTIONS.md`](MODULE_CONVENTIONS.md) — how to build a workspace screen
 - [`SUPABASE_CONVENTIONS.md`](SUPABASE_CONVENTIONS.md) — the data-layer playbook
+- [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) — schema changes and `@geiger/orm`
 - [`crafting.md`](crafting.md) — UI craft and quality bar
 - [`docs/blog-automation.md`](docs/blog-automation.md) — how the blog automation job works
 

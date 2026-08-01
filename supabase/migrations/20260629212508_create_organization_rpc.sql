@@ -1,3 +1,7 @@
+-- Imported from 0003_create_organization_rpc.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- create_organization RPC.
 --
 -- The onboarding wizard inserts an org and needs the new id/slug back. Doing

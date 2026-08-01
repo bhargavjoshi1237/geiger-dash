@@ -1,3 +1,7 @@
+-- Imported from blog_automation.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Geiger automatic blog research, generation, review, and usage tracking.
 -- Run after database/init/blog.sql.
 

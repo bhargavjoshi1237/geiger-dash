@@ -1,5 +1,9 @@
+-- Imported from organisition/organization_projects.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Organization project and plan tables.
--- Run this in the Supabase SQL editor for databases missing these external org tables.
+-- Mirrored here so the org schema is tracked inside the repo's Supabase SQL hierarchy.
 
 create table if not exists public.organizations (
   id uuid not null default gen_random_uuid(),

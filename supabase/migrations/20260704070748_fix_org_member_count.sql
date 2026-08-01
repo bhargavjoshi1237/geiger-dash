@@ -1,3 +1,7 @@
+-- Imported from 0005_fix_org_member_count.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Fix find_organization's member_count.
 --
 -- The original definition added the length of metadata.members to the count of

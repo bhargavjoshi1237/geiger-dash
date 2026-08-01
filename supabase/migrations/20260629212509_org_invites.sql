@@ -1,3 +1,7 @@
+-- Imported from 0004_org_invites.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Organization invites + onboarding team-size capture.
 --
 -- Adds a token-based invite system (create invites past RLS, email an accept

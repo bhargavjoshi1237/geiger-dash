@@ -1,3 +1,7 @@
+-- Imported from changelog.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Changelog table for tracking product updates and releases
 CREATE TABLE IF NOT EXISTS public.dash_changelog (
   id UUID NOT NULL DEFAULT gen_random_uuid(),

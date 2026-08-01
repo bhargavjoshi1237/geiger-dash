@@ -1,3 +1,7 @@
+-- Imported from seo_pages.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- SEO landing pages (product / solution / feature) written by AI in the studio
 -- and rendered publicly under /product, /solutions, /features. Mirrors the
 -- dash_blog_posts pattern: published rows readable by everyone, authenticated

@@ -1,3 +1,7 @@
+-- Imported from 0005_payments.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Billing tables for the pricing-page Stripe checkout (geiger-dash).
 --
 -- Three user-scoped tables in public (reachable by supabase-js' default client,

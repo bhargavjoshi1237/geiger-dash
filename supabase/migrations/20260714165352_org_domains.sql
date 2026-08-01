@@ -1,3 +1,7 @@
+-- Imported from 0008_org_domains.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Per-organization custom domains for the purchasable "domains" add-on.
 --
 -- Backs the $5 Custom subdomain product (and, later, the $10 Own domain product).

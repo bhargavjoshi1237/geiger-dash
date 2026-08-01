@@ -1,3 +1,7 @@
+-- Imported from docs.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Geiger Docs content system
 -- Run this in the Supabase SQL editor after the base project tables.
 

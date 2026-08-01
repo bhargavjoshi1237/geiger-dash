@@ -1,3 +1,7 @@
+-- Imported from 0002_org_abilities_rls.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Organization ability + RLS layer for geiger-dash.
 --
 -- Mirrors the geiger-flow authorization model (flow.has_ability / is_org_member

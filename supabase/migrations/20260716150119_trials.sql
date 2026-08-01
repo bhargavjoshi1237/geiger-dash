@@ -1,3 +1,7 @@
+-- Imported from 0009_trials.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Trial + expiry lifecycle for user_plan (geiger-dash).
 --
 -- Adds a per-user trial eligibility stamp and a period-end used to expire both

@@ -1,3 +1,7 @@
+-- Imported from 0010_org_email_templates.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Per-organization custom email templates for the purchasable "Custom email
 -- templates" add-on ($10/mo, catalog id `emailTemplate`).
 --

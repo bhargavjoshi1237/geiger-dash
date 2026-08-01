@@ -1,3 +1,7 @@
+-- Imported from blog.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Blog posts table
 CREATE TABLE IF NOT EXISTS public.dash_blog_posts (
   id UUID NOT NULL DEFAULT gen_random_uuid(),

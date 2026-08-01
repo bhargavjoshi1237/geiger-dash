@@ -1,3 +1,7 @@
+-- Imported from storage_policies.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Storage bucket + RLS policies for blog/changelog image uploads.
 -- Run this in Supabase SQL editor after blog/changelog table setup.
 

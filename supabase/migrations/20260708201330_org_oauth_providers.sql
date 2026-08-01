@@ -1,3 +1,7 @@
+-- Imported from 0007_org_oauth_providers.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Per-organization OAuth (SSO) provider config for the purchasable OAuth add-on.
 --
 -- One row per organization (unique organization_id) describing a generic

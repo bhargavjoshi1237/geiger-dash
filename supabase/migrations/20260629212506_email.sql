@@ -1,3 +1,7 @@
+-- Imported from 0001_email.sql by geiger-orm.
+-- No @down section — this migration cannot be rolled back.
+
+-- @up
 -- Geiger email subsystem.
 --
 -- geiger-dash is the "mother" project of the suite: it hosts every transactional
