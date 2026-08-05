@@ -18,7 +18,7 @@
 
 import { NextResponse } from "next/server";
 import { extractApiKey, verifyApiKey } from "@/lib/email/auth";
-import { sendTemplateEmail } from "@/lib/email/send";
+import { sendRenderedEmail, sendTemplateEmail } from "@/lib/email/send";
 
 export const runtime = "nodejs";
 
@@ -38,23 +38,35 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { template, to, data, from, subject } = body || {};
-  if (!template || !to) {
+  const { template, to, data, from, subject, html } = body || {};
+  if (!to || (!template && !html)) {
     return NextResponse.json(
-      { error: "`template` and `to` are required." },
+      { error: "`to` and either `template` or `html` are required." },
       { status: 400 }
     );
   }
 
-  const result = await sendTemplateEmail({
-    key: template,
-    to,
-    data: data || {},
-    from,
-    subject,
-    project: apiKey.project,
-    apiKeyId: apiKey.id,
-  });
+  // Pre-rendered mode: the caller owns its own template library and only wants
+  // our delivery and send log. geiger-docs uses this for Documenso's templates.
+  const result = html
+    ? await sendRenderedEmail({
+        to,
+        html,
+        subject,
+        from,
+        templateKey: template || null,
+        project: apiKey.project,
+        apiKeyId: apiKey.id,
+      })
+    : await sendTemplateEmail({
+        key: template,
+        to,
+        data: data || {},
+        from,
+        subject,
+        project: apiKey.project,
+        apiKeyId: apiKey.id,
+      });
 
   if (!result.ok) {
     return NextResponse.json(

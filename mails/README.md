@@ -86,3 +86,25 @@ curl -X POST https://geiger.studio/api/email/send \
     "data": { "recipientName": "Alex", "issueTitle": "Login bug", "issueUrl": "https://..." }
   }'
 ```
+
+### Pre-rendered mode
+
+An app that already owns a template library can post the finished HTML instead
+of a template key, and still get this project's Resend account and send log.
+Send `html` + `subject` in place of `template`; an optional `template` string is
+then recorded as the log label only.
+
+geiger-docs uses this — it is a Documenso fork and ships Documenso's own
+(Geiger-themed) React Email templates.
+
+```bash
+curl -X POST https://geiger.studio/api/email/send \
+  -H "Authorization: Bearer gk_live_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "person@example.com",
+    "subject": "Please sign \"Master Services Agreement\"",
+    "html": "<html>…</html>",
+    "template": "docs.document_invite"
+  }'
+```
