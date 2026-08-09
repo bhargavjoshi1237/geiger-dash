@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, HomeIcon } from "lucide-react";
+import { CreditCard, HomeIcon, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CachedAvatarImage } from "@/components/cached-avatar-image";
 import {
@@ -65,6 +65,16 @@ export function UserProfileDropdown({ user }) {
               <span>Dashboard</span>
             </Link>
           </DropdownMenuItem >
+
+          <DropdownMenuItem
+            asChild
+            className="text-muted-foreground focus:bg-surface-hover focus:text-foreground cursor-pointer gap-2"
+          >
+            <Link href={user?.id ? `/profile/${user.id}` : "/profile"}>
+              <UserRound className="w-3.5 h-3.5" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
 
           <DropdownMenuItem
             asChild
