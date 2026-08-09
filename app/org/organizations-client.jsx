@@ -9,7 +9,6 @@ import {
   Camera,
   Check,
   Copy,
-  Crown,
   ExternalLink,
   Gauge,
   Globe,
@@ -297,50 +296,38 @@ function memberRoleLabel(member) {
   return member.role || 'Member'
 }
 
-// Polished "Your role" summary — an icon chip, the role badge, and the concrete
-// things that role can do as check chips.
-function YourRoleCard({ roleLabel }) {
-  const privileged = roleLabel === 'Owner' || roleLabel === 'Creator'
-  const Icon = privileged ? Crown : ShieldCheck
-  const blurb = privileged
-    ? 'You have full control of this workspace — manage members, projects, billing, and settings.'
-    : 'You have member access to this workspace and its shared projects.'
-  const caps = privileged
-    ? ['Manage members', 'Manage projects', 'Billing & plan', 'Workspace settings']
-    : ['Access shared projects', 'Launch products']
-
+// One settings block: bordered card, a titled header row with an optional aside,
+// and a body. Shared by the settings tabs so every tab keeps the same rhythm.
+function SettingsSection({ title, description, aside, children, bodyClassName }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-card p-4">
-      <div className="flex items-start gap-3">
-        <span
-          className={cn(
-            'flex size-10 shrink-0 items-center justify-center rounded-lg border',
-            privileged
-              ? 'border-primary/20 bg-primary/10 text-primary'
-              : 'border-border bg-surface-subtle text-muted-foreground',
-          )}
-        >
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-foreground">Your role</p>
-            <Badge variant={privileged ? 'success' : 'secondary'}>{roleLabel}</Badge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{blurb}</p>
+    <section className="overflow-hidden rounded-lg border border-border bg-surface-card">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">{title}</p>
+          {description ? <p className="mt-0.5 text-xs text-muted-foreground">{description}</p> : null}
         </div>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {caps.map((c) => (
-          <span
-            key={c}
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs text-muted-foreground"
-          >
-            <Check className="size-3 text-emerald-400" />
-            {c}
-          </span>
-        ))}
-      </div>
+        {aside ? <div className="shrink-0">{aside}</div> : null}
+      </header>
+      {children ? <div className={cn('p-4', bodyClassName)}>{children}</div> : null}
+    </section>
+  )
+}
+
+// Actions attached to the bottom of a SettingsSection (used with bodyClassName="p-0").
+function SettingsSectionFooter({ children }) {
+  return (
+    <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3">{children}</div>
+  )
+}
+
+// Label + control pair inside a settings section body.
+function SettingsField({ id, label, className, children }) {
+  return (
+    <div className={cn('grid gap-1.5', className)}>
+      <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
+        {label}
+      </Label>
+      {children}
     </div>
   )
 }
@@ -365,9 +352,9 @@ function MemberAvatar({ member }) {
   )
 }
 
-// Members tab: fetches the directory + pending invites on open, renders the role
-// card, an invite form, the member list (with role + remove for managers), and
-// pending invites. Reads through server actions; owns its own toasts.
+// Members tab: fetches the directory + pending invites on open, renders the
+// invite row, the member list (with role + remove for managers), and pending
+// invites. Reads through server actions; owns its own toasts.
 function MembersTab({ organization, userId, roleLabel, canManage }) {
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState([])
@@ -479,15 +466,9 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
 
   return (
     <div className="space-y-4">
-      <YourRoleCard roleLabel={preciseRole} />
-
       {canManage && (
-        <form onSubmit={handleInvite} className="rounded-lg border border-border bg-surface-card p-4">
-          <div className="flex items-center gap-2">
-            <UserPlus className="size-4 text-muted-foreground" />
-            <p className="text-sm font-medium text-foreground">Invite a teammate</p>
-          </div>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <SettingsSection title="Invite a teammate" description="They get access to this workspace and its projects.">
+          <form onSubmit={handleInvite} className="flex flex-col gap-2 sm:flex-row">
             <Input
               type="email"
               value={inviteEmail}
@@ -496,7 +477,7 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
               className="flex-1 bg-surface-subtle"
             />
             <Select value={inviteRole} onValueChange={setInviteRole}>
-              <SelectTrigger className="w-full bg-surface-subtle sm:w-[150px]">
+              <SelectTrigger className="w-full bg-surface-subtle sm:w-[160px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -511,23 +492,23 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
               {inviting ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
               Invite
             </Button>
-          </div>
-        </form>
+          </form>
+        </SettingsSection>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-border bg-surface-card">
-        <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-          <div className="flex items-center gap-2">
-            <Users className="size-4 text-muted-foreground" />
-            <p className="text-sm font-medium text-foreground">Members</p>
-          </div>
-          <span className="text-xs text-muted-foreground">{members.length}</span>
-        </div>
-
+      <SettingsSection
+        title="Members"
+        aside={
+          <span className="text-xs text-muted-foreground">
+            {members.length} {members.length === 1 ? 'member' : 'members'} · you are {preciseRole}
+          </span>
+        }
+        bodyClassName="p-0"
+      >
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" />
-            Loading members…
+            Loading Members…
           </div>
         ) : members.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">No members found.</p>
@@ -538,30 +519,26 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
               const fixed = m.isOwner || m.isCreator
               const manageable = canManage && !fixed && !isSelf
               return (
-                <div key={m.userId || m.email} className="flex items-center gap-3 px-3 py-2.5">
+                <div key={m.userId || m.email} className="flex items-center gap-3 px-4 py-3">
                   <MemberAvatar member={m} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <p className="truncate text-sm font-medium text-foreground">
                         {m.name || m.email || 'Unknown user'}
                       </p>
-                      {isSelf && (
-                        <span className="rounded-full border border-border bg-surface-subtle px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          You
-                        </span>
-                      )}
+                      {isSelf && <span className="text-xs text-muted-foreground">(you)</span>}
                     </div>
                     {m.name && m.email && <p className="truncate text-xs text-muted-foreground">{m.email}</p>}
                   </div>
 
                   {manageable ? (
-                    <div className="flex items-center gap-1.5">
+                    <>
                       <Select
                         value={MEMBER_ROLE_OPTIONS.includes(m.role) ? m.role : 'User'}
                         onValueChange={(v) => handleRole(m, v)}
                         disabled={busyId === m.userId}
                       >
-                        <SelectTrigger className="h-8 w-[150px] bg-surface-subtle text-xs">
+                        <SelectTrigger className="h-8 w-[160px] shrink-0 bg-surface-subtle text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -578,7 +555,7 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
                             variant="ghost"
                             size="icon-sm"
                             aria-label="Member actions"
-                            className="text-muted-foreground hover:text-foreground"
+                            className="shrink-0 text-muted-foreground hover:text-foreground"
                           >
                             <MoreHorizontal className="size-4" />
                           </Button>
@@ -590,32 +567,35 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
+                    </>
                   ) : (
-                    <Badge variant={fixed ? 'success' : 'secondary'} className="gap-1">
-                      {fixed && <Crown className="size-3" />}
+                    // Fixed roles (owner/creator) and your own row aren't editable — read-only
+                    // label, sized to the role-select column so the right edge stays aligned.
+                    <span
+                      className={cn(
+                        'shrink-0 text-xs text-muted-foreground',
+                        canManage ? 'w-[204px] text-right' : 'pl-2',
+                      )}
+                    >
                       {memberRoleLabel(m)}
-                    </Badge>
+                    </span>
                   )}
                 </div>
               )
             })}
           </div>
         )}
-      </div>
+      </SettingsSection>
 
       {canManage && invites.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-border bg-surface-card">
-          <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-            <div className="flex items-center gap-2">
-              <Mail className="size-4 text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">Pending invites</p>
-            </div>
-            <span className="text-xs text-muted-foreground">{invites.length}</span>
-          </div>
+        <SettingsSection
+          title="Pending invites"
+          aside={<span className="text-xs text-muted-foreground">{invites.length}</span>}
+          bodyClassName="p-0"
+        >
           <div className="divide-y divide-border">
             {invites.map((i) => (
-              <div key={i.id} className="flex items-center gap-3 px-3 py-2.5">
+              <div key={i.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-surface-subtle text-muted-foreground">
                   <Mail className="size-4" />
                 </span>
@@ -623,20 +603,19 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
                   <p className="truncate text-sm font-medium text-foreground">{i.email}</p>
                   <p className="truncate text-xs text-muted-foreground">Invited as {i.role}</p>
                 </div>
-                <Badge variant="secondary">Invited</Badge>
                 <Button
                   variant="ghost"
                   size="sm"
                   disabled={busyId === i.id}
                   onClick={() => handleRevoke(i)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
                 >
                   {busyId === i.id ? <Loader2 className="size-4 animate-spin" /> : 'Revoke'}
                 </Button>
               </div>
             ))}
           </div>
-        </div>
+        </SettingsSection>
       )}
 
       <Dialog open={Boolean(removeTarget)} onOpenChange={(o) => !o && setRemoveTarget(null)}>
@@ -1228,7 +1207,7 @@ function DomainTab({ organization }) {
     return (
       <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
         <Loader2 className="size-4 animate-spin" />
-        Loading domain settings…
+        Loading Domain Settings…
       </div>
     )
   }
@@ -1239,25 +1218,17 @@ function DomainTab({ organization }) {
   if (domain && !editing) {
     const host = `${domain.subdomain}.${ROOT_DOMAIN}`
     return (
-      <div className="space-y-4">
-        <div className="rounded-lg border border-border bg-surface-card p-4">
-          <div className="flex items-center gap-2">
-            <Globe className="size-4 text-muted-foreground" />
-            <p className="text-sm font-medium text-foreground">Your subdomain is live</p>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            This workspace is reachable at the address below. Opening it shows only this organization.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-card p-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-subtle text-emerald-400">
+      <SettingsSection
+        title="Custom subdomain"
+        description="This workspace is reachable at the address below. Opening it shows only this organization."
+        aside={<Badge variant="success">Active</Badge>}
+        bodyClassName="p-0"
+      >
+        <div className="flex items-center gap-3 p-4">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-subtle text-muted-foreground">
             <Globe className="size-4" />
           </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-foreground">{host}</span>
-            <span className="block text-xs text-emerald-400">Active</span>
-          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{host}</span>
           <Button
             type="button"
             variant="outline"
@@ -1285,43 +1256,34 @@ function DomainTab({ organization }) {
           </Button>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <SettingsSectionFooter>
           <Button
             type="button"
             variant="ghost"
             onClick={handleRemove}
             disabled={removing}
-            className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+            className="mr-auto text-red-400 hover:bg-red-500/10 hover:text-red-400"
           >
             {removing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             Remove
           </Button>
-          <Button type="button" onClick={startEdit}>
+          <Button type="button" variant="outline" onClick={startEdit} className="border-border bg-surface-subtle">
             <Pencil className="size-4" />
             Change
           </Button>
-        </div>
-      </div>
+        </SettingsSectionFooter>
+      </SettingsSection>
     )
   }
 
   // Setup / change form.
   return (
-    <div className="space-y-4">
-      <div className="rounded-lg border border-border bg-surface-card p-4">
-        <div className="flex items-center gap-2">
-          <Globe className="size-4 text-muted-foreground" />
-          <p className="text-sm font-medium text-foreground">
-            {domain ? 'Change your subdomain' : 'Claim your subdomain'}
-          </p>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Pick a subdomain to host this workspace. Visitors to it see only this organization.
-        </p>
-      </div>
-
-      <div className="grid gap-2 rounded-lg border border-border bg-surface-card p-4">
-        <Label htmlFor={`subdomain-${organization.id}`}>Subdomain</Label>
+    <SettingsSection
+      title={domain ? 'Change your subdomain' : 'Claim your subdomain'}
+      description="Pick a subdomain to host this workspace. Visitors to it see only this organization."
+      bodyClassName="p-0"
+    >
+      <SettingsField id={`subdomain-${organization.id}`} label="Subdomain" className="p-4">
         <div className="flex items-stretch overflow-hidden rounded-md border border-border bg-surface-subtle focus-within:ring-2 focus-within:ring-ring">
           <input
             id={`subdomain-${organization.id}`}
@@ -1357,9 +1319,9 @@ function DomainTab({ organization }) {
             <span className="text-text-tertiary">3–63 characters · letters, numbers, and hyphens</span>
           )}
         </div>
-      </div>
+      </SettingsField>
 
-      <div className="flex justify-end gap-2">
+      <SettingsSectionFooter>
         {editing && domain && (
           <Button
             type="button"
@@ -1374,10 +1336,10 @@ function DomainTab({ organization }) {
         )}
         <Button type="button" onClick={handleSave} disabled={!canSave}>
           {saving ? <Loader2 className="size-4 animate-spin" /> : <Globe className="size-4" />}
-          {domain ? 'Save changes' : 'Claim subdomain'}
+          {domain ? 'Save Changes' : 'Claim subdomain'}
         </Button>
-      </div>
-    </div>
+      </SettingsSectionFooter>
+    </SettingsSection>
   )
 }
 
@@ -1877,6 +1839,11 @@ function OrganizationCard({ organization, userId }) {
             <ExternalLink className="h-3.5 w-3.5" />
             Open
           </ContextMenuItem>
+          <ContextMenuItem onClick={() => startEdit()} className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs focus:bg-surface-active focus:text-foreground">
+            <ExternalLink className="h-3.5 w-3.5" />
+            Edit
+          </ContextMenuItem>
+          
           {canManage ? (
             <>
               <ContextMenuSeparator className="bg-surface-hover" />
@@ -1962,7 +1929,7 @@ function OrganizationCard({ organization, userId }) {
               <Button type="button" variant="ghost" onClick={() => setEditOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -2009,7 +1976,7 @@ function OrganizationCard({ organization, userId }) {
           <DialogHeader className="border-b border-border p-4">
             <div className="flex items-center gap-2">
               <Settings2 className="h-5 w-5 text-muted-foreground" />
-              <DialogTitle className="text-base font-medium text-foreground">Organization settings</DialogTitle>
+              <DialogTitle className="text-base font-medium text-foreground">Organization Settings</DialogTitle>
             </div>
           </DialogHeader>
 
@@ -2026,7 +1993,7 @@ function OrganizationCard({ organization, userId }) {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveSettingsTab(tab.id)}
-                className={`flex-1 border-b-2 py-3 text-sm font-medium transition-colors ${activeSettingsTab === tab.id ? 'border-white bg-surface-hover/30 text-foreground' : 'border-transparent text-foreground/70 hover:bg-surface-hover/20 hover:text-foreground'}`}
+                className={`flex-1 border-b-2 py-2.5 text-sm font-medium transition-colors ${activeSettingsTab === tab.id ? 'border-foreground bg-surface-hover/30 text-foreground' : 'border-transparent text-muted-foreground hover:bg-surface-hover/20 hover:text-foreground'}`}
               >
                 {tab.label}
               </button>
@@ -2035,48 +2002,45 @@ function OrganizationCard({ organization, userId }) {
 
           <div className="max-h-[460px] overflow-y-auto bg-surface-subtle p-6">
             {activeSettingsTab === 'general' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 rounded-lg border border-border bg-surface-card p-4">
-                  <div className="group/avatar relative shrink-0">
-                    <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-subtle">
-                      {avatarPreview || organization.avatar_url ? (
-                        <Image
-                          src={avatarPreview || organization.avatar_url}
-                          alt=""
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="select-none text-2xl font-semibold text-foreground">
-                          {(organization.name || 'O').slice(0, 1).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => avatarInputRef.current?.click()}
-                      disabled={avatarUploading}
-                      aria-label="Change organization icon"
-                      className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 opacity-0 transition-opacity group-hover/avatar:opacity-100 disabled:pointer-events-none"
-                    >
-                      {avatarUploading
-                        ? <Loader2 className="size-5 animate-spin text-white" />
-                        : <Camera className="size-5 text-white" />
-                      }
-                    </button>
-                  </div>
+              <SettingsSection
+                title="Organization profile"
+                description="How this workspace appears across the Geiger suite."
+                bodyClassName="p-0"
+              >
+                <div className="flex items-center gap-4 p-4">
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    aria-label="Change organization icon"
+                    className="group/avatar relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-subtle disabled:pointer-events-none"
+                  >
+                    {avatarPreview || organization.avatar_url ? (
+                      <Image src={avatarPreview || organization.avatar_url} alt="" fill className="object-cover" />
+                    ) : (
+                      <span className="select-none text-xl font-semibold text-foreground">
+                        {(organization.name || 'O').slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/avatar:opacity-100">
+                      <Camera className="size-5 text-white" />
+                    </span>
+                  </button>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-foreground">Organization icon</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">PNG, JPG, or WebP · max 2 MB</p>
-                    <button
-                      type="button"
-                      onClick={() => avatarInputRef.current?.click()}
-                      disabled={avatarUploading}
-                      className="mt-2 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none"
-                    >
-                      {avatarUploading ? 'Uploading…' : 'Upload image'}
-                    </button>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={avatarUploading}
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="shrink-0 border-border bg-surface-subtle"
+                  >
+                    {avatarUploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+                    {avatarUploading ? 'Uploading…' : 'Upload'}
+                  </Button>
                   <input
                     ref={avatarInputRef}
                     type="file"
@@ -2085,19 +2049,35 @@ function OrganizationCard({ organization, userId }) {
                     onChange={handleAvatarChange}
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={`settings-name-${organization.id}`}>Workspace name</Label>
-                  <Input id={`settings-name-${organization.id}`} defaultValue={organization.name || ''} />
+
+                <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2">
+                  <SettingsField
+                    id={`settings-name-${organization.id}`}
+                    label="Workspace name"
+                    className="sm:col-span-2"
+                  >
+                    <Input
+                      id={`settings-name-${organization.id}`}
+                      defaultValue={organization.name || ''}
+                      className="bg-surface-subtle"
+                    />
+                  </SettingsField>
+                  <SettingsField id={`settings-country-${organization.id}`} label="Country">
+                    <Input
+                      id={`settings-country-${organization.id}`}
+                      defaultValue={organization.country || ''}
+                      className="bg-surface-subtle"
+                    />
+                  </SettingsField>
+                  <SettingsField id={`settings-phone-${organization.id}`} label="Phone">
+                    <Input
+                      id={`settings-phone-${organization.id}`}
+                      defaultValue={organization.phone || ''}
+                      className="bg-surface-subtle"
+                    />
+                  </SettingsField>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={`settings-country-${organization.id}`}>Country</Label>
-                  <Input id={`settings-country-${organization.id}`} defaultValue={organization.country || ''} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={`settings-phone-${organization.id}`}>Phone</Label>
-                  <Input id={`settings-phone-${organization.id}`} defaultValue={organization.phone || ''} />
-                </div>
-              </div>
+              </SettingsSection>
             )}
 
             {activeSettingsTab === 'members' && (
@@ -2111,17 +2091,17 @@ function OrganizationCard({ organization, userId }) {
 
             {activeSettingsTab === 'security' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg border border-border bg-surface-subtle p-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Workspace active</p>
-                    <p className="text-sm text-muted-foreground">Allow members to access this workspace.</p>
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-card p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">Workspace Active</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Allow members to access this workspace.</p>
                   </div>
                   <Switch defaultChecked={Boolean(organization.is_active)} />
                 </div>
-                <div className="flex items-center justify-between rounded-lg border border-border bg-surface-subtle p-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Require approval for new joins</p>
-                    <p className="text-sm text-muted-foreground">Review incoming requests before access is granted.</p>
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-card p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">Require Approval For New Joins</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Review incoming requests before access is granted.</p>
                   </div>
                   <Switch />
                 </div>
@@ -2140,7 +2120,7 @@ function OrganizationCard({ organization, userId }) {
               Cancel
             </Button>
             <Button onClick={() => { toast.success('Settings updated.'); setSettingsOpen(false) }}>
-              Save changes
+              Save Changes
             </Button>
           </div>
         </DialogContent>
@@ -2200,7 +2180,7 @@ export function OrganizationsClient({ organizations, userId, searchState, scope 
   const scopedBlocked = scoped && scope.status !== 'member'
 
   return (
-    <main className="min-h-screen bg-background pt-12 text-foreground">
+    <main className="relative z-10 min-h-screen flex-1 pt-12 text-foreground">
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-2xl mt-6">

@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import { Header } from '@/components/header'
+import { GridBackdrop } from '@/components/grid-backdrop'
 import { Badge } from '@/components/ui/badge'
 import { getOrganizationProjects } from '@/lib/org/projects'
 import { getOrgEntitlements } from '@/lib/billing/entitlements'
@@ -44,16 +45,17 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
     : null
 
   return (
-    <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
+    <div className="geiger-flow-palette flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
+      <GridBackdrop variant="subtle" />
       <Header megaMenue={false} />
 
-      <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col bg-background px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto flex min-h-[60vh] w-full max-w-5xl flex-1 flex-col px-4 pb-20 pt-24 sm:px-6 lg:px-8">
         <Link
           href="/org"
           className="mb-6 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          All organizations
+          All Organizations
         </Link>
 
         <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -77,7 +79,7 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
                 ) : null}
               </div>
               <p className="mt-1 truncate text-sm text-muted-foreground">
-                {projectCount} {projectCount === 1 ? 'project' : 'projects'} · Shared workspaces across the Geiger suite
+                {projectCount} {projectCount === 1 ? 'Project' : 'Projects'} · Shared workspaces across the Geiger suite
               </p>
             </div>
           </div>
@@ -100,6 +102,7 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
           <section className="mt-8">
             <OrganizationProjectsClient
               organizationId={ORGID}
+              organizationName={organization?.name || ''}
               projects={projects}
               notificationParams={notificationParams}
               entitlements={clientEntitlements}

@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Header } from '@/components/header'
+import { GridBackdrop } from '@/components/grid-backdrop'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
 import { getUserOrganizations } from '@/lib/org/membership'
@@ -52,7 +53,8 @@ export default async function OrganizationsPage({ searchParams }) {
     (typeof params?.error === 'string' ? decodeURIComponent(params.error) : '')
 
   return (
-    <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
+    <div className="geiger-flow-palette flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
+      <GridBackdrop variant="subtle" />
       <Header megaMenue={false} />
       <OrganizationsClient
         organizations={visibleOrganizations}

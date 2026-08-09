@@ -1,6 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Header } from '@/components/header'
+import Footer from '@/components/footer'
+import { GridBackdrop } from '@/components/grid-backdrop'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { getOrganizationProjects } from '@/lib/org/projects'
 import { getOrgEntitlements } from '@/lib/billing/entitlements'
 import { products as PRODUCT_CATALOG } from '@/lib/pricing/plans'
@@ -50,26 +54,51 @@ export default async function OrganizationUsagePage({ params }) {
     : null
 
   return (
-    <div className="geiger-flow-palette min-h-screen bg-background text-foreground">
-      <Header megaMenue={false} />
+    <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
+      <GridBackdrop variant="subtle" />
+      <Header />
 
-      <main className="mx-auto flex min-h-[60vh] max-w-6xl flex-col bg-background px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-8">
         <Link
           href={`/org/${ORGID}`}
           className="mb-6 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Back to organization
+          Back to Organization
         </Link>
 
+        <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight">Usage</h1>
+            <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span className="truncate">
+                {organization?.name || 'Organization'} · what you&apos;re using against the
+                allowance you&apos;ve purchased
+              </span>
+              {usage?.hasSubscription ? (
+                <Badge variant={usage.isTrial ? 'warning' : 'success'}>
+                  {usage.planName} {usage.isTrial ? 'trial' : 'plan'}
+                </Badge>
+              ) : null}
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/pricing">
+              {usage?.hasSubscription ? 'Add Capacity' : 'Choose a Plan'}
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </header>
+
         {error || !organization ? (
-          <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error || 'Organization not found.'}
           </div>
         ) : (
           <UsageScreen usage={usage} />
         )}
       </main>
+      <Footer />
     </div>
   )
 }
