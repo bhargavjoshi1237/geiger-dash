@@ -3,31 +3,14 @@
 import {
   ArrowDown,
   ArrowRight,
-  BookOpen,
-  BriefcaseBusiness,
-  Building2,
-  CalendarDays,
   Check,
-  CheckCircle2,
-  Code2,
-  FileStack,
-  FolderKanban,
-  Globe,
   HardDrive,
-  Image,
-  Link2,
   Lock,
   Mail,
-  MailPlus,
-  Megaphone,
-  MessageSquareText,
   Minus,
-  Podcast,
   Plus,
   Radio,
-  RadioTower,
   Sparkles,
-  Workflow,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -60,33 +43,10 @@ import {
   getPlanRank,
   YEARLY_MULTIPLIER,
 } from "@/lib/pricing/plans";
+// The catalog is icon-free so the server can import it; icons live beside it.
+import { PRODUCT_ICONS } from "@/lib/pricing/product-icons";
 import { createCheckoutAction } from "@/app/pricing/actions";
 import { startTrialAction } from "@/app/pricing/trial-actions";
-
-// Pricing data lives in lib/pricing/plans.js (shared with the server checkout
-// action). The catalog there is icon-free; map each product id to its Lucide
-// icon for rendering here.
-const PRODUCT_ICONS = {
-  campaign: Megaphone,
-  flow: Workflow,
-  events: CalendarDays,
-  assets: Image,
-  comms: RadioTower,
-  forms: CheckCircle2,
-  grey: Sparkles,
-  office: BriefcaseBusiness,
-  docs: BookOpen,
-  content: Code2,
-  pods: Podcast,
-  chat: MessageSquareText,
-  notes: FileStack,
-  canvas: FolderKanban,
-  property: Building2,
-  oauth: Lock,
-  subdomain: Link2,
-  domain: Globe,
-  emailTemplate: MailPlus,
-};
 
 function formatNumber(value) {
   return new Intl.NumberFormat("en-US").format(value);

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CreditCard, ReceiptText, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CreditCard, LucideClock, ReceiptText } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
+import { ProductAccess } from "@/components/billing/product-access";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
@@ -15,15 +16,6 @@ export const dynamic = "force-dynamic";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const PRODUCT_META = new Map(PRODUCT_CATALOG.map((p) => [p.id, p]));
-
-// Product families rendered as grouped rows in the plan card, in display order.
-const PRODUCT_GROUPS = [
-  { key: "core", label: "Core", dot: "bg-emerald-400" },
-  { key: "addon", label: "Add-ons", dot: "bg-blue-400" },
-  { key: "cherry", label: "Cherry", dot: "bg-violet-400" },
-  { key: "security", label: "Security", dot: "bg-amber-400" },
-  { key: "domains", label: "Domains", dot: "bg-sky-400" },
-];
 
 const PURCHASE_STATUS = {
   completed: { label: "Completed", variant: "success" },
@@ -40,13 +32,13 @@ const PLAN_PHASE_BADGE = {
   none: { label: "Inactive", variant: "secondary" },
 };
 
-// Phase-driven accent for the plan icon and the billing-period meter fill.
+// Phase-driven accent for the billing-period meter fill.
 const PHASE_ACCENT = {
-  trialing: { icon: "border-amber-500/20 bg-amber-500/10 text-amber-400", bar: "bg-amber-400" },
-  active: { icon: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400", bar: "bg-emerald-400" },
-  grace: { icon: "border-red-500/20 bg-red-500/10 text-red-400", bar: "bg-red-400" },
-  expired: { icon: "border-border bg-surface-subtle text-muted-foreground", bar: "bg-surface-strong" },
-  none: { icon: "border-border bg-surface-subtle text-muted-foreground", bar: "bg-surface-strong" },
+  trialing: { bar: "bg-amber-400" },
+  active: { bar: "bg-emerald-400" },
+  grace: { bar: "bg-red-400" },
+  expired: { bar: "bg-surface-strong" },
+  none: { bar: "bg-surface-strong" },
 };
 
 function formatUsd(cents, currency = "usd") {
@@ -68,17 +60,6 @@ function planLabel(planKey) {
 
 function productNames(ids) {
   return (Array.isArray(ids) ? ids : []).map((id) => PRODUCT_META.get(id)?.name || id);
-}
-
-// Groups the plan's product ids into catalog families, dropping empty groups.
-function groupProducts(ids) {
-  const list = Array.isArray(ids) ? ids : [];
-  return PRODUCT_GROUPS.map((group) => ({
-    ...group,
-    items: list
-      .map((id) => PRODUCT_META.get(id))
-      .filter((p) => p && p.category === group.key),
-  })).filter((group) => group.items.length);
 }
 
 // Progress through the current billing cycle: fill %, cycle start, and days left.
@@ -113,7 +94,7 @@ export default async function BillingPage() {
   const accent = PHASE_ACCENT[planState.phase] || PHASE_ACCENT.none;
 
   const cycle = plan ? billingCycle(plan, planState) : null;
-  const productGroups = plan ? groupProducts(plan.products) : [];
+  const planProducts = Array.isArray(plan?.products) ? plan.products : [];
   const totalSpent = purchases
     .filter((p) => p.status === "completed")
     .reduce((sum, p) => sum + (p.amountTotal || 0), 0);
@@ -134,7 +115,7 @@ export default async function BillingPage() {
           </div>
           <Button asChild variant="outline" className="shrink-0">
             <Link href="/pricing">
-              {plan ? "Change plan" : "Choose a plan"}
+              {plan ? "Change Plan" : "Choose a Plan"}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -143,7 +124,7 @@ export default async function BillingPage() {
         {/* Current plan */}
         <section className="mt-8">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-            Current plan
+            Current Plan
           </h2>
           {plan ? (
             <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-card">
@@ -151,24 +132,17 @@ export default async function BillingPage() {
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent" />
               <div className="relative p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <span
-                      className={`flex size-12 shrink-0 items-center justify-center rounded-xl border ${accent.icon}`}
-                    >
-                      <Sparkles className="size-6" />
-                    </span>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold">{planLabel(plan.planKey)}</h3>
-                        <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {planState.isTrial
-                          ? "Free trial"
-                          : `${formatUsd(plan.amountTotal, plan.currency)} / ${plan.billingInterval}`}{" "}
-                        · member since {formatDate(plan.startedAt)}
-                      </p>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg font-semibold">{planLabel(plan.planKey)}</h3>
+                      <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
                     </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {planState.isTrial
+                        ? "Free trial"
+                        : `${formatUsd(plan.amountTotal, plan.currency)} / ${plan.billingInterval}`}{" "}
+                      · member since {formatDate(plan.startedAt)}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-semibold tabular-nums tracking-tight">
@@ -185,10 +159,10 @@ export default async function BillingPage() {
                   <div className="mt-6">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-text-secondary">
-                        {planState.phase === "trialing" ? "Trial period" : "Current billing period"}
+                        {planState.phase === "trialing" ? "Trial Period" : "Current Billing Period"}
                       </span>
-                      <span className="text-muted-foreground">
-                        {cycle.daysRemaining} {cycle.daysRemaining === 1 ? "day" : "days"} left
+                      <span className="text-muted-foreground flex gap-1.5 items-center">
+                       <LucideClock className="w-3 h-3" /> <p className="text-xs text-muted-foreground -mt-0.5">{cycle.daysRemaining} days left</p>
                       </span>
                     </div>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-strong">
@@ -218,46 +192,12 @@ export default async function BillingPage() {
                         {formatDate(planState.deletionDate)}) unless you renew.
                       </p>
                       <Button asChild size="sm" variant="destructive" className="mt-3">
-                        <Link href="/pricing">Renew plan</Link>
+                        <Link href="/pricing">Renew Plan</Link>
                       </Button>
                     </div>
                   </div>
                 ) : null}
 
-                {/* Product access, grouped by catalog family. */}
-                {productGroups.length ? (
-                  <div className="mt-6 border-t border-border pt-5">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-                        Product access
-                      </p>
-                      <span className="text-xs text-muted-foreground">
-                        {plan.products.length} {plan.products.length === 1 ? "product" : "products"}
-                      </span>
-                    </div>
-                    <div className="space-y-3">
-                      {productGroups.map((group) => (
-                        <div key={group.key} className="flex flex-col gap-1.5 sm:flex-row sm:gap-4">
-                          <span className="flex w-20 shrink-0 items-center gap-1.5 pt-1 text-xs font-medium text-text-secondary">
-                            <span className={`size-1.5 rounded-full ${group.dot}`} />
-                            {group.label}
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {group.items.map((product) => (
-                              <span
-                                key={product.id}
-                                title={product.detail}
-                                className="rounded-md border border-border bg-surface-subtle px-2 py-1 text-xs text-text-secondary"
-                              >
-                                {product.name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </div>
             </div>
           ) : (
@@ -265,13 +205,13 @@ export default async function BillingPage() {
               <span className="mb-4 flex size-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                 <CreditCard className="size-6" />
               </span>
-              <h3 className="text-base font-semibold">No active plan</h3>
+              <h3 className="text-base font-semibold">No Active Plan</h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                 You haven&apos;t purchased a plan yet. Pick a foundation to get started.
               </p>
               <Button asChild className="mt-5">
                 <Link href="/pricing">
-                  View plans
+                  View Plans
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -283,18 +223,28 @@ export default async function BillingPage() {
         {plan ? (
           <section className="mt-6">
             <div className="grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-card sm:grid-cols-4 sm:divide-y-0">
-              <StatCell label="Total spent" value={formatUsd(totalSpent)} />
+              <StatCell label="Total Spent" value={formatUsd(totalSpent)} />
               <StatCell label="Payments" value={paymentCount} />
-              <StatCell label="Products" value={plan.products.length} />
-              <StatCell label="Member since" value={formatDate(plan.startedAt)} />
+              <StatCell label="Products" value={planProducts.length} />
+              <StatCell label="Member Since" value={formatDate(plan.startedAt)} />
             </div>
+          </section>
+        ) : null}
+
+        {/* What the plan unlocks, grouped by catalog family. */}
+        {planProducts.length ? (
+          <section className="mt-10">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+              Product Access
+            </h2>
+            <ProductAccess productIds={planProducts} />
           </section>
         ) : null}
 
         {/* Purchase history */}
         <section className="mt-10">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-            Purchase history
+            Purchase History
           </h2>
           {purchases.length ? (
             <div className="overflow-hidden rounded-2xl border border-border bg-surface-card">
@@ -357,7 +307,7 @@ export default async function BillingPage() {
               <span className="mb-4 flex size-12 items-center justify-center rounded-xl bg-surface-subtle text-muted-foreground">
                 <ReceiptText className="size-6" />
               </span>
-              <h3 className="text-base font-semibold">No purchases yet</h3>
+              <h3 className="text-base font-semibold">No Purchases Yet</h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                 Your completed payments will appear here.
               </p>
