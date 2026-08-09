@@ -23,7 +23,7 @@ const deadlines = [
     priority: "High",
     progress: 75,
     color: "#f59e0b",
-    remaining: "14 days left",
+    remaining: "14 Days left",
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const deadlines = [
     priority: "Critical",
     progress: 40,
     color: "#ef4444",
-    remaining: "21 days left",
+    remaining: "21 Days left",
   },
   {
     id: 3,
@@ -41,7 +41,7 @@ const deadlines = [
     priority: "Medium",
     progress: 10,
     color: "#3b82f6",
-    remaining: "35 days left",
+    remaining: "35 Days left",
   },
   {
     id: 4,
@@ -50,7 +50,7 @@ const deadlines = [
     priority: "Low",
     progress: 90,
     color: "#10b981",
-    remaining: "42 days left",
+    remaining: "42 Days left",
   },
 ];
 

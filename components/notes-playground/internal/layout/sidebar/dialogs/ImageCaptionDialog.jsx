@@ -118,7 +118,7 @@ const ImageCaptionDialog = ({ open, onOpenChange, initialData, onSave }) => {
             onClick={handleSave}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            Save changes
+            Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>

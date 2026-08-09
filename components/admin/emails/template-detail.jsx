@@ -239,7 +239,7 @@ export function TemplateDetail({ template, onSaved }) {
               ) : (
                 <Save className="h-3.5 w-3.5" />
               )}
-              Save changes
+              Save Changes
             </Button>
           </div>
         </div>
