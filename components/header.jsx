@@ -22,7 +22,7 @@ function HeaderContent({ user = null, megaMenue }) {
     : null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background md:border-border/50 md:bg-background/85 md:backdrop-blur-md">
+    <header className="fixed top-[var(--geiger-banner-h,0px)] left-0 right-0 z-50 border-b border-border bg-background md:border-border/50 md:bg-background/85 md:backdrop-blur-md">
       <div className="mx-auto flex h-12 w-full max-w-6xl items-center justify-between px-4 sm:px-6 relative">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 flex items-center justify-center">
