@@ -10,6 +10,19 @@ import { loginNextRouteNames } from '@/lib/product-routes.mjs'
 const GATED_SEGMENTS = new Set(loginNextRouteNames)
 GATED_SEGMENTS.delete('docs')
 
+// Buyer-facing paths that live inside a gated product. Gating by path segment
+// alone would bounce ticket buyers and portal members — who are not suite users
+// and have no org — to the organiser login, so these are exempted before that
+// check. Keep the list narrow: everything else under a gated segment stays gated.
+const PUBLIC_PREFIXES = [
+  '/events/login', // members sign-in + emailed set-password links
+  '/events/members', // the members portal shell
+  '/events/api/portal', // the members API (web portal + mobile app)
+  '/events/e/', // public event page — where tickets are bought
+  '/events/w/', // public event website
+  '/events/r/', // public registration page
+]
+
 const HAS_ORG_COOKIE = 'geiger_has_org'
 
 function redirectWithCookies(url, base) {
@@ -76,7 +89,12 @@ export async function updateSession(request, requestHeaders) {
     })
   }
 
-  const segment = request.nextUrl.pathname.split('/')[1] || ''
+  const { pathname } = request.nextUrl
+  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return supabaseResponse
+  }
+
+  const segment = pathname.split('/')[1] || ''
   if (!GATED_SEGMENTS.has(segment)) {
     return supabaseResponse
   }
