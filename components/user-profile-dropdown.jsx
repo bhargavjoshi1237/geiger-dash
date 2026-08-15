@@ -24,7 +24,9 @@ export function UserProfileDropdown({ user }) {
     .toUpperCase()
     .slice(0, 2);
 
-  const fallbackInitials = initials || "U";
+  // Same placeholder as the Geiger Events member portal: a single initial on a
+  // flat surface, no coloured background.
+  const fallbackInitial = (initials || "U").charAt(0);
 
   return (
     <DropdownMenu modal={false}>
@@ -39,10 +41,11 @@ export function UserProfileDropdown({ user }) {
                 src={user.avatarUrl}
                 cacheKey={user.id}
                 alt={displayName}
+                className="object-cover"
               />
             )}
-            <AvatarFallback className="border-0 bg-border-strong text-[10px] font-semibold text-white">
-              {fallbackInitials}
+            <AvatarFallback className="border-0 bg-surface-strong text-sm font-semibold text-foreground">
+              {fallbackInitial}
             </AvatarFallback>
           </Avatar>
           <span className="sr-only">Open user menu</span>
