@@ -197,7 +197,7 @@ function ProfileHeader({
   return (
     <Card className="relative overflow-hidden">
       {/* Soft top-light, same as the plan card on /billing. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40" />
       <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -298,7 +298,9 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
   const fileRef = useRef(null)
 
   const [tab, setTab] = useState('general')
-  const [avatarVersion, setAvatarVersion] = useState(0)
+  // Shows the freshly uploaded picture straight away; router.refresh() then
+  // brings the prop up to the same versioned URL.
+  const [avatarOverride, setAvatarOverride] = useState('')
   const [avatarRemoved, setAvatarRemoved] = useState(false)
   const [uploading, setUploading] = useState(false)
 
@@ -328,10 +330,12 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
   const phaseBadge = PLAN_PHASE_BADGE[billing.phase] || PLAN_PHASE_BADGE.none
   const isDark = resolvedTheme === 'dark'
 
+  // profile.avatarUrl already carries the ?v= cache buster (see lib/avatar-url),
+  // so nothing needs appending here.
   const avatarSrc = useMemo(() => {
-    if (avatarRemoved || !profile.avatarUrl) return ''
-    return avatarVersion ? `${profile.avatarUrl}?v=${avatarVersion}` : profile.avatarUrl
-  }, [avatarRemoved, avatarVersion, profile.avatarUrl])
+    if (avatarRemoved) return ''
+    return avatarOverride || profile.avatarUrl || ''
+  }, [avatarRemoved, avatarOverride, profile.avatarUrl])
 
   const dirty = useMemo(
     () => Object.keys(form).some((key) => form[key] !== savedForm[key]),
@@ -356,7 +360,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
       // every surface keeps showing the old picture.
       await clearProfileImageCache()
       setAvatarRemoved(false)
-      setAvatarVersion(Date.now())
+      setAvatarOverride(result.url || '')
       toast.success('Profile picture updated.')
       router.refresh()
     } else {
@@ -368,6 +372,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
     const result = await removeAvatarAction()
     if (result?.ok) {
       await clearProfileImageCache()
+      setAvatarOverride('')
       setAvatarRemoved(true)
       toast.success('Profile picture removed.')
       router.refresh()

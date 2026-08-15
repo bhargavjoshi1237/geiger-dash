@@ -8,15 +8,7 @@ import { PlanBanner } from "@/components/billing/plan_banner";
 // peer deps) into this server component's module graph.
 import { BannerProvider, GlobalBanner } from "@geiger/ui/global-banner";
 import { Toaster } from "@/components/ui/sonner";
-
-// Demo notice for the above-the-topbar strip. Drop `initial` to start hidden and
-// drive it from a client component with useBanner().showBanner({ … }).
-const DEMO_BANNER = {
-  message: "Scheduled maintenance on Sunday 02:00–04:00 UTC.",
-  type: "warning",
-  dismissible: true,
-  link: { text: "See status", href: "/changelog" },
-};
+import { getActiveNotice } from "@/lib/notices/queries";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +36,12 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // The above-the-topbar strip is driven by public.dash_notices — null when no
+  // notice is live, which renders nothing. Manage it at /admin/notice; a client
+  // component can still override it at runtime with useBanner().showBanner({…}).
+  const notice = await getActiveNotice();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning
@@ -57,7 +54,7 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <BannerProvider initial={DEMO_BANNER}>
+          <BannerProvider initial={notice}>
             <GlobalBanner />
             {children}
           </BannerProvider>

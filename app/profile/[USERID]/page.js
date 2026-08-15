@@ -9,6 +9,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
 import { getUserOrganizations } from '@/lib/org/membership'
+import { avatarUrlForUser } from '@/lib/avatar-url'
 import { getUserPlan, listPurchases } from '@/lib/billing/store'
 import { derivePlanState } from '@/lib/billing/plan_state'
 import { getPlan } from '@/lib/pricing/plans'
@@ -110,9 +111,7 @@ export default async function ProfilePage({ params }) {
     providers: identities.length
       ? identities.map((identity) => identity.provider)
       : [user.app_metadata?.provider || 'email'],
-    avatarUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
-      ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${user.id}/latest.jpg`
-      : '',
+    avatarUrl: avatarUrlForUser(user),
     displayName: meta.full_name || meta.name || (user.email || '').split('@')[0] || 'You',
     jobTitle: meta.job_title || '',
     company: meta.company || '',

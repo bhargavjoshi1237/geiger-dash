@@ -129,7 +129,7 @@ export default async function BillingPage() {
           {plan ? (
             <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-card">
               {/* Soft top-light so the hero card lifts off the canvas. */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/[0.05] to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-40" />
               <div className="relative p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0">

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
+import { userAvatarUrl } from '@/lib/avatar-url'
 
 // Profile server actions — everything the /profile hub can change about the
 // signed-in user. All identity data lives on the Supabase auth user (email,
@@ -12,22 +13,27 @@ import { requireUser } from '@/supabase/user/getUser'
 
 const AVATAR_BUCKET = 'pfp'
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024
+// Supabase defaults public objects to an hour. The object name is reused on
+// every upload, so a long TTL means a stale picture everywhere that still reads
+// the unversioned URL — keep it short as a backstop for those callers.
+const AVATAR_CACHE_SECONDS = 60
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function cleanText(value, max = 200) {
   return String(value ?? '').trim().slice(0, max)
 }
 
-// The storage object every surface in the suite reads the avatar from. Fixed
-// name so the URL never changes; cache-busting is the client's job.
+// The storage object every surface in the suite reads the avatar from. The
+// object name is fixed, so the URL is only unique per upload once `version`
+// (user_metadata.avatar_version) is appended — without it, browsers serve the
+// previous picture from cache for the whole AVATAR_CACHE_SECONDS window.
+// `lib/avatar-url.js` owns the URL shape; this just re-exports it as an action.
 function avatarPath(userId) {
   return `${userId}/latest.jpg`
 }
 
-export async function avatarPublicUrl(userId) {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!base || !userId) return ''
-  return `${base}/storage/v1/object/public/${AVATAR_BUCKET}/${avatarPath(userId)}`
+export async function avatarPublicUrl(userId, version = 0) {
+  return userAvatarUrl(userId, version)
 }
 
 // Saves the editable profile fields. `name`/`full_name` are kept in sync because
@@ -100,18 +106,29 @@ export async function updateAvatarAction(formData) {
   const bytes = await file.arrayBuffer()
   const { error } = await supabase.storage
     .from(AVATAR_BUCKET)
-    .upload(avatarPath(user.id), bytes, { contentType: file.type, upsert: true })
+    .upload(avatarPath(user.id), bytes, {
+      contentType: file.type,
+      cacheControl: String(AVATAR_CACHE_SECONDS),
+      upsert: true,
+    })
 
   if (error) return { ok: false, error: error.message }
 
+  // The upload reuses the same object name, so the picture only changes for a
+  // browser if the URL does. `avatar_version` is that cache buster: every
+  // surface builds the src as `<path>?v=<avatar_version>`.
+  const version = Date.now()
+  const url = await avatarPublicUrl(user.id, version)
+
   // Mirror the URL onto the auth user so apps that read `avatar_url` (the member
   // directory, OAuth-provisioned profiles) pick the new picture up too.
-  const url = await avatarPublicUrl(user.id)
-  await supabase.auth.updateUser({ data: { avatar_url: url } })
+  await supabase.auth.updateUser({
+    data: { avatar_url: url, avatar_version: version },
+  })
 
   revalidatePath(`/profile/${user.id}`)
   revalidatePath('/org')
-  return { ok: true, url }
+  return { ok: true, url, version }
 }
 
 export async function removeAvatarAction() {
@@ -121,7 +138,9 @@ export async function removeAvatarAction() {
   const { error } = await supabase.storage.from(AVATAR_BUCKET).remove([avatarPath(user.id)])
   if (error) return { ok: false, error: error.message }
 
-  await supabase.auth.updateUser({ data: { avatar_url: '' } })
+  // Clear the version too, so a later upload can't collide with a cached entry
+  // stored under the old one.
+  await supabase.auth.updateUser({ data: { avatar_url: '', avatar_version: 0 } })
 
   revalidatePath(`/profile/${user.id}`)
   revalidatePath('/org')

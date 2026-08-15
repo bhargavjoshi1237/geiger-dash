@@ -5,6 +5,7 @@ import { getUser } from "@/supabase/user/getUser";
 import { MegaMenu } from "@/components/mega-menu";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { avatarUrlForUser } from "@/lib/avatar-url";
 
 function HeaderContent({ user = null, megaMenue }) {
   const userId = user?.id;
@@ -14,9 +15,7 @@ function HeaderContent({ user = null, megaMenue }) {
         email: user.email,
         name: user.user_metadata?.name,
         fullName: user.user_metadata?.full_name,
-        avatarUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/pfp/${userId}/latest.jpg`
-          : "",
+        avatarUrl: avatarUrlForUser(user),
         dashboardHref: "/org",
       }
     : null;
