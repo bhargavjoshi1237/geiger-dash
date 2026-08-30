@@ -30,6 +30,7 @@ export function MegaMenu({ userId }) {
       label: "Notes",
       description: "Write and collaborate.",
       href: notesHref,
+      badge: "Pre-alpha",
     },
     {
       icon: ContainerIcon,
@@ -66,6 +67,7 @@ export function MegaMenu({ userId }) {
       label: "Events",
       description: "Organise & Manage events.",
       href: "/events",
+      badge: "Pre-alpha",
     },
     {
       icon: LayoutGrid,
@@ -96,6 +98,7 @@ export function MegaMenu({ userId }) {
       label: "Chat",
       description: "Messaging and hangout.",
       href: "/chat",
+      badge: "Pre-alpha",
     },
     {
       icon: PenTool,
@@ -112,7 +115,7 @@ export function MegaMenu({ userId }) {
     {
       icon: Building2,
       label: "Property",
-      description: "Manage real estate & property.",
+      description: "Manage real estate.",
       href: "/property",
     }
   ];
@@ -123,9 +126,6 @@ export function MegaMenu({ userId }) {
     { label: "Documentation", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Blog", href: "/blog" },
-    { label: "GitHub Repository", href: "#" },
-    { label: "Self Host Geiger", href: "#" },
-    { label: "Free Image Tools", href: "/tools", },
   ];
 
   return (
@@ -155,7 +155,14 @@ export function MegaMenu({ userId }) {
                     >
                       <Icon className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-foreground">{item.label}</p>
+                        <p className="flex items-center gap-1.5 text-sm text-foreground">
+                          {item.label}
+                          {item.badge ? (
+                            <span className="rounded-full border border-border px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-muted-foreground">
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        </p>
                         <p className="text-xs text-foreground0">{item.description}</p>
                       </div>
                     </Link>
@@ -236,6 +243,11 @@ export function MegaMenu({ userId }) {
                         >
                           <Icon className="h-4 w-4 text-muted-foreground" />
                           <p className="leading-tight">{item.label}</p>
+                          {item.badge ? (
+                            <span className="rounded-full border border-border px-1.5 py-px text-[8px] font-medium uppercase tracking-wide text-muted-foreground">
+                              {item.badge}
+                            </span>
+                          ) : null}
                         </Link>
                       </SheetClose>
                     );
