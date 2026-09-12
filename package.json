@@ -25,7 +25,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@excalidraw/excalidraw": "^0.18.1",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
-    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#dc740a3a5aa9541b2786acd065934fb3b683572b",
+    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#3e39407aa598ba03f55356c9c4e1e23b4dc42659",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-accordion": "^1.2.2",
