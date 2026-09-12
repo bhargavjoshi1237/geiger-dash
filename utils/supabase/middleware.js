@@ -25,6 +25,16 @@ const PUBLIC_PREFIXES = [
 
 const HAS_ORG_COOKIE = 'geiger_has_org'
 
+// Paths this function would pass through untouched anyway: the marketing site,
+// docs, and the buyer-facing paths inside gated products. Proxy runs ahead of the
+// CDN, so building the Supabase client and calling getUser() for them puts a
+// round-trip in front of every cacheable response and changes nothing. An invite
+// still waiting to be accepted is the one case that needs the full path.
+function isPassThroughPath(pathname) {
+  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true
+  return !GATED_SEGMENTS.has(pathname.split('/')[1] || '')
+}
+
 function redirectWithCookies(url, base) {
   const res = NextResponse.redirect(url)
   base.cookies.getAll().forEach((cookie) => res.cookies.set(cookie))
@@ -35,6 +45,14 @@ export async function updateSession(request, requestHeaders) {
   // Forward any headers the outer middleware injected (e.g. x-geiger-subdomain)
   // to the downstream request while preserving Supabase's cookie refresh.
   const headers = requestHeaders || new Headers(request.headers)
+
+  if (
+    !request.cookies.get('pending_invite')?.value &&
+    isPassThroughPath(request.nextUrl.pathname)
+  ) {
+    return NextResponse.next({ request: { headers } })
+  }
+
   const syncCookieHeader = () => {
     headers.set(
       'cookie',

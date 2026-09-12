@@ -14,7 +14,7 @@ export function subdomainFromHost(host) {
   return label && !label.includes('.') ? label : ''
 }
 
-export async function middleware(request) {
+export async function proxy(request) {
   const subdomain = subdomainFromHost(request.headers.get('host'))
   const requestHeaders = new Headers(request.headers)
   if (subdomain) requestHeaders.set('x-geiger-subdomain', subdomain)
