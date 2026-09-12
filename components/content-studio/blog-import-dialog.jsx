@@ -4,16 +4,16 @@ import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Download, FileText, Link2, Loader2, Sparkles, Upload } from 'lucide-react'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+  Input,
+  Label,
+} from "@geiger/ui";
 import { callLlmChat, extractJson, useLlmConfig } from '@/components/content-studio/llm-config'
 import { extractArticleAction, createImportedBlogPostAction } from '@/app/studio/posts/actions'
 import {

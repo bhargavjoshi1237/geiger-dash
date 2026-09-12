@@ -4,16 +4,16 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Tag } from 'lucide-react'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+  Input,
+  Label,
+} from "@geiger/ui";
 import { createBlogCategoryAction } from '@/app/studio/posts/actions'
 
 const inputClassName = 'bg-background text-foreground placeholder:text-muted-foreground'

@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge, Button, Card, CardContent, Progress, SearchBar } from "@geiger/ui";
 import {
   Flag,
   Calendar,
@@ -19,7 +16,6 @@ import {
   SquareStack,
 } from "lucide-react";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
-import { SearchBar } from "@/components/ui/search-bar";
 import { cn } from "@/lib/utils";
 
 const MOCK_MILESTONES = [

@@ -12,7 +12,7 @@ import {
   SidebarMenu,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@geiger/ui";
 import { PanelLeft, ChevronLeft, Search, Bell, X } from "lucide-react";
 import { SidebarOption } from "../sidebar_option";
 import { projectNav, settingsNav } from "./sidebar_data";

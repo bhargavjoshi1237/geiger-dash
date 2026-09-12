@@ -11,7 +11,7 @@ import {
   SidebarMenu,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@geiger/ui";
 import { PanelLeft, ChevronLeft } from "lucide-react";
 import { SidebarOption } from "../sidebar_option";
 import { projectNav, settingsNav, mediaTypesNav } from "./sidebar_data";

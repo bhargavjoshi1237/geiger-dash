@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge, Button } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,

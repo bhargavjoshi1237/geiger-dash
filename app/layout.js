@@ -7,7 +7,7 @@ import { PlanBanner } from "@/components/billing/plan_banner";
 // Subpath import: the barrel would drag every component (and their optional
 // peer deps) into this server component's module graph.
 import { BannerProvider, GlobalBanner } from "@geiger/ui/global-banner";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@geiger/ui";
 import { getActiveNotice } from "@/lib/notices/queries";
 
 const geistSans = Geist({

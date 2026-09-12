@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { LogOut, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@geiger/ui";
 import { logout } from "@/app/login/actions";
 import { clearProfileImageCache } from "@/lib/profile-image-cache";
 import { cn } from "@/lib/utils";

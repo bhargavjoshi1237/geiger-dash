@@ -2,11 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Pencil } from "lucide-react";
-import { ExpandableSearch } from "@geiger/ui";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Dialog, DialogContent, ExpandableSearch, Input, Label } from "@geiger/ui";
 import { updateProjectAction } from "../actions";
 import { CompactDialogHeader, PROJECT_DIALOG_CONTENT_CLASS, ProductPickerFooter } from "./dialog-parts";
 import { ProductPickerEmpty, ProductToggleRow } from "./product-picker";

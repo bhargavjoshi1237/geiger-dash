@@ -1,17 +1,17 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+} from "@geiger/ui";
 import { logout } from "@/app/login/actions";
 import { clearProfileImageCache } from "@/lib/profile-image-cache";
 import { useState } from "react";

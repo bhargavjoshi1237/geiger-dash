@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
+  Avatar,
+  AvatarFallback,
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectGroup,
@@ -12,16 +16,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui/avatar";
+  Textarea,
+} from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Expand, Maximize2, ArrowUpRight, Check, Search, X, Plus, Circle, Zap, AlertOctagon, CircleDot, Archive, ClipboardList, Rocket, FlaskConical, CloudUpload, Server, GitMerge, Eye, Flag, CircleCheck, CheckIcon, ArrowRight, Cloud, GitBranch, Bug } from "lucide-react";
 

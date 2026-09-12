@@ -2,9 +2,8 @@
 
 import React from "react";
 import { Search, Bell, HelpCircle, ChevronsUpDown, Plug } from "lucide-react";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Kbd, KbdGroup, SidebarTrigger } from "@geiger/ui";
 import { useProject } from "@/components/assets-playground/context/project-context";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationsDropdown } from "../dialogue/notifications_dropdown";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 

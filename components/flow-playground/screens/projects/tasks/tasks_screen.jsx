@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
+  Badge,
+  Button,
+  Progress,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@geiger/ui";
 import {
   Plus,
   AlertTriangle,

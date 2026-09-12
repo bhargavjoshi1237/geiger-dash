@@ -1,17 +1,17 @@
 "use client";
 
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+  Switch,
+  Textarea,
+} from "@geiger/ui";
 
 const ROLE_VISIBILITY = [
   { value: "team", label: "Team" },

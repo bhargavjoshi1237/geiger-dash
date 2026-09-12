@@ -2,20 +2,23 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  Badge,
+  Button,
+  Input,
+  ScrollArea,
+  Skeleton,
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
-} from "@/components/ui/table";
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@geiger/ui";
 import {
   Search,
   Table2,

@@ -6,7 +6,7 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@geiger/ui";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
 import { VaultItemCard } from "./vault_item_card";
 import { AddVaultItemDialog } from "./add_vault_item_dialog";

@@ -3,8 +3,7 @@ import { AlertTriangle, ArrowRight, CreditCard, LucideClock, ReceiptText } from 
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { ProductAccess } from "@/components/billing/product-access";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge, Button } from "@geiger/ui";
 import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
 import { getPlan, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";

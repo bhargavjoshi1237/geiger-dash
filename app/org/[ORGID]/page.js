@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import { Header } from '@/components/header'
 import { GridBackdrop } from '@/components/grid-backdrop'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from "@geiger/ui";
 import { getOrganizationProjects } from '@/lib/org/projects'
 import { getOrgEntitlements } from '@/lib/billing/entitlements'
 import { OrganizationProjectsClient } from './organization-projects-client'

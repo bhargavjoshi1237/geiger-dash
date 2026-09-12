@@ -2,9 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Input, Label } from "@geiger/ui";
 
 // Static, session-remembered password gate over /admin. This is UI-only and NOT
 // real security — anyone can read the client bundle; it just keeps the admin

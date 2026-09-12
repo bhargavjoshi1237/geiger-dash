@@ -4,9 +4,7 @@ import { ArrowUpRight, Check, Wrench, Zap } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Badge, Button, Separator } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 
 function formatDate(date) {

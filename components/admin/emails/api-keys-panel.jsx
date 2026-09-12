@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { KeyRound, Plus, Trash2, Copy, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import { createApiKeyAction, revokeApiKeyAction } from "@/lib/email/actions";
 
 function formatWhen(iso) {

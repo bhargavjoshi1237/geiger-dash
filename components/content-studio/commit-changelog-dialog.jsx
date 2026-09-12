@@ -12,17 +12,17 @@ import {
   Wand2,
 } from 'lucide-react'
 import {
+  Badge,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Badge } from '@/components/ui/badge'
+  Input,
+  Label,
+  ScrollArea,
+} from "@geiger/ui";
 import { callLlmChat, extractJson, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =

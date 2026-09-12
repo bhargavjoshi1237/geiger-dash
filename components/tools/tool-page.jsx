@@ -2,12 +2,7 @@ import Link from "next/link";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@geiger/ui";
 import { benefits, tools } from "@/lib/tools/tool-content";
 import { TrackedAssetsLink } from "@/components/tools/tracked-assets-link";
 

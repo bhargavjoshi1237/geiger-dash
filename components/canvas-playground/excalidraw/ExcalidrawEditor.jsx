@@ -18,8 +18,7 @@ const ExcalidrawComponent = dynamic(
     loading: () => (
       <div className="flex-1 flex items-center justify-center bg-[#1e1e1e]">
         <div className="flex flex-col items-center gap-3">
-          <LogoLoading size={56} />
-          <p className="text-sm text-text-secondary">Loading canvas…</p>
+          <LogoLoading size={56} label="Loading canvas" />
         </div>
       </div>
     ),

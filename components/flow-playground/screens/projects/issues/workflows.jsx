@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button, IssueItem } from "@geiger/ui";
 import { Plus, Play, GitBranch } from "lucide-react";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
-import { IssueItem } from "@/components/ui/issue-item";
 
 export function WorkflowsScreen() {
 

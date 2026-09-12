@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { CreditCard, HomeIcon, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CachedAvatarImage } from "@/components/cached-avatar-image";
 import {
+  Avatar,
+  AvatarFallback,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@geiger/ui";
+import { CachedAvatarImage } from "@/components/cached-avatar-image";
 import { SignOutMenuItem } from "@/components/sign-out-menu-item";
 
 export function UserProfileDropdown({ user }) {

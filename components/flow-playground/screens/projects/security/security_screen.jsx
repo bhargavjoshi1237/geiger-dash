@@ -2,17 +2,20 @@
 
 import React from "react";
 import {
+  Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  Switch,
+} from "@geiger/ui";
 import { useProject } from "@/components/flow-playground/context/project-context-demo";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import {
   Shield,
   ShieldCheck,
@@ -60,11 +63,6 @@ import {
   Area,
   ResponsiveContainer,
 } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
 const securityEventsTimeline = Array.from({ length: 14 }, (_, i) => ({

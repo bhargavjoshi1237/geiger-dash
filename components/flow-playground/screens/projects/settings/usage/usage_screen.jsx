@@ -7,7 +7,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@geiger/ui";
 import { useProject } from "@/components/flow-playground/context/project-context-demo";
 import {
   Info,
@@ -31,11 +34,6 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
 const dailyRequests = Array.from({ length: 30 }, (_, i) => ({

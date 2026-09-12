@@ -1,7 +1,7 @@
 "use client";
 
 import { FolderKanban, Plus, Rocket } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import { CreateProjectDialog } from "./create-project-dialog";
 
 export function NoProjectsState({ organizationId }) {

@@ -13,12 +13,7 @@ import {
 import { BarChart, Bar } from 'recharts'
 import { Card, Section } from '@/components/account/panel'
 import { FAMILY_TINT } from '@/components/billing/product-access'
-import { Badge } from '@/components/ui/badge'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+import { Badge, ChartContainer, ChartTooltip, ChartTooltipContent } from "@geiger/ui";
 import {
   products as PRODUCT_CATALOG,
   productCategories,

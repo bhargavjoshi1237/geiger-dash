@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@geiger/ui";
 
 const linkCls = "hover:text-foreground transition-colors text-muted-foreground text-sm";
 

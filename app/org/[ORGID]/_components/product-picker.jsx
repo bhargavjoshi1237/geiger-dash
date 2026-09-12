@@ -1,8 +1,7 @@
 "use client";
 
 import { Check, FolderKanban, Lock, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Input, Switch } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import { productMeta } from "./constants";
 

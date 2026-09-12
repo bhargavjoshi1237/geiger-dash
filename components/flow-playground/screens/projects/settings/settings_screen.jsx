@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@geiger/ui";
 import { GeneralSettingsScreen } from "./general/general_settings";
 import { ConnectivityScreen } from "./connectivity/connectivity_screen";
 import { AddonsSettingsScreen } from "./addons/addons_settings";

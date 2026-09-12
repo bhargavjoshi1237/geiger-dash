@@ -3,23 +3,21 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, Loader2, Sparkles, Trash2, XCircle } from 'lucide-react'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@geiger/ui";
 import { LLM_PRESETS, callLlmChat, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =

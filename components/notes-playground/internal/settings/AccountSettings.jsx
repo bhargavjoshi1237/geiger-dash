@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Mail, Shield, CreditCard, LogOut, Loader2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Mail, Shield, CreditCard, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button, LogoLoading } from "@geiger/ui";
 import { createClient } from "@/utils/supabase/client";
 import { getUser } from "@/supabase/user/getUser";
 import { useRouter } from "next/navigation";
@@ -43,7 +41,7 @@ export default function AccountSettings() {
   if (loading)
     return (
       <div className="flex h-40 items-center justify-center">
-        <Loader2 className="w-5 h-5 text-foreground0 animate-spin" />
+        <LogoLoading size={40} />
       </div>
     );
 

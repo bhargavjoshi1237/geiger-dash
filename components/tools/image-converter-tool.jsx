@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+  Slider,
+} from "@geiger/ui";
 import { FileDropzone } from "@/components/tools/file-dropzone";
 import { ImagePreview } from "@/components/tools/image-preview";
 import {

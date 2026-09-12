@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+  Input,
+  Label,
+  Switch,
+} from "@geiger/ui";
 import { Building2, Plus, Shield, UserCheck, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FilterDropdown from "../overview/filter_dropdown";

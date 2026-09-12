@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@geiger/ui";
 import { Bell, Download, FileText, Image as ImageIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { getUser } from "@/lib/supabase/user-demo";

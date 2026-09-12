@@ -29,7 +29,39 @@ import {
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { LogoLoading } from '@geiger/ui'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Input,
+  Label,
+  LogoLoading,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  Textarea,
+} from "@geiger/ui";
 import {
   createOrganizationAction,
   inviteOrgMembersAction,
@@ -61,44 +93,6 @@ import {
 } from './email-actions'
 import { getOrgEntitlements, isProductUnlocked } from '@/lib/billing/entitlements'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-
 const ORG_ROUTE = '/org'
 
 const AWS_DEPLOYMENT_LOCATIONS = [
@@ -508,8 +502,7 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-            <LogoLoading size={40} />
-            Loading Members…
+            <LogoLoading size={40} label="Loading Members" />
           </div>
         ) : members.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">No members found.</p>
@@ -825,8 +818,7 @@ function OAuthTab({ organization }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} />
-        Loading OAuth settings…
+        <LogoLoading size={40} label="Loading OAuth settings" />
       </div>
     )
   }
@@ -1207,8 +1199,7 @@ function DomainTab({ organization }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} />
-        Loading Domain Settings…
+        <LogoLoading size={40} label="Loading Domain Settings" />
       </div>
     )
   }
@@ -1437,8 +1428,7 @@ function EmailTemplatesTab({ organization }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} />
-        Loading templates…
+        <LogoLoading size={40} label="Loading templates" />
       </div>
     )
   }

@@ -3,8 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Calendar, Clock3 } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge, Button } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { getPublishedBlogPosts } from "@/lib/public-content/queries";
 

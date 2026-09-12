@@ -30,7 +30,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+} from "@geiger/ui";
 
 function formatTTL(ttl) {
   if (!ttl) return null;

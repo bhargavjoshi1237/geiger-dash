@@ -10,11 +10,7 @@ import {
   Clock,
   Trash2,
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Badge, Button, Label, Progress, Switch } from "@geiger/ui";
 
 export default function GeneralSettings({ settings, onSettingsChange }) {
   const usage = {

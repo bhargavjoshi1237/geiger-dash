@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Calendar, Clock3, User } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@geiger/ui";
 import {
   getPublishedBlogPostBySlug,
   getRelatedBlogPosts,

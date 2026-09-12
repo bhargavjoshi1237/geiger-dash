@@ -2,24 +2,21 @@
 
 import React, { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+  Switch,
+} from "@geiger/ui";
 import {
   Activity,
   Settings,
@@ -27,7 +24,6 @@ import {
   Layout,
   ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import ColorPicker from "../edges/ColorePicker";

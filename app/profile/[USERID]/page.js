@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Header } from '@/components/header'
 import Footer from '@/components/footer'
 import { GridBackdrop } from '@/components/grid-backdrop'
-import { Button } from '@/components/ui/button'
+import { Button } from "@geiger/ui";
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'

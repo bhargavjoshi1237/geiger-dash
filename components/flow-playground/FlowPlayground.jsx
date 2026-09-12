@@ -3,9 +3,8 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { ProjectSidebar } from "./sidebar/projects/project_sidebar";
 import { ProjectTopbar } from "./topbar/projects/topbar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { LogoLoading, SidebarInset, SidebarProvider } from "@geiger/ui";
 import dynamic from "next/dynamic";
-import { LogoLoading } from "@geiger/ui";
 
 const LoadingScreen = () => (
   <div className="h-full w-full flex items-center justify-center text-foreground0">

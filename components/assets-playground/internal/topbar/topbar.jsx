@@ -10,9 +10,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage, Kbd, KbdGroup, SidebarTrigger } from "@geiger/ui";
 import { NotificationsDropdown } from "./dialogue/notifications_dropdown";
 import { useIsMobile } from "@/lib/hooks/use-mobile";
 

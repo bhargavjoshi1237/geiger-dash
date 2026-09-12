@@ -7,7 +7,25 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { LogoLoading } from '@geiger/ui'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  LogoLoading,
+  ScrollArea,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@geiger/ui";
 import {
   ArrowLeft,
   ChevronRight,
@@ -30,20 +48,6 @@ import {
   listStudioMediaAction,
   uploadStudioMediaAction,
 } from '@/app/studio/posts/actions'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-
 export const inputClassName = 'bg-background text-foreground placeholder:text-muted-foreground'
 export const textareaClassName =
   'min-h-[80px] bg-background text-foreground placeholder:text-muted-foreground'

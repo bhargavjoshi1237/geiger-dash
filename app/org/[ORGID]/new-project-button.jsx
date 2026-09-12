@@ -3,8 +3,7 @@
 import { EntitlementsContext } from './_components/entitlements'
 import { CreateProjectDialog } from './_components/create-project-dialog'
 import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
+import { Button } from "@geiger/ui";
 export function NewProjectButton({ organizationId, entitlements }) {
   return (
     <EntitlementsContext.Provider value={entitlements}>

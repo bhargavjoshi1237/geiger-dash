@@ -1,22 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  IssueItem,
+} from "@geiger/ui";
 import { ChevronDown, Activity, Sparkles, Bug, GitMerge, ChevronRight } from "lucide-react";
 import { useProject } from "@/components/flow-playground/context/project-context-demo";
 import { DeadlinesSection } from "@/components/flow-playground/shared/deadlines";
 import { useBanner } from "@/components/flow-playground/context/banner-context";
 import { useEffect } from "react";
 import { LineChart, Line } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import FilterDropdown from "./filter_dropdown";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
-import { IssueItem } from "@/components/ui/issue-item";
 
 function MetricCard({ title, subtitle, value, data }) {
   const chartData =

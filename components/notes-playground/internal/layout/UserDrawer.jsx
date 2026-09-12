@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
 import {
+  Button,
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+  ScrollArea,
+} from "@geiger/ui";
 import {
   Users2,
   Crown,

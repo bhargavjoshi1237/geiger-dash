@@ -2,10 +2,14 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Progress,
+} from "@geiger/ui";
 import {
   Upload, X, CloudUpload, FileIcon,
 } from "lucide-react";

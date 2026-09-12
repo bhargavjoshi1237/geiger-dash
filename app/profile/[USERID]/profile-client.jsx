@@ -27,21 +27,24 @@ import {
 import { toast } from 'sonner'
 import { Card, Section } from '@/components/account/panel'
 import { ProductAccess } from '@/components/billing/product-access'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
+  Badge,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
+  Input,
+  Label,
+  Switch,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from "@geiger/ui";
 import { clearProfileImageCache } from '@/lib/profile-image-cache'
 import { cn } from '@/lib/utils'
 import {

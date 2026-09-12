@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, CircleAlert } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
 import { completeCheckout } from "@/lib/billing/store";
 

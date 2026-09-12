@@ -1,13 +1,15 @@
 import React from "react";
 import { Calendar, Clock, AlertCircle, ChevronRight } from "lucide-react";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  CardHeader,
+  CardTitle,
+} from "@geiger/ui";
 
 const users = [
   { id: 1, name: "User 1", src: "https://i.pravatar.cc/150?u=1" },

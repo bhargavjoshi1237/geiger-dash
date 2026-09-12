@@ -5,21 +5,26 @@ import { toast } from 'sonner'
 import { ArrowUpRight, Calendar, FileText, LayoutGrid, Save, Sparkles, Wand2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+  Switch,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from "@geiger/ui";
 import {
   CollapsibleSection,
   CoverImageUpload,

@@ -3,16 +3,16 @@
 import React from "react";
 import {
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@geiger/ui";
 import { ChevronDown, Search, MoreVertical, PanelLeft } from "lucide-react";
 import { SidebarOption } from "./sidebar_option";
 import { workspaceNav } from "./sidebar_nav";

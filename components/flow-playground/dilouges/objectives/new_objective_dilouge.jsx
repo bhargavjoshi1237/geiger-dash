@@ -2,32 +2,28 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import {
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
+  Separator,
+  Textarea,
+} from "@geiger/ui";
 import { Plus, X, Target, Pencil, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -4,24 +4,22 @@ import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ImagePlus, Link2, Loader2, Sparkles, Upload, X } from 'lucide-react'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+  Textarea,
+} from "@geiger/ui";
 import { callLlmChat, extractJson, useLlmConfig } from '@/components/content-studio/llm-config'
 import { uploadStudioMediaAction } from '@/app/studio/posts/actions'
 import { createGeneratedSeoPageAction } from '@/app/studio/pages/actions'

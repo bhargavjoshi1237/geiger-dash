@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@geiger/ui";
 import { TrendingUp, FolderOpen, HardDrive, Download, Layers } from "lucide-react";
 
 export function StatsCard({ icon: Icon, label, value, change, changeType }) {

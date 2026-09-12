@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -9,8 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@geiger/ui";
 import { Plus, Edit3 } from "lucide-react";
 import { TaskCoreTab } from "./tabs/task_core_tab";
 import { cn } from "@/lib/utils";

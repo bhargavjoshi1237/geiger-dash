@@ -1,6 +1,6 @@
 "use client";
 
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 
 export const PROJECT_DIALOG_CONTENT_CLASS =

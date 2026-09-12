@@ -2,26 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-
-import { ChevronDown } from "lucide-react";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Input,
+  Label,
+} from "@geiger/ui";
+
+import { ChevronDown } from "lucide-react";
 
 export function InviteMemberDialog({
   children,

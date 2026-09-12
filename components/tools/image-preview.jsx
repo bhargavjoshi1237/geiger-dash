@@ -1,7 +1,7 @@
 "use client";
 
 import { FileImage, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import { formatBytes } from "@/lib/tools/image-tools";
 
 export function ImagePreview({ source, onClear, children, overlay }) {

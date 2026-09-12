@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { getPublishedSeoPagesByType } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";

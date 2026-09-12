@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ProjectSidebar } from "./internal/sidebar/projects/project_sidebar";
 import { ProjectTopbar } from "./internal/topbar/projects/topbar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@geiger/ui";
 import { ProjectProvider } from "./context/project-context";
 import { settingsNav } from "./internal/sidebar/projects/sidebar_data";
 import { HomeScreen } from "./internal/screens/projects/home/home_screen";

@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import {
+  Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+} from "@geiger/ui";
 import {
   LucidePackagePlus,
   GripVertical,
@@ -14,13 +21,6 @@ import {
 import { useAddonRegistry } from "@/components/flow-playground/addons/registry";
 import { getInstalledAddons } from "@/components/flow-playground/addons/registry";
 import { projectNav } from "@/components/flow-playground/sidebar/projects/sidebar_data";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 function AddonCard({ addon, enabled, positionOptions, selectValue, currentColor, onToggle, onPositionChange, onColorChange }) {

@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, Badge, Button, Progress } from "@geiger/ui";
 import {
   FolderOpen,
   Image,

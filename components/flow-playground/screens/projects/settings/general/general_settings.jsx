@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+  Input,
+  Label,
+} from "@geiger/ui";
 import { useProject } from "@/components/flow-playground/context/project-context-demo";
 import {
   Copy,

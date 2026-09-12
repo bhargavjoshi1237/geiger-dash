@@ -2,15 +2,15 @@
 
 import React from "react";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@geiger/ui";
 import { Database, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
 import { AddActivityDialog } from "@/components/flow-playground/dilouges/activities/add_activity_dilouge";
 

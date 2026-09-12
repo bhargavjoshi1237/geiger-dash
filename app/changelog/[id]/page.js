@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowUpRight, Check, Wrench, Zap } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@geiger/ui";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;

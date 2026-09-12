@@ -22,7 +22,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
 import CustomNode from "./nodes/custom_node";

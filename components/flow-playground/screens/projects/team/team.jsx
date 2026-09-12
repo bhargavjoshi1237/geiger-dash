@@ -12,27 +12,28 @@ import {
   Trash,
 } from "lucide-react";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  LoadingArea,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@geiger/ui";
 import { InviteMemberDialog } from "@/components/flow-playground/dilouges/teams/invitemember_dilouge";
 import { createClient } from "@/lib/supabase/client-demo";
 import { useProject } from "@/components/flow-playground/context/project-context-demo";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MainScreenWrapper } from "@/components/flow-playground/shared/screen_wrappers";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/flow-playground/notfound/not_found";
-import { Button } from "@/components/ui/button";
 
 export function TeamScreen() {
   const { project } = useProject();
@@ -180,7 +181,7 @@ export function TeamScreen() {
                   colSpan={4}
                   className="text-center py-8 text-foreground0"
                 >
-                  Loading team members...
+                  <LoadingArea className="py-0" label="Loading team members" />
                 </TableCell>
               </TableRow>
             ) : members.length === 0 ? (

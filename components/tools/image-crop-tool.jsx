@@ -9,15 +9,15 @@ import {
   ProcessButton,
   ResultCard,
 } from "@/components/tools/tool-controls";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
 import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+  Slider,
+} from "@geiger/ui";
 import {
   downloadBlob,
   getFileStem,

@@ -3,7 +3,7 @@ import { Mail, Clock, ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { PublicPageHero } from "@/components/public-page-hero";
-import { Button } from "@/components/ui/button";
+import { Button } from "@geiger/ui";
 import ContactForm from "./contact-form";
 
 export const metadata = {

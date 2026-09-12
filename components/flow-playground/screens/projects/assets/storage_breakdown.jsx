@@ -1,8 +1,14 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Progress,
+} from "@geiger/ui";
 import {
   HardDrive, ShieldCheck, Zap, Calendar, BarChart3, Info,
 } from "lucide-react";

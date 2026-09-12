@@ -4,13 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { getUser } from "@/supabase/user/getUser";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle } from "@geiger/ui";
 import { Users2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

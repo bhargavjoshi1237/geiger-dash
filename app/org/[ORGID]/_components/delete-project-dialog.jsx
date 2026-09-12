@@ -1,15 +1,15 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@geiger/ui";
 import { deleteProjectAction } from "../actions";
 
 export function DeleteProjectDialog({ project, name, organizationId, open, onOpenChange }) {

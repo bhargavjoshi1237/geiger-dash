@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { Copy, MoreHorizontal, PenLine, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@geiger/ui";
 import { DeleteProjectDialog } from "./delete-project-dialog";
 import { EditProjectDialog } from "./edit-project-dialog";
 

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+} from "@geiger/ui";
 import {
   Download,
   Info,

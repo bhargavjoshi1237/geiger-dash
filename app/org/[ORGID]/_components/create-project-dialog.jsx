@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, FolderPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Dialog, DialogContent, DialogTrigger, Input, Label } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import { createProjectAction } from "../actions";
 import { DEFAULT_SELECTED_PRODUCT_IDS } from "./constants";
