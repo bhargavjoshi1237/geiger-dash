@@ -25,13 +25,31 @@ const PUBLIC_PREFIXES = [
 
 const HAS_ORG_COOKIE = 'geiger_has_org'
 
-// Paths this function would pass through untouched anyway: the marketing site,
-// docs, and the buyer-facing paths inside gated products. Proxy runs ahead of the
-// CDN, so building the Supabase client and calling getUser() for them puts a
-// round-trip in front of every cacheable response and changes nothing. An invite
-// still waiting to be accepted is the one case that needs the full path.
-function isPassThroughPath(pathname) {
+// Every product's bare "/<segment>" is its public marketing landing, not its
+// workspace. Those rewrite out to the product deployments, so this proxy is the
+// only gate in front of them — segment-level gating alone bounced signed-out
+// visitors off /notes, /flow, /events... to the login page. Anything deeper
+// (/notes/<uid>/home, /flow/project/x) is still the workspace and stays gated.
+// `org` is the exception: it is the dashboard itself, public at no depth.
+function isProductLanding(pathname) {
+  const [, segment, ...rest] = pathname.split('/')
+  if (!segment || segment === 'org') return false
+  if (rest.some(Boolean)) return false
+  return GATED_SEGMENTS.has(segment)
+}
+
+function isPublicPath(pathname) {
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true
+  return isProductLanding(pathname)
+}
+
+// Paths this function would pass through untouched anyway: the marketing site,
+// docs, product landings, and the buyer-facing paths inside gated products.
+// Proxy runs ahead of the CDN, so building the Supabase client and calling
+// getUser() for them puts a round-trip in front of every cacheable response and
+// changes nothing. An invite still waiting to be accepted needs the full path.
+function isPassThroughPath(pathname) {
+  if (isPublicPath(pathname)) return true
   return !GATED_SEGMENTS.has(pathname.split('/')[1] || '')
 }
 
@@ -108,7 +126,7 @@ export async function updateSession(request, requestHeaders) {
   }
 
   const { pathname } = request.nextUrl
-  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+  if (isPublicPath(pathname)) {
     return supabaseResponse
   }
 

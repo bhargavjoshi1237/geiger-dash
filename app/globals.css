@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@geiger/ui/tokens.css";
 @source "../node_modules/@geiger/ui/src";
 
 @custom-variant dark (&:is(.dark *));
@@ -82,125 +83,17 @@
   }
 }
 
+/* Palette comes from @geiger/ui/tokens.css so dash renders on the same
+   surfaces as every other product. Only the two tokens the shared file
+   does not carry are declared here. */
 :root {
-  --radius: 0.5rem;
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #171717;
-  --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #171717;
-  --muted: #f3f4f6;
-  --muted-foreground: #737373;
-  --accent: #e5e7eb;
-  --accent-foreground: #171717;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #d4d4d4;
-  --chart-1: #2563eb;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #3b82f6;
-  --chart-5: #ef4444;
-  --sidebar: #f9fafb;
-  --sidebar-foreground: #525252;
-  --sidebar-primary: #171717;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3f4f6;
-  --sidebar-accent-foreground: #171717;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #d4d4d4;
-  --surface-subtle: #f9fafb;
-  --surface-card: #ffffff;
-  --surface-active: #f3f4f6;
-  --surface-hover: #f3f4f6;
-  --surface-dialog: #ffffff;
-  --surface-strong: #e5e7eb;
   --surface-elevated: #d1d5db;
   --surface-highest: #c4c8cc;
-  --border-strong: #d4d4d4;
-  --text-secondary: #525252;
-  --text-tertiary: #a3a3a3;
-  --canvas-dots: #d1d5db;
-  --minimap-node: #d1d5db;
-  --minimap-stroke: #9ca3af;
-  --edge-stroke: #71717a;
-  --node-default: #f3f4f6;
-  --comment-bg: #dbeafe;
-  --comment-input: #bfdbfe;
-  --scrollbar-thumb: #d1d5db;
-  --scrollbar-thumb-hover: #9ca3af;
-  --topbar-bg: rgb(255 255 255 / 0.82);
-  --topbar-border: #e5e7eb;
-  --divider: #e5e7eb;
-  --zoom-bg: rgb(229 231 235 / 0.72);
-  --notification-dot: #3b82f6;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #e5e5e5;
-  --card: #161616;
-  --card-foreground: #e5e5e5;
-  --popover: #1a1a1a;
-  --popover-foreground: #e5e5e5;
-  --primary: #ffffff;
-  --primary-foreground: #0a0a0a;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #e5e5e5;
-  --muted: #1a1a1a;
-  --muted-foreground: #737373;
-  --accent: #1f1f1f;
-  --accent-foreground: #e5e5e5;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #262626;
-  --input: #1a1a1a;
-  --ring: #404040;
-  --chart-1: #3b82f6;
-  --chart-2: #10b981;
-  --chart-3: #f59e0b;
-  --chart-4: #8b5cf6;
-  --chart-5: #ef4444;
-  --sidebar: #0f0f0f;
-  --sidebar-foreground: #a3a3a3;
-  --sidebar-primary: #e5e5e5;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #1a1a1a;
-  --sidebar-accent-foreground: #e5e5e5;
-  --sidebar-border: #262626;
-  --sidebar-ring: #404040;
-  --surface-subtle: #0f0f0f;
-  --surface-card: #161616;
-  --surface-active: #1f1f1f;
-  --surface-hover: #1a1a1a;
-  --surface-dialog: #1a1a1a;
-  --surface-strong: #262626;
   --surface-elevated: #2e2e2e;
   --surface-highest: #404040;
-  --border-strong: #404040;
-  --text-secondary: #a3a3a3;
-  --text-tertiary: #737373;
-  --canvas-dots: #262626;
-  --minimap-node: #2e2e2e;
-  --minimap-stroke: #404040;
-  --edge-stroke: #525252;
-  --node-default: #1a1a1a;
-  --comment-bg: #1e293b;
-  --comment-input: #334155;
-  --scrollbar-thumb: #262626;
-  --scrollbar-thumb-hover: #404040;
-  --topbar-bg: rgb(10 10 10 / 0.82);
-  --topbar-border: #1a1a1a;
-  --divider: #262626;
-  --zoom-bg: rgb(38 38 38 / 0.6);
-  --notification-dot: #3b82f6;
 }
 
 .geiger-flow-palette {
@@ -315,13 +208,15 @@
   --color-primary-darker: #d4d4d4;
   --color-primary-darkest: #a3a3a3;
 
-  --app-background-color: #0a0a0a;
-  --bg-color: #0a0a0a;
+  /* Canvas sits on the suite background (--background) so the editor does not
+     read as a darker hole punched in the page. */
+  --app-background-color: #161616;
+  --bg-color: #161616;
 
-  --color-surface-lowest: #0a0a0a;
-  --color-surface-low: #0f0f0f;
-  --color-surface-high: #1a1a1a;
-  --color-surface-highest: #1f1f1f;
+  --color-surface-lowest: #161616;
+  --color-surface-low: #1a1a1a;
+  --color-surface-high: #202020;
+  --color-surface-highest: #242424;
 
   --island-bg-color: #161616;
 
