@@ -7,6 +7,7 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { LogoLoading } from '@geiger/ui'
 import {
   ArrowLeft,
   ChevronRight,
@@ -682,7 +683,7 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
 
             {isLoading && (
               <div className="col-span-2 flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <LogoLoading size={48} />
               </div>
             )}
           </div>

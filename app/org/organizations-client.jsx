@@ -29,6 +29,7 @@ import {
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { LogoLoading } from '@geiger/ui'
 import {
   createOrganizationAction,
   inviteOrgMembersAction,
@@ -506,8 +507,8 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
         bodyClassName="p-0"
       >
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" />
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+            <LogoLoading size={40} />
             Loading Members…
           </div>
         ) : members.length === 0 ? (
@@ -823,8 +824,8 @@ function OAuthTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
+      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <LogoLoading size={40} />
         Loading OAuth settings…
       </div>
     )
@@ -1205,8 +1206,8 @@ function DomainTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
+      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <LogoLoading size={40} />
         Loading Domain Settings…
       </div>
     )
@@ -1435,8 +1436,8 @@ function EmailTemplatesTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
+      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <LogoLoading size={40} />
         Loading templates…
       </div>
     )

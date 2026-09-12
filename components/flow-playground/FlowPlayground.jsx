@@ -5,11 +5,11 @@ import { ProjectSidebar } from "./sidebar/projects/project_sidebar";
 import { ProjectTopbar } from "./topbar/projects/topbar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+import { LogoLoading } from "@geiger/ui";
 
 const LoadingScreen = () => (
   <div className="h-full w-full flex items-center justify-center text-foreground0">
-    <Loader2 className="w-8 h-8 animate-spin" />
+    <LogoLoading size={56} />
   </div>
 );
 

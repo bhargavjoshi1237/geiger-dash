@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Loader2,
   Bold,
   Italic,
   Strikethrough,
@@ -19,6 +18,7 @@ import {
   ListOrdered,
   Quote,
 } from "lucide-react";
+import { LogoLoading } from "@geiger/ui";
 import { toast } from "sonner";
 import { Toggle } from "@/components/ui/toggle";
 
@@ -339,7 +339,7 @@ const DocumentEditor = ({ documentId, onClose, isOpen }) => {
         <div className="flex-1 overflow-y-auto w-full relative bg-[#1e1e1e]">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-8 h-8 animate-spin text-foreground0" />
+              <LogoLoading size={64} />
             </div>
           ) : (
             <div
