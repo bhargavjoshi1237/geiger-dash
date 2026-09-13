@@ -16,7 +16,7 @@ Part of the [Geiger](#the-geiger-suite) suite.
 
 Geiger Dash is the parent application of the Geiger suite. It owns everything that is shared rather than product-specific:
 
-- the **public site** — home, product and feature pages, solutions, pricing, blog, changelog, docs, tools, and legal;
+- the **public site** — home, product and feature pages, solutions, pricing, blog, changelog, Help Center, tools, and legal;
 - the **account layer** — login, signup, onboarding, invites, organisations, roles, usage, and Stripe billing;
 - the **routing hub** — rewrites that serve every product app under a path on the same origin (`/flow`, `/notes`, `/events`, `/forms`, `/content`, `/campaign`, `/assets`, `/property`, `/audio`), so the suite shares one domain and one session.
 
@@ -157,7 +157,7 @@ Set `SITE_URL` when refreshing a preview or local deployment instead of `https:/
 ```
 app/
   page.js, product/, features/, solutions/, pricing/   Public marketing site
-  blog/, changelog/, docs/, tools/, contact/, legal    Content and utility surfaces
+  blog/, changelog/, help/, tools/, contact/, legal    Content and utility surfaces
   login/, signup/, auth/, onboarding/, invite/         Account flows
   org/[ORGID]/, billing/                               Organisations and billing
   studio/, admin/                                      Internal authoring and email admin
