@@ -18,7 +18,7 @@ Geiger Dash is the parent application of the Geiger suite. It owns everything th
 
 - the **public site** — home, product and feature pages, solutions, pricing, blog, changelog, docs, tools, and legal;
 - the **account layer** — login, signup, onboarding, invites, organisations, roles, usage, and Stripe billing;
-- the **routing hub** — rewrites that serve every product app under a path on the same origin (`/flow`, `/notes`, `/events`, `/forms`, `/content`, `/campaign`, `/chat`, `/canvas`, `/assets`, `/office`, `/property`, `/audio`), so the suite shares one domain and one session.
+- the **routing hub** — rewrites that serve every product app under a path on the same origin (`/flow`, `/notes`, `/events`, `/forms`, `/content`, `/campaign`, `/assets`, `/office`, `/property`, `/audio`), so the suite shares one domain and one session.
 
 Because every product is proxied through Dash and every product app runs under its own base path on that origin, a user signs in once and moves between applications without another handshake.
 
@@ -48,7 +48,7 @@ Because every product is proxied through Dash and every product app runs under i
 - **Email** — React Email and Resend
 - **Storage** — Vercel Blob
 - **Analytics** — PostHog
-- **Content & canvas** — Tiptap, React Flow (`@xyflow/react`), Excalidraw, Mermaid
+- **Content & canvas** — Tiptap, React Flow (`@xyflow/react`), Mermaid
 - **Charts** — Recharts
 
 ## Getting started
@@ -202,7 +202,7 @@ This codebase follows a consistent set of patterns. Read these before contributi
 
 ## The Geiger suite
 
-Geiger Dash is the parent app of the Geiger suite. The products it serves — Flow, Notes, Events, Forms, Content, Campaign, Chat, Comms, Docs, Property, Assets, Office, Canvas — each live in their own repository, share one Supabase project, and use the [`@geiger/ui`](https://github.com/bhargavjoshi1237/geiger-ui) component library so the whole suite feels like one product.
+Geiger Dash is the parent app of the Geiger suite. The products it serves — Flow, Notes, Events, Forms, Content, Campaign, Comms, Docs, Property, Assets, Office — each live in their own repository, share one Supabase project, and use the [`@geiger/ui`](https://github.com/bhargavjoshi1237/geiger-ui) component library so the whole suite feels like one product.
 
 ## License
 

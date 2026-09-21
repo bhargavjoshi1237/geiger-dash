@@ -39,9 +39,8 @@ name); everywhere this doc writes `<schema>`, substitute that value.
 | Geiger Flow | `flow` | | Geiger Campaign | `campaign` |
 | Geiger Assets | `assets` | | Geiger Pods | `pods` |
 | Geiger Grey | `grey` | | Geiger Comms | `comms` |
-| Geiger Office | `office` | | Geiger Chat | `chat` |
-| Geiger Forms | `forms` | | Geiger Canvas | `canvas` |
-| Geiger Events | `events` | | Geiger Docs | `docs` |
+| Geiger Office | `office` | | Geiger Docs | `docs` |
+| Geiger Forms | `forms` | | Geiger Events | `events` |
 
 **Only genuinely cross-product tables stay in `public`** — the shared entities every
 product reads, e.g. `users` and `project`. Everything a product owns lives in its

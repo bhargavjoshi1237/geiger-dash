@@ -17,7 +17,7 @@ export default function FooterProducts() {
         <Accordion type="single" collapsible>
           <AccordionItem value="more" className="border-none">
             <AccordionTrigger className="py-0 text-sm font-normal text-muted-foreground hover:text-foreground hover:no-underline [&>svg]:size-3.5">
-              & 11 More
+              & 9 More
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-3">
               <ul className="space-y-3">
@@ -28,8 +28,6 @@ export default function FooterProducts() {
                 <li><Link href="/campaign" className={linkCls}>Geiger Campaign</Link></li>
                 <li><Link href="/pods" className={linkCls}>Geiger Pods</Link></li>
                 <li><Link href="/comms" className={linkCls}>Geiger Comms</Link></li>
-                <li><Link href="/chat" className={linkCls}>Geiger Chat</Link></li>
-                <li><Link href="/canvas" className={linkCls}>Geiger Canvas</Link></li>
                 <li><Link href="/docs" className={linkCls}>Geiger Docs</Link></li>
                 <li><Link href="/property" className={linkCls}>Geiger Property</Link></li>
                </ul>

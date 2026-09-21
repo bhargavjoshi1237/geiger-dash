@@ -81,6 +81,61 @@
       transform: translateX(100%);
     }
   }
+
+  /* Login showcase: slides lift in and drift out as the panel rotates apps. */
+  --animate-showcase-in: showcase-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-showcase-out: showcase-out 0.5s cubic-bezier(0.4, 0, 1, 1) both;
+
+  @keyframes showcase-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes showcase-out {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-14px);
+    }
+  }
+
+  /* Suite carousel: the Events scanner sweep and the typing caret in the Grey/Docs demos. */
+  --animate-suite-scan: suite-scan 1.8s ease-in-out infinite;
+  --animate-suite-caret: suite-caret 1s step-end infinite;
+
+  /* Driven off `top` rather than a transform so the sweep spans whatever height
+     the viewfinder happens to be. */
+  @keyframes suite-scan {
+    0%,
+    100% {
+      opacity: 0.2;
+      top: 6%;
+    }
+    50% {
+      opacity: 1;
+      top: 90%;
+    }
+  }
+
+  @keyframes suite-caret {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 /* Palette comes from @geiger/ui/tokens.css so dash renders on the same
@@ -89,11 +144,24 @@
 :root {
   --surface-elevated: #d1d5db;
   --surface-highest: #c4c8cc;
+  /* Categorical chart series, assigned in this fixed order and never cycled.
+     Validated for colorblind separation and contrast against the light card
+     surface (#f9fafb); dark mode gets its own steps below, not a flip. */
+  --chart-1: #3b82f6;
+  --chart-2: #e8912a;
+  --chart-3: #14b8a6;
+  --chart-4: #a855f7;
+  --chart-5: #e11d48;
 }
 
 .dark {
   --surface-elevated: #2e2e2e;
   --surface-highest: #404040;
+  --chart-1: #4a90f0;
+  --chart-2: #cf8021;
+  --chart-3: #0fa896;
+  --chart-4: #a855f7;
+  --chart-5: #ec4d6c;
 }
 
 .geiger-flow-palette {
@@ -197,41 +265,6 @@
   body {
     @apply bg-background text-foreground;
   }
-}
-
-.excalidraw .sidebar-trigger {
-  display: none !important;
-}
-
-.excalidraw.theme--dark {
-  --color-primary: #e5e5e5;
-  --color-primary-darker: #d4d4d4;
-  --color-primary-darkest: #a3a3a3;
-
-  /* Canvas sits on the suite background (--background) so the editor does not
-     read as a darker hole punched in the page. */
-  --app-background-color: #161616;
-  --bg-color: #161616;
-
-  --color-surface-lowest: #161616;
-  --color-surface-low: #1a1a1a;
-  --color-surface-high: #202020;
-  --color-surface-highest: #242424;
-
-  --island-bg-color: #161616;
-
-  --color-gray-1: #161616;
-  --color-gray-2: #1a1a1a;
-  --color-gray-3: #1f1f1f;
-  --color-gray-4: #262626;
-  --color-gray-5: #2e2e2e;
-  --color-gray-6: #404040;
-  --color-gray-7: #737373;
-  --color-gray-8: #a3a3a3;
-  --color-gray-9: #e5e5e5;
-
-  --text-primary-color: #e5e5e5;
-  --text-secondary-color: #a3a3a3;
 }
 
 .docs-scrollbar-hidden {

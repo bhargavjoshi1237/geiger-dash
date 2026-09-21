@@ -53,7 +53,6 @@ import {
   DropdownMenuTrigger,
   Input,
   Label,
-  LogoLoading,
   Select,
   SelectContent,
   SelectItem,
@@ -501,8 +500,9 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
         bodyClassName="p-0"
       >
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-            <LogoLoading size={40} label="Loading Members" />
+          <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Loading Members…
           </div>
         ) : members.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">No members found.</p>
@@ -817,8 +817,9 @@ function OAuthTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} label="Loading OAuth settings" />
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading OAuth settings…
       </div>
     )
   }
@@ -1198,8 +1199,9 @@ function DomainTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} label="Loading Domain Settings" />
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading Domain Settings…
       </div>
     )
   }
@@ -1427,8 +1429,9 @@ function EmailTemplatesTab({ organization }) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-        <LogoLoading size={40} label="Loading templates" />
+      <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading templates…
       </div>
     )
   }

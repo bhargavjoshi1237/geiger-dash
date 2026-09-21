@@ -20,12 +20,13 @@
     "db:seed": "geiger-orm seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1136.0",
+    "@aws-sdk/s3-request-presigner": "^3.1136.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@excalidraw/excalidraw": "^0.18.1",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
-    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#d75b645131fabde755de1a16a24b45d2da244abf",
+    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#50142c36cad4e1ce7cfd8ded86f00011d2f60450",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-accordion": "^1.2.2",

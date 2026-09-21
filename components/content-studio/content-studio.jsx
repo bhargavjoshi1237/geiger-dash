@@ -67,8 +67,6 @@ import { useLlmConfig } from '@/components/content-studio/llm-config'
 const releaseProducts = [
   { value: 'geiger-assets', label: 'Geiger Assets' },
   { value: 'geiger-campaign', label: 'Geiger Campaign' },
-  { value: 'geiger-canvas', label: 'Geiger Canvas' },
-  { value: 'geiger-chat', label: 'Geiger Chat' },
   { value: 'geiger-content', label: 'Geiger Content' },
   { value: 'geiger-dash', label: 'Geiger Dash' },
   { value: 'geiger-docs', label: 'Geiger Docs' },

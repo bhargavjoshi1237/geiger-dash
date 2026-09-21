@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { login } from "./actions";
 import { Github, Loader2, AlertCircle, Apple, KeyRound, ArrowLeft } from "lucide-react";
+import Logo from "@geiger/ui/logo";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { resolveLoginRedirectPath } from "@/lib/product-routes.mjs";
+import { AppShowcase } from "./app-showcase";
 
 // Mock Google Icon since it's not in Lucide
 const GoogleIcon = ({ className }) => (
@@ -122,183 +125,202 @@ export function AuthForm({ next, initialError = "" }) {
   ) : null;
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
-      <div className="relative z-10 w-full max-w-[400px]">
-        <div
-          className={cn(
-            "transition-all duration-200 ease-out",
-            fading ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
-          )}
+    // Locked to the dark palette: the split layout is designed on a black canvas,
+    // so the panel's semantic surfaces must resolve dark whatever the OS theme is.
+    <div className="dark grid min-h-screen w-full grid-cols-1 bg-black font-sans text-foreground lg:grid-cols-2">
+      {/* Auth column — brand mark pinned top-left, the form stays centred. */}
+      <div className="relative flex flex-col px-4 py-6 sm:px-8">
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-2 text-white transition-opacity hover:opacity-80"
         >
-          {ssoMode ? (
-            // ---- Enterprise SSO panel ----
-            <div className="space-y-6 text-left">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-medium tracking-tight text-white">Welcome back</h1>
-                <p className="text-sm text-foreground0">Sign in to your enterprise account</p>
-              </div>
+          <Logo size={22} />
+          <span className="text-lg font-medium tracking-tight">Geiger</span>
+        </Link>
 
-              <form onSubmit={handleSsoSubmit} className="space-y-4">
-                {errorBox}
-                <div className="space-y-2">
-                  <label className="ml-1 text-xs font-medium text-white">Email</label>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="gavin@hooli.com"
-                    required
-                    autoFocus
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={INPUT}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={ssoLoading || !email.trim()}
-                  className="inline-flex h-11 w-full items-center justify-center whitespace-nowrap rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {ssoLoading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Redirecting…
-                    </span>
-                  ) : (
-                    <span>Sign in</span>
-                  )}
-                </button>
-              </form>
-
-              <p className="text-center text-xs text-foreground0">
-                <button
-                  type="button"
-                  onClick={() => switchMode(false)}
-                  className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Back to sign in
-                </button>
-              </p>
-            </div>
-          ) : (
-            // ---- Standard sign-in ----
-            <div className="space-y-6 text-center">
-              <div className="mb-8 space-y-2">
-                <h1 className="text-2xl font-medium tracking-tight text-white">Welcome to Geiger</h1>
-                <p className="text-lg font-medium text-foreground0">The better way to manage work.</p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
-                  type="button"
-                  onClick={() => handleOAuth("google")}
-                  disabled={Boolean(oauthLoading)}
-                >
-                  {oauthLoading === "google" ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <GoogleIcon className="mr-2 h-4 w-4" />
-                  )}
-                  Continue with Google
-                </button>
-                <button
-                  className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
-                  type="button"
-                  onClick={() => handleOAuth("github")}
-                  disabled={Boolean(oauthLoading)}
-                >
-                  {oauthLoading === "github" ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Github className="mr-2 h-4 w-4" />
-                  )}
-                  Continue with GitHub
-                </button>
-                <button
-                  className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
-                  type="button"
-                  disabled={Boolean(oauthLoading)}
-                >
-                  <Apple className="mr-2 h-4 w-4" />
-                  Continue with Apple
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchMode(true)}
-                  disabled={Boolean(oauthLoading)}
-                  className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
-                >
-                  <KeyRound className="mr-2 h-4 w-4" />
-                  Continue with SSO
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
-                <input type="hidden" name="next" value={next || ""} />
-
-                {errorBox}
-
-                <div className="space-y-2">
-                  <label className="ml-1 text-xs font-medium text-foreground0">Email</label>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="Your email address"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={INPUT}
-                  />
-                </div>
-
-                <div
-                  className={`grid transition-all duration-300 ease-in-out ${
-                    showPassword
-                      ? "grid-rows-[1fr] opacity-100"
-                      : "pointer-events-none grid-rows-[0fr] opacity-0"
-                  }`}
-                >
-                  <div className="space-y-4 overflow-hidden py-1">
-                    <input
-                      name="password"
-                      type="password"
-                      placeholder="Your password"
-                      required={showPassword}
-                      className={INPUT}
-                    />
+        <div className="flex flex-1 items-center justify-center py-12">
+          <div className="relative z-10 w-full max-w-[400px]">
+            <div
+              className={cn(
+                "transition-all duration-200 ease-out",
+                fading ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
+              )}
+            >
+              {ssoMode ? (
+                // ---- Enterprise SSO panel ----
+                <div className="space-y-6 text-left">
+                  <div className="space-y-2">
+                    <h1 className="text-3xl font-medium tracking-tight text-white">Welcome back</h1>
+                    <p className="text-sm text-foreground0">Sign in to your enterprise account</p>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  className="group relative inline-flex h-10 w-full items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-border bg-surface-subtle px-8 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center gap-2 duration-300 animate-in fade-in zoom-in">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Processing...</span>
+                  <form onSubmit={handleSsoSubmit} className="space-y-4">
+                    {errorBox}
+                    <div className="space-y-2">
+                      <label className="ml-1 text-xs font-medium text-white">Email</label>
+                      <input
+                        name="email"
+                        type="email"
+                        placeholder="gavin@hooli.com"
+                        required
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={INPUT}
+                      />
                     </div>
-                  ) : (
-                    <span>Continue</span>
-                  )}
-                </button>
-              </form>
+                    <button
+                      type="submit"
+                      disabled={ssoLoading || !email.trim()}
+                      className="inline-flex h-11 w-full items-center justify-center whitespace-nowrap rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      {ssoLoading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Redirecting…
+                        </span>
+                      ) : (
+                        <span>Sign in</span>
+                      )}
+                    </button>
+                  </form>
 
-              <p className="mt-8 text-center text-xs text-foreground0">
-                Don&apos;t have an account?{" "}
-                <a
-                  href="/signup"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Sign up
-                </a>
-              </p>
+                  <p className="text-center text-xs text-foreground0">
+                    <button
+                      type="button"
+                      onClick={() => switchMode(false)}
+                      className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      Back to sign in
+                    </button>
+                  </p>
+                </div>
+              ) : (
+                // ---- Standard sign-in ----
+                <div className="space-y-6 text-center">
+                  <div className="mb-8 space-y-2">
+                    <h1 className="text-2xl font-medium tracking-tight text-white">Welcome to Geiger</h1>
+                    <p className="text-lg font-medium text-foreground0">The better way to manage work.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+                      type="button"
+                      onClick={() => handleOAuth("google")}
+                      disabled={Boolean(oauthLoading)}
+                    >
+                      {oauthLoading === "google" ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <GoogleIcon className="mr-2 h-4 w-4" />
+                      )}
+                      Continue with Google
+                    </button>
+                    <button
+                      className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+                      type="button"
+                      onClick={() => handleOAuth("github")}
+                      disabled={Boolean(oauthLoading)}
+                    >
+                      {oauthLoading === "github" ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Github className="mr-2 h-4 w-4" />
+                      )}
+                      Continue with GitHub
+                    </button>
+                    <button
+                      className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+                      type="button"
+                      disabled={Boolean(oauthLoading)}
+                    >
+                      <Apple className="mr-2 h-4 w-4" />
+                      Continue with Apple
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => switchMode(true)}
+                      disabled={Boolean(oauthLoading)}
+                      className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      <KeyRound className="mr-2 h-4 w-4" />
+                      Continue with SSO
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
+                    <input type="hidden" name="next" value={next || ""} />
+
+                    {errorBox}
+
+                    <div className="space-y-2">
+                      <label className="ml-1 text-xs font-medium text-foreground0">Email</label>
+                      <input
+                        name="email"
+                        type="email"
+                        placeholder="Your email address"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={INPUT}
+                      />
+                    </div>
+
+                    <div
+                      className={`grid transition-all duration-300 ease-in-out ${
+                        showPassword
+                          ? "grid-rows-[1fr] opacity-100"
+                          : "pointer-events-none grid-rows-[0fr] opacity-0"
+                      }`}
+                    >
+                      <div className="space-y-4 overflow-hidden py-1">
+                        <input
+                          name="password"
+                          type="password"
+                          placeholder="Your password"
+                          required={showPassword}
+                          className={INPUT}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="group relative inline-flex h-10 w-full items-center justify-center overflow-hidden whitespace-nowrap rounded-md border border-border bg-surface-subtle px-8 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center gap-2 duration-300 animate-in fade-in zoom-in">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        <span>Continue</span>
+                      )}
+                    </button>
+                  </form>
+
+                  <p className="mt-8 text-center text-xs text-foreground0">
+                    Don&apos;t have an account?{" "}
+                    <a
+                      href="/signup"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Sign up
+                    </a>
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
+
+      {/* Rotating tour of the suite — hidden on small screens where it would
+          push the form below the fold. */}
+      <AppShowcase className="m-3 ml-0 hidden lg:block" />
     </div>
   );
 }

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
       <p>
         Geiger Studios (“Geiger”, “we”, “us”, or “our”) operates geiger.studio
         and the connected Geiger products, including Notes, Flow, Assets,
-        Canvas, Forms, Events, Office, Content, Campaign, Chat, Grey, and Docs.
+        Forms, Events, Office, Content, Campaign, Grey, and Docs.
         For privacy questions or requests, contact{" "}
         <a href="mailto:info@geiger.studio">info@geiger.studio</a>.
       </p>

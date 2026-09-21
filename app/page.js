@@ -5,8 +5,8 @@ import Footer from "@/components/footer";
 import { GridBackdrop } from "@/components/grid-backdrop";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
-import LandingCanvasShowcase from "@/components/canvas-playground/LandingCanvasShowcase";
-import CollaboratorTabsShowcase from "@/components/canvas-playground/CollaboratorTabsShowcase";
+import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlaygroundShowcase";
+import CollaboratorTabsShowcase from "@/components/flow-playground/CollaboratorTabsShowcase";
 import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
@@ -50,7 +50,7 @@ export default async function Home() {
   const supabase = await createClient();
   const user = await getUser(supabase);
 
-  const [notesShowcaseBg, canvasShowcaseBg, flowShowcaseBg] =
+  const [notesShowcaseBg, eventsShowcaseBg, flowShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
 
   return (
@@ -93,10 +93,10 @@ export default async function Home() {
             ctaHref="/login"
             ctaLabel="Checkout Notes"
           />
-          <LandingCanvasShowcase
-            backgroundImage={canvasShowcaseBg}
+          <EventsPlaygroundShowcase
+            backgroundImage={eventsShowcaseBg}
             ctaHref="/login"
-            ctaLabel="Checkout Canvas"
+            ctaLabel="Checkout Events"
           />
           <CollaboratorTabsShowcase
             backgroundImage={flowShowcaseBg}

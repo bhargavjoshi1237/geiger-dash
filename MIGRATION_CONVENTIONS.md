@@ -156,9 +156,8 @@ tables (`public.projects`) live in `public`.
 | Geiger Notes | `notes` | | Geiger Content | `content` |
 | Geiger Flow | `flow` | | Geiger Campaign | `campaign` |
 | Geiger Events | `events` | | Geiger Comms | `comms` |
-| Geiger Forms | `forms` | | Geiger Chat | `chat` |
-| Geiger Docs | `docs` | | Geiger Property | `property` |
-| Geiger Dash | `public` | | | |
+| Geiger Forms | `forms` | | Geiger Property | `property` |
+| Geiger Docs | `docs` | | Geiger Dash | `public` |
 
 Inside a dedicated schema a table prefix is redundant: name tables plainly
 (`public.tickets`), never `public.flow_tickets`.

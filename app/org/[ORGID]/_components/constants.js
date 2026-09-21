@@ -7,11 +7,9 @@ import {
   GitBranch,
   Images,
   Megaphone,
-  MessageSquare,
   Mic,
   NotebookPen,
   PenLine,
-  PenTool,
   Radio,
   Sparkles,
 } from "lucide-react";
@@ -48,9 +46,7 @@ const PRODUCT_META = {
   docs: { Icon: BookOpen, icon: "text-sky-400", tile: "bg-sky-500/10 border-sky-500/20", hover: "group-hover/row:text-sky-400" },
   content: { Icon: PenLine, icon: "text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-400" },
   pods: { Icon: Mic, icon: "text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-400" },
-  chat: { Icon: MessageSquare, icon: "text-green-400", tile: "bg-green-500/10 border-green-500/20", hover: "group-hover/row:text-green-400" },
   notes: { Icon: NotebookPen, icon: "text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20", hover: "group-hover/row:text-yellow-400" },
-  canvas: { Icon: PenTool, icon: "text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20", hover: "group-hover/row:text-emerald-400" },
 };
 
 export function productMeta(id) {

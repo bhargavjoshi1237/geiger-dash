@@ -176,7 +176,7 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
 // the previous hardcoded defaults.
 const DEFAULT_CONFIG = {
   planId: "plus",
-  products: ["campaign", "flow", "forms", "grey", "chat", "notes", "canvas"],
+  products: ["campaign", "flow", "forms", "grey", "notes"],
   metrics: { projects: 3, seats: 12, storage: 50, bandwidth: 250, edgeData: 0, aiCredits: 200, emails: 0 },
 };
 
