@@ -21,6 +21,8 @@ const PUBLIC_PREFIXES = [
   '/events/e/', // public event page — where tickets are bought
   '/events/w/', // public event website
   '/events/r/', // public registration page
+  '/assets/d/', // public asset delivery — <img src> targets, never a suite user
+  '/assets/g/', // published public gallery (own password/expiry gate)
 ]
 
 const HAS_ORG_COOKIE = 'geiger_has_org'
