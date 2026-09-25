@@ -27,6 +27,7 @@ import {
 import { toast } from 'sonner'
 import { Card, Section } from '@/components/account/panel'
 import { ProductAccess } from '@/components/billing/product-access'
+import { PasskeyManager } from '@/components/auth/passkey-manager'
 import {
   Badge,
   Button,
@@ -952,6 +953,8 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
               </form>
             </Card>
           </Section>
+
+          <PasskeyManager />
 
           <Section title="Account">
             <Card className="divide-y divide-border">

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { login } from "./actions";
-import { Github, Loader2, AlertCircle, Apple, KeyRound, ArrowLeft } from "lucide-react";
+import { Github, Loader2, AlertCircle, Apple, KeyRound, ArrowLeft, Fingerprint } from "lucide-react";
 import Logo from "@geiger/ui/logo";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 import { resolveLoginRedirectPath } from "@/lib/product-routes.mjs";
+import { getPasskeyPromptUser, signInWithPasskey } from "@/lib/auth/passkeys";
+import { PasskeySetupDialog } from "@/components/auth/passkey-setup-dialog";
 import { AppShowcase } from "./app-showcase";
 
 // Mock Google Icon since it's not in Lucide
@@ -51,35 +52,72 @@ export function AuthForm({ next, initialError = "" }) {
   const [isLoading, setIsLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState("");
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+  // Set after a password sign-in when the user should be offered a passkey.
+  const [passkeyPrompt, setPasskeyPrompt] = useState(null);
   const [error, setError] = useState(ERROR_MESSAGES[initialError] || "");
-  // View state: cross-fade between the standard sign-in and the enterprise SSO
-  // panel. `fading` hides the current content, we swap views while invisible,
-  // then fade the new one back in — a clean crossfade with one container.
+  // Horizontal slide between sign-in and the SSO panel: slide out, swap, snap to the far side, slide in.
   const [ssoMode, setSsoMode] = useState(false);
-  const [fading, setFading] = useState(false);
+  const [slide, setSlide] = useState({ phase: "idle", forward: true });
   const showPassword = email.length > 0;
 
   function switchMode(toSso) {
-    if (fading) return;
+    if (slide.phase !== "idle") return;
     setError("");
-    setFading(true);
+    setSlide({ phase: "out", forward: toSso });
     setTimeout(() => {
       setSsoMode(toSso);
-      setFading(false);
+      setSlide({ phase: "enter", forward: toSso });
+      // Two frames so the off-screen start position paints before transitioning in.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setSlide({ phase: "idle", forward: toSso })),
+      );
     }, 200);
   }
+
+  const slideClass = {
+    idle: "translate-x-0 opacity-100",
+    out: slide.forward ? "-translate-x-6 opacity-0" : "translate-x-6 opacity-0",
+    enter: cn("opacity-0 transition-none", slide.forward ? "translate-x-6" : "-translate-x-6"),
+  }[slide.phase];
 
   async function handleSubmit(e) {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     const formData = new FormData(e.currentTarget);
-    const result = await login(formData);
+    // Browser client, not a Server Action: setting cookies in an action re-renders /login, whose
+    // signed-in redirect would fire before the passkey dialog.
+    const { data, error: signInError } = await createClient().auth.signInWithPassword({
+      email: String(formData.get("email") || ""),
+      password: String(formData.get("password") || ""),
+    });
 
-    if (result && result.error) {
+    if (signInError) {
       setIsLoading(false);
-      setError(result.error);
+      setError(signInError.message);
+      return;
     }
+
+    const destination = data?.user ? resolveLoginRedirectPath(next) : "/";
+    const promptUser = await getPasskeyPromptUser();
+    if (promptUser) {
+      setPasskeyPrompt({ userId: promptUser.id, destination });
+    } else {
+      window.location.assign(destination);
+    }
+  }
+
+  async function handlePasskeySignIn() {
+    setPasskeyLoading(true);
+    setError("");
+    const result = await signInWithPasskey();
+    if (result.ok) {
+      window.location.assign(resolveLoginRedirectPath(next));
+      return;
+    }
+    setPasskeyLoading(false);
+    if (!result.cancelled) setError(result.error);
   }
 
   // Supabase-hosted social sign-in: starts the PKCE flow and returns the browser
@@ -129,13 +167,13 @@ export function AuthForm({ next, initialError = "" }) {
     // so the panel's semantic surfaces must resolve dark whatever the OS theme is.
     <div className="dark grid min-h-screen w-full grid-cols-1 bg-black font-sans text-foreground lg:grid-cols-2">
       {/* Auth column — brand mark pinned top-left, the form stays centred. */}
-      <div className="relative flex flex-col px-4 py-6 sm:px-8">
+      <div className="relative flex flex-col overflow-x-clip px-4 py-6 sm:px-8">
         <Link
           href="/"
           className="inline-flex w-fit items-center gap-2 text-white transition-opacity hover:opacity-80"
         >
-          <Logo size={22} />
-          <span className="text-lg font-medium tracking-tight">Geiger</span>
+          <Logo size={20} />
+          <span className="text-sm font-semibold">Geiger Studio</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-center py-12">
@@ -143,7 +181,8 @@ export function AuthForm({ next, initialError = "" }) {
             <div
               className={cn(
                 "transition-all duration-200 ease-out",
-                fading ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
+                "motion-reduce:transform-none",
+                slideClass,
               )}
             >
               {ssoMode ? (
@@ -248,10 +287,22 @@ export function AuthForm({ next, initialError = "" }) {
                       <KeyRound className="mr-2 h-4 w-4" />
                       Continue with SSO
                     </button>
+                    <button
+                      type="button"
+                      onClick={handlePasskeySignIn}
+                      disabled={Boolean(oauthLoading) || passkeyLoading}
+                      className="relative inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      {passkeyLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Fingerprint className="mr-2 h-4 w-4" />
+                      )}
+                      Sign in with a passkey
+                    </button>
                   </div>
 
                   <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-left">
-                    <input type="hidden" name="next" value={next || ""} />
 
                     {errorBox}
 
@@ -321,6 +372,14 @@ export function AuthForm({ next, initialError = "" }) {
       {/* Rotating tour of the suite — hidden on small screens where it would
           push the form below the fold. */}
       <AppShowcase className="m-3 ml-0 hidden lg:block" />
+
+      {/* Portalled outside the dark wrapper, so it re-applies the dark palette. */}
+      <PasskeySetupDialog
+        open={Boolean(passkeyPrompt)}
+        userId={passkeyPrompt?.userId}
+        onDone={() => window.location.assign(passkeyPrompt?.destination || "/")}
+        className="dark"
+      />
     </div>
   );
 }

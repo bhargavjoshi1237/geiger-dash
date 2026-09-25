@@ -4,28 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { resolveLoginRedirectPath } from '@/lib/product-routes.mjs'
 
-export async function login(formData) {
-  const supabase =  await createClient()
-
-  const email = formData.get('email')
-  const password = formData.get('password')
-  const redirectPath = resolveLoginRedirectPath(formData.get('next'))
-
-  const { data: { user }, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/', 'layout')
-  
-  redirect(user ? redirectPath : '/')
-}
+// Password sign-in runs in the browser (auth-form.jsx): a cookie-setting Server Action re-renders
+// /login, which redirects the signed-in user before the passkey setup dialog can show.
 
 export async function logout() {
   const supabase =  await createClient()

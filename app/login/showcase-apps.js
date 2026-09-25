@@ -39,21 +39,21 @@ import {
   Zap,
 } from "lucide-react";
 
-// Per-app accent for the icon tile, kept as whole class strings so Tailwind sees them.
+// Per-app accent for the icon tile (tuned for the light showcase), kept as whole class strings so Tailwind sees them.
 const ACCENTS = {
-  flow: "bg-indigo-500/10 text-indigo-400 ring-indigo-500/20",
-  notes: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-  assets: "bg-violet-500/10 text-violet-400 ring-violet-500/20",
-  grey: "bg-sky-500/10 text-sky-400 ring-sky-500/20",
-  office: "bg-teal-500/10 text-teal-400 ring-teal-500/20",
-  forms: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-  events: "bg-rose-500/10 text-rose-400 ring-rose-500/20",
-  content: "bg-cyan-500/10 text-cyan-400 ring-cyan-500/20",
-  campaign: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
-  pods: "bg-fuchsia-500/10 text-fuchsia-400 ring-fuchsia-500/20",
-  comms: "bg-blue-500/10 text-blue-400 ring-blue-500/20",
-  docs: "bg-yellow-500/10 text-yellow-400 ring-yellow-500/20",
-  property: "bg-slate-400/10 text-slate-300 ring-slate-400/20",
+  flow: "bg-indigo-500/10 text-indigo-600 ring-indigo-500/20",
+  notes: "bg-amber-500/10 text-amber-600 ring-amber-500/20",
+  assets: "bg-violet-500/10 text-violet-600 ring-violet-500/20",
+  grey: "bg-sky-500/10 text-sky-600 ring-sky-500/20",
+  office: "bg-teal-500/10 text-teal-600 ring-teal-500/20",
+  forms: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20",
+  events: "bg-rose-500/10 text-rose-600 ring-rose-500/20",
+  content: "bg-cyan-500/10 text-cyan-600 ring-cyan-500/20",
+  campaign: "bg-orange-500/10 text-orange-600 ring-orange-500/20",
+  pods: "bg-fuchsia-500/10 text-fuchsia-600 ring-fuchsia-500/20",
+  comms: "bg-blue-500/10 text-blue-600 ring-blue-500/20",
+  docs: "bg-yellow-500/10 text-yellow-600 ring-yellow-500/20",
+  property: "bg-slate-400/10 text-slate-600 ring-slate-400/20",
 };
 
 export const SHOWCASE_SLIDES = [
@@ -253,5 +253,5 @@ export const SHOWCASE_SLIDES = [
 
 // Accent classes for a slide's icon tile, with a neutral fallback.
 export function accentFor(app) {
-  return ACCENTS[app] || "bg-surface-strong text-foreground ring-border";
+  return ACCENTS[app] || "bg-zinc-100 text-zinc-900 ring-zinc-200";
 }

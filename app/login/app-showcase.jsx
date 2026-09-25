@@ -9,8 +9,9 @@ import { SHOWCASE_SLIDES, accentFor } from "./showcase-apps";
 const HOLD_MS = 5200;
 const FADE_MS = 500;
 
+// Always light (explicit colours, not theme tokens) so it contrasts with the black sign-in column.
 const PANEL =
-  "relative overflow-hidden rounded-2xl border border-border bg-surface-subtle p-10";
+  "relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-10 text-zinc-950";
 
 // Fisher-Yates, then push any two neighbours from the same app apart so a random
 // order never shows one product twice in a row.
@@ -125,10 +126,10 @@ export function AppShowcase({ className }) {
             >
               <Icon className="size-12" strokeWidth={1.5} />
             </div>
-            <h2 className="mt-8 text-balance text-4xl font-medium tracking-tight text-foreground">
+            <h2 className="mt-8 text-balance text-4xl font-medium tracking-tight text-zinc-950">
               {slide.headline}
             </h2>
-            <p className="mt-4 text-pretty text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-pretty text-sm leading-relaxed text-zinc-600">
               {slide.blurb}
             </p>
           </Reveal>
@@ -148,8 +149,8 @@ export function AppShowcase({ className }) {
                 className={cn(
                   "h-0.5 w-full rounded-full transition-colors duration-300",
                   i === index
-                    ? "bg-foreground/70"
-                    : "bg-border-strong group-hover:bg-muted-foreground",
+                    ? "bg-zinc-900"
+                    : "bg-zinc-300 group-hover:bg-zinc-500",
                 )}
               />
             </button>
@@ -157,15 +158,15 @@ export function AppShowcase({ className }) {
         </div>
 
         <Reveal key={`features-${slide.id}`} phase={phase} delay={140}>
-          <ul className="grid grid-cols-3 gap-6">
+          <ul className="mx-auto grid w-full max-w-3xl grid-cols-3 gap-4">
             {slide.features.map((feature) => {
               const FeatureIcon = feature.icon;
               return (
                 <li
                   key={feature.label}
-                  className="flex flex-col items-center gap-3 text-center text-xs leading-relaxed text-muted-foreground"
+                  className="flex flex-col items-center gap-3 text-center text-xs leading-relaxed text-zinc-600"
                 >
-                  <FeatureIcon className="size-5 text-text-secondary" strokeWidth={1.5} />
+                  <FeatureIcon className="size-5 text-zinc-500" strokeWidth={1.5} />
                   <span className="text-balance">{feature.label}</span>
                 </li>
               );
