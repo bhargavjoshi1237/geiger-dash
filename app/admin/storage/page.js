@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
 import { getPoolSnapshot } from "@/lib/filestore/stats";
 import { getRules, getApiKeys, getNodes } from "@/lib/filestore/queries";
-import { DRIVER_CATALOG } from "@/lib/filestore/drivers";
+import { DRIVER_CATALOG, builtinCatalog } from "@/lib/filestore/drivers";
 import { hasSecretKey } from "@/lib/filestore/crypto";
 import { StorageManager } from "@/components/admin/storage/storage-manager";
 
@@ -35,6 +35,7 @@ export default async function AdminStoragePage() {
       rules={rules}
       apiKeys={apiKeys}
       drivers={DRIVER_CATALOG}
+      builtins={builtinCatalog()}
       initialNodes={nodes}
       initialNamespaceId={firstNamespace?.id || null}
       secretKeyReady={hasSecretKey()}

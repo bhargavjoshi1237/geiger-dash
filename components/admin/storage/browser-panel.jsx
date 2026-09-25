@@ -125,6 +125,8 @@ export function BrowserPanel({
 
     setUploading(true);
     const target = normalizePath(`${path === "/" ? "" : path}/${file.name}`);
+    let stage = "reservation";
+    let uploadId = null;
 
     try {
       // 1. reserve — the pool picks a provider and debits the capacity.
@@ -137,8 +139,10 @@ export function BrowserPanel({
       });
 
       if (!started.ok) throw new Error(started.error);
+      uploadId = started.uploadId;
 
       // 2. transfer — straight to the provider, following the ticket.
+      stage = "transfer";
       const transferred = await runUploadTicket({
         ticket: started.ticket,
         mode: started.mode,
@@ -146,6 +150,7 @@ export function BrowserPanel({
       });
 
       // 3. commit — settle the ledger and mint the file map.
+      stage = "commit";
       const committed = await commitAdminUploadAction({
         uploadId: started.uploadId,
         parts: transferred.parts,
@@ -160,7 +165,13 @@ export function BrowserPanel({
       );
       await refresh();
     } catch (err) {
-      toast.error(err.message || "Upload failed.");
+      console.error("[filestore.adminUpload]", {
+        stage, uploadId, fileName: file.name, sizeBytes: file.size,
+        mimeType: file.type || "application/octet-stream",
+      }, err);
+      toast.error(`Upload failed during ${stage}: ${err.message || "Unknown error."}`, {
+        duration: 12000,
+      });
     } finally {
       setUploading(false);
     }

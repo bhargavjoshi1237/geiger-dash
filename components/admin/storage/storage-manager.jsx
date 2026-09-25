@@ -33,6 +33,7 @@ export function StorageManager({
   rules,
   apiKeys,
   drivers,
+  builtins,
   initialNodes,
   initialNamespaceId,
   secretKeyReady,
@@ -112,6 +113,7 @@ export function StorageManager({
         <ProvidersPanel
           providers={snapshot.providers}
           drivers={drivers}
+          builtins={builtins}
           secretKeyReady={secretKeyReady}
         />
       )}

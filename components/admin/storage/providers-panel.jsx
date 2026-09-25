@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
   EmptyState,
   StatusPill,
+  Switch,
 } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import {
@@ -40,14 +41,20 @@ import {
   deleteProviderAction,
   setProviderStatusAction,
   reorderProvidersAction,
+  setBuiltinProviderAction,
 } from "@/lib/filestore/actions";
 import { ProviderDialog } from "./provider-dialog";
 
-export function ProvidersPanel({ providers, drivers, secretKeyReady }) {
+export function ProvidersPanel({ providers, drivers, builtins = [], secretKeyReady }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [testing, setTesting] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [toggling, setToggling] = useState(null);
+
+  // Built-ins are env-configured and only switched on/off, so they get their own section instead of the editable list.
+  const builtinDrivers = new Set(builtins.map((entry) => entry.driver));
+  const poolProviders = providers.filter((provider) => !builtinDrivers.has(provider.driver));
 
   function openCreate() {
     setEditing(null);
@@ -100,8 +107,22 @@ export function ProvidersPanel({ providers, drivers, secretKeyReady }) {
     else toast.success(`${provider.name} is now ${status}.`);
   }
 
+  async function handleBuiltin(entry, enabled) {
+    setToggling(entry.driver);
+    const result = await setBuiltinProviderAction(entry.driver, enabled);
+    setToggling(null);
+
+    if (!result.ok) {
+      toast.error(result.error || `${entry.label} could not be switched on.`, { duration: 8000 });
+      return;
+    }
+    toast.success(
+      enabled ? `${entry.label} qualified and is taking uploads.` : `${entry.label} stopped taking uploads.`
+    );
+  }
+
   async function handleMove(index, direction) {
-    const next = [...providers];
+    const next = [...poolProviders];
     const target = index + direction;
     if (target < 0 || target >= next.length) return;
 
@@ -124,7 +145,7 @@ export function ProvidersPanel({ providers, drivers, secretKeyReady }) {
         </Button>
       </div>
 
-      {providers.length === 0 ? (
+      {poolProviders.length === 0 ? (
         <EmptyState
           title="The pool is empty"
           description="Add an S3 bucket, a REST provider like Uploadcare, Supabase Storage or Vercel Blob to give uploads somewhere to land."
@@ -137,7 +158,7 @@ export function ProvidersPanel({ providers, drivers, secretKeyReady }) {
         />
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-surface-subtle">
-          {providers.map((provider, index) => {
+          {poolProviders.map((provider, index) => {
             const percent = usagePercent(provider.usedBytes, provider.capacityBytes);
             const capabilities = Object.entries(CAPABILITY_LABELS).filter(
               ([key]) => provider.capabilities?.[key]
@@ -273,6 +294,82 @@ export function ProvidersPanel({ providers, drivers, secretKeyReady }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {builtins.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-tertiary">
+            Built-in
+          </p>
+          <div className="overflow-hidden rounded-xl border border-border bg-surface-subtle">
+            {builtins.map((entry, index) => {
+              const provider = providers.find((item) => item.driver === entry.driver);
+              const enabled = Boolean(provider) && provider.status !== "disabled";
+
+              return (
+                <div
+                  key={entry.driver}
+                  className={cn(
+                    "flex flex-col gap-3 p-4 lg:flex-row lg:items-center",
+                    index > 0 && "border-t border-border"
+                  )}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium text-foreground">{entry.label}</span>
+                      {provider && (
+                        <StatusPill status={provider.status} map={PROVIDER_STATUS_MAP} />
+                      )}
+                      <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-300">
+                        Dev only
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-text-secondary">{entry.description}</p>
+                    <p className="mt-1 text-xs text-text-tertiary">
+                      {!entry.configured
+                        ? "Not configured on this deployment."
+                        : provider
+                          ? `Priority ${provider.priority} · ${provider.objectCount} object${
+                              provider.objectCount === 1 ? "" : "s"
+                            } · ${formatBytes(provider.usedBytes)} · probed ${formatRelative(
+                              provider.lastProbeAt
+                            )}${provider.lastProbeError ? ` · ${provider.lastProbeError}` : ""}`
+                          : "Off — switch it on to add it to the pool."}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {provider && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-xs"
+                        onClick={() => handleTest(provider)}
+                        disabled={testing === provider.id || toggling === entry.driver}
+                      >
+                        {testing === provider.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <FlaskConical className="h-3.5 w-3.5" />
+                        )}
+                        Test
+                      </Button>
+                    )}
+                    {toggling === entry.driver && (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-text-tertiary" />
+                    )}
+                    <Switch
+                      checked={enabled}
+                      onCheckedChange={(value) => handleBuiltin(entry, value)}
+                      disabled={toggling === entry.driver || (!entry.configured && !enabled)}
+                      aria-label={`Use ${entry.label} in the pool`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

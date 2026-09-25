@@ -342,11 +342,13 @@ export function KeysPanel({ apiKeys, namespaces, events, providers }) {
                     )}
                   />
                   <span className="text-sm text-foreground">{event.type}</span>
-                  <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">
-                    {event.detail?.path ||
-                      event.detail?.message ||
-                      providerName(event.providerId) ||
-                      ""}
+                  <span
+                    className="min-w-0 flex-1 truncate text-xs text-text-secondary"
+                    title={event.detail?.message || undefined}
+                  >
+                    {event.detail?.message
+                      ? `${event.detail.stage ? `${event.detail.stage}: ` : ""}${event.detail.message}`
+                      : event.detail?.path || providerName(event.providerId) || ""}
                   </span>
                   {event.bytes > 0 && (
                     <span className="shrink-0 text-xs tabular-nums text-text-secondary">

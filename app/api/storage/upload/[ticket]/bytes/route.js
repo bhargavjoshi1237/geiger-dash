@@ -19,6 +19,17 @@ import { transferBytes } from "@/lib/filestore/uploads";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Max-Age": "600",
+};
+
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(request, { params }) {
   const { ticket } = await params;
   const contentType = request.headers.get("content-type") || "";
@@ -30,7 +41,7 @@ export async function POST(request, { params }) {
     const form = await request.formData();
     const file = form.get("file");
     if (!file || typeof file === "string") {
-      return Response.json({ error: "`file` is required." }, { status: 400 });
+      return Response.json({ error: "`file` is required." }, { status: 400, headers: CORS_HEADERS });
     }
     body = Buffer.from(await file.arrayBuffer());
     mime = file.type || "application/octet-stream";
@@ -39,15 +50,15 @@ export async function POST(request, { params }) {
   }
 
   if (!body?.byteLength) {
-    return Response.json({ error: "Empty request body." }, { status: 400 });
+    return Response.json({ error: "Empty request body." }, { status: 400, headers: CORS_HEADERS });
   }
 
   const result = await transferBytes({ uploadId: ticket, body, mime });
-  if (!result.ok) return Response.json({ error: result.error }, { status: 502 });
+  if (!result.ok) return Response.json({ error: result.error }, { status: 502, headers: CORS_HEADERS });
 
   return Response.json({
     ok: true,
     uploadId: ticket,
     providerKey: result.stored.key,
-  });
+  }, { headers: CORS_HEADERS });
 }
