@@ -1,12 +1,9 @@
 import { SeoHubPage } from "@/components/pages-studio/seo-hub-page";
-import { PAGE_TYPE_HUB } from "@/lib/pages-studio/skills";
+import { buildSeoHubMetadata } from "@/lib/pages-studio/metadata";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: PAGE_TYPE_HUB.solution.title,
-  description: PAGE_TYPE_HUB.solution.description,
-};
+export const metadata = buildSeoHubMetadata("solution");
 
 export default function SolutionsHubPage() {
   return <SeoHubPage pageType="solution" />;

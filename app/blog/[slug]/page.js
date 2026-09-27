@@ -13,6 +13,8 @@ import {
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
+const SITE_URL = "https://geiger.studio";
+
 function formatDate(value) {
   if (!value) return null;
 
@@ -79,9 +81,38 @@ export default async function BlogPostPage({ params }) {
   const relatedPosts = await getRelatedBlogPosts(post);
 
   const publishedDate = formatDate(post.published_at);
+  const postUrl = `${SITE_URL}/blog/${post.slug}`;
+
+  // Article + breadcrumb structured data so the post is eligible for rich results.
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt,
+      url: postUrl,
+      mainEntityOfPage: postUrl,
+      datePublished: post.published_at || undefined,
+      dateModified: post.updated_at || post.published_at || undefined,
+      image: post.featured_image || undefined,
+      keywords: post.tags?.length ? post.tags.join(", ") : undefined,
+      author: { "@type": "Organization", name: post.author_name || "Geiger Studios", url: SITE_URL },
+      publisher: { "@type": "Organization", name: "Geiger Studios", url: SITE_URL },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+        { "@type": "ListItem", position: 3, name: post.title, item: postUrl },
+      ],
+    },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
       <Header />
 

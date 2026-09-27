@@ -1,18 +1,12 @@
 import { SeoProductHub } from "@/components/pages-studio/seo-product-hub";
-import { resolveProductApp } from "@/lib/pages-studio/products";
-import { PAGE_TYPE_HUB } from "@/lib/pages-studio/skills";
+import { buildSeoHubMetadata } from "@/lib/pages-studio/metadata";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
 export async function generateMetadata({ params }) {
   const { product } = await params;
-  const app = resolveProductApp(product);
-  if (!app) return {};
-  return {
-    title: `${app.name} ${PAGE_TYPE_HUB.product.title}`,
-    description: `${PAGE_TYPE_HUB.product.title} for ${app.name}.`,
-  };
+  return buildSeoHubMetadata("product", product);
 }
 
 export default async function ProductProductHubPage({ params }) {

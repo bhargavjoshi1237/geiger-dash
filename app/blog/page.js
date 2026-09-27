@@ -10,6 +10,7 @@ import { getPublishedBlogPosts } from "@/lib/public-content/queries";
 export const metadata = {
   title: "Blog",
   description: "Articles, product notes, and updates from Geiger Studios.",
+  alternates: { canonical: "/blog" },
 };
 
 const placeholderImages = [
@@ -109,7 +110,7 @@ export default async function BlogPage() {
         {archive.length ? (
           <section className="mt-20">
             <div className="mb-5 flex items-center justify-between border-b border-border pb-4">
-              <h2 className="text-sm font-medium uppercase tracking-[0.18em]">The archive</h2>
+              <h2 className="text-sm font-medium uppercase tracking-[0.18em]">All Blogs</h2>
               <span className="font-mono text-xs text-muted-foreground">{String(archive.length).padStart(2, "0")} notes</span>
             </div>
             <div>

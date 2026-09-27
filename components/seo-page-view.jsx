@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { resolveProductApp } from "@/lib/pages-studio/products";
@@ -32,9 +32,57 @@ function formatPageContent(content) {
     .join("");
 }
 
+function formatDate(value) {
+  if (!value) return null;
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 // Renders one published SEO page: breadcrumb (UI + JSON-LD), hero, product CTA,
-// body, and a closing CTA. Shared by /solutions, /product, /features.
-export function SeoPageView({ page, pageType }) {
+// body, related blog posts, and a closing CTA. Shared by /solutions, /product, /features.
+// Compact link list to other SEO pages of one type for the same product.
+function MorePages({ title, pages, pageType, hubPath }) {
+  if (!pages.length) return null;
+  return (
+    <section className="mt-16">
+      <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
+        <h2 className="text-sm font-medium uppercase tracking-[0.18em]">{title}</h2>
+        <Link href={hubPath} className="text-xs text-muted-foreground transition-colors hover:text-foreground">
+          View all
+        </Link>
+      </div>
+      <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3">
+        {pages.map((item) => (
+          <Link
+            key={item.id}
+            href={buildSeoPagePath(pageType, item.product, item.slug)}
+            className="group flex flex-col gap-2 border-b border-border/70 py-5 pr-4 transition-colors hover:bg-muted/25"
+          >
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              {item.title}
+              <ArrowUpRight className="size-3.5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </span>
+            {item.excerpt ? (
+              <span className="line-clamp-2 text-sm leading-6 text-muted-foreground">{item.excerpt}</span>
+            ) : null}
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function SeoPageView({
+  page,
+  pageType,
+  relatedPosts = [],
+  siblingPages = [],
+  crossPages = [],
+  crossType,
+}) {
   const hub = PAGE_TYPE_HUB[pageType] || PAGE_TYPE_HUB.solution;
   const productApp = resolveProductApp(page.product);
   const heroHeading = page.hero_heading || page.title;
@@ -136,6 +184,53 @@ export function SeoPageView({ page, pageType }) {
           className="mx-auto mt-12 max-w-3xl text-[1rem] leading-8 text-muted-foreground [&_a]:break-words [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:my-8 [&_blockquote]:border-l-2 [&_blockquote]:border-foreground/30 [&_blockquote]:pl-6 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.875em] [&_h2]:mt-12 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-foreground [&_h3]:mt-10 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-foreground [&_hr]:my-12 [&_hr]:border-border [&_img]:my-10 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_li]:mt-2 [&_ol]:my-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mt-6 [&_pre]:my-8 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted [&_pre]:p-5 [&_strong]:font-semibold [&_strong]:text-foreground [&_ul]:my-6 [&_ul]:list-disc [&_ul]:pl-6"
           dangerouslySetInnerHTML={{ __html: formatPageContent(page.content) }}
         />
+
+        {relatedPosts.length ? (
+          <section className="mt-20 border-t border-border/70 pt-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              From the blog
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Related reading</h2>
+            <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+              {relatedPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="group flex min-h-56 flex-col bg-background p-6 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
+                    <span>{post.category}</span>
+                    <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </div>
+                  <h3 className="mt-8 text-xl font-semibold leading-snug tracking-tight">{post.title}</h3>
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p>
+                  <time className="mt-auto pt-6 text-xs text-muted-foreground">
+                    {formatDate(post.published_at)}
+                  </time>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {productApp ? (
+          <>
+            <MorePages
+              title={`More ${productApp.label} ${hub.label.toLowerCase()}`}
+              pages={siblingPages}
+              pageType={pageType}
+              hubPath={productHubPath}
+            />
+            {crossType ? (
+              <MorePages
+                title={`${productApp.label} ${PAGE_TYPE_HUB[crossType].label.toLowerCase()}`}
+                pages={crossPages}
+                pageType={crossType}
+                hubPath={buildSeoProductHubPath(crossType, page.product)}
+              />
+            ) : null}
+          </>
+        ) : null}
 
         {productApp ? (
           <section className="mt-20 flex flex-col items-start gap-5 rounded-xl border border-border bg-card/70 p-8 sm:flex-row sm:items-center sm:justify-between">
