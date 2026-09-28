@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Header } from "@/components/header";
+import { SessionHeader } from "@/components/session-header";
+import { SessionLink } from "@/components/session-link";
 import Footer from "@/components/footer";
 import { GridBackdrop } from "@/components/grid-backdrop";
 import Section from "@/components/section";
@@ -11,8 +12,11 @@ import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsP
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
-import { createClient } from "@/utils/supabase/server";
-import { getUser } from "@/supabase/user/getUser";
+
+// Statically generated and served from the CDN; the build fails if anything here starts reading request-time data.
+export const dynamic = "error";
+// ISR window: matches the notice cache so scheduled notices, new posts and the showcase shuffle refresh in the background.
+export const revalidate = 60;
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -46,10 +50,7 @@ function getRandomShowcaseBackgrounds(count) {
   );
 }
 
-export default async function Home() {
-  const supabase = await createClient();
-  const user = await getUser(supabase);
-
+export default function Home() {
   const [notesShowcaseBg, eventsShowcaseBg, flowShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
 
@@ -61,7 +62,7 @@ export default async function Home() {
       />
       <GridBackdrop />
 
-      <Header />
+      <SessionHeader />
 
       <main className="relative z-10 flex flex-1 flex-col pt-16 sm:pt-20">
         <section className="mx-auto mt-10 mb-10 flex w-full max-w-6xl items-start justify-start px-4 sm:mt-16 sm:px-6">
@@ -71,13 +72,13 @@ export default async function Home() {
               Turn your ideas into something real with a single suite that combines solid management tools and
               easy-to-use creative features.
             </p>
-            <Link
-              href={user ? "/org" : "/login"}
+            <SessionLink
+              label="Log in to Start"
+              signedInLabel="Get in Your Workspace"
               className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
             >
-              {user ? "Get in Your Workspace" : "Log in to Start"}
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </SessionLink>
           </div>
         </section>
 
@@ -177,13 +178,12 @@ export default async function Home() {
               TRY GEIGER NOW
             </h2>
             <div className="flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link
-                href={user ? "/org" : "/login"}
+              <SessionLink
+                label="Studio"
                 className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
               >
-                Studio
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </SessionLink>
               <Link
                 href="/contact"
                 className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"

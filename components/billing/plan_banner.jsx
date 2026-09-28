@@ -1,27 +1,38 @@
-// App-wide banner surfacing a live trial's remaining days and, once a trial or
-// paid plan ends, the 30-day data-deletion countdown. Server component: reads
-// the signed-in user's plan and derives the phase; renders nothing for signed-out
-// users or a healthy active/none/expired plan. Fixed to the bottom so it never
-// collides with the fixed page headers.
+"use client";
 
+// App-wide trial / data-deletion countdown banner, fixed to the bottom; resolved client-side so the root layout never reads cookies and pages can stay static.
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, Clock } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
-import { getUser } from "@/supabase/user/getUser";
-import { getUserPlan } from "@/lib/billing/store";
-import { derivePlanState } from "@/lib/billing/plan_state";
+import { getPlanBannerState } from "@/lib/billing/actions";
+import { useSessionUser } from "@/lib/hooks/use-session-user";
 
 function pluralDays(n) {
   return `${n} ${n === 1 ? "day" : "days"}`;
 }
 
-export async function PlanBanner() {
-  const supabase = await createClient();
-  const user = await getUser(supabase);
-  if (!user) return null;
+export function PlanBanner() {
+  const userId = useSessionUser()?.id;
+  const [result, setResult] = useState(null);
 
-  const plan = await getUserPlan(user.id);
-  const state = derivePlanState(plan);
+  // Signed-out visitors never hit the server; the action re-checks auth before reading the plan.
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    getPlanBannerState()
+      .then((state) => {
+        if (!cancelled) setResult({ userId, state });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // Only show a result fetched for the current session, so a sign-out hides it immediately.
+  const state = result && result.userId === userId ? result.state : null;
+  if (!state) return null;
 
   if (state.phase === "trialing") {
     return (

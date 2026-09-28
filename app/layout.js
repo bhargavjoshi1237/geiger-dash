@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -58,9 +57,7 @@ export default async function RootLayout({ children }) {
             <GlobalBanner />
             {children}
           </BannerProvider>
-          <Suspense fallback={null}>
-            <PlanBanner />
-          </Suspense>
+          <PlanBanner />
           <Toaster />
         </ThemeProvider>
       </body>

@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import { updateSession } from './utils/supabase/middleware'
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'geiger.studio'
@@ -20,15 +19,12 @@ export async function proxy(request) {
   if (subdomain) requestHeaders.set('x-geiger-subdomain', subdomain)
   else requestHeaders.delete('x-geiger-subdomain')
 
-  if (request.nextUrl.pathname === '/') {
-    return NextResponse.next({ request: { headers: requestHeaders } })
-  }
-
   return await updateSession(request, requestHeaders)
 }
 
 export const config = {
+  // `.+` leaves the bare `/` unmatched so the statically generated landing page is served straight from the CDN.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).+)',
   ],
 }
