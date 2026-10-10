@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@geiger/ui/tokens.css";
 @source "../node_modules/@geiger/ui/src";
+@source "../node_modules/@geiger/notify/src";
 
 @custom-variant dark (&:is(.dark *));
 

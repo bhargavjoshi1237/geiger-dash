@@ -3,6 +3,7 @@
 // Subpath import, not the barrel: keeps @geiger/ui's optional peers out of the graph.
 import { SuiteHeader } from "@geiger/ui/suite-header";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
+import { NotificationsBell } from "@/components/notifications-bell";
 import { avatarUrlForUser } from "@/lib/avatar-url";
 import { useSessionUser } from "@/lib/hooks/use-session-user";
 
@@ -12,16 +13,19 @@ export function SessionHeader({ megaMenue = true }) {
   const userId = user?.id ?? null;
 
   const profile = userId ? (
-    <UserProfileDropdown
-      user={{
-        id: userId,
-        email: user.email,
-        name: user.user_metadata?.name,
-        fullName: user.user_metadata?.full_name,
-        avatarUrl: avatarUrlForUser(user),
-        dashboardHref: "/org",
-      }}
-    />
+    <div className="flex items-center gap-2">
+      <NotificationsBell />
+      <UserProfileDropdown
+        user={{
+          id: userId,
+          email: user.email,
+          name: user.user_metadata?.name,
+          fullName: user.user_metadata?.full_name,
+          avatarUrl: avatarUrlForUser(user),
+          dashboardHref: "/org",
+        }}
+      />
+    </div>
   ) : null;
 
   return <SuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;

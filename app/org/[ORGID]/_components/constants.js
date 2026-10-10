@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ClipboardList,
   GitBranch,
+  House,
   Images,
   Megaphone,
   Mic,
@@ -47,6 +48,7 @@ const PRODUCT_META = {
   content: { Icon: PenLine, icon: "text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-400" },
   pods: { Icon: Mic, icon: "text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-400" },
   notes: { Icon: NotebookPen, icon: "text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20", hover: "group-hover/row:text-yellow-400" },
+  property: { Icon: House, icon: "text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20", hover: "group-hover/row:text-emerald-400" },
 };
 
 export function productMeta(id) {

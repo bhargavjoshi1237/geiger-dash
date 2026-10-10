@@ -5,6 +5,7 @@ import { SuiteHeader } from "@geiger/ui/suite-header";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
+import { NotificationsBell } from "@/components/notifications-bell";
 import { avatarUrlForUser } from "@/lib/avatar-url";
 
 // Resolves the session, then hands the shared SuiteHeader a ready-made profile
@@ -16,16 +17,19 @@ export async function Header({ megaMenue = true }) {
   const userId = user?.id;
 
   const profile = userId ? (
-    <UserProfileDropdown
-      user={{
-        id: userId,
-        email: user.email,
-        name: user.user_metadata?.name,
-        fullName: user.user_metadata?.full_name,
-        avatarUrl: avatarUrlForUser(user),
-        dashboardHref: "/org",
-      }}
-    />
+    <div className="flex items-center gap-2">
+      <NotificationsBell />
+      <UserProfileDropdown
+        user={{
+          id: userId,
+          email: user.email,
+          name: user.user_metadata?.name,
+          fullName: user.user_metadata?.full_name,
+          avatarUrl: avatarUrlForUser(user),
+          dashboardHref: "/org",
+        }}
+      />
+    </div>
   ) : null;
 
   return <SuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;

@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { getUser } from '@/supabase/user/getUser'
 import { loginNextRouteNames } from '@/lib/product-routes.mjs'
+import { notifyMemberJoined } from '@/lib/notifications/send'
 
 // Inner app routes that require a signed-in user *with* an organization. These
 // are the product workspaces (which proxy through this project via next.config
@@ -117,7 +118,9 @@ export async function updateSession(request, requestHeaders) {
   // accept route). Best-effort and cleared regardless so a bad token can't loop.
   const pendingInvite = request.cookies.get('pending_invite')?.value
   if (user && pendingInvite) {
-    await supabase.rpc('accept_invite', { p_token: pendingInvite })
+    const { data: accepted } = await supabase.rpc('accept_invite', { p_token: pendingInvite })
+    const joined = Array.isArray(accepted) ? accepted[0] : accepted
+    if (joined) notifyMemberJoined(supabase, { user, organizationId: joined.organization_id, orgName: joined.org_name })
     supabaseResponse.cookies.set('pending_invite', '', { path: '/', maxAge: 0 })
     supabaseResponse.cookies.set(HAS_ORG_COOKIE, '1', {
       path: '/',

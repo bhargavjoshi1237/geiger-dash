@@ -7,9 +7,16 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
 import { sendTemplateEmail } from '@/lib/email/send'
+import { notifyMemberJoined, notifyMemberRemoved, notifyRoleChanged } from '@/lib/notifications/send'
 
 function cleanText(value) {
   return String(value || '').trim()
+}
+
+// Org display name for notification copy; null when unreadable.
+async function orgName(supabase, organizationId) {
+  const { data } = await supabase.from('organizations').select('name').eq('id', organizationId).maybeSingle()
+  return data?.name ?? null
 }
 
 const ORG_ROUTE = '/org'
@@ -112,7 +119,7 @@ export async function updateOrgAvatarAction(formData) {
 
 export async function joinOrganizationAction(formData) {
   const supabase = await createClient()
-  await requireUser(supabase, '/login?next=org')
+  const user = await requireUser(supabase, '/login?next=org')
   const organizationId = cleanText(formData.get('organization_id'))
 
   if (!organizationId) {
@@ -131,6 +138,7 @@ export async function joinOrganizationAction(formData) {
     redirect(`${ORG_ROUTE}?error=organization_not_found`)
   }
 
+  notifyMemberJoined(supabase, { user, organizationId: row.id, orgName: row.name })
   revalidatePath(ORG_ROUTE)
   redirect(`${ORG_ROUTE}?joined=1`)
 }
@@ -227,7 +235,7 @@ export async function inviteOrgMembersAction({ organizationId, organizationName,
 
 export async function setOrgMemberRoleAction({ organizationId, userId, role }) {
   const supabase = await createClient()
-  await requireUser(supabase, '/login?next=org')
+  const user = await requireUser(supabase, '/login?next=org')
   const orgId = cleanText(organizationId)
   const uid = cleanText(userId)
   const nextRole = cleanText(role)
@@ -241,17 +249,19 @@ export async function setOrgMemberRoleAction({ organizationId, userId, role }) {
   if (error) return { ok: false, error: error.message }
   if (!data) return { ok: false, error: "You can't change this member's role." }
 
+  notifyRoleChanged({ actorId: user.id, organizationId: orgId, orgName: await orgName(supabase, orgId), userId: uid, role: nextRole })
   revalidatePath(ORG_ROUTE)
   return { ok: true }
 }
 
 export async function removeOrgMemberAction({ organizationId, userId }) {
   const supabase = await createClient()
-  await requireUser(supabase, '/login?next=org')
+  const user = await requireUser(supabase, '/login?next=org')
   const orgId = cleanText(organizationId)
   const uid = cleanText(userId)
   if (!orgId || !uid) return { ok: false, error: 'Missing member.' }
 
+  const name = await orgName(supabase, orgId)
   const { data, error } = await supabase.rpc('remove_organization_member', {
     p_org: orgId,
     p_user: uid,
@@ -259,6 +269,8 @@ export async function removeOrgMemberAction({ organizationId, userId }) {
   if (error) return { ok: false, error: error.message }
   if (!data) return { ok: false, error: "You can't remove this member." }
 
+  // Self-removal ("leave") needs no notice; others get one via the service role.
+  if (uid !== user.id) notifyMemberRemoved({ actorId: user.id, organizationId: orgId, orgName: name, userId: uid })
   revalidatePath(ORG_ROUTE)
   return { ok: true }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
+import { notifyMemberJoined } from '@/lib/notifications/send'
 
 // Invite accept link target. If the visitor is signed in we accept immediately
 // and drop them in the org. If not, we stash the token in a short-lived cookie
@@ -32,6 +33,7 @@ export async function GET(request, { params }) {
     return NextResponse.redirect(`${origin}/org?error=invite_invalid`)
   }
 
+  notifyMemberJoined(supabase, { user, organizationId: row.organization_id, orgName: row.org_name })
   const res = NextResponse.redirect(`${origin}/org?joined=1`)
   // The user now has an org — prime the middleware's membership cache.
   res.cookies.set('geiger_has_org', '1', {
