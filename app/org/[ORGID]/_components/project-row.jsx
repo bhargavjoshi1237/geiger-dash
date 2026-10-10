@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate, launchHref, productMeta, projectAvatarColor } from "./constants";
@@ -54,7 +53,8 @@ function ProductPill({ product, entitlements }) {
   }
 
   return (
-    <Link
+    // Plain <a>: products are separate Next apps behind rewrites, so <Link> would prefetch and soft-navigate in vain.
+    <a
       href={launchHref(product)}
       className="group/row inline-flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-surface-hover"
     >
@@ -62,7 +62,7 @@ function ProductPill({ product, entitlements }) {
       <span className="whitespace-nowrap text-[13px] text-text-secondary transition-colors group-hover/row:text-foreground">
         {product.name}
       </span>
-    </Link>
+    </a>
   );
 }
 

@@ -24,7 +24,8 @@ export async function proxy(request) {
 
 export const config = {
   // `.+` leaves the bare `/` unmatched so the statically generated landing page is served straight from the CDN.
+  // `[^/]+/_next/` skips the rewritten product apps' own assets (/property/_next/...) so chunks don't each hit auth.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).+)',
+    '/((?!_next/static|_next/image|[^/]+/_next/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).+)',
   ],
 }
