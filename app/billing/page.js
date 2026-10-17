@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CreditCard, LucideClock, ReceiptText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
-import { ProductAccess } from "@/components/billing/product-access";
-import { Badge, Button } from "@geiger/ui";
+import { ProductAccess, titleCaseId } from "@/components/billing/product-access";
+import { Button, ScreenHeader, SectionCard, cn } from "@geiger/ui";
 import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
-import { getPlan, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { getPlan, planPrice, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
 import { getUserPlan, listPurchases } from "@/lib/billing/store";
 import { derivePlanState } from "@/lib/billing/plan_state";
 
@@ -17,27 +17,19 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const PRODUCT_META = new Map(PRODUCT_CATALOG.map((p) => [p.id, p]));
 
 const PURCHASE_STATUS = {
-  completed: { label: "Completed", variant: "success" },
-  pending: { label: "Pending", variant: "secondary" },
-  refunded: { label: "Refunded", variant: "secondary" },
-  canceled: { label: "Canceled", variant: "secondary" },
+  completed: { label: "Paid", muted: false },
+  pending: { label: "Pending", muted: true },
+  refunded: { label: "Refunded", muted: true },
+  canceled: { label: "Canceled", muted: true },
 };
 
-const PLAN_PHASE_BADGE = {
-  trialing: { label: "Trial", variant: "warning" },
-  active: { label: "Active", variant: "success" },
-  grace: { label: "Ended", variant: "destructive" },
-  expired: { label: "Expired", variant: "secondary" },
-  none: { label: "Inactive", variant: "secondary" },
-};
-
-// Phase-driven accent for the billing-period meter fill.
-const PHASE_ACCENT = {
-  trialing: { bar: "bg-amber-400" },
-  active: { bar: "bg-emerald-400" },
-  grace: { bar: "bg-red-400" },
-  expired: { bar: "bg-surface-strong" },
-  none: { bar: "bg-surface-strong" },
+// Status dot per plan phase; the theme's destructive token is the only non-neutral colour.
+const PHASE = {
+  trialing: { label: "Trial", dot: "bg-foreground" },
+  active: { label: "Active", dot: "bg-foreground" },
+  grace: { label: "Ended", dot: "bg-destructive" },
+  expired: { label: "Expired", dot: "bg-muted-foreground/50" },
+  none: { label: "Inactive", dot: "bg-muted-foreground/50" },
 };
 
 function formatUsd(cents, currency = "usd") {
@@ -58,28 +50,228 @@ function planLabel(planKey) {
 }
 
 function productNames(ids) {
-  return (Array.isArray(ids) ? ids : []).map((id) => PRODUCT_META.get(id)?.name || id);
+  return (Array.isArray(ids) ? ids : []).map((id) => PRODUCT_META.get(id)?.name || titleCaseId(id));
 }
 
-// Progress through the current billing cycle: fill %, cycle start, and days left.
-function billingCycle(plan, planState) {
-  const periodEnd = planState.periodEnd;
-  if (!periodEnd) return null;
-  const intervalDays = plan.billingInterval === "year" ? 365 : 30;
-  const cycleStart = new Date(periodEnd.getTime() - intervalDays * DAY_MS);
-  const now = new Date();
-  const span = periodEnd.getTime() - cycleStart.getTime();
-  const elapsed = now.getTime() - cycleStart.getTime();
-  const pct = Math.min(100, Math.max(0, span > 0 ? (elapsed / span) * 100 : 0));
-  return { cycleStart, periodEnd, pct, daysRemaining: planState.daysRemaining };
+// How far through the current cycle we are, for the active/trial progress line.
+function cycleProgress(plan, planState) {
+  if (!planState.periodEnd) return null;
+  const totalDays = plan.billingInterval === "year" ? 365 : 30;
+  const start = planState.periodEnd.getTime() - totalDays * DAY_MS;
+  const pct = Math.min(100, Math.max(0, ((Date.now() - start) / (totalDays * DAY_MS)) * 100));
+  return { pct, daysRemaining: planState.daysRemaining };
 }
 
-function StatCell({ label, value }) {
+// The plan's key date and how to label it for the current phase.
+function keyDate(plan, planState) {
+  switch (planState.phase) {
+    case "trialing":
+      return { label: "Trial ends", value: planState.periodEnd };
+    case "active":
+      return { label: "Renews on", value: planState.periodEnd };
+    case "grace":
+      return { label: "Ended on", value: planState.periodEnd };
+    case "expired":
+      return { label: "Expired on", value: plan.currentPeriodEnd };
+    default:
+      return null;
+  }
+}
+
+// "Campaign, Flow, Events and 14 more" — what the plan actually covers, in one line.
+function includesLine(names) {
+  if (!names.length) return "";
+  if (names.length <= 3) return names.join(", ");
+  return `${names.slice(0, 3).join(", ")} and ${names.length - 3} more`;
+}
+
+// "$174" set large with a small currency sign and interval, cents only when the price has them.
+function PriceFigure({ cents, currency = "usd", interval }) {
+  const parts = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: cents % 100 ? 2 : 0,
+  }).formatToParts(cents / 100);
+  const symbol = parts.filter((p) => p.type === "currency").map((p) => p.value).join("");
+  const whole = parts.filter((p) => p.type === "integer" || p.type === "group").map((p) => p.value).join("");
+  const fraction = parts.find((p) => p.type === "fraction")?.value;
+
   return (
-    <div className="px-5 py-4 first:pl-6 last:pr-6">
-      <p className="text-xs uppercase tracking-wider text-text-tertiary">{label}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums tracking-tight">{value}</p>
-    </div>
+    <p className="flex items-start leading-none sm:justify-end">
+      <span className="mt-1.5 text-2xl font-medium text-muted-foreground">{symbol}</span>
+      <span className="text-6xl font-semibold tracking-[-0.045em] tabular-nums">{whole}</span>
+      {fraction ? <span className="mt-1.5 text-2xl font-semibold tabular-nums">.{fraction}</span> : null}
+      <span className="ml-1.5 self-end pb-1 text-base text-muted-foreground">
+        /{interval === "year" ? "yr" : "mo"}
+      </span>
+    </p>
+  );
+}
+
+// "Pro $119 · 17 products $50 · Usage $5" — only the parts that cost something.
+function PriceBreakdown({ price, planName, productCount, currency }) {
+  const parts = [
+    { label: planName, cents: price.baseCents },
+    { label: `${productCount} ${productCount === 1 ? "product" : "products"}`, cents: price.productsCents },
+    { label: "Usage", cents: price.usageCents },
+  ].filter((part) => part.cents > 0);
+  if (parts.length < 2) return null;
+
+  return (
+    <p className="mt-3 text-xs text-muted-foreground sm:text-right">
+      {parts.map((part, index) => (
+        <span key={part.label}>
+          {index ? " · " : null}
+          {part.label}{" "}
+          <span className="tabular-nums text-foreground">
+            {new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency,
+              minimumFractionDigits: part.cents % 100 ? 2 : 0,
+            }).format(part.cents / 100)}
+          </span>
+        </span>
+      ))}
+    </p>
+  );
+}
+
+// Phase tint faded down from the card's top edge: green while active, amber in the final week, red once ended.
+function planTint(planState, progress) {
+  if (planState.phase === "grace" || planState.phase === "expired") return "from-red-500/10";
+  if (!progress) return null;
+  return progress.daysRemaining <= 7 ? "from-amber-500/10" : "from-emerald-500/10";
+}
+
+function RenewButton({ label = "Renew plan" }) {
+  return (
+    <Button asChild className="shrink-0">
+      <Link href="/pricing">
+        {label}
+        <ArrowRight className="size-4" />
+      </Link>
+    </Button>
+  );
+}
+
+// The page's focal point: plan and price set large, with a footer that changes with the plan's phase.
+function PlanPanel({ plan, planState, phase, progress, date, price, productNames: names }) {
+  const needsRenewal = planState.phase === "grace" || planState.phase === "expired";
+  const isGrace = planState.phase === "grace";
+  const tint = planTint(planState, progress);
+
+  if (!plan) {
+    return (
+      <section className="overflow-hidden rounded-xl border border-border bg-surface-subtle">
+        <div className="p-6 sm:p-8">
+          <p className="text-sm text-muted-foreground">No plan yet</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Pick your plan</h2>
+          <p className="mt-3 max-w-md text-sm text-muted-foreground">
+            Choose a plan and the products your team works in. You can change it any time.
+          </p>
+        </div>
+        <footer className="flex justify-end border-t border-border bg-background/60 px-6 py-4 sm:px-8">
+          <RenewButton label="View plans" />
+        </footer>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-label="Your plan"
+      className={cn(
+        "relative overflow-hidden rounded-xl border bg-surface-subtle",
+        isGrace ? "border-destructive/40" : "border-border",
+      )}
+    >
+      {tint ? (
+        <div className={cn("pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b to-transparent", tint)} />
+      ) : null}
+      <div className="relative flex flex-col gap-8 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-8">
+        <div className="min-w-0">
+          <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <span className={cn("size-1.5 rounded-full", phase.dot)} />
+            {phase.label} plan
+          </p>
+          <h2 className="mt-3 text-5xl font-semibold leading-none tracking-[-0.045em] sm:text-6xl">
+            {planLabel(plan.planKey)}
+          </h2>
+          {names.length ? (
+            <p className="mt-4 max-w-md text-sm text-muted-foreground">
+              {needsRenewal ? `${names.length} products, locked until you renew` : `Includes ${includesLine(names)}`}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="sm:self-center sm:text-right">
+          <PriceFigure cents={price.totalCents} currency={plan.currency} interval={plan.billingInterval} />
+          <PriceBreakdown
+            price={price}
+            planName={planLabel(plan.planKey)}
+            productCount={names.length}
+            currency={plan.currency}
+          />
+        </div>
+      </div>
+
+      <footer
+        className={cn(
+          "relative flex flex-col gap-4 border-t px-6 py-4 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8",
+          isGrace ? "border-destructive/30 bg-destructive/5" : "border-border bg-background/60",
+        )}
+      >
+        {progress ? (
+          <>
+            <div className="w-full max-w-sm">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-surface-strong">
+                <div className="h-full rounded-full bg-foreground" style={{ width: `${progress.pct}%` }} />
+              </div>
+              <p className="mt-2 text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  {progress.daysRemaining} {progress.daysRemaining === 1 ? "day" : "days"} left
+                </span>
+                {date ? ` · ${date.label.toLowerCase()} ${formatDate(date.value)}` : null}
+              </p>
+            </div>
+            <p className="text-muted-foreground">Member since {formatDate(plan.startedAt)}</p>
+          </>
+        ) : null}
+
+        {isGrace ? (
+          <>
+            <p className="text-pretty">
+              <span className="font-medium">Your plan ended on {formatDate(planState.periodEnd)}.</span>{" "}
+              <span className="text-muted-foreground">
+                Workspace data will be deleted on {formatDate(planState.deletionDate)} (
+                {planState.deletionDaysRemaining} {planState.deletionDaysRemaining === 1 ? "day" : "days"}) unless
+                you renew.
+              </span>
+            </p>
+            <RenewButton />
+          </>
+        ) : null}
+
+        {planState.phase === "expired" ? (
+          <>
+            <p className="text-pretty">
+              <span className="font-medium">Expired on {formatDate(date?.value)}.</span>{" "}
+              <span className="text-muted-foreground">Renew to unlock your products. Everything is restored.</span>
+            </p>
+            <RenewButton />
+          </>
+        ) : null}
+
+        {!progress && !needsRenewal ? (
+          <>
+            <p className="text-muted-foreground">
+              {planState.phase === "none" ? "This plan is inactive." : `Member since ${formatDate(plan.startedAt)}`}
+            </p>
+            {planState.phase === "none" ? <RenewButton label="Choose a plan" /> : null}
+          </>
+        ) : null}
+      </footer>
+    </section>
   );
 }
 
@@ -89,211 +281,117 @@ export default async function BillingPage() {
 
   const [plan, purchases] = await Promise.all([getUserPlan(user.id), listPurchases(user.id)]);
   const planState = derivePlanState(plan);
-  const phaseBadge = PLAN_PHASE_BADGE[planState.phase] || PLAN_PHASE_BADGE.none;
-  const accent = PHASE_ACCENT[planState.phase] || PHASE_ACCENT.none;
+  const phase = PHASE[planState.phase] || PHASE.none;
 
-  const cycle = plan ? billingCycle(plan, planState) : null;
+  const progress =
+    plan && (planState.phase === "active" || planState.phase === "trialing")
+      ? cycleProgress(plan, planState)
+      : null;
+  const date = plan ? keyDate(plan, planState) : null;
   const planProducts = Array.isArray(plan?.products) ? plan.products : [];
-  const totalSpent = purchases
-    .filter((p) => p.status === "completed")
-    .reduce((sum, p) => sum + (p.amountTotal || 0), 0);
-  const paymentCount = purchases.filter((p) => p.status === "completed").length;
+  const completed = purchases.filter((p) => p.status === "completed");
+  const totalSpent = completed.reduce((sum, p) => sum + (p.amountTotal || 0), 0);
+  // Priced from the plan's configuration: user_plan.amount_total can hold the last upgrade delta, not the plan price.
+  const currentPurchase = purchases.find((p) => p.id === plan?.currentPurchaseId);
+  const price = plan
+    ? planPrice({
+        planId: plan.planKey,
+        billingInterval: plan.billingInterval,
+        selectedProducts: planProducts,
+        metrics: currentPurchase?.metrics || {},
+      })
+    : null;
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
-      {/* Suite-consistent grid wash, masked to the top, echoing the pricing page. */}
+      {/* Suite grid wash, masked to the top like the pricing page. */}
       <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808014_1px,transparent_1px),linear-gradient(to_bottom,#80808014_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_40%_at_50%_0%,#000_50%,transparent_100%)]" />
       <Header />
-      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Billing</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Your current plan and purchase history.
-            </p>
-          </div>
-          <Button asChild variant="outline" className="shrink-0">
-            <Link href="/pricing">
-              {plan ? "Change Plan" : "Choose a Plan"}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </header>
+      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-4 pb-24 pt-24 sm:px-6 lg:px-8">
+        <ScreenHeader
+          title="Billing"
+          description={user.email ? `Plan, products and payments for ${user.email}.` : "Plan, products and payments."}
+          actions={
+            <Button asChild variant={plan ? "outline" : "default"}>
+              <Link href="/pricing">
+                {plan ? "Change plan" : "Choose a plan"}
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          }
+        />
 
-        {/* Current plan */}
-        <section className="mt-8">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-            Current Plan
-          </h2>
-          {plan ? (
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-card">
-              {/* Soft top-light so the hero card lifts off the canvas. */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-40" />
-              <div className="relative p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-lg font-semibold">{planLabel(plan.planKey)}</h3>
-                      <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {planState.isTrial
-                        ? "Free trial"
-                        : `${formatUsd(plan.amountTotal, plan.currency)} / ${plan.billingInterval}`}{" "}
-                      · member since {formatDate(plan.startedAt)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-semibold tabular-nums tracking-tight">
-                      {planState.isTrial ? "Free" : formatUsd(plan.amountTotal, plan.currency)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {planState.isTrial ? "during trial" : `per ${plan.billingInterval}`}
-                    </p>
-                  </div>
-                </div>
+        <div className="mt-10">
+          <PlanPanel
+            plan={plan}
+            planState={planState}
+            phase={phase}
+            progress={progress}
+            date={date}
+            price={price}
+            productNames={productNames(planProducts)}
+          />
+        </div>
 
-                {/* Billing-period meter — the at-a-glance "where am I in this cycle". */}
-                {cycle && (planState.phase === "active" || planState.phase === "trialing") ? (
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-text-secondary">
-                        {planState.phase === "trialing" ? "Trial Period" : "Current Billing Period"}
-                      </span>
-                      <span className="text-muted-foreground flex gap-1.5 items-center">
-                       <LucideClock className="w-3 h-3" /> <p className="text-xs text-muted-foreground -mt-0.5">{cycle.daysRemaining} days left</p>
-                      </span>
-                    </div>
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-strong">
-                      <div
-                        className={`h-full rounded-full ${accent.bar}`}
-                        style={{ width: `${cycle.pct}%` }}
-                      />
-                    </div>
-                    <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{formatDate(cycle.cycleStart)}</span>
-                      <span>
-                        {planState.phase === "trialing" ? "Trial ends " : "Renews "}
-                        {formatDate(cycle.periodEnd)}
-                      </span>
-                    </div>
-                  </div>
-                ) : null}
-
-                {planState.phase === "grace" ? (
-                  <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-                    <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        Your plan ended. Your data will be deleted in{" "}
-                        {planState.deletionDaysRemaining}{" "}
-                        {planState.deletionDaysRemaining === 1 ? "day" : "days"} (
-                        {formatDate(planState.deletionDate)}) unless you renew.
-                      </p>
-                      <Button asChild size="sm" variant="destructive" className="mt-3">
-                        <Link href="/pricing">Renew Plan</Link>
-                      </Button>
-                    </div>
-                  </div>
-                ) : null}
-
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-card py-12 text-center">
-              <span className="mb-4 flex size-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-                <CreditCard className="size-6" />
-              </span>
-              <h3 className="text-base font-semibold">No Active Plan</h3>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                You haven&apos;t purchased a plan yet. Pick a foundation to get started.
-              </p>
-              <Button asChild className="mt-5">
-                <Link href="/pricing">
-                  View Plans
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
-          )}
-        </section>
-
-        {/* Account summary */}
-        {plan ? (
-          <section className="mt-6">
-            <div className="grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-card sm:grid-cols-4 sm:divide-y-0">
-              <StatCell label="Total Spent" value={formatUsd(totalSpent)} />
-              <StatCell label="Payments" value={paymentCount} />
-              <StatCell label="Products" value={planProducts.length} />
-              <StatCell label="Member Since" value={formatDate(plan.startedAt)} />
-            </div>
-          </section>
-        ) : null}
-
-        {/* What the plan unlocks, grouped by catalog family. */}
         {planProducts.length ? (
-          <section className="mt-10">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-              Product Access
-            </h2>
+          <SectionCard
+            bare
+            title="Products"
+            className="mt-12"
+          >
             <ProductAccess productIds={planProducts} />
-          </section>
+          </SectionCard>
         ) : null}
 
-        {/* Purchase history */}
-        <section className="mt-10">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-            Purchase History
-          </h2>
+        <SectionCard
+          bare
+          title="Payment history"
+          description={
+            completed.length
+              ? `${completed.length} ${completed.length === 1 ? "payment" : "payments"} · ${formatUsd(totalSpent)} total`
+              : undefined
+          }
+          className="mt-12"
+        >
           {purchases.length ? (
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface-card">
+            <div className="-mx-1 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-surface-subtle text-left text-xs text-muted-foreground">
-                    <th className="px-4 py-3 font-medium">Date</th>
-                    <th className="px-4 py-3 font-medium">Plan</th>
-                    <th className="hidden px-4 py-3 font-medium sm:table-cell">Products</th>
-                    <th className="px-4 py-3 text-right font-medium">Amount</th>
-                    <th className="px-4 py-3 text-right font-medium">Status</th>
+                  <tr className="text-left text-xs text-muted-foreground">
+                    <th className="px-1 pb-2 font-medium">Date</th>
+                    <th className="px-1 pb-2 font-medium">Description</th>
+                    <th className="px-1 pb-2 text-right font-medium">Amount</th>
+                    <th className="px-1 pb-2 text-right font-medium">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border border-t border-border">
                   {purchases.map((purchase) => {
                     const status = PURCHASE_STATUS[purchase.status] || PURCHASE_STATUS.pending;
                     const names = productNames(purchase.products);
                     return (
-                      <tr
-                        key={purchase.id}
-                        className="border-b border-border transition-colors last:border-b-0 hover:bg-surface-hover"
-                      >
-                        <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                      <tr key={purchase.id} className="align-top">
+                        <td className="whitespace-nowrap px-1 py-3 text-muted-foreground">
                           {formatDate(purchase.createdAt)}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="max-w-0 px-1 py-3 sm:w-1/2">
                           <span className="font-medium">{planLabel(purchase.planKey)}</span>
-                          <span className="ml-1 text-xs text-muted-foreground">
-                            /{purchase.billingInterval}
-                          </span>
-                        </td>
-                        <td className="hidden max-w-[16rem] px-4 py-3 text-muted-foreground sm:table-cell">
+                          <span className="text-muted-foreground"> · {purchase.billingInterval}ly</span>
                           {names.length ? (
-                            <span className="flex items-baseline gap-1.5">
-                              <span className="font-medium tabular-nums text-text-secondary">
-                                {names.length}
-                              </span>
-                              <span className="truncate">{names.join(", ")}</span>
+                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                              {names.length} {names.length === 1 ? "product" : "products"}: {names.join(", ")}
                             </span>
-                          ) : (
-                            "—"
-                          )}
+                          ) : null}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-right font-medium tabular-nums">
+                        <td className="whitespace-nowrap px-1 py-3 text-right font-medium tabular-nums">
                           {formatUsd(purchase.amountTotal, purchase.currency)}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex justify-end">
-                            <Badge variant={status.variant}>{status.label}</Badge>
-                          </div>
+                        <td
+                          className={cn(
+                            "whitespace-nowrap px-1 py-3 text-right",
+                            status.muted ? "text-muted-foreground" : "text-foreground",
+                          )}
+                        >
+                          {status.label}
                         </td>
                       </tr>
                     );
@@ -302,17 +400,9 @@ export default async function BillingPage() {
               </table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-card py-12 text-center">
-              <span className="mb-4 flex size-12 items-center justify-center rounded-xl bg-surface-subtle text-muted-foreground">
-                <ReceiptText className="size-6" />
-              </span>
-              <h3 className="text-base font-semibold">No Purchases Yet</h3>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Your completed payments will appear here.
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">No payments yet. Receipts appear here after checkout.</p>
           )}
-        </section>
+        </SectionCard>
       </main>
       <Footer />
     </div>

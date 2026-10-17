@@ -182,6 +182,30 @@
     }
   }
 
+  /* Landing spectrum: bars rise in on load; the open bar's dwell meter fills before auto-advancing. */
+  --animate-landing-rise: landing-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-landing-dwell: landing-dwell 5s linear both;
+
+  @keyframes landing-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes landing-dwell {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
   @keyframes suite-caret {
     0%,
     50% {

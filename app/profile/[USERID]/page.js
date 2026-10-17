@@ -12,7 +12,7 @@ import { getUserOrganizations } from '@/lib/org/membership'
 import { avatarUrlForUser } from '@/lib/avatar-url'
 import { getUserPlan, listPurchases } from '@/lib/billing/store'
 import { derivePlanState } from '@/lib/billing/plan_state'
-import { getPlan } from '@/lib/pricing/plans'
+import { getPlan, planPrice } from '@/lib/pricing/plans'
 import { ProfileClient } from './profile-client'
 
 export const dynamic = 'force-dynamic'
@@ -126,7 +126,15 @@ export default async function ProfilePage({ params }) {
     planKey: plan?.planKey || null,
     planName: plan?.planKey ? getPlan(plan.planKey)?.name || plan.planKey : null,
     billingInterval: plan?.billingInterval || null,
-    amountTotal: plan?.amountTotal || 0,
+    // The plan's real price, not user_plan.amount_total (which can hold the last upgrade delta).
+    amountTotal: plan
+      ? planPrice({
+          planId: plan.planKey,
+          billingInterval: plan.billingInterval,
+          selectedProducts: plan.products,
+          metrics: purchases.find((purchase) => purchase.id === plan.currentPurchaseId)?.metrics || {},
+        }).totalCents
+      : 0,
     currency: plan?.currency || 'usd',
     startedAt: plan?.startedAt || null,
     phase: planState.phase,

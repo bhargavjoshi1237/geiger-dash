@@ -9,10 +9,12 @@ import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShow
 import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlaygroundShowcase";
 import CollaboratorTabsShowcase from "@/components/collaborator-tabs-showcase";
 import PlaygroundFrame from "@/components/playground-frame";
-import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
-
+import { displayFont } from "@/components/suite-landing/display_font";
+import { StartPaths } from "@/components/suite-landing/start_paths";
+import { ShippingLog } from "@/components/suite-landing/shipping_log";
+import { SpectrumHeader } from "@/components/why-geiger/why_geiger_kit";
 // Statically generated and served from the CDN; the build fails if anything here starts reading request-time data.
 export const dynamic = "error";
 // ISR window: matches the notice cache so scheduled notices, new posts and the showcase shuffle refresh in the background.
@@ -55,7 +57,7 @@ export default function Home() {
     getRandomShowcaseBackgrounds(3);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground selection:bg-indigo-500/30 font-sans">
+    <div className={`${displayFont.variable} flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground selection:bg-indigo-500/30 font-sans`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
@@ -72,13 +74,21 @@ export default function Home() {
               Turn your ideas into something real with a single suite that combines solid management tools and
               easy-to-use creative features.
             </p>
-            <SessionLink
-              label="Log in to Start"
-              signedInLabel="Get in Your Workspace"
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </SessionLink>
+            <div className="flex flex-wrap items-center gap-3">
+              <SessionLink
+                label="Log in to Start"
+                signedInLabel="Get in Your Workspace"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </SessionLink>
+              <Link
+                href="/why-geiger"
+                className="inline-flex h-10 items-center rounded-full border border-border-strong bg-background/40 px-6 text-sm font-medium text-foreground backdrop-blur-md transition-colors hover:bg-surface-hover/70 sm:text-base"
+              >
+                Why Geiger
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -157,8 +167,10 @@ export default function Home() {
           </div>
         </section>
 
+        <StartPaths />
+        <ShippingLog />
+
         <div className="flex flex-col gap-10 sm:gap-20 mt-10">
-          <ChangeLogComponent />
 
 
 
@@ -171,6 +183,9 @@ export default function Home() {
 
         <section className="relative z-20 overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           <div className="container mx-auto relative z-10 flex flex-col items-center text-center">
+            <div className="mb-12 w-full max-w-6xl sm:mb-16">
+              <SpectrumHeader />
+            </div>
             <h3 className="mb-4 text-xs font-semibold tracking-widest text-muted-foreground uppercase sm:text-sm">
               Open source from day one
             </h3>

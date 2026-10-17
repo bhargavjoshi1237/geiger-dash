@@ -1213,7 +1213,7 @@ function DomainTab({ organization }) {
     const host = `${domain.subdomain}.${ROOT_DOMAIN}`
     return (
       <SettingsSection
-        title="Custom subdomain"
+        title="Custom Subdomain"
         description="This workspace is reachable at the address below. Opening it shows only this organization."
         aside={<Badge variant="success">Active</Badge>}
         bodyClassName="p-0"

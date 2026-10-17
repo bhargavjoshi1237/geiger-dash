@@ -12,7 +12,7 @@ import {
   Radio,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ import {
 } from "@/lib/pricing/plans";
 // The catalog is icon-free so the server can import it; icons live beside it.
 import { PRODUCT_ICONS } from "@/lib/pricing/product-icons";
+import { displayFont } from "@/components/suite-landing/display_font";
 import { createCheckoutAction } from "@/app/pricing/actions";
 import { startTrialAction } from "@/app/pricing/trial-actions";
 
@@ -170,6 +171,49 @@ function Counter({ label, value, minimum = 1, maximum, onChange }) {
       </div>
     </div>
   );
+}
+
+// The suite's skewed "counter click" mark.
+function Tick({ className }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("inline-block h-3 w-1 shrink-0 rounded-[1px]", className)}
+      style={{ transform: "skewX(-30deg)" }}
+    />
+  );
+}
+
+// One tick per allowance slot, solid when used; ticks past the divider are paid extras.
+function AllowanceMeter({ used, allowance }) {
+  const slots = Math.max(allowance, used);
+  if (!slots) return null;
+  return (
+    <span className="flex items-center gap-1" aria-hidden="true">
+      {Array.from({ length: slots }, (_, index) => (
+        <Fragment key={index}>
+          {index === allowance && allowance > 0 ? <span className="mx-0.5 h-3 w-px bg-border-strong" /> : null}
+          <Tick className={index < used ? "bg-foreground" : "border border-border-strong"} />
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+function StepLabel({ step, children }) {
+  return (
+    <p className="flex items-baseline gap-2.5 text-sm font-semibold">
+      <span className="font-mono text-xs font-normal text-muted-foreground">0{step}</span>
+      {children}
+    </p>
+  );
+}
+
+// Category allowance badge: "2 of 3 Included" within the allowance, "1 Included · 2 Extra" once over it.
+function allowanceLabel(selected, allowance) {
+  if (selected <= allowance) return allowance > 0 ? `${selected} of ${allowance} Included` : "Not Included";
+  const extra = selected - allowance;
+  return allowance > 0 ? `${allowance} Included · ${extra} Extra` : `${extra} Extra`;
 }
 
 // Starter selection when an org has no purchased plan yet — unchanged from
@@ -393,6 +437,18 @@ export function PlanCards({
   const dueToday = dueTodayMonthly * billingMultiplier;
   const noChangeToUpgrade = hasSubscription && dueTodayMonthly <= 0;
 
+  const costLines = [
+    { label: `${selectedPlan.name} foundation`, value: selectedPlan.price },
+    { label: "Extra products", value: estimate.productCost },
+    { label: "Extra projects", value: estimate.projectCost },
+    { label: "Extra collaborators", value: estimate.seatCost },
+    { label: "Extra storage", value: estimate.storageCost },
+    { label: "Extra bandwidth", value: estimate.bandwidthCost },
+    { label: "Edge / CDN usage", value: estimate.edgeDataCost },
+    { label: "Extra AI credits", value: estimate.aiCost },
+    { label: "Monthly emails", value: estimate.emailCost },
+  ];
+
   return (
     <>
       <section aria-labelledby="plans-heading">
@@ -526,10 +582,10 @@ export function PlanCards({
         </div>
       </section>
 
-      <section id="plan-calculator" className="scroll-mt-24 py-20 sm:py-24" aria-labelledby="calculator-heading">
+      <section id="plan-calculator" className={`${displayFont.variable} scroll-mt-24 py-20 sm:py-24`} aria-labelledby="calculator-heading">
         <div className="mb-8 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Plan calculator</p>
-          <h2 id="calculator-heading" className="mt-3 text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Plan calculator</p>
+          <h2 id="calculator-heading" className="mt-3 text-3xl font-semibold tracking-[-0.03em] [font-family:var(--font-display)] sm:text-5xl">
             Shape the plan around your work.
           </h2>
           <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
@@ -538,9 +594,9 @@ export function PlanCards({
         </div>
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface-card">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface-subtle">
             <div className="border-b border-border p-5 sm:p-6">
-              <p className="text-sm font-semibold">1. Choose a foundation</p>
+              <StepLabel step={1}>Choose a foundation</StepLabel>
               <div className="mt-4 grid min-w-0 grid-cols-3 gap-2">
                 {plans.map((plan) => {
                   const isSelected = selectedPlanId === plan.id;
@@ -557,20 +613,26 @@ export function PlanCards({
                         downgrade
                           ? "cursor-not-allowed border-border bg-background/30 opacity-50"
                           : isSelected
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-border bg-background/50 hover:border-border-strong"
+                            ? "border-foreground/70 bg-surface-active ring-1 ring-foreground/70"
+                            : "border-border bg-background hover:border-border-strong"
                       }`}
                     >
-                      <span className="block truncate text-xs font-semibold sm:text-sm">{plan.name}</span>
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="truncate text-xs font-semibold sm:text-sm">{plan.name}</span>
+                        <span
+                          aria-hidden="true"
+                          className={`flex size-3.5 shrink-0 items-center justify-center rounded-full border ${isSelected ? "border-foreground" : "border-border-strong"}`}
+                        >
+                          {isSelected ? <span className="size-1.5 rounded-full bg-foreground" /> : null}
+                        </span>
+                      </span>
                       <span className="mt-2 flex min-w-0 items-end gap-1">
                         <RollingPrice
                           key={plan.price * billingMultiplier}
                           value={formatNumber(plan.price * billingMultiplier)}
-                          className={`min-w-0 text-base font-semibold tracking-tight sm:text-lg ${
-                            isSelected ? "text-background" : "text-foreground"
-                          }`}
+                          className="min-w-0 font-mono text-base font-semibold tracking-tight text-foreground sm:text-lg"
                         />
-                        <span className={`pb-px text-[10px] ${isSelected ? "text-background/60" : "text-muted-foreground"}`}>
+                        <span className="pb-px text-[10px] text-muted-foreground">
                           /{isYearly ? "yr" : "mo"}
                         </span>
                       </span>
@@ -583,9 +645,9 @@ export function PlanCards({
             <div className="border-b border-border p-5 sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold">2. Choose products for your projects</p>
+                  <StepLabel step={2}>Choose products for your projects</StepLabel>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Each foundation includes a category allowance. Each products are priced individually.
+                    Each foundation includes a category allowance. Extra products are priced individually.
                   </p>
                 </div>
                 <p className="w-fit rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
@@ -593,7 +655,7 @@ export function PlanCards({
                 </p>
               </div>
 
-              <div className="mt-6 space-y-7">
+              <div className="mt-6 space-y-8">
                 {productCategories.map((category) => {
                   const categoryProducts = products.filter(
                     (product) => product.category === category.id
@@ -605,28 +667,27 @@ export function PlanCards({
 
                   return (
                     <section key={category.id} aria-labelledby={`${category.id}-products-heading`}>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6 mt-6">
-                        <div>
+                      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
                           <h3 id={`${category.id}-products-heading`} className="text-sm font-semibold">
                             {category.name}
                           </h3>
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="mt-0.5 text-xs text-muted-foreground">
                             {category.description}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px]">
-                          <span className="rounded-full bg-surface-active px-2.5 py-1 font-medium text-muted-foreground">
-                            {selectedCount > allowance
-                              ? `${allowance} included / ${selectedCount - allowance} Each`
-                              : `${selectedCount}/${allowance} Included`}
+                        <div className="flex shrink-0 items-center gap-1.5 text-[11px] tabular-nums">
+                          <span className="flex items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1 font-medium text-muted-foreground">
+                            <AllowanceMeter used={selectedCount} allowance={allowance} />
+                            {allowanceLabel(selectedCount, allowance)}
                           </span>
-                          <span className="rounded-full border border-border px-2.5 py-1 font-semibold">
-                            +${category.rate}/Each
+                          <span className="rounded-full border border-border bg-background px-2.5 py-1 font-semibold">
+                            ${category.rate}/mo Per Extra
                           </span>
                         </div>
                       </div>
 
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      <div className="grid gap-2 sm:grid-cols-2">
                         {categoryProducts.map((product) => {
                           const Icon = PRODUCT_ICONS[product.id];
                           const isOwned = hasSubscription && currentEntitlements.unlockedProducts.includes(product.id);
@@ -648,14 +709,22 @@ export function PlanCards({
                               }
                               onClick={() => toggleProduct(product.id)}
                               className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                disabled
-                                  ? "cursor-not-allowed border-dashed border-border bg-surface-subtle opacity-70"
-                                  : isEnabled
-                                    ? "border-foreground/50 bg-surface-active"
-                                    : "border-border bg-background/45 hover:border-border-strong"
+                                isOwned
+                                  ? "cursor-not-allowed border-border-strong bg-surface-active"
+                                  : comingSoon
+                                    ? "cursor-not-allowed border-dashed border-border bg-transparent opacity-60"
+                                    : isEnabled
+                                      ? "border-foreground/70 bg-surface-active ring-1 ring-foreground/70"
+                                      : "border-border bg-background hover:border-border-strong hover:bg-surface-hover"
                               }`}
                             >
-                              <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg border ${isOwned ? "border-border bg-surface-card text-muted-foreground" : isEnabled ? "border-foreground/20 bg-foreground text-background" : "border-border bg-surface-card text-muted-foreground"}`}>
+                              <span
+                                className={`flex size-10 shrink-0 items-center justify-center rounded-lg border transition ${
+                                  isEnabled && !isOwned
+                                    ? "border-transparent bg-foreground text-background"
+                                    : "border-border bg-surface-card text-muted-foreground"
+                                }`}
+                              >
                                 {isOwned ? <Lock className="size-4" /> : <Icon className="size-4" />}
                               </span>
                               <span className="min-w-0 flex-1">
@@ -667,7 +736,7 @@ export function PlanCards({
                                     </span>
                                   )}
                                 </span>
-                                <span className="block truncate text-xs text-muted-foreground">
+                                <span className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted-foreground">
                                   {isOwned
                                     ? "Owned — included in your plan"
                                     : comingSoon
@@ -675,7 +744,7 @@ export function PlanCards({
                                       : product.detail}
                                 </span>
                               </span>
-                              <span className={`flex size-5 items-center justify-center rounded-full border ${isEnabled ? "border-foreground bg-foreground text-background" : "border-border"}`}>
+                              <span className={`flex size-5 shrink-0 items-center justify-center rounded-full border ${isEnabled ? "border-foreground bg-foreground text-background" : "border-border-strong"}`}>
                                 {isEnabled && <Check className="size-3" />}
                               </span>
                             </button>
@@ -689,9 +758,9 @@ export function PlanCards({
             </div>
 
             <div className="p-5 sm:p-6">
-              <p className="text-sm font-semibold">3. Set your scale</p>
+              <StepLabel step={3}>Set your scale</StepLabel>
               <p className="mt-1 text-xs text-muted-foreground">
-                Each active projects are $5 each and Each collaborators are $1 each.
+                Extra active projects are $5 each and extra collaborators are $1 each.
               </p>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 {metricConfig.slice(0, 2).map((metric) => (
@@ -763,15 +832,15 @@ export function PlanCards({
                     />
                     <span className="mt-2 flex justify-between text-[10px] text-muted-foreground/70">
                       <span>
-                        {metric.id === "Storage"
-                          ? "$0.50 per Each GB"
+                        {metric.id === "storage"
+                          ? "$0.50 per extra GB"
                           : metric.id === "bandwidth"
-                            ? "$0.25 per Each GB"
+                            ? "$0.25 per extra GB"
                             : metric.id === "edgeData"
                               ? "Not included / $0.10 per GB across 119 PoPs"
                               : metric.id === "emails"
                                 ? "$0.35 per 1,000 emails"
-                                : "$10 per 1,000 Each Credits"}
+                                : "$10 per 1,000 extra credits"}
                       </span>
                       <span>{formatNumber(metric.max)} {metric.suffix}</span>
                     </span>
@@ -789,103 +858,52 @@ export function PlanCards({
             </div>
           </div>
 
-          <aside className="top-24 overflow-hidden rounded-2xl border border-border-strong bg-[#171717] text-white shadow-2xl lg:sticky">
-            <div className="border-b border-white/10 p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+          <aside className="top-24 overflow-hidden rounded-2xl border border-border-strong bg-background lg:sticky">
+            <div className="border-b border-border p-6">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                 Estimated {isYearly ? "yearly" : "monthly"} cost
               </p>
               <div className="mt-4 flex min-w-0 items-end gap-2" aria-live="polite">
                 <RollingPrice
                   value={formatNumber(estimate.total * billingMultiplier)}
-                  className="text-6xl font-semibold tracking-[-0.065em]"
+                  className="text-6xl font-semibold tracking-[-0.04em] [font-family:var(--font-display)]"
                 />
-                <span className="pb-2 text-sm text-white/45">USD</span>
+                <span className="pb-2 font-mono text-xs text-muted-foreground">USD / {isYearly ? "yr" : "mo"}</span>
               </div>
-              <p className="mt-3 text-xs leading-5 text-white/50 capitalize">
-                For {metrics.projects} {metrics.projects === 1 ? "project" : "projects"}, {metrics.seats} collaborators, {selectedProducts.length} products, {metrics.storage} GB storage, {metrics.bandwidth} GB bandwidth, and {metrics.edgeData} GB edge data.
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                {metrics.projects} {metrics.projects === 1 ? "project" : "projects"} · {metrics.seats} collaborators · {selectedProducts.length} products · {metrics.storage} GB storage · {metrics.bandwidth} GB bandwidth
+                {metrics.edgeData > 0 ? ` · ${metrics.edgeData} GB edge` : ""}
               </p>
               {hasSubscription && (
-                <div className="mt-4 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
-                  <span className="text-xs text-white/55">Due today (upgrade)</span>
-                  <RollingPrice value={formatNumber(dueToday)} className="text-base font-semibold" />
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-surface-subtle px-3 py-2.5">
+                  <span className="text-xs text-muted-foreground">Due today (upgrade)</span>
+                  <RollingPrice value={formatNumber(dueToday)} className="font-mono text-base font-semibold" />
                 </div>
               )}
             </div>
 
-            <div className="space-y-3 p-6 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">{selectedPlan.name} foundation</span>
-                <RollingPrice
-                  value={formatNumber(selectedPlan.price * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each products</span>
-                <RollingPrice
-                  value={formatNumber(estimate.productCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each projects</span>
-                <RollingPrice
-                  value={formatNumber(estimate.projectCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each collaborators</span>
-                <RollingPrice
-                  value={formatNumber(estimate.seatCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each storage</span>
-                <RollingPrice
-                  value={formatNumber(estimate.storageCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each bandwidth</span>
-                <RollingPrice
-                  value={formatNumber(estimate.bandwidthCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Edge / CDN usage</span>
-                <RollingPrice
-                  value={formatNumber(estimate.edgeDataCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Each AI credits</span>
-                <RollingPrice
-                  value={formatNumber(estimate.aiCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-white/55">Monthly emails</span>
-                <RollingPrice
-                  value={formatNumber(estimate.emailCost * billingMultiplier)}
-                  className="font-medium"
-                />
-              </div>
-            </div>
+            <dl className="space-y-2.5 p-6 text-sm">
+              {costLines.map((line) => (
+                <div
+                  key={line.label}
+                  className={`flex items-center justify-between gap-3 transition-colors ${line.value > 0 ? "text-foreground" : "text-muted-foreground/60"}`}
+                >
+                  <dt className={line.value > 0 ? "text-text-secondary dark:text-foreground/80" : undefined}>{line.label}</dt>
+                  <dd>
+                    <RollingPrice value={formatNumber(line.value * billingMultiplier)} className="font-mono text-[13px]" />
+                  </dd>
+                </div>
+              ))}
+            </dl>
 
-            <div className="border-t border-white/10 p-4">
+            <div className="border-t border-border p-4">
               {isAuthed && organizations.length > 0 ? (
                 <div className="mb-3">
-                  <label className="mb-1.5 block text-xs font-medium text-white/55">
+                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                     Apply to organization
                   </label>
                   <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                    <SelectTrigger className="w-full border-white/15 bg-white/5 text-white">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select organization" />
                     </SelectTrigger>
                     <SelectContent>
@@ -899,9 +917,9 @@ export function PlanCards({
                 </div>
               ) : null}
               {isAuthed && organizations.length === 0 ? (
-                <p className="mb-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/55">
+                <p className="mb-3 rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs text-muted-foreground">
                   You&apos;ll need an organization to apply this plan to.{" "}
-                  <Link href="/org" className="font-medium text-white underline-offset-2 hover:underline">
+                  <Link href="/org" className="font-medium text-foreground underline-offset-2 hover:underline">
                     Create one
                   </Link>
                   .
@@ -911,7 +929,7 @@ export function PlanCards({
                 type="button"
                 onClick={handleCheckout}
                 disabled={checkingOut || noChangeToUpgrade}
-                className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3.5 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full items-center justify-between rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {checkingOut
                   ? "Starting checkout…"
@@ -922,7 +940,7 @@ export function PlanCards({
                       : `Pay for ${selectedPlan.name}`}
                 {!checkingOut && !noChangeToUpgrade && <ArrowRight className="size-4" />}
               </button>
-              <p className="mt-3 text-center text-[11px] text-white/40">
+              <p className="mt-3 text-center text-[11px] text-muted-foreground">
                 Secure checkout via Stripe · estimate excludes taxes.
               </p>
             </div>
