@@ -6,7 +6,7 @@ import { CHANGELOG_PRODUCTS, generateChangelogFromPush } from '@/lib/changelog/g
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 120
+export const maxDuration = 150
 
 // Called by each product repo's GitHub "changelog" workflow with Bearer CHANGELOG_INGEST_SECRET.
 function isAuthorized(request) {
@@ -46,6 +46,7 @@ export async function POST(request) {
       branch: String(body.branch || ''),
       headSha,
       commits: body.commits,
+      changes: { nameStatus: String(body.nameStatus || ''), patch: String(body.patch || '') },
     })
     if (result.status === 'created') {
       revalidatePath('/changelog')

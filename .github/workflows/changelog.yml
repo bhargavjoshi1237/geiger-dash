@@ -24,6 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Generate changelog entry
         env:
           INGEST_SECRET: ${{ secrets.CHANGELOG_INGEST_SECRET }}
@@ -34,12 +38,25 @@ jobs:
             exit 0
           fi
 
-          jq --arg product "$PRODUCT" '{
+          # Diff the whole push so the LLM sees what changed, not just the commit messages.
+          BEFORE=$(jq -r '.before' "$GITHUB_EVENT_PATH")
+          AFTER=$(jq -r '.after' "$GITHUB_EVENT_PATH")
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            BEFORE=$(git hash-object -t tree /dev/null)
+          fi
+          git diff --name-status -M "$BEFORE" "$AFTER" > name-status.txt
+          git diff -M --no-color --diff-filter=d -U1 "$BEFORE" "$AFTER" \
+            -- . ':(exclude)**/package-lock.json' ':(exclude)package-lock.json' ':(exclude)**/*.lock' \
+            | head -c 3000000 > patch.diff
+
+          jq --arg product "$PRODUCT" --rawfile nameStatus name-status.txt --rawfile patch patch.diff '{
             product: $product,
             repo: .repository.full_name,
             branch: (.ref | sub("^refs/heads/"; "")),
             headSha: .after,
-            commits: [.commits[] | {id, message, timestamp, author: {name: .author.name}}]
+            commits: [.commits[] | {id, message, timestamp, author: {name: .author.name}}],
+            nameStatus: $nameStatus,
+            patch: $patch
           }' "$GITHUB_EVENT_PATH" > payload.json
 
           if [ "$(jq '.commits | length' payload.json)" -eq 0 ]; then
