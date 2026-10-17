@@ -779,7 +779,7 @@ export function ContentStudio({
             <span className="hidden sm:inline">Import</span>
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={() => setLlmOpen(true)}>
-            <Sparkles className={isConfigured ? 'text-emerald-400' : ''} />
+            <Sparkles className={isConfigured ? 'text-emerald-600 dark:text-emerald-400' : ''} />
             <span className="hidden sm:inline">AI model</span>
             <span
               className={`size-1.5 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-muted-foreground'}`

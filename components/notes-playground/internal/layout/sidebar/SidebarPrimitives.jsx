@@ -28,7 +28,7 @@ export const SidebarButton = React.forwardRef(
           
           ${
             active
-              ? "bg-surface-active text-white"
+              ? "bg-surface-active text-foreground"
               : "bg-transparent"
           }
 

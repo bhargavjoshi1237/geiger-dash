@@ -76,7 +76,7 @@ function ToolbarButton({ active = false, label, children, ...props }) {
 }
 
 const editorSurfaceClass =
-  'prose prose-invert min-h-[460px] min-w-0 max-w-full overflow-x-hidden break-words rounded-md border border-border bg-background px-6 py-5 text-sm leading-relaxed text-foreground focus:outline-none [&_a]:break-all [&_a]:text-blue-300 [&_blockquote]:border-l-zinc-600 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-surface-hover [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-border [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:bg-surface-subtle [&_pre]:border [&_pre]:border-border'
+  'prose prose-invert min-h-[460px] min-w-0 max-w-full overflow-x-hidden break-words rounded-md border border-border bg-background px-6 py-5 text-sm leading-relaxed text-foreground focus:outline-none [&_a]:break-all [&_a]:text-blue-700 dark:[&_a]:text-blue-300 [&_blockquote]:border-l-zinc-600 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-surface-hover [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-border [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:bg-surface-subtle [&_pre]:border [&_pre]:border-border'
 
 const AI_SYSTEM_PROMPT =
   'You are an expert technical blog writer for a modern SaaS product suite. ' +
@@ -182,7 +182,7 @@ function AiAssist({ editor }) {
               type="button"
               size="sm"
               variant="ghost"
-              className="gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200"
+              className="gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-200"
             >
               <Sparkles className="h-4 w-4" />
               AI
@@ -195,7 +195,7 @@ function AiAssist({ editor }) {
       <DialogContent className="max-h-[85dvh] max-w-3xl overflow-hidden p-0">
         <DialogHeader className="border-b border-border px-6 py-5 pr-12">
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="size-4 text-indigo-400" />
+            <Sparkles className="size-4 text-indigo-600 dark:text-indigo-400" />
             AI writing assistant
           </DialogTitle>
           <DialogDescription>
@@ -236,7 +236,7 @@ function AiAssist({ editor }) {
             </div>
 
             {!isConfigured ? (
-              <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-400">
+              <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
                 No AI model connected yet. Open AI Settings to add one.
               </p>
             ) : null}
@@ -314,7 +314,7 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
           autolink: true,
           defaultProtocol: 'https',
           HTMLAttributes: {
-            class: 'text-blue-300 underline underline-offset-4',
+            class: 'text-blue-700 dark:text-blue-300 underline underline-offset-4',
             rel: 'noopener noreferrer nofollow',
             target: '_blank',
           },
@@ -516,7 +516,7 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
                 onChange={(event) => setImageSrc(event.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImageBySrc())}
                 placeholder="Paste an image URL to place it in the article"
-                className="border-border-strong bg-background text-foreground placeholder:text-foreground0"
+                className="border-border-strong bg-background text-foreground placeholder:text-muted-foreground"
               />
               <Button type="button" variant="outline" onClick={addImageBySrc} disabled={!canInsertImage}>
                 <ImagePlus className="h-4 w-4" />
@@ -543,7 +543,7 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
             <div
               className={editorSurfaceClass}
               dangerouslySetInnerHTML={{
-                __html: html || '<p class="text-foreground0">Your formatted post preview will appear here.</p>',
+                __html: html || '<p class="text-muted-foreground">Your formatted post preview will appear here.</p>',
               }}
             />
           </TabsContent>
@@ -553,14 +553,14 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
               value={html}
               onChange={handleHtmlChange}
               spellCheck={false}
-              className="min-h-[460px] resize-y border-border bg-background font-mono text-xs leading-6 text-foreground placeholder:text-foreground0"
+              className="min-h-[460px] resize-y border-border bg-background font-mono text-xs leading-6 text-foreground placeholder:text-muted-foreground"
               placeholder="<h2>Write with HTML</h2>"
             />
           </TabsContent>
         </Tabs>
 
         {/* Status bar */}
-        <div className="flex items-center justify-between rounded-md border border-border bg-surface-subtle/60 px-3 py-1.5 text-[11px] text-foreground0">
+        <div className="flex items-center justify-between rounded-md border border-border bg-surface-subtle/60 px-3 py-1.5 text-[11px] text-muted-foreground">
           <span>
             {stats.words} words · {stats.chars} characters
           </span>

@@ -68,8 +68,8 @@ export default function ToolbarOptions({
                       flex flex-col items-center justify-center gap-2 aspect-square rounded-xl transition-all pt-3 pb-3 border-2
                       ${
                         isActive
-                          ? "bg-surface-hover border-zinc-500 text-white"
-                          : "bg-surface-subtle border-transparent text-foreground0 hover:bg-surface-hover hover:text-muted-foreground"
+                          ? "bg-surface-hover border-zinc-500 text-foreground"
+                          : "bg-surface-subtle border-transparent text-muted-foreground hover:bg-surface-hover hover:text-muted-foreground"
                       }
                     `}
                   >

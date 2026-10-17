@@ -367,7 +367,7 @@ export default function ImageCropDialog({ open, onOpenChange, src, onSave }) {
           variant="secondary"
           size="icon"
           onClick={handleSave}
-          className="rounded-full w-10 h-10 bg-surface-strong hover:bg-zinc-600 text-white transition-colors"
+          className="rounded-full w-10 h-10 bg-surface-strong hover:bg-zinc-300 dark:hover:bg-zinc-600 text-foreground transition-colors"
           title="Apply Crop"
         >
           <Check size={18} />
@@ -407,7 +407,7 @@ export default function ImageCropDialog({ open, onOpenChange, src, onSave }) {
       </div>
 
       {imgLoaded && (
-        <div className="mt-4 text-foreground0 text-xs bg-surface-subtle/80 px-3 py-1.5 rounded-lg border border-border">
+        <div className="mt-4 text-muted-foreground text-xs bg-surface-subtle/80 px-3 py-1.5 rounded-lg border border-border">
           {cropNatW} × {cropNatH} px
         </div>
       )}

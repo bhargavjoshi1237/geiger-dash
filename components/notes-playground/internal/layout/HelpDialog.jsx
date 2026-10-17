@@ -12,7 +12,7 @@ import {
 export default function HelpDialog({ open, onOpenChange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
+      <DialogContent className="max-w-md bg-white dark:bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
         <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <HelpCircle className="w-5 h-5 text-muted-foreground" />
@@ -29,7 +29,7 @@ export default function HelpDialog({ open, onOpenChange }) {
             <p className="text-sm font-medium text-muted-foreground">
               How can we help?
             </p>
-            <p className="text-xs text-foreground0">
+            <p className="text-xs text-muted-foreground">
               Search for a topic or browse our help resources below.
             </p>
           </div>

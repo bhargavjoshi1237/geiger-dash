@@ -7,8 +7,8 @@ import { ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLE = {
-  sent: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  queued: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  sent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-500/20",
+  queued: "bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-500/20",
   failed: "bg-red-500/10 text-red-500 border-red-500/20",
 };
 

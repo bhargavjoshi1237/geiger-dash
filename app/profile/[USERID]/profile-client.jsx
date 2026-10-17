@@ -181,7 +181,7 @@ function CopyButton({ value, label }) {
         setTimeout(() => setCopied(false), 1500)
       }}
     >
-      {copied ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
+      {copied ? <Check className="size-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="size-4" />}
     </Button>
   )
 }
@@ -253,12 +253,12 @@ function ProfileHeader({
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
             <span className="truncate">{profile.email}</span>
             {profile.emailVerified ? (
-              <span className="inline-flex items-center gap-1 text-emerald-400">
+              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <ShieldCheck className="size-3.5" />
                 Verified
               </span>
             ) : (
-              <span className="text-amber-400">Unverified</span>
+              <span className="text-amber-600 dark:text-amber-400">Unverified</span>
             )}
           </p>
 
@@ -484,7 +484,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
       ) : null}
 
       {billing.phase === 'grace' ? (
-        <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <div className="flex-1">
             <p className="font-medium">
@@ -1011,7 +1011,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
               <Button
                 asChild
                 variant="ghost"
-                className="shrink-0 bg-red-900/15 text-red-400 hover:bg-red-500/10 hover:text-red-400"
+                className="shrink-0 bg-red-900/15 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
               >
                 <Link href="/contact">
                   <Trash2 className="size-4" />

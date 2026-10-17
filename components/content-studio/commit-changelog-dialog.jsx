@@ -26,7 +26,7 @@ import {
 import { callLlmChat, extractJson, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =
-  'border-border-strong bg-background text-foreground placeholder:text-foreground0 focus-visible:ring-zinc-600'
+  'border-border-strong bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-zinc-600'
 
 // Map a conventional-commit prefix to a changelog bucket.
 const PREFIX_MAP = [
@@ -270,7 +270,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
       <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col gap-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <GitCommit className="h-4 w-4 text-indigo-400" />
+            <GitCommit className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             Build changelog from commits
           </DialogTitle>
           <DialogDescription>
@@ -293,7 +293,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Branch</Label>
             <div className="relative">
-              <GitBranch className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground0" />
+              <GitBranch className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
@@ -328,7 +328,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
           <>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground0" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -342,7 +342,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
             </div>
 
             <ScrollArea className="h-[280px] rounded-md border border-border">
-              <div className="divide-y divide-zinc-800/70">
+              <div className="divide-y divide-border dark:divide-zinc-800/70">
                 {filtered.map((commit) => {
                   const isSelected = selected.has(commit.sha)
                   return (
@@ -365,7 +365,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm text-foreground">{commit.title}</span>
-                        <span className="mt-0.5 flex items-center gap-2 text-[11px] text-foreground0">
+                        <span className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
                           <code className="rounded bg-surface-hover px-1 text-muted-foreground">{commit.shortSha}</code>
                           <span className="truncate">{commit.author}</span>
                           {commit.date && <span>· {new Date(commit.date).toLocaleDateString()}</span>}

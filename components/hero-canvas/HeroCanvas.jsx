@@ -20,7 +20,7 @@ const initialNodes = [
     data: {
       label:
         "Launch Strategy 🚀\n\n- Define core value props\n- Identify target audience\n- Set launch timeline",
-      backgroundColor: "#222222",
+      backgroundColor: "var(--surface-active)",
       reactions: { "🔥": 3, "👍": 1 },
     },
     position: { x: 250, y: 150 },
@@ -108,7 +108,7 @@ export default function HeroCanvas() {
         maxZoom={1.5}
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={24} size={1} color="#333" />
+        <Background gap={24} size={1} color="var(--canvas-dots)" />
         <ZoomControls />
       </ReactFlow>
     </div>

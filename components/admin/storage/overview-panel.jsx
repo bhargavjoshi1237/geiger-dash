@@ -364,9 +364,9 @@ export function OverviewPanel({ snapshot, onJump }) {
                   </div>
                   <div className="mt-2 flex items-center gap-1.5 text-xs text-text-secondary">
                     {provider.lastProbeOk === false ? (
-                      <CircleAlert className="h-3 w-3 text-red-400" />
+                      <CircleAlert className="h-3 w-3 text-red-600 dark:text-red-400" />
                     ) : (
-                      <CircleCheck className="h-3 w-3 text-emerald-400" />
+                      <CircleCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                     )}
                     {status.label || provider.status}
                     <span className="text-text-tertiary">

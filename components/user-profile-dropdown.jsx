@@ -56,7 +56,7 @@ export function UserProfileDropdown({ user }) {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="z-[100] w-[150px] min-w-[150px] max-w-[208px] bg-surface-subtle border-surface-active shadow-xl"
+        className="z-[100] w-[150px] min-w-[150px] max-w-[208px] bg-background border-border shadow-xl"
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
         <DropdownMenuGroup>
@@ -90,7 +90,7 @@ export function UserProfileDropdown({ user }) {
             </Link>
           </DropdownMenuItem>
 
-          <SignOutMenuItem className="text-text-secondary focus:bg-surface-hover focus:text-foreground" />
+          <SignOutMenuItem className="text-muted-foreground focus:bg-surface-hover focus:text-foreground" />
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

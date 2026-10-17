@@ -56,8 +56,8 @@ const DocumentNode = ({ id, data, selected, dragging }) => {
         className={`
             relative flex flex-col w-full h-full min-h-[68px] min-w-[200px] group
             transition-all duration-300 ease-out
-            bg-[#1e1e1e] shadow-lg
-            ${selected ? "border-2 border-white" : "border-2 border-transparent hover:border-zinc-500"}
+            bg-white dark:bg-[#1e1e1e] shadow-lg
+            ${selected ? "border-2 border-zinc-900 dark:border-white" : "border-2 border-transparent hover:border-zinc-500"}
             ${dragging ? "shadow-2xl shadow-black/50 z-50" : ""}
         `}
         style={{
@@ -100,7 +100,7 @@ const DocumentNode = ({ id, data, selected, dragging }) => {
               <span className="text-sm font-medium text-foreground truncate font-sans">
                 {data.label || "Untitled Document"}
               </span>
-              <span className="text-xs text-foreground0 truncate font-sans">
+              <span className="text-xs text-muted-foreground truncate font-sans">
                 Double-click to edit
               </span>
             </div>

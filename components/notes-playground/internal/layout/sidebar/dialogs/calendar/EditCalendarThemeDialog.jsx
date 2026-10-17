@@ -328,7 +328,7 @@ export default function EditCalendarThemeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-[480px] bg-[#1e1e1e] border border-border text-white p-0 overflow-hidden gap-0 sm:rounded-lg"
+        className="max-w-[480px] bg-white dark:bg-[#1e1e1e] border border-border text-foreground p-0 overflow-hidden gap-0 sm:rounded-lg"
       >
         <DialogHeader className="p-4 border-b border-border space-y-0">
           <div className="flex items-center justify-between w-full">
@@ -340,14 +340,14 @@ export default function EditCalendarThemeDialog({
             </div>
             <button
               onClick={() => onOpenChange(false)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-foreground0 hover:text-foreground hover:bg-surface-hover transition-all"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </DialogHeader>
 
-        <div className="flex border-b border-border bg-[#1e1e1e]">
+        <div className="flex border-b border-border bg-white dark:bg-[#1e1e1e]">
           {STYLES.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -357,8 +357,8 @@ export default function EditCalendarThemeDialog({
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
                   activeStyle === tab.id
-                    ? "border-zinc-100 text-foreground bg-surface-hover/30"
-                    : "border-transparent text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/20"
+                    ? "border-zinc-900 dark:border-zinc-100 text-foreground bg-surface-hover/30"
+                    : "border-transparent text-muted-foreground hover:text-muted-foreground hover:bg-surface-hover/20"
                 )}
               >
                 <Icon className="w-4 h-4" />
@@ -368,7 +368,7 @@ export default function EditCalendarThemeDialog({
           })}
         </div>
 
-        <div className="p-4 bg-[#1e1e1e] h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+        <div className="p-4 bg-white dark:bg-[#1e1e1e] h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
           <div className="mb-4">
             <div
               className="rounded-xl border border-border/60 bg-surface-hover p-5 flex items-center justify-center h-[180px]"
@@ -380,7 +380,7 @@ export default function EditCalendarThemeDialog({
               <div
                 className="flex flex-col rounded-xl overflow-hidden"
                 style={{
-                  backgroundColor: "#2a2a2a",
+                  backgroundColor: "var(--surface-hover)",
                   width: `${previewDimensions.width}px`,
                   height: `${previewDimensions.height}px`,
                 }}
@@ -391,7 +391,7 @@ export default function EditCalendarThemeDialog({
           </div>
 
           <div className="mb-4">
-            <span className="text-[10px] text-foreground0 uppercase tracking-wider mb-2 block">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 block">
               Theme
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -400,8 +400,8 @@ export default function EditCalendarThemeDialog({
                 className={cn(
                   "flex items-center justify-center gap-2 py-3 rounded-lg border text-sm font-medium transition-all",
                   activeTheme === "light"
-                    ? "border-zinc-100 text-foreground bg-surface-hover/50"
-                    : "border-border text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/30"
+                    ? "border-zinc-900 dark:border-zinc-100 text-foreground bg-surface-hover/50"
+                    : "border-border text-muted-foreground hover:text-muted-foreground hover:bg-surface-hover/30"
                 )}
               >
                 <Lightbulb className="h-4 w-4" /><p>Light</p>
@@ -411,8 +411,8 @@ export default function EditCalendarThemeDialog({
                 className={cn(
                   "flex items-center justify-center gap-2 py-3 rounded-lg border text-sm font-medium transition-all",
                   activeTheme === "dark"
-                    ? "border-zinc-100 text-foreground bg-surface-hover/50"
-                    : "border-border text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/30"
+                    ? "border-zinc-900 dark:border-zinc-100 text-foreground bg-surface-hover/50"
+                    : "border-border text-muted-foreground hover:text-muted-foreground hover:bg-surface-hover/30"
                 )}
               >
                   <Moon className="h-4 w-4" /><p>Dark</p>
@@ -421,7 +421,7 @@ export default function EditCalendarThemeDialog({
           </div>
         </div>
 
-        <div className="p-4 border-t border-border bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
+        <div className="p-4 border-t border-border bg-white dark:bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

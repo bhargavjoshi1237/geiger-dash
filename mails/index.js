@@ -17,6 +17,18 @@ import TaskDueReminder from "./templates/geiger-flow/task-due-reminder.jsx";
 import TaskCompleted from "./templates/geiger-flow/task-completed.jsx";
 import ProjectAdded from "./templates/geiger-flow/project-added.jsx";
 import TicketPurchaseConfirmation from "./templates/geiger-events/ticket-purchase-confirmation.jsx";
+import RentReminder from "./templates/geiger-property/rent-reminder.jsx";
+import RentReceipt from "./templates/geiger-property/rent-receipt.jsx";
+import LateNotice from "./templates/geiger-property/late-notice.jsx";
+import LeaseExpiring from "./templates/geiger-property/lease-expiring.jsx";
+import RenewalOffer from "./templates/geiger-property/renewal-offer.jsx";
+import WorkOrderUpdate from "./templates/geiger-property/work-order-update.jsx";
+import PropertyAnnouncement from "./templates/geiger-property/announcement.jsx";
+import PropertyMessage from "./templates/geiger-property/message.jsx";
+import PortalInvite from "./templates/geiger-property/portal-invite.jsx";
+import OwnerStatement from "./templates/geiger-property/owner-statement.jsx";
+import DocumentExpiring from "./templates/geiger-property/document-expiring.jsx";
+import ScheduledReport from "./templates/geiger-property/scheduled-report.jsx";
 import TextOnly from "./templates/geiger/text-only.jsx";
 
 export const COMPONENTS = {
@@ -33,6 +45,18 @@ export const COMPONENTS = {
   "flow.task_completed": TaskCompleted,
   "flow.project_added": ProjectAdded,
   "events.ticket_purchase_confirmation": TicketPurchaseConfirmation,
+  "property.rent_reminder": RentReminder,
+  "property.rent_receipt": RentReceipt,
+  "property.late_notice": LateNotice,
+  "property.lease_expiring": LeaseExpiring,
+  "property.renewal_offer": RenewalOffer,
+  "property.work_order_update": WorkOrderUpdate,
+  "property.announcement": PropertyAnnouncement,
+  "property.message": PropertyMessage,
+  "property.portal_invite": PortalInvite,
+  "property.owner_statement": OwnerStatement,
+  "property.document_expiring": DocumentExpiring,
+  "property.scheduled_report": ScheduledReport,
   "geiger.text_only": TextOnly,
 };
 

@@ -21,7 +21,7 @@ import {
 import { LLM_PRESETS, callLlmChat, useLlmConfig } from '@/components/content-studio/llm-config'
 
 const fieldClass =
-  'border-border-strong bg-background text-foreground placeholder:text-foreground0 focus-visible:ring-zinc-600'
+  'border-border-strong bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-zinc-600'
 
 export function LlmSettingsDialog({ open, onOpenChange }) {
   const { config, save, clear, isConfigured } = useLlmConfig()
@@ -78,7 +78,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-indigo-400" />
+            <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             AI Model Settings
           </DialogTitle>
           <DialogDescription>
@@ -152,12 +152,12 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
               )}
             </Button>
             {test.state === 'ok' && (
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+              <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-4 w-4" /> {test.message}
               </span>
             )}
             {test.state === 'error' && (
-              <span className="flex items-center gap-1.5 text-xs text-red-400">
+              <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
                 <XCircle className="h-4 w-4" /> {test.message}
               </span>
             )}
@@ -171,7 +171,7 @@ export function LlmSettingsDialog({ open, onOpenChange }) {
             size="sm"
             onClick={clear}
             disabled={!isConfigured}
-            className="text-muted-foreground hover:text-red-400"
+            className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
             Disconnect

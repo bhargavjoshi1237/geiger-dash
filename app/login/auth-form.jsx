@@ -190,7 +190,7 @@ export function AuthForm({ next, initialError = "" }) {
                 <div className="space-y-6 text-left">
                   <div className="space-y-2">
                     <h1 className="text-3xl font-medium tracking-tight text-white">Welcome back</h1>
-                    <p className="text-sm text-foreground0">Sign in to your enterprise account</p>
+                    <p className="text-sm text-muted-foreground">Sign in to your enterprise account</p>
                   </div>
 
                   <form onSubmit={handleSsoSubmit} className="space-y-4">
@@ -224,7 +224,7 @@ export function AuthForm({ next, initialError = "" }) {
                     </button>
                   </form>
 
-                  <p className="text-center text-xs text-foreground0">
+                  <p className="text-center text-xs text-muted-foreground">
                     <button
                       type="button"
                       onClick={() => switchMode(false)}
@@ -240,7 +240,7 @@ export function AuthForm({ next, initialError = "" }) {
                 <div className="space-y-6 text-center">
                   <div className="mb-8 space-y-2">
                     <h1 className="text-2xl font-medium tracking-tight text-white">Welcome to Geiger</h1>
-                    <p className="text-lg font-medium text-foreground0">The better way to manage work.</p>
+                    <p className="text-lg font-medium text-muted-foreground">The better way to manage work.</p>
                   </div>
 
                   <div className="space-y-3">
@@ -307,7 +307,7 @@ export function AuthForm({ next, initialError = "" }) {
                     {errorBox}
 
                     <div className="space-y-2">
-                      <label className="ml-1 text-xs font-medium text-foreground0">Email</label>
+                      <label className="ml-1 text-xs font-medium text-muted-foreground">Email</label>
                       <input
                         name="email"
                         type="email"
@@ -353,7 +353,7 @@ export function AuthForm({ next, initialError = "" }) {
                     </button>
                   </form>
 
-                  <p className="mt-8 text-center text-xs text-foreground0">
+                  <p className="mt-8 text-center text-xs text-muted-foreground">
                     Don&apos;t have an account?{" "}
                     <a
                       href="/signup"

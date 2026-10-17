@@ -41,9 +41,15 @@ function isProductLanding(pathname) {
   return GATED_SEGMENTS.has(segment)
 }
 
+// Each product's /<segment>/playground is the live demo the landing showcases iframe; it runs on in-memory data, so it's public.
+function isProductPlayground(pathname) {
+  const [, segment, page, ...rest] = pathname.split('/')
+  return page === 'playground' && !rest.some(Boolean) && segment !== 'org' && GATED_SEGMENTS.has(segment)
+}
+
 function isPublicPath(pathname) {
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true
-  return isProductLanding(pathname)
+  return isProductLanding(pathname) || isProductPlayground(pathname)
 }
 
 // Paths this function would pass through untouched anyway: the marketing site,

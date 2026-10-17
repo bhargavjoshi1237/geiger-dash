@@ -163,7 +163,7 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-indigo-400" />
+            <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
             Generate a page with AI
           </DialogTitle>
           <DialogDescription>
@@ -298,7 +298,7 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
           </div>
 
           {!isConfigured ? (
-            <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-400">
+            <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
               No AI model connected. Use the AI model button in the top bar to add one.
             </p>
           ) : null}

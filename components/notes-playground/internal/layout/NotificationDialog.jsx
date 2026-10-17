@@ -42,7 +42,7 @@ export default function NotificationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
+      <DialogContent className="max-w-md bg-white dark:bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
         <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Bell className="w-5 h-5 text-muted-foreground" />
@@ -66,12 +66,12 @@ export default function NotificationDialog({
               <p className="text-sm font-medium text-muted-foreground">
                 No new notifications
               </p>
-              <p className="text-xs text-foreground0">
+              <p className="text-xs text-muted-foreground">
                 We'll notify you when something important happens.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800/50">
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
@@ -87,7 +87,7 @@ export default function NotificationDialog({
                           </AvatarFallback>
                         </Avatar>
                         <div className="absolute -bottom-1 -right-1 bg-surface-subtle rounded-full p-0.5 border border-border">
-                          <User className="w-3 h-3 text-blue-400 fill-blue-400" />
+                          <User className="w-3 h-3 text-blue-600 dark:text-blue-400 fill-blue-400" />
                         </div>
                       </div>
                     )}
@@ -97,7 +97,7 @@ export default function NotificationDialog({
                       <p className="text-sm font-medium text-foreground">
                         {notification.title}
                       </p>
-                      <span className="text-[10px] text-foreground0">
+                      <span className="text-[10px] text-muted-foreground">
                         {new Date(notification.timestamp).toLocaleTimeString(
                           [],
                           { hour: "2-digit", minute: "2-digit" },
@@ -121,7 +121,7 @@ export default function NotificationDialog({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-xs text-muted-foreground hover:text-red-400 hover:bg-red-900/10"
+                          className="h-7 text-xs text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-900/10"
                           onClick={() => onKickMember(notification.id)}
                         >
                           <X className="w-3 h-3 mr-1.5" />

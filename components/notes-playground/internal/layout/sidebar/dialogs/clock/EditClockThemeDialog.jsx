@@ -22,7 +22,7 @@ const ColorField = ({ label, value, onChange }) => (
     </span>
     <ColorPicker value={value} onChange={onChange} align="center">
       <button
-        className="w-8 h-5 rounded-[5px] border border-border-strong/80 cursor-pointer hover:border-zinc-500 transition-all hover:scale-110 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:ring-offset-1 focus:ring-offset-[#141414]"
+        className="w-8 h-5 rounded-[5px] border border-border-strong/80 cursor-pointer hover:border-zinc-500 transition-all hover:scale-110 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-[#141414]"
         style={{ backgroundColor: value }}
       />
     </ColorPicker>
@@ -170,7 +170,7 @@ export default function EditClockThemeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-[480px] bg-[#1e1e1e] border border-border text-white p-0 overflow-hidden gap-0 sm:rounded-lg"
+        className="max-w-[480px] bg-white dark:bg-[#1e1e1e] border border-border text-foreground p-0 overflow-hidden gap-0 sm:rounded-lg"
       >
         <DialogHeader className="p-4 border-b border-border space-y-0">
           <div className="flex items-center justify-between w-full">
@@ -182,14 +182,14 @@ export default function EditClockThemeDialog({
             </div>
             <button
               onClick={() => onOpenChange(false)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-foreground0 hover:text-foreground hover:bg-surface-hover transition-all"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </DialogHeader>
 
-        <div className="flex border-b border-border bg-[#1e1e1e]">
+        <div className="flex border-b border-border bg-white dark:bg-[#1e1e1e]">
           {[
             { id: "analog", label: "Analog", icon: Clock },
             { id: "digital", label: "Digital", icon: Monitor },
@@ -200,8 +200,8 @@ export default function EditClockThemeDialog({
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === tab.id
-                  ? "border-zinc-100 text-foreground bg-surface-hover/30"
-                  : "border-transparent text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/20",
+                  ? "border-zinc-900 dark:border-zinc-100 text-foreground bg-surface-hover/30"
+                  : "border-transparent text-muted-foreground hover:text-muted-foreground hover:bg-surface-hover/20",
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -210,10 +210,10 @@ export default function EditClockThemeDialog({
           ))}
         </div>
 
-        <div className="p-4 bg-[#1e1e1e] h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+        <div className="p-4 bg-white dark:bg-[#1e1e1e] h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
           <div className="mb-2">
             <div
-              className="rounded-xl border border-border/60 bg-[#232323] p-5 flex items-center justify-center h-[180px]"
+              className="rounded-xl border border-border/60 bg-surface-subtle dark:bg-[#232323] p-5 flex items-center justify-center h-[180px]"
               style={{
                 backgroundImage:
                   "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.01) 0%, transparent 70%)",
@@ -333,7 +333,7 @@ export default function EditClockThemeDialog({
                   <div className="flex flex-col gap-1.5 pt-1 pb-1">
                     <div className="grid grid-cols-2 gap-2 mt-1">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] text-foreground0 uppercase">
+                        <span className="text-[10px] text-muted-foreground uppercase">
                           Markers
                         </span>
                         <ToggleGroup
@@ -346,26 +346,26 @@ export default function EditClockThemeDialog({
                         >
                           <ToggleGroupItem
                             value="none"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             None
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="four"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             4
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="all"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             All
                           </ToggleGroupItem>
                         </ToggleGroup>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] text-foreground0 uppercase">
+                        <span className="text-[10px] text-muted-foreground uppercase">
                           Numbers
                         </span>
                         <ToggleGroup
@@ -378,19 +378,19 @@ export default function EditClockThemeDialog({
                         >
                           <ToggleGroupItem
                             value="none"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             None
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="four"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             4
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="all"
-                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-white text-muted-foreground hover:text-muted-foreground transition-all"
+                            className="flex-1 h-6 text-[10px] rounded-md data-[state=on]:bg-surface-active dark:data-[state=on]:bg-[#2c2c2c] data-[state=on]:text-foreground text-muted-foreground hover:text-muted-foreground transition-all"
                           >
                             All
                           </ToggleGroupItem>
@@ -419,7 +419,7 @@ export default function EditClockThemeDialog({
             </div>
           </div>
           <div>
-            <div className="rounded-lg border border-border/60 bg-[#232323] px-3.5 py-2">
+            <div className="rounded-lg border border-border/60 bg-surface-subtle dark:bg-[#232323] px-3.5 py-2">
               {activeTab === "analog" ? (
                 <div className="grid grid-cols-2 gap-x-6 gap-y-0">
                   {data.showBackground && (
@@ -489,7 +489,7 @@ export default function EditClockThemeDialog({
           </div>
         </div>
 
-        <div className="p-4 border-t border-border bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
+        <div className="p-4 border-t border-border bg-white dark:bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

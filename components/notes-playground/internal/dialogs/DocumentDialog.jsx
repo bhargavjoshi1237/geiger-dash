@@ -28,7 +28,7 @@ const Toolbar = ({ editor }) => {
   }
 
   return (
-    <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-[#1e1e1e]">
+    <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-white dark:bg-[#1e1e1e]">
       <Toggle
         size="sm"
         pressed={editor.isActive("bold")}
@@ -306,13 +306,13 @@ const DocumentEditor = ({ documentId, onClose, isOpen }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-5xl h-[85vh] flex flex-col bg-[#1e1e1e] text-white border-border p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between space-y-0 shrink-0 bg-[#1e1e1e]">
+      <DialogContent className="max-w-5xl h-[85vh] flex flex-col bg-white dark:bg-[#1e1e1e] text-foreground border-border p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between space-y-0 shrink-0 bg-white dark:bg-[#1e1e1e]">
           <DialogTitle className="text-lg font-medium">
             Document Editor
           </DialogTitle>
           <div className="flex items-center gap-2">
-            <div className="text-xs text-foreground0 font-mono uppercase tracking-wider">
+            <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
               {saveStatus === "saving" && (
                 <span className="text-yellow-500 animate-pulse">Saving...</span>
               )}
@@ -320,10 +320,10 @@ const DocumentEditor = ({ documentId, onClose, isOpen }) => {
                 <span className="text-green-500">Synced</span>
               )}
               {saveStatus === "unsaved" && (
-                <span className="text-foreground0">Unsaved changes...</span>
+                <span className="text-muted-foreground">Unsaved changes...</span>
               )}
               {saveStatus === "local" && (
-                <span className="text-foreground0">Local playground</span>
+                <span className="text-muted-foreground">Local playground</span>
               )}
             </div>
           </div>
@@ -336,7 +336,7 @@ const DocumentEditor = ({ documentId, onClose, isOpen }) => {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto w-full relative bg-[#1e1e1e]">
+        <div className="flex-1 overflow-y-auto w-full relative bg-white dark:bg-[#1e1e1e]">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <LogoLoading size={64} />

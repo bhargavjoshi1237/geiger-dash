@@ -20,7 +20,7 @@ export default function JoinTab({
             <h3 className="text-md font-semibold text-foreground">
               Session Active
             </h3>
-            <p className="text-xs text-foreground0 max-w-[260px] mx-auto">
+            <p className="text-xs text-muted-foreground max-w-[260px] mx-auto">
               You are currently in a session. Leave the current session to join
               another.
             </p>
@@ -34,7 +34,7 @@ export default function JoinTab({
               <h3 className="text-md font-semibold text-foreground">
                 Join a Session
               </h3>
-              <p className="text-xs text-foreground0 w-full  mx-auto">
+              <p className="text-xs text-muted-foreground w-full  mx-auto">
                 Enter a session code to join a live collaborative workspace.
               </p>
             </div>
@@ -53,12 +53,12 @@ export default function JoinTab({
                   : "border-border",
               )}
             />
-            {joinError && <p className="text-xs text-red-400">{joinError}</p>}
+            {joinError && <p className="text-xs text-red-600 dark:text-red-400">{joinError}</p>}
 
             <Button
               onClick={joinByCode}
               disabled={isJoining || !sessionCodeInput.trim()}
-              className="w-full bg-zinc-100 text-sm text-black hover:bg-zinc-200 transition-all active:scale-95"
+              className="w-full bg-primary text-sm text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
             >
               {isJoining ? (
                 "Joining..."

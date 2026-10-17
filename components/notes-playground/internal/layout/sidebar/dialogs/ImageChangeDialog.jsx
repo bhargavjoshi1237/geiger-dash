@@ -139,7 +139,7 @@ export default function ImageChangeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1e1e1e] border-border text-foreground">
+      <DialogContent className="sm:max-w-[500px] bg-white dark:bg-[#1e1e1e] border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Change Image</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -150,9 +150,9 @@ export default function ImageChangeDialog({
         <div className="grid gap-5 py-4">
           {hasExistingImage && isWarningVisible && (
             <div className="relative flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 pr-8">
-              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
               <div className="flex-1 space-y-2">
-                <p className="text-sm text-amber-200/90">
+                <p className="text-sm text-amber-800 dark:text-amber-200/90">
                   Replacing this image will delete the old version. Download it
                   first to keep a copy.
                 </p>
@@ -160,7 +160,7 @@ export default function ImageChangeDialog({
                   size="sm"
                   variant="outline"
                   onClick={handleDownloadOld}
-                  className="h-8 text-xs gap-1.5 border-amber-500/30 transition-colors text-amber-300 hover:bg-amber-500/20 hover:text-amber-200"
+                  className="h-8 text-xs gap-1.5 border-amber-500/30 transition-colors text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 hover:text-amber-800 dark:hover:text-amber-200"
                 >
                   <Download size={14} />
                   Download
@@ -209,7 +209,7 @@ export default function ImageChangeDialog({
                 <div className="text-muted-foreground font-medium">
                   Click or drag image here
                 </div>
-                <div className="text-foreground0 text-sm">
+                <div className="text-muted-foreground text-sm">
                   Supports JPG, PNG, WEBP
                 </div>
               </div>
@@ -239,7 +239,7 @@ export default function ImageChangeDialog({
                 onValueChange={(vals) => setQuality(vals[0])}
                 className="py-2"
               />
-              <p className="text-xs text-foreground0">
+              <p className="text-xs text-muted-foreground">
                 The Lower the Percent the Highter the Compression
               </p>
             </div>

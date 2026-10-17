@@ -73,7 +73,7 @@ export default function UserDrawer({
             {members.slice(0, 3).map((member, i) => (
               <div
                 key={member.id}
-                className="relative w-10 h-10 rounded-full border-2 border-[#1e1e1e] bg-surface-hover flex items-center justify-center text-xs font-semibold text-muted-foreground shadow-lg z-[3-i]"
+                className="relative w-10 h-10 rounded-full border-2 border-white dark:border-[#1e1e1e] bg-surface-hover flex items-center justify-center text-xs font-semibold text-muted-foreground shadow-lg z-[3-i]"
                 style={
                   member.color
                     ? { backgroundColor: member.color, color: "#000" }
@@ -84,16 +84,16 @@ export default function UserDrawer({
               </div>
             ))}
             {members.length > 3 && (
-              <div className="w-10 h-10 rounded-full border-2 border-[#1e1e1e] bg-surface-strong flex items-center justify-center text-[10px] font-bold text-muted-foreground shadow-lg z-0">
+              <div className="w-10 h-10 rounded-full border-2 border-white dark:border-[#1e1e1e] bg-surface-strong flex items-center justify-center text-[10px] font-bold text-muted-foreground shadow-lg z-0">
                 +{members.length - 3}
               </div>
             )}
-            <div className="w-10 h-10 rounded-full border-2 border-[#1e1e1e] bg-surface-subtle flex items-center justify-center text-muted-foreground shadow-lg z-[10] group-hover:bg-surface-hover transition-colors">
+            <div className="w-10 h-10 rounded-full border-2 border-white dark:border-[#1e1e1e] bg-surface-subtle flex items-center justify-center text-muted-foreground shadow-lg z-[10] group-hover:bg-surface-hover transition-colors">
               <Users2 className="w-4 h-4" />
             </div>
           </div>
         </DrawerTrigger>
-        <DrawerContent className="bg-[#1e1e1e] border-border text-foreground max-w-sm mx-auto">
+        <DrawerContent className="bg-white dark:bg-[#1e1e1e] border-border text-foreground max-w-sm mx-auto">
           <div className="w-full">
             <DrawerHeader className="border-b border-border pb-2">
               <div className="flex items-center justify-between">
@@ -103,7 +103,7 @@ export default function UserDrawer({
                   </div>
                   <div className="text-left">
                     <DrawerTitle>Session Members</DrawerTitle>
-                    <p className="text-xs text-foreground0 mt-0.5 flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       {members.length} active users
                     </p>
@@ -113,7 +113,7 @@ export default function UserDrawer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-foreground0 hover:text-foreground"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -138,7 +138,7 @@ export default function UserDrawer({
                                     backgroundColor: member.color,
                                     color: "#000",
                                   }
-                                : { color: "#a1a1aa" }
+                                : { color: "var(--muted-foreground)" }
                             }
                           >
                             {member.name.charAt(0).toUpperCase()}
@@ -154,12 +154,12 @@ export default function UserDrawer({
                           <span className="text-sm font-medium text-foreground flex items-center gap-2">
                             {member.name}
                             {member.isMe && (
-                              <span className="text-xs text-foreground0 font-normal">
+                              <span className="text-xs text-muted-foreground font-normal">
                                 (You)
                               </span>
                             )}
                           </span>
-                          <span className="text-[10px] text-foreground0 capitalize flex items-center gap-1">
+                          <span className="text-[10px] text-muted-foreground capitalize flex items-center gap-1">
                             {member.role === "Owner" && (
                               <ShieldCheck className="w-3 h-3" />
                             )}
@@ -176,7 +176,7 @@ export default function UserDrawer({
                             onClick={() =>
                               onKickMember && onKickMember(member.id)
                             }
-                            className="h-8 w-8 p-0 text-foreground0 hover:text-red-400 hover:bg-red-900/10"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-900/10"
                             title="Kick Member"
                           >
                             <UserMinus className="w-4 h-4" />

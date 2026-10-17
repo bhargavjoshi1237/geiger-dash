@@ -78,11 +78,18 @@ import {
 } from "../../lib/demo-data";
 
 const CHART_COLORS = {
-  primary: "#ffffff",
-  appBackground: "#161616",
+  primary: "var(--primary)",
+  appBackground: "var(--background)",
 };
 
-const CHART_SERIES_COLORS = ["#ffffff", "#d4d4d4", "#a3a3a3", "#737373", "#525252"];
+// Greyscale ramp from the primary ink toward the page, so it inverts with the theme.
+const CHART_SERIES_COLORS = [
+  "var(--primary)",
+  "color-mix(in srgb, var(--primary) 80%, var(--background))",
+  "color-mix(in srgb, var(--primary) 60%, var(--background))",
+  "color-mix(in srgb, var(--primary) 40%, var(--background))",
+  "color-mix(in srgb, var(--primary) 25%, var(--background))",
+];
 
 function formatCurrency(value) {
   return `$${Math.round(value || 0).toLocaleString("en-US")}`;
@@ -138,9 +145,9 @@ const DEMO_TOP_EVENTS = [
 ];
 
 const MOMENTUM_META = {
-  fast: { label: "Selling fast", icon: Flame, className: "text-emerald-300" },
-  track: { label: "On track", icon: TrendingUp, className: "text-sky-300" },
-  slow: { label: "Slow", icon: TrendingDown, className: "text-amber-300" },
+  fast: { label: "Selling fast", icon: Flame, className: "text-emerald-700 dark:text-emerald-300" },
+  track: { label: "On track", icon: TrendingUp, className: "text-sky-700 dark:text-sky-300" },
+  slow: { label: "Slow", icon: TrendingDown, className: "text-amber-700 dark:text-amber-300" },
   upcoming: { label: "Not yet on sale", icon: Clock, className: "text-text-secondary" },
 };
 
@@ -365,13 +372,13 @@ function RegistrationsTrendWidget({ demo, pending, events = [], orders = [], reg
           className="mx-auto h-full w-full"
         >
           <LineChart data={data} margin={{ top: 24, right: 16, left: 12, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#2a2a2a" strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke="var(--sidebar-border)" strokeDasharray="3 3" />
             <XAxis
               dataKey="label"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tick={{ fill: "#737373", fontSize: 11 }}
+              tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
             />
             <ChartTooltip
               cursor={false}
@@ -400,7 +407,7 @@ function RegistrationsTrendWidget({ demo, pending, events = [], orders = [], reg
                 dataKey="value"
                 position="top"
                 offset={10}
-                className="fill-[#ededed]"
+                className="fill-foreground"
                 fontSize={11}
                 formatter={formatValue}
               />
@@ -559,7 +566,7 @@ function ConversionFunnelWidget({ demo, registered, confirmed, checkedIn }) {
         subtitle={subtitle}
         action={
           <div className="flex shrink-0 flex-col items-end">
-            <span className="text-3xl font-bold leading-none text-white">{overall}%</span>
+            <span className="text-3xl font-bold leading-none text-foreground">{overall}%</span>
             <span className="mt-1 text-[11px] text-text-secondary">
               {demo ? "view → ticket" : "registered → checked-in"}
             </span>
@@ -586,8 +593,8 @@ function ConversionFunnelWidget({ demo, registered, confirmed, checkedIn }) {
                 />
               }
             />
-            <PolarGrid stroke="#2a2a2a" />
-            <PolarAngleAxis dataKey="short" tick={{ fill: "#a3a3a3", fontSize: 11 }} />
+            <PolarGrid stroke="var(--sidebar-border)" />
+            <PolarAngleAxis dataKey="short" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} />
             <Radar
               dataKey="share"
               stroke={CHART_COLORS.primary}
@@ -651,7 +658,7 @@ function GaugeWidget({ title, subtitle, caption, events = [], demo, demoValue, d
               radialLines={false}
               stroke="none"
               polarRadius={[78, 66]}
-              className="first:fill-[#202020] last:fill-[#1a1a1a]"
+              className="first:fill-zinc-200 dark:first:fill-[#202020] last:fill-surface-subtle"
             />
             <RadialBar dataKey="value" cornerRadius={8} isAnimationActive={true} />
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
@@ -668,7 +675,7 @@ function GaugeWidget({ title, subtitle, caption, events = [], demo, demoValue, d
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-white text-3xl font-bold"
+                          className="fill-foreground text-3xl font-bold"
                         >
                           {clamped}%
                         </tspan>
@@ -794,14 +801,14 @@ function TopEventsTable({ demo, pending, events = [] }) {
                       <div className="w-[140px] space-y-1.5">
                         <div className="h-1.5 overflow-hidden rounded-full bg-surface-hover">
                           <div
-                            className="h-full rounded-full bg-[#ededed]"
+                            className="h-full rounded-full bg-foreground"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
                         <p className="text-xs text-text-secondary">{pct}%</p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums text-white">
+                    <TableCell className="text-right font-semibold tabular-nums text-foreground">
                       {formatCurrency(event.revenue)}
                     </TableCell>
                     <TableCell>
@@ -891,7 +898,7 @@ function GeneralStatsCard({ items }) {
                 </div>
                 <p className="mt-0.5 truncate text-xs text-text-secondary">{item.hint}</p>
               </div>
-              <span className="shrink-0 text-xl font-bold tabular-nums text-white">{item.value}</span>
+              <span className="shrink-0 text-xl font-bold tabular-nums text-foreground">{item.value}</span>
               {href ? (
                 <span className="shrink-0 inline-flex items-center gap-0.5 text-xs font-medium text-text-secondary transition-colors group-hover:text-foreground">
                   <ChevronRight className="h-3 w-3" />
@@ -1130,7 +1137,7 @@ export function EventsOverviewScreen({ demo = false }) {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <div className="flex w-full items-center justify-center gap-3 text-center md:w-auto md:justify-start md:text-left">
-              <h1 className="text-2xl font-bold text-white tracking-tight">Events Overview</h1>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Events Overview</h1>
 
             </div>
             <p className="mt-1 text-center text-sm text-muted-foreground md:text-left">
@@ -1158,7 +1165,7 @@ export function EventsOverviewScreen({ demo = false }) {
 
                     <RollingNumber
                       value={stat.value}
-                      className="mt-0.5 text-2xl font-bold text-white"
+                      className="mt-0.5 text-2xl font-bold text-foreground"
                     />
                   </div>
                 );

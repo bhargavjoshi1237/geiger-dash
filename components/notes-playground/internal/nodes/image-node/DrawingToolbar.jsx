@@ -92,10 +92,10 @@ const DrawingToolbar = ({
             <button
               key={size}
               onClick={() => setBrushSize(size)}
-              className={`rounded-full hover:bg-surface-strong flex items-center justify-center w-8 h-8 transition-all ${brushSize === size ? "bg-surface-strong ring-1 ring-white" : ""}`}
+              className={`rounded-full hover:bg-surface-strong flex items-center justify-center w-8 h-8 transition-all ${brushSize === size ? "bg-surface-strong ring-1 ring-zinc-900 dark:ring-white" : ""}`}
             >
               <div
-                className="bg-white rounded-full"
+                className="bg-zinc-900 dark:bg-white rounded-full"
                 style={{
                   width: size,
                   height: size,
@@ -122,7 +122,7 @@ const DrawingToolbar = ({
             <X size={18} className="text-muted-foreground" />
           ) : (
             <div
-              className="w-5 h-5 rounded-full border border-white/20"
+              className="w-5 h-5 rounded-full border border-black/20 dark:border-white/20"
               style={{ backgroundColor: brushColor }}
             />
           )}
@@ -139,7 +139,7 @@ const DrawingToolbar = ({
           {PRESET_COLORS.map((c) => (
             <button
               key={c}
-              className={`w-6 h-6 rounded-full border transition-transform hover:scale-110 ${brushColor === c ? "border-white scale-110" : "border-transparent"}`}
+              className={`w-6 h-6 rounded-full border transition-transform hover:scale-110 ${brushColor === c ? "border-zinc-900 dark:border-white scale-110" : "border-transparent"}`}
               style={{ backgroundColor: c }}
               title={c}
               onClick={() => setBrushColor(c)}

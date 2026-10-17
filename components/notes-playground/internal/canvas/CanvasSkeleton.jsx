@@ -15,7 +15,7 @@ const CanvasSkeleton = () => {
         <img
           src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`}
           alt=""
-          className="w-28 h-28 grayscale brightness-0 invert"
+          className="w-28 h-28 grayscale brightness-0 dark:invert"
           style={{
             animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
             opacity: 0.05,
@@ -23,7 +23,7 @@ const CanvasSkeleton = () => {
         />
       </div>
 
-      <div className="absolute bottom-10 right-10 flex items-center gap-2 text-foreground0 text-sm font-medium animate-pulse">
+      <div className="absolute bottom-10 right-10 flex items-center gap-2 text-muted-foreground text-sm font-medium animate-pulse">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
         Loading Canvas...
       </div>

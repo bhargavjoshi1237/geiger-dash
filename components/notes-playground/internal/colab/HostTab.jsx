@@ -22,7 +22,7 @@ export default function HostTab({
             <h3 className="text-md font-semibold text-foreground">
               Start a Session
             </h3>
-            <p className="text-xs text-foreground0 max-w-[260px] mx-auto">
+            <p className="text-xs text-muted-foreground max-w-[260px] mx-auto">
               Create a live collaborative workspace and invite others instantly.
             </p>
           </div>
@@ -30,7 +30,7 @@ export default function HostTab({
           <Button
             onClick={startSession}
             disabled={isStarting}
-            className="bg-zinc-100 text-sm text-black hover:bg-zinc-200 min-w-[150px] transition-all active:scale-95"
+            className="bg-primary text-sm text-primary-foreground hover:bg-primary/90 min-w-[150px] transition-all active:scale-95"
           >
             {isStarting ? "Starting…" : "Start Session"}
           </Button>
@@ -39,7 +39,7 @@ export default function HostTab({
         <div className="w-full max-w-sm space-y-6 animate-in fade-in zoom-in-95">
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-medium text-foreground0 uppercase tracking-wider">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Session Active
               </span>
             </div>
@@ -56,7 +56,7 @@ export default function HostTab({
                   </span>
                 </div>
 
-                <div className="flex items-center w-[10%] justify-center gap-1.5 text-xs text-foreground0 font-medium group-hover:text-emerald-500/80 transition-colors">
+                <div className="flex items-center w-[10%] justify-center gap-1.5 text-xs text-muted-foreground font-medium group-hover:text-emerald-500/80 transition-colors">
                   {copied ? (
                     <>
                       <Check className="w-3.5 h-3.5" />

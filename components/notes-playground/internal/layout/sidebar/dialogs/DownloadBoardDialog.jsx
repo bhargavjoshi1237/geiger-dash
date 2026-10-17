@@ -18,7 +18,7 @@ const FORMAT_OPTIONS = [
     label: "JSON",
     description: "Raw board data",
     icon: Braces,
-    color: "text-yellow-400",
+    color: "text-yellow-600 dark:text-yellow-400",
     accent: "bg-yellow-400/10 border-yellow-400/30",
   },
   {
@@ -26,7 +26,7 @@ const FORMAT_OPTIONS = [
     label: "PDF",
     description: "Printable document",
     icon: FileText,
-    color: "text-red-400",
+    color: "text-red-600 dark:text-red-400",
     accent: "bg-red-400/10 border-red-400/30",
   },
   {
@@ -34,7 +34,7 @@ const FORMAT_OPTIONS = [
     label: "PNG",
     description: "Board layout image",
     icon: Image,
-    color: "text-blue-400",
+    color: "text-blue-600 dark:text-blue-400",
     accent: "bg-blue-400/10 border-blue-400/30",
   },
   {
@@ -42,7 +42,7 @@ const FORMAT_OPTIONS = [
     label: "TXT",
     description: "Plain text summary",
     icon: AlignLeft,
-    color: "text-green-400",
+    color: "text-green-600 dark:text-green-400",
     accent: "bg-green-400/10 border-green-400/30",
   },
 ];
@@ -311,7 +311,7 @@ export default function DownloadBoardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1e1e] border-border text-white sm:max-w-[440px]">
+      <DialogContent className="bg-white dark:bg-[#1e1e1e] border-border text-foreground sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle>Download Board</DialogTitle>
         </DialogHeader>
@@ -347,11 +347,11 @@ export default function DownloadBoardDialog({
                   </div>
                   <div className="min-w-0">
                     <p
-                      className={`text-sm font-semibold leading-tight ${isSelected ? "text-white" : "text-muted-foreground"}`}
+                      className={`text-sm font-semibold leading-tight ${isSelected ? "text-foreground" : "text-muted-foreground"}`}
                     >
                       {fmt.label}
                     </p>
-                    <p className="text-[11px] text-foreground0 truncate">
+                    <p className="text-[11px] text-muted-foreground truncate">
                       {fmt.description}
                     </p>
                   </div>

@@ -184,7 +184,7 @@ export function ProvidersPanel({ providers, drivers, builtins = [], secretKeyRea
                     {capabilities.map(([key, label]) => (
                       <span
                         key={key}
-                        className="inline-flex items-center gap-1 rounded-full border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-300"
+                        className="inline-flex items-center gap-1 rounded-full border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-700 dark:text-sky-300"
                       >
                         {key === "cdn" ? (
                           <Zap className="h-2.5 w-2.5" />
@@ -282,7 +282,7 @@ export function ProvidersPanel({ providers, drivers, builtins = [], secretKeyRea
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         variant="destructive"
-                        className="text-red-400 focus:bg-red-500/10"
+                        className="text-red-600 dark:text-red-400 focus:bg-red-500/10"
                         onClick={() => handleDelete(provider)}
                       >
                         <Trash2 className="mr-2 h-3.5 w-3.5" />
@@ -321,7 +321,7 @@ export function ProvidersPanel({ providers, drivers, builtins = [], secretKeyRea
                       {provider && (
                         <StatusPill status={provider.status} map={PROVIDER_STATUS_MAP} />
                       )}
-                      <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-300">
+                      <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300">
                         Dev only
                       </span>
                     </div>

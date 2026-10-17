@@ -22,8 +22,8 @@ import {
 } from "@/lib/email/actions";
 
 const STATUS_STYLE = {
-  active: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  draft: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  active: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-500/20",
+  draft: "bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-500/20",
   archived: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
 

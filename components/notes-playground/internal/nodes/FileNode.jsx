@@ -28,7 +28,7 @@ const FileNode = ({ id, data, selected, dragging }) => {
   const fileSize = data.fileSize ? formatBytes(data.fileSize) : "";
   const fileUrl = data.src || null;
   const caption = data.caption || "";
-  const color = data.color || "#1e1e1e";
+  const color = data.color;
 
   const handleDownload = (e) => {
     e.stopPropagation();
@@ -43,7 +43,8 @@ const FileNode = ({ id, data, selected, dragging }) => {
         className={`
           relative flex flex-col w-full h-full min-h-[68px] min-w-[338px] group
           transition-all duration-300 ease-out
-          ${selected ? "border-2 border-white" : "border-2 border-transparent hover:border-zinc-600"}
+          ${color ? "" : "bg-node-default dark:bg-[#1e1e1e]"}
+          ${selected ? "border-2 border-zinc-900 dark:border-white" : "border-2 border-transparent hover:border-zinc-600"}
           ${dragging ? "shadow-2xl shadow-black/50 z-50" : ""}
         `}
         style={{ backgroundColor: color }}
@@ -114,7 +115,7 @@ const FileNode = ({ id, data, selected, dragging }) => {
           type="source"
           position={Position.Right}
           className={`
-            !w-2 !h-2 !bg-zinc-100 !border-0
+            !w-2 !h-2 !bg-zinc-900 dark:!bg-zinc-100 !border-0
             absolute !top-0 !right-[0px]
             flex items-center justify-center
             origin-top-right
@@ -125,7 +126,7 @@ const FileNode = ({ id, data, selected, dragging }) => {
             z-50
           `}
         >
-          <ArrowRight className="w-[10px] h-[10px] opacity-0 group-hover/handle:opacity-100 transition-opacity duration-200 text-black -rotate-45" />
+          <ArrowRight className="w-[10px] h-[10px] opacity-0 group-hover/handle:opacity-100 transition-opacity duration-200 text-white dark:text-black -rotate-45" />
         </Handle>
       </div>
     </>

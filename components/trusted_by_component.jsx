@@ -21,7 +21,7 @@ export default function TrustedByComponent() {
           {TRUSTED_COMPANIES.map((company) => (
             <div
               key={company}
-              className="flex h-24 items-center justify-center rounded-sm border border-[#262626] bg-background px-3"
+              className="flex h-24 items-center justify-center rounded-sm border border-border dark:border-[#262626] bg-background px-3"
             >
               <span className="text-lg font-semibold tracking-tight text-foreground">{company}</span>
             </div>

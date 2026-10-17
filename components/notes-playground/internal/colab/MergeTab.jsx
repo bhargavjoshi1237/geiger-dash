@@ -27,7 +27,7 @@ export default function MergeTab({
         <div className="h-full flex flex-col">
           <ScrollArea className="flex-1 px-4 pb-4">
             {mergeSessions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-foreground0">
+              <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4">
                   <History className="w-8 h-8 opacity-20 ml-auto mr-auto" />
                 </div>
@@ -106,18 +106,18 @@ export default function MergeTab({
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <div className="text-xs text-foreground0 group-hover:text-muted-foreground">
+                      <div className="text-xs text-muted-foreground group-hover:text-muted-foreground">
                         {session.rollback ? (
                           <div className="text-[10px] text-amber-500/90 flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
                             <GitMerge className="w-3 h-3" /> Merged
                           </div>
                         ) : (
-                          <div className="text-[10px] text-foreground0 flex items-center gap-1 bg-surface-hover/50 px-1.5 py-0.5 rounded border border-border-strong/50">
+                          <div className="text-[10px] text-muted-foreground flex items-center gap-1 bg-surface-hover/50 px-1.5 py-0.5 rounded border border-border-strong/50">
                             <GitMerge className="w-3 h-3" /> Not Merged
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-foreground0 group-hover:text-muted-foreground">
+                      <p className="text-xs text-muted-foreground group-hover:text-muted-foreground">
                         {new Date(session.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -151,7 +151,7 @@ export default function MergeTab({
                     </span>
                   </p>
                 </div>
-                <div className="text-xs text-foreground0 bg-surface-subtle/50 px-4 py-3 rounded-md border border-border w-full">
+                <div className="text-xs text-muted-foreground bg-surface-subtle/50 px-4 py-3 rounded-md border border-border w-full">
                   Rolling back will restore the board state to exactly how it
                   was before the merge.
                 </div>
@@ -162,7 +162,7 @@ export default function MergeTab({
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-surface-hover/30 border-2 border-border border-dashed rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 group hover:border-emerald-500/30 transition-colors">
-                        <div className="text-2xl font-bold text-emerald-400">
+                        <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                           {mergeDiff.newNodes.length}
                         </div>
                         <div className="text-xs font-medium text-muted-foreground group-hover:text-muted-foreground">
@@ -170,7 +170,7 @@ export default function MergeTab({
                         </div>
                       </div>
                       <div className="bg-surface-hover/30 border-2 border-border border-dashed rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 group hover:border-blue-500/30 transition-colors">
-                        <div className="text-2xl font-bold text-blue-400">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                           {mergeDiff.changedNodes.length}
                         </div>
                         <div className="text-xs font-medium text-muted-foreground group-hover:text-muted-foreground">

@@ -1,7 +1,7 @@
 export default function Showcase(){
     return (<>
     
-    <div className="flex h-[500px] w-[80%] ml-auto mr-auto bg-[#212121]">
+    <div className="flex h-[500px] w-[80%] ml-auto mr-auto bg-surface-subtle dark:bg-[#212121]">
         
         <div className="w-[40%]  flex flex-col items-center justify-center">
         <p className="text-foreground text-lg w-[90%]">

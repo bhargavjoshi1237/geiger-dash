@@ -48,7 +48,7 @@ export default async function BlogComponent() {
               />
             </div>
             <div className="p-5">
-              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-foreground0">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
                 {post.category ? <span>{post.category}</span> : null}
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />

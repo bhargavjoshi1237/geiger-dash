@@ -191,7 +191,6 @@ export default function BoardCanvas({
           data: {
             label: "Clock",
             clockType: "analog",
-            backgroundColor: "#232323",
           },
           style: { width: 156, height: 156 },
         };

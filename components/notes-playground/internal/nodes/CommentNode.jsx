@@ -67,7 +67,7 @@ const CommentNode = ({ id, data, selected }) => {
     <div className="relative group">
       <div
         className={`
-          relative flex items-center p-3 gap-3 min-w-[300px] bg-[#2A3441] rounded-lg shadow-lg transition-all duration-200
+          relative flex items-center p-3 gap-3 min-w-[300px] bg-comment-bg rounded-lg shadow-lg transition-all duration-200
           ${selected ? "ring-2 ring-blue-500" : "hover:ring-1 hover:ring-zinc-600"}
         `}
       >
@@ -84,7 +84,7 @@ const CommentNode = ({ id, data, selected }) => {
           >
             <input
               type="text"
-              className="w-full bg-[#3B4654] text-foreground text-sm rounded px-3 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-zinc-500 placeholder:text-foreground0"
+              className="w-full bg-comment-input text-foreground text-sm rounded px-3 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-zinc-500 placeholder:text-muted-foreground"
               placeholder="Write a comment..."
               value={comment}
               onChange={handleChange}
@@ -92,7 +92,7 @@ const CommentNode = ({ id, data, selected }) => {
           </TextEditingTrait>
           <button
             onClick={handleSend}
-            className="absolute right-2 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors"
+            className="absolute right-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs font-medium transition-colors"
           >
             Send
           </button>

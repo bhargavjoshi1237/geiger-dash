@@ -16,12 +16,12 @@ const PURCHASABLE_COUNT = PRODUCT_CATALOG.filter((product) => !product.comingSoo
 // Catalog families in display order. The tint is the family's identity: it is
 // the only colour in the grid, so colour always means "which family".
 const FAMILIES = [
-  { key: "core", label: "Core", tile: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400" },
-  { key: "addon", label: "Add-ons", tile: "border-blue-500/20 bg-blue-500/10 text-blue-400" },
-  { key: "cherry", label: "Cherry", tile: "border-violet-500/20 bg-violet-500/10 text-violet-400" },
-  { key: "security", label: "Security", tile: "border-amber-500/20 bg-amber-500/10 text-amber-400" },
-  { key: "domains", label: "Domains", tile: "border-sky-500/20 bg-sky-500/10 text-sky-400" },
-  { key: "email", label: "Email", tile: "border-rose-500/20 bg-rose-500/10 text-rose-400" },
+  { key: "core", label: "Core", tile: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+  { key: "addon", label: "Add-ons", tile: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  { key: "cherry", label: "Cherry", tile: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  { key: "security", label: "Security", tile: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400" },
+  { key: "domains", label: "Domains", tile: "border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400" },
+  { key: "email", label: "Email", tile: "border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400" },
   { key: "other", label: "Other", tile: "border-border bg-surface-card text-muted-foreground" },
 ];
 

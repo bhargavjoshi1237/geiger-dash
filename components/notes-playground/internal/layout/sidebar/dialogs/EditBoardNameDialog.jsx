@@ -34,7 +34,7 @@ export default function EditBoardNameDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1e1e] border-border text-white sm:max-w-[425px]">
+      <DialogContent className="bg-white dark:bg-[#1e1e1e] border-border text-foreground sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Board Name</DialogTitle>
         </DialogHeader>
@@ -48,7 +48,7 @@ export default function EditBoardNameDialog({
                 if (e.key === "Enter") handleSave();
               }}
               autoFocus
-              className="bg-surface-subtle border-border-strong text-white focus-visible:ring-zinc-600 focus-visible:ring-offset-0"
+              className="bg-surface-subtle border-border-strong text-foreground focus-visible:ring-zinc-600 focus-visible:ring-offset-0"
               placeholder="Enter board name"
             />
           </div>
@@ -60,7 +60,7 @@ export default function EditBoardNameDialog({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSave();
               }}
-              className="bg-surface-subtle border-border-strong text-white focus-visible:ring-zinc-600 focus-visible:ring-offset-0"
+              className="bg-surface-subtle border-border-strong text-foreground focus-visible:ring-zinc-600 focus-visible:ring-offset-0"
               placeholder="Double click to open"
             />
           </div>

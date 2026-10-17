@@ -181,7 +181,7 @@ export function RulesPanel({ rules, providers }) {
               <Route
                 className={cn(
                   "h-4 w-4 shrink-0",
-                  rule.enabled ? "text-emerald-400" : "text-text-tertiary"
+                  rule.enabled ? "text-emerald-600 dark:text-emerald-400" : "text-text-tertiary"
                 )}
               />
               <div className="min-w-0 flex-1">
@@ -209,7 +209,7 @@ export function RulesPanel({ rules, providers }) {
                 variant="ghost"
                 size="icon"
                 aria-label={`Delete ${rule.name}`}
-                className="text-red-400 hover:bg-red-500/10"
+                className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
                 onClick={() => handleDelete(rule)}
                 disabled={busyId === rule.id}
               >

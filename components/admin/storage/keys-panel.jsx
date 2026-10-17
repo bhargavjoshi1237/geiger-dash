@@ -208,7 +208,7 @@ export function KeysPanel({ apiKeys, namespaces, events, providers }) {
       >
         {newKey && (
           <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
-            <p className="mb-2 text-xs text-emerald-300">
+            <p className="mb-2 text-xs text-emerald-700 dark:text-emerald-300">
               Copy this now — it is never shown again.
             </p>
             <div className="flex items-center gap-2">
@@ -281,14 +281,14 @@ export function KeysPanel({ apiKeys, namespaces, events, providers }) {
                 <KeyRound
                   className={cn(
                     "h-3.5 w-3.5 shrink-0",
-                    key.active ? "text-text-tertiary" : "text-red-400"
+                    key.active ? "text-text-tertiary" : "text-red-600 dark:text-red-400"
                   )}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-foreground">
                     {key.name}
                     {!key.active && (
-                      <span className="ml-2 text-[11px] text-red-400">revoked</span>
+                      <span className="ml-2 text-[11px] text-red-600 dark:text-red-400">revoked</span>
                     )}
                   </p>
                   <p className="truncate text-[11px] text-text-tertiary">
@@ -301,7 +301,7 @@ export function KeysPanel({ apiKeys, namespaces, events, providers }) {
                     variant="ghost"
                     size="icon"
                     aria-label={`Revoke ${key.name}`}
-                    className="text-red-400 hover:bg-red-500/10"
+                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
                     onClick={() => handleRevoke(key)}
                     disabled={revoking === key.id}
                   >
@@ -338,7 +338,7 @@ export function KeysPanel({ apiKeys, namespaces, events, providers }) {
                   <Icon
                     className={cn(
                       "h-3.5 w-3.5 shrink-0",
-                      event.type === "error" ? "text-red-400" : "text-text-tertiary"
+                      event.type === "error" ? "text-red-600 dark:text-red-400" : "text-text-tertiary"
                     )}
                   />
                   <span className="text-sm text-foreground">{event.type}</span>

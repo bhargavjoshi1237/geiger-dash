@@ -166,7 +166,7 @@ export function ApiKeysPanel({ apiKeys }) {
                       className={cn(
                         "rounded-md border px-1.5 py-0.5 text-[11px] font-medium",
                         k.active
-                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500"
                           : "border-zinc-500/20 bg-zinc-500/10 text-zinc-400"
                       )}
                     >

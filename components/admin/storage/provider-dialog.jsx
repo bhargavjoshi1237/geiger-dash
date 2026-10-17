@@ -309,7 +309,7 @@ export function ProviderDialog({ onOpenChange, provider, drivers, secretKeyReady
                 ))}
               </div>
               {!secretKeyReady && (
-                <p className="mt-3 text-xs text-amber-400">
+                <p className="mt-3 text-xs text-amber-700 dark:text-amber-400">
                   STORAGE_SECRET_KEY is missing — credentials cannot be saved.
                 </p>
               )}

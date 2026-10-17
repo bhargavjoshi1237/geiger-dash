@@ -87,7 +87,7 @@ export function AdminGate({ children }) {
             placeholder="••••"
             className="bg-background text-foreground"
           />
-          {error ? <p className="text-sm text-red-400">{error}</p> : null}
+          {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
         </div>
         <Button type="submit" className="w-full">
           Unlock

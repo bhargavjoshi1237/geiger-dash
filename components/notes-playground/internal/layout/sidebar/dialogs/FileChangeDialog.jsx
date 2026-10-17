@@ -91,7 +91,7 @@ export default function FileChangeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1e1e1e] border-border text-foreground">
+      <DialogContent className="sm:max-w-[500px] bg-white dark:bg-[#1e1e1e] border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Upload File</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -102,9 +102,9 @@ export default function FileChangeDialog({
         <div className="grid gap-5 py-4">
           {hasExistingFile && isWarningVisible && (
             <div className="relative flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 pr-8">
-              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
               <div className="flex-1 space-y-2">
-                <p className="text-sm text-amber-200/90">
+                <p className="text-sm text-amber-800 dark:text-amber-200/90">
                   Replacing this file will delete the old version. Download it
                   first to keep a copy.
                 </p>
@@ -112,7 +112,7 @@ export default function FileChangeDialog({
                   size="sm"
                   variant="outline"
                   onClick={handleDownloadOld}
-                  className="h-8 text-xs gap-1.5 border-amber-500/30 transition-colors text-amber-300 hover:bg-amber-500/20 hover:text-amber-200"
+                  className="h-8 text-xs gap-1.5 border-amber-500/30 transition-colors text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 hover:text-amber-800 dark:hover:text-amber-200"
                 >
                   <Download size={14} />
                   Download
@@ -135,12 +135,12 @@ export default function FileChangeDialog({
           >
             {selectedFile ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center gap-3">
-                <FileText className="w-12 h-12 text-blue-400" />
+                <FileText className="w-12 h-12 text-blue-600 dark:text-blue-400" />
                 <div className="text-center">
                   <p className="text-sm font-medium text-foreground">
                     {selectedFile.name}
                   </p>
-                  <p className="text-xs text-foreground0">
+                  <p className="text-xs text-muted-foreground">
                     {(selectedFile.size / 1024).toFixed(2)} KB
                   </p>
                 </div>

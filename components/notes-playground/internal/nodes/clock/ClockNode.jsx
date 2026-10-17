@@ -67,8 +67,8 @@ const ClockNode = ({ id, data, selected, dragging }) => {
 
   const bgColor =
     clockType === "analog"
-      ? data.backgroundColor || "#232323"
-      : data.digitalBackgroundColor || "#232323";
+      ? data.backgroundColor || "var(--surface-active)"
+      : data.digitalBackgroundColor || "var(--surface-active)";
   const clockFaceColor = data.clockFaceColor || "rgba(0,0,0,0.2)";
   const hourHandColor = data.hourHandColor || "#555";
   const minuteHandColor = data.minuteHandColor || "#666";
@@ -76,8 +76,8 @@ const ClockNode = ({ id, data, selected, dragging }) => {
   const centerDotColor = data.centerDotColor || "#333";
   const borderColor = data.borderColor || "rgba(0,0,0,0.1)";
 
-  const digitalTextColor = data.digitalTextColor || "#ffffff";
-  const digitalDateColor = data.digitalDateColor || "#a1a1aa";
+  const digitalTextColor = data.digitalTextColor || "var(--foreground)";
+  const digitalDateColor = data.digitalDateColor || "var(--muted-foreground)";
   const digitalShowDate = data.digitalShowDate !== false;
   const digitalShowSeconds = data.digitalShowSeconds !== false;
   const circularSeconds = data.circularSeconds || false;
@@ -168,7 +168,7 @@ const ClockNode = ({ id, data, selected, dragging }) => {
             relative flex flex-col w-full h-full min-h-[100px] min-w-[100px] group
             transition-all duration-300 ease-out 
             ${showBackground ? "rounded-xl" : "rounded-full"}
-            ${showBackground ? (selected ? "ring-2 ring-white ring-offset-2 ring-offset-[#1e1e1e]" : "ring-2 ring-transparent hover:ring-zinc-600") : ""}
+            ${showBackground ? (selected ? "ring-2 ring-zinc-900 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-[#1e1e1e]" : "ring-2 ring-transparent hover:ring-zinc-600") : ""}
             ${dragging ? "shadow-2xl shadow-black/50 z-50" : ""}
             ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-95"}
         `}
@@ -279,7 +279,7 @@ const ClockNode = ({ id, data, selected, dragging }) => {
                     className={`absolute inset-[8px] pointer-events-none ${showBackground ? "rounded-[12px]" : "rounded-full"}`}
                     style={{
                       padding: "4px",
-                      background: "rgba(255,255,255,0.06)",
+                      background: "color-mix(in srgb, var(--foreground) 6%, transparent)",
                       WebkitMask:
                         "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
                       WebkitMaskComposite: "xor",
@@ -354,7 +354,7 @@ const ClockNode = ({ id, data, selected, dragging }) => {
           type="source"
           position={Position.Right}
           className={`
-    !w-2 !h-2 !bg-zinc-100 !border-0
+    !w-2 !h-2 !bg-zinc-900 dark:!bg-zinc-100 !border-0
     absolute !top-0 !-right-[1px]
     flex items-center justify-center
 
@@ -366,7 +366,7 @@ const ClockNode = ({ id, data, selected, dragging }) => {
     ${selected ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
   `}
         >
-          <ArrowRight className="w-[10px] h-[10px] opacity-0 group-hover/handle:opacity-100 transition-opacity duration-200 text-black -rotate-45" />
+          <ArrowRight className="w-[10px] h-[10px] opacity-0 group-hover/handle:opacity-100 transition-opacity duration-200 text-white dark:text-black -rotate-45" />
         </Handle>
       </div>
     </>

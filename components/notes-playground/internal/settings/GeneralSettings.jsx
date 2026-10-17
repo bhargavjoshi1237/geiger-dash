@@ -29,7 +29,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
       <div className="flex items-center justify-between pb-4 border-b border-border/50">
         <div>
           <h3 className="text-sm font-medium text-foreground">System Status</h3>
-          <p className="text-xs text-foreground0 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Usage metrics and cache options.
           </p>
         </div>
@@ -37,7 +37,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-foreground0 hover:text-muted-foreground"
+            className="h-8 w-8 text-muted-foreground hover:text-muted-foreground"
           >
             <RefreshCcw className="w-4 h-4" />
           </Button>
@@ -46,14 +46,14 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
 
       {/* Usage Section */}
       <div className="space-y-5">
-        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Resources
         </h4>
 
         <div className="space-y-3">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Node Allowance</span>
-            <span className="text-foreground0">
+            <span className="text-muted-foreground">
               <span className="text-foreground font-medium">{usage.nodes}</span> /{" "}
               {usage.maxNodes}
             </span>
@@ -62,7 +62,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
             value={nodePercentage}
             className="h-1.5 bg-surface-hover"
             indicatorClassName={
-              nodePercentage > 90 ? "bg-red-500" : "bg-zinc-100"
+              nodePercentage > 90 ? "bg-red-500" : "bg-zinc-900 dark:bg-zinc-100"
             }
           />
         </div>
@@ -70,13 +70,13 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
         <div className="space-y-3 pt-2">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Storage</span>
-            <span className="text-foreground0">{usage.storage} used</span>
+            <span className="text-muted-foreground">{usage.storage} used</span>
           </div>
           <div className="flex h-1.5 w-full rounded-full bg-surface-hover overflow-hidden">
             <div className="h-full bg-zinc-400" style={{ width: "25%" }} />
             <div className="h-full bg-zinc-600" style={{ width: "10%" }} />
           </div>
-          <div className="flex gap-4 text-[10px] text-foreground0 pt-1">
+          <div className="flex gap-4 text-[10px] text-muted-foreground pt-1">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
               <span>Media</span>
@@ -91,7 +91,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
 
       {/* Preferences Section */}
       <div className="space-y-4 pt-4 border-t border-border/50">
-        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider mb-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Controls
         </h4>
 
@@ -100,7 +100,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
             <Label className="text-sm font-medium text-foreground">
               Double Click to Insert
             </Label>
-            <p className="text-xs text-foreground0">Fast card creation</p>
+            <p className="text-xs text-muted-foreground">Fast card creation</p>
           </div>
           <Switch
             checked={settings?.doubleClickToInsert}
@@ -115,7 +115,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
             <Label className="text-sm font-medium text-foreground">
               Show Clock
             </Label>
-            <p className="text-xs text-foreground0">Display time in toolbar</p>
+            <p className="text-xs text-muted-foreground">Display time in toolbar</p>
           </div>
           <Switch
             checked={settings?.showClock ?? true}
@@ -131,7 +131,7 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
             <Label className="text-sm font-medium text-foreground">
               Clock Animation
             </Label>
-            <p className="text-xs text-foreground0">Shimmer effect on time</p>
+            <p className="text-xs text-muted-foreground">Shimmer effect on time</p>
           </div>
           <Switch
             checked={settings?.clockAnimation ?? true}
@@ -147,12 +147,12 @@ export default function GeneralSettings({ settings, onSettingsChange }) {
         <div className="flex items-center justify-between p-3 rounded-md border border-border/50 bg-surface-subtle/20 hover:border-red-900/30 transition-colors">
           <div className="space-y-0.5">
             <h4 className="text-sm font-medium text-muted-foreground">Local Cache</h4>
-            <p className="text-xs text-foreground0">Clear temporary files</p>
+            <p className="text-xs text-muted-foreground">Clear temporary files</p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="h-8 border-border-strong text-muted-foreground hover:text-red-400 hover:border-red-900/50 hover:bg-red-900/10"
+            className="h-8 border-border-strong text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:border-red-900/50 hover:bg-red-900/10"
           >
             <Trash2 className="w-3.5 h-3.5 mr-2" />
             Clear

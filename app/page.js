@@ -7,8 +7,8 @@ import { GridBackdrop } from "@/components/grid-backdrop";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
 import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlaygroundShowcase";
-import CollaboratorTabsShowcase from "@/components/flow-playground/CollaboratorTabsShowcase";
-import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
+import CollaboratorTabsShowcase from "@/components/collaborator-tabs-showcase";
+import PlaygroundFrame from "@/components/playground-frame";
 import ChangeLogComponent from "@/components/change_log_component";
 import BlogComponent from "@/components/blog_component";
 import TrustedByComponent from "@/components/trusted_by_component";
@@ -114,8 +114,8 @@ export default function Home() {
           }}
         >
           <div className="flex h-full flex-col">
-            <div className="relative h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-background shadow-2xl">
-              <ClientAssetsPlayground />
+            <div className="relative h-full w-full overflow-hidden rounded-lg border border-border dark:border-[#313131] bg-background shadow-2xl">
+              <PlaygroundFrame src="/assets/playground" title="Geiger Assets playground" />
             </div>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function Home() {
 
         <section className="relative z-20 overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           <div className="container mx-auto relative z-10 flex flex-col items-center text-center">
-            <h3 className="mb-4 text-xs font-semibold tracking-widest text-foreground0 uppercase sm:text-sm">
+            <h3 className="mb-4 text-xs font-semibold tracking-widest text-muted-foreground uppercase sm:text-sm">
               Open source from day one
             </h3>
             <h2 className="mb-8 bg-gradient-to-b from-foreground to-text-tertiary bg-clip-text text-3xl font-black tracking-tighter text-transparent drop-shadow-lg sm:mb-10 sm:text-5xl lg:text-6xl">

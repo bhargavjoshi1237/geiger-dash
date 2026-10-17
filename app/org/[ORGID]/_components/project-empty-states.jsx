@@ -32,7 +32,7 @@ export function NoProjectsState({ organizationId }) {
 export function NoMatchesState({ onClear }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-card py-14 text-center">
-      <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-black/20 text-muted-foreground">
+      <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-black/5 dark:bg-black/20 text-muted-foreground">
         <Rocket className="size-6" />
       </span>
       <p className="text-sm font-medium text-foreground">No projects match your filters</p>

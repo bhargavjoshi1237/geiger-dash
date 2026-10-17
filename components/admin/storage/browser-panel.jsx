@@ -411,7 +411,7 @@ export function BrowserPanel({
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         variant="destructive"
-                        className="text-red-400 focus:bg-red-500/10"
+                        className="text-red-600 dark:text-red-400 focus:bg-red-500/10"
                         onClick={() => handleDelete(node)}
                       >
                         <Trash2 className="mr-2 h-3.5 w-3.5" />

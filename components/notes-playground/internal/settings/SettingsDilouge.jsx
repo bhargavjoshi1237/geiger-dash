@@ -98,7 +98,7 @@ export default function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-2xl bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg"
+        className="max-w-2xl bg-white dark:bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg"
       >
         <DialogHeader className="p-4 border-b border-border ">
           <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function SettingsDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex border-b border-border bg-[#1e1e1e] -mt-4">
+        <div className="flex border-b border-border bg-white dark:bg-[#1e1e1e] -mt-4">
           {[
             { id: "general", label: "General" },
             { id: "defaults", label: "Defaults" },
@@ -121,8 +121,8 @@ export default function SettingsDialog({
               className={cn(
                 "flex-1 py-3 text-sm font-medium border-b-2 transition-colors",
                 activeTab === tab.id
-                  ? "border-zinc-100 text-foreground bg-surface-hover/30"
-                  : "border-transparent text-foreground0 hover:text-muted-foreground hover:bg-surface-hover/20",
+                  ? "border-zinc-900 dark:border-zinc-100 text-foreground bg-surface-hover/30"
+                  : "border-transparent text-muted-foreground hover:text-muted-foreground hover:bg-surface-hover/20",
               )}
             >
               {tab.label}
@@ -131,7 +131,7 @@ export default function SettingsDialog({
         </div>
 
         {/* Content Area */}
-        <div className="h-[500px] overflow-y-auto p-0 bg-[#1e1e1e]">
+        <div className="h-[500px] overflow-y-auto p-0 bg-white dark:bg-[#1e1e1e]">
           {activeTab === "general" && (
             <div className="p-6">
               <GeneralSettings
@@ -147,7 +147,7 @@ export default function SettingsDialog({
                 <h3 className="text-sm font-medium text-foreground mb-1">
                   Global Preferences
                 </h3>
-                <p className="text-xs text-foreground0 mb-4">
+                <p className="text-xs text-muted-foreground mb-4">
                   Set default properties for new items created on the canvas.
                 </p>
 
@@ -164,7 +164,7 @@ export default function SettingsDialog({
                   >
                     <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <ArrowRight className="w-4 h-4 text-foreground0" />
+                        <ArrowRight className="w-4 h-4 text-muted-foreground" />
                         <span>Edge Styles</span>
                       </div>
                     </AccordionTrigger>
@@ -205,7 +205,7 @@ export default function SettingsDialog({
                               </button>
                             </PopoverTrigger>
                             <PopoverContent
-                              className="w-40 bg-[#1e1e1e] border-border p-1"
+                              className="w-40 bg-white dark:bg-[#1e1e1e] border-border p-1"
                               side="bottom"
                             >
                               {STROKE_WIDTHS.map((sw) => (
@@ -237,7 +237,7 @@ export default function SettingsDialog({
 
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center gap-3 text-muted-foreground">
-                          <Activity className="w-4 h-4 text-foreground0" />
+                          <Activity className="w-4 h-4 text-muted-foreground" />
                           <span className="text-sm font-medium">
                             Animated Edges
                           </span>
@@ -258,7 +258,7 @@ export default function SettingsDialog({
                   >
                     <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <MousePointer2 className="w-4 h-4 text-foreground0" />
+                        <MousePointer2 className="w-4 h-4 text-muted-foreground" />
                         <span>Toolbar Options</span>
                       </div>
                     </AccordionTrigger>
@@ -277,11 +277,11 @@ export default function SettingsDialog({
                   >
                     <AccordionTrigger className="px-4 py-3 hover:no-underline text-muted-foreground hover:text-foreground">
                       <div className="flex items-center gap-2">
-                        <Layout className="w-4 h-4 text-foreground0" />
+                        <Layout className="w-4 h-4 text-muted-foreground" />
                         <span>Node Styles</span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 py-4 text-foreground0 text-sm border-t border-border/50">
+                    <AccordionContent className="px-4 py-4 text-muted-foreground text-sm border-t border-border/50">
                       Node default settings are not yet implemented.
                     </AccordionContent>
                   </AccordionItem>
@@ -297,7 +297,7 @@ export default function SettingsDialog({
           )}
         </div>
 
-        <div className="p-4 border-t border-border bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
+        <div className="p-4 border-t border-border bg-white dark:bg-[#1e1e1e] flex justify-end gap-2 text-sm z-10 relative">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

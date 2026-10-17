@@ -62,7 +62,7 @@ export function StorageManager({
 
       {!secretKeyReady && (
         <div className="mb-5 flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3.5 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
           <div className="text-sm">
             <p className="font-medium text-foreground">
               STORAGE_SECRET_KEY is not set

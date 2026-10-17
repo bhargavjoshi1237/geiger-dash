@@ -52,7 +52,7 @@ export default function AccountSettings() {
       <div className="flex items-center justify-between pb-4 border-b border-border/50">
         <div>
           <h3 className="text-sm font-medium text-foreground">Account Profile</h3>
-          <p className="text-xs text-foreground0 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Manage your personal information and subscription.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function AccountSettings() {
       </div>
 
       <div className="space-y-5">
-        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Personal Information
         </h4>
 
@@ -78,7 +78,7 @@ export default function AccountSettings() {
           </Avatar>
           <div className="flex-1 space-y-1">
             <div className="text-sm font-medium text-foreground">{user.name}</div>
-            <div className="text-xs text-foreground0 flex items-center gap-2">
+            <div className="text-xs text-muted-foreground flex items-center gap-2">
               <Mail className="w-3 h-3" />
               {user.email}
             </div>
@@ -97,7 +97,7 @@ export default function AccountSettings() {
       </div>
 
       <div className="space-y-4 pt-4 border-t border-border/50">
-        <h4 className="text-xs font-semibold text-foreground0 uppercase tracking-wider mb-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Settings
         </h4>
 
@@ -110,7 +110,7 @@ export default function AccountSettings() {
               <div className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Subscription
               </div>
-              <div className="text-xs text-foreground0">
+              <div className="text-xs text-muted-foreground">
                 Manage billing and payment methods
               </div>
             </div>
@@ -118,7 +118,7 @@ export default function AccountSettings() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-foreground0 group-hover:text-muted-foreground"
+            className="text-muted-foreground group-hover:text-muted-foreground"
           >
             <div className="text-[10px] mr-2">Manage</div>
           </Button>
@@ -133,7 +133,7 @@ export default function AccountSettings() {
               <div className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                 Security
               </div>
-              <div className="text-xs text-foreground0">
+              <div className="text-xs text-muted-foreground">
                 Password and 2FA settings
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function AccountSettings() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-foreground0 group-hover:text-muted-foreground"
+            className="text-muted-foreground group-hover:text-muted-foreground"
           >
             <div className="text-[10px] mr-2">Update</div>
           </Button>
@@ -154,7 +154,7 @@ export default function AccountSettings() {
           onClick={handleSignOut}
         >
           <div className="space-y-0.5">
-            <h4 className="text-sm font-medium text-red-400/90">Sign Out</h4>
+            <h4 className="text-sm font-medium text-red-600 dark:text-red-400/90">Sign Out</h4>
             <p className="text-xs text-red-500/50">
               End your current session safely
             </p>
@@ -162,7 +162,7 @@ export default function AccountSettings() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+            className="h-8 w-8 p-0 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-500/10"
           >
             <LogOut className="w-3.5 h-3.5" />
           </Button>

@@ -149,7 +149,6 @@ export default function BoardPlaygroundCanvas({ className = "" }) {
           data: {
             calendarTheme: "light",
             calendarStyle: "default",
-            backgroundColor: "#2a2a2a",
           },
           style: { width: 200, height: 200 },
         };

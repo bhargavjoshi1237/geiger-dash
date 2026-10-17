@@ -80,7 +80,7 @@ export default function EditBoardIconDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1e1e] border-border text-white sm:max-w-[425px]">
+      <DialogContent className="bg-white dark:bg-[#1e1e1e] border-border text-foreground sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Board Icon & Accent</DialogTitle>
         </DialogHeader>
@@ -100,7 +100,7 @@ export default function EditBoardIconDialog({
                     onClick={() => setIconName(name)}
                     className={`p-2 rounded-md transition-all ${
                       isSelected
-                        ? "bg-purple-500/20 text-purple-400 border border-purple-500/50"
+                        ? "bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/50"
                         : "text-muted-foreground hover:bg-surface-hover hover:text-foreground border border-transparent"
                     }`}
                     title={name}
@@ -115,7 +115,7 @@ export default function EditBoardIconDialog({
           <div className="grid grid-cols-[auto_1fr] gap-4 p-4 rounded-lg border border-border/60 bg-surface-subtle/30 items-center">
             {/* Preview Section */}
             <div className="flex flex-col justify-center items-center gap-3 pr-4 border-r border-border/60">
-              <span className="text-[10px] font-semibold text-foreground0 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Preview
               </span>
               {(() => {
@@ -134,7 +134,7 @@ export default function EditBoardIconDialog({
 
             {/* Accent Colors Section */}
             <div className="flex flex-col gap-3 pl-2">
-              <span className="text-[10px] font-semibold text-foreground0 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Theme Colors
               </span>
               <div className="flex items-center gap-6">

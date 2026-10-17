@@ -48,7 +48,7 @@ export function AddCategoryDialog({ open, onOpenChange, onCreated }) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Tag className="h-4 w-4 text-emerald-400" />
+            <Tag className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             New category
           </DialogTitle>
           <DialogDescription>

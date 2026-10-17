@@ -101,7 +101,7 @@ export default function EdgeSettingsSidebar({
         onClick={() =>
           onUpdateEdge(selectedEdge.id, { animated: !selectedEdge.animated })
         }
-        className={selectedEdge.animated ? "text-green-400 bg-surface-hover/50" : ""}
+        className={selectedEdge.animated ? "text-green-600 dark:text-green-400 bg-surface-hover/50" : ""}
       />
     </SidebarShell>
   );

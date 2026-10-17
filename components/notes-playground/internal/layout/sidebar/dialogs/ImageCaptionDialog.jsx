@@ -41,7 +41,7 @@ const ImageCaptionDialog = ({ open, onOpenChange, initialData, onSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-[#1e1e1e] border-border text-foreground">
+      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-[#1e1e1e] border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Edit Caption</DialogTitle>
         </DialogHeader>

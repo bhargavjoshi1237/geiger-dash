@@ -45,14 +45,14 @@ export default function Topbar({
 
   return (
     <>
-      <header className="relative h-14 px-4 flex items-center justify-between border-b border-border/50 bg-background/60 backdrop-blur-md text-white z-20 w-full shrink-0">
+      <header className="relative h-14 px-4 flex items-center justify-between border-b border-border/50 bg-background/60 backdrop-blur-md text-foreground z-20 w-full shrink-0">
         <div
           className={`absolute top-0 left-0 right-0 h-[3px] z-50 transition-opacity duration-500 ${
             isSyncing ? "opacity-100" : "opacity-0"
           }`}
         >
           <div
-            className={`h-full w-1/3 bg-gradient-to-r from-transparent via-[#474747] to-transparent ${
+            className={`h-full w-1/3 bg-gradient-to-r from-transparent via-border-strong to-transparent ${
               isSyncing ? "animate-sync-progress" : ""
             }`}
           ></div>
@@ -75,7 +75,7 @@ export default function Topbar({
           >
             <img
               src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/logo1.svg`}
-              className="w-5 h-5 -mr-1.5"
+              className="geiger-logo w-5 h-5 -mr-1.5"
               alt=""
             />
           </a>
@@ -83,19 +83,19 @@ export default function Topbar({
             onClick={() => onBreadcrumbClick && onBreadcrumbClick(null)}
             className="flex items-center gap-1 cursor-pointer group group-data-[collapsible=icon]:hidden md:border-l md:border-border ml-1.5 pl-2 hidden sm:flex"
           >
-            <span className="text-white font-semibold text-sm ml-2.5">Notes</span>
+            <span className="text-foreground font-semibold text-sm ml-2.5">Notes</span>
           </div>
           {breadcrumbs &&
             breadcrumbs.map((crumb) => (
               <React.Fragment key={crumb.id}>
-                <LucideChevronRight className="w-4 h-4 text-[#474747]" />
+                <LucideChevronRight className="w-4 h-4 text-zinc-400 dark:text-[#474747]" />
                 <div
                   onClick={() =>
                     onBreadcrumbClick && onBreadcrumbClick(crumb.id)
                   }
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer p-1 rounded"
                 >
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-foreground">
                     {crumb.name}
                   </span>
                 </div>

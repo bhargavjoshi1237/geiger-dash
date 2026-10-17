@@ -63,9 +63,9 @@ const BANNER_THEMES = {
 };
 
 const STATUS_BADGES = {
-  live: { label: "Live", className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-500" },
-  scheduled: { label: "Scheduled", className: "border-blue-500/20 bg-blue-500/10 text-blue-400" },
-  expired: { label: "Expired", className: "border-amber-500/20 bg-amber-500/10 text-amber-500" },
+  live: { label: "Live", className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500" },
+  scheduled: { label: "Scheduled", className: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  expired: { label: "Expired", className: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-500" },
   off: { label: "Off", className: "border-zinc-500/20 bg-zinc-500/10 text-zinc-400" },
 };
 

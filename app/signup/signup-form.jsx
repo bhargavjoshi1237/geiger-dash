@@ -40,13 +40,13 @@ export function SignupForm() {
 
   if (sent) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
+      <div className="dark flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
         <div className="w-full max-w-[400px] space-y-4 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-subtle ring-1 ring-border">
             <MailCheck className="h-7 w-7 text-white" />
           </div>
           <h1 className="text-2xl font-medium tracking-tight text-white">Check your email</h1>
-          <p className="text-sm text-foreground0">
+          <p className="text-sm text-muted-foreground">
             We sent a confirmation link to <span className="text-white">{email}</span>. Click it to
             activate your account, then sign in.
           </p>
@@ -62,11 +62,11 @@ export function SignupForm() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
+    <div className="dark flex min-h-screen w-full items-center justify-center bg-black px-4 font-sans text-foreground">
       <div className="relative z-10 w-full max-w-[400px] space-y-6 text-center">
         <div className="mb-8 space-y-2">
           <h1 className="text-2xl font-medium tracking-tight text-white">Create your account</h1>
-          <p className="text-lg font-medium text-foreground0">
+          <p className="text-lg font-medium text-muted-foreground">
             The better way to manage work.
           </p>
         </div>
@@ -80,7 +80,7 @@ export function SignupForm() {
           )}
 
           <div className="space-y-2">
-            <label className="ml-1 text-xs font-medium text-foreground0">Email</label>
+            <label className="ml-1 text-xs font-medium text-muted-foreground">Email</label>
             <input
               name="email"
               type="email"
@@ -128,14 +128,14 @@ export function SignupForm() {
 
           <div className="flex items-center gap-3 py-1">
             <span className="h-px flex-1 bg-border" />
-            <span className="text-xs text-foreground0">or</span>
+            <span className="text-xs text-muted-foreground">or</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
           <SsoSignIn next="/onboarding" />
         </form>
 
-        <p className="mt-8 text-center text-xs text-foreground0">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           Already have an account?{" "}
           <a
             href="/login"

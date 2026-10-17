@@ -263,14 +263,14 @@ const MEMBER_ROLE_OPTIONS = ['Manager', 'User', 'Leader', 'Technical Officer', '
 
 // Stable avatar tint from a key (mirrors the project-avatar palette idea).
 const MEMBER_TINTS = [
-  'bg-blue-500/15 text-blue-400',
-  'bg-violet-500/15 text-violet-400',
-  'bg-emerald-500/15 text-emerald-400',
-  'bg-orange-500/15 text-orange-400',
-  'bg-pink-500/15 text-pink-400',
-  'bg-cyan-500/15 text-cyan-400',
-  'bg-amber-500/15 text-amber-400',
-  'bg-rose-500/15 text-rose-400',
+  'bg-blue-500/15 text-blue-600 dark:text-blue-400',
+  'bg-violet-500/15 text-violet-600 dark:text-violet-400',
+  'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+  'bg-orange-500/15 text-orange-600 dark:text-orange-400',
+  'bg-pink-500/15 text-pink-600 dark:text-pink-400',
+  'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
+  'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+  'bg-rose-500/15 text-rose-600 dark:text-rose-400',
 ]
 function memberTint(key = '') {
   let h = 0
@@ -1077,7 +1077,7 @@ function OAuthTab({ organization }) {
           variant="ghost"
           onClick={handleDelete}
           disabled={deleting}
-          className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          className="text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
         >
           {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
           Remove
@@ -1256,7 +1256,7 @@ function DomainTab({ organization }) {
             variant="ghost"
             onClick={handleRemove}
             disabled={removing}
-            className="mr-auto text-red-400 hover:bg-red-500/10 hover:text-red-400"
+            className="mr-auto text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
           >
             {removing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             Remove
@@ -1303,11 +1303,11 @@ function DomainTab({ organization }) {
           )}
           {status === 'available' && (
             <>
-              <Check className="size-3.5 text-emerald-400" />
-              <span className="text-emerald-400">{previewHost} is available</span>
+              <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-emerald-600 dark:text-emerald-400">{previewHost} is available</span>
             </>
           )}
-          {status === 'unavailable' && <span className="text-red-400">{reason || 'Not available.'}</span>}
+          {status === 'unavailable' && <span className="text-red-600 dark:text-red-400">{reason || 'Not available.'}</span>}
           {status === 'idle' && value && <span className="text-muted-foreground">Preview: {previewHost}</span>}
           {status === 'idle' && !value && (
             <span className="text-text-tertiary">3–63 characters · letters, numbers, and hyphens</span>
@@ -1598,7 +1598,7 @@ function EmailTemplatesTab({ organization }) {
                   size="icon-sm"
                   aria-label="Delete template"
                   disabled={deletingId === t.id}
-                  className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+                  className="text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
                   onClick={() => handleDelete(t)}
                 >
                   {deletingId === t.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}

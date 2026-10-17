@@ -32,10 +32,10 @@ export const LabelPlug = ({
         side="right"
         align="start"
         sideOffset={8}
-        className="w-72 bg-[#1e1e1e] border-border p-4 shadow-2xl rounded-xl"
+        className="w-72 bg-white dark:bg-[#1e1e1e] border-border p-4 shadow-2xl rounded-xl"
       >
         <div className="flex flex-col gap-3">
-          <Label className="text-[11px] uppercase tracking-wider text-foreground0 font-semibold">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
             {title}
           </Label>
           <div className="relative">

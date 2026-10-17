@@ -5,7 +5,7 @@ import { Smartphone } from "lucide-react";
 export default function AppDialog({ open, onOpenChange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
+      <DialogContent className="max-w-md bg-white dark:bg-[#1e1e1e] border-border text-foreground p-0 overflow-hidden shadow-xl sm:rounded-lg">
         <DialogHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Smartphone className="w-5 h-5 text-muted-foreground" />
@@ -23,7 +23,7 @@ export default function AppDialog({ open, onOpenChange }) {
             <p className="text-sm font-medium text-muted-foreground">
               Coming Soon to iOS & Android
             </p>
-            <p className="text-xs text-foreground0">
+            <p className="text-xs text-muted-foreground">
               We're building a seamless mobile experience for you. Stay tuned
               for updates!
             </p>

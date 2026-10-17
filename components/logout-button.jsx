@@ -59,7 +59,7 @@ export function LogoutButton() {
             type="button"
             variant="destructive"
             onClick={handleLogout}
-            className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400 border border-red-500/20"
+            className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400 border border-red-500/20"
           >
             Sign out
           </Button>

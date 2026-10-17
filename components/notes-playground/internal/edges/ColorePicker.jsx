@@ -42,14 +42,14 @@ export default function ColorPicker({
           {COLORS.map((color) => (
             <button
               key={color}
-              className="w-8 h-8 rounded-lg border border-border-strong/50 hover:scale-110 hover:border-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="w-8 h-8 rounded-lg border border-border-strong/50 hover:scale-110 hover:border-zinc-900 dark:hover:border-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20"
               style={{ backgroundColor: color }}
               onClick={() => onChange(color)}
             />
           ))}
         </div>
         <div className="border-t border-border pt-3">
-          <Label className="text-[10px] uppercase tracking-wider text-foreground0 mb-2 block font-semibold">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 block font-semibold">
             Custom Hex
           </Label>
           <div className="flex gap-2 items-center bg-surface-subtle/50 p-1 rounded-lg border border-border focus-within:border-border-strong transition-colors">

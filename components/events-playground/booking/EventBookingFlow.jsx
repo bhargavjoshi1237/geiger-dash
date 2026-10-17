@@ -147,7 +147,7 @@ export default function EventBookingFlow() {
                         <span className="block truncate text-[11px] text-text-tertiary">
                           {item.perk}
                           {item.remaining !== null && item.remaining <= 20 ? (
-                            <span className="text-amber-300"> · {item.remaining} left</span>
+                            <span className="text-amber-700 dark:text-amber-300"> · {item.remaining} left</span>
                           ) : null}
                         </span>
                       </span>

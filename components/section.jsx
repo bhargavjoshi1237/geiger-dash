@@ -1,13 +1,4 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const FlowPlayground = dynamic(
-  () => import("@/components/flow-playground/FlowPlayground").then((mod) => mod.FlowPlayground),
-  {
-    ssr: false,
-  }
-);
+import PlaygroundFrame from "@/components/playground-frame";
 
 export default function Section() {
   return (
@@ -18,8 +9,8 @@ export default function Section() {
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-cc24ca462279ca23250c.jpg')",
       }}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-lg">
-        <FlowPlayground />
+      <div className="relative h-full w-full overflow-hidden rounded-lg border border-border dark:border-[#313131] shadow-2xl">
+        <PlaygroundFrame src="/flow/playground" title="Geiger Flow playground" />
       </div>
     </div>
   );

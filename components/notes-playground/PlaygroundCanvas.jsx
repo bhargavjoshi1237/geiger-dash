@@ -20,10 +20,10 @@ const initialNodes = [
     position: { x: 100, y: 100 },
     data: { label: "Welcome to Geiger Notes Playground" },
     style: {
-      background: "#18181b",
-      border: "1px solid #3f3f46",
+      background: "var(--surface-subtle)",
+      border: "1px solid var(--border-strong)",
       borderRadius: "8px",
-      color: "#fafafa",
+      color: "var(--foreground)",
       padding: "10px 15px",
       fontSize: "14px",
     },
@@ -33,10 +33,10 @@ const initialNodes = [
     position: { x: 300, y: 200 },
     data: { label: "Click and drag nodes to move them" },
     style: {
-      background: "#18181b",
-      border: "1px solid #3f3f46",
+      background: "var(--surface-subtle)",
+      border: "1px solid var(--border-strong)",
       borderRadius: "8px",
-      color: "#a1a1aa",
+      color: "var(--muted-foreground)",
       padding: "10px 15px",
       fontSize: "13px",
     },
@@ -46,10 +46,10 @@ const initialNodes = [
     position: { x: 150, y: 300 },
     data: { label: "Connect nodes by dragging from handle to handle" },
     style: {
-      background: "#18181b",
-      border: "1px solid #3f3f46",
+      background: "var(--surface-subtle)",
+      border: "1px solid var(--border-strong)",
       borderRadius: "8px",
-      color: "#a1a1aa",
+      color: "var(--muted-foreground)",
       padding: "10px 15px",
       fontSize: "13px",
     },
@@ -59,10 +59,10 @@ const initialNodes = [
     position: { x: 400, y: 100 },
     data: { label: "Use the controls to zoom and pan" },
     style: {
-      background: "#18181b",
-      border: "1px solid #3f3f46",
+      background: "var(--surface-subtle)",
+      border: "1px solid var(--border-strong)",
       borderRadius: "8px",
-      color: "#a1a1aa",
+      color: "var(--muted-foreground)",
       padding: "10px 15px",
       fontSize: "13px",
     },
@@ -137,10 +137,10 @@ export default function PlaygroundCanvas() {
         position,
         data: { label: label || "New Node" },
         style: {
-          background: "#18181b",
-          border: "1px solid #3f3f46",
+          background: "var(--surface-subtle)",
+          border: "1px solid var(--border-strong)",
           borderRadius: "8px",
-          color: "#fafafa",
+          color: "var(--foreground)",
           padding: "10px 15px",
           fontSize: "14px",
         },
@@ -165,11 +165,11 @@ export default function PlaygroundCanvas() {
         fitView
         className="bg-background"
       >
-        <Background color="#27272a" gap={20} size={1} />
+        <Background color="var(--canvas-dots)" gap={20} size={1} />
         <Controls className="bg-surface-subtle border-border rounded-lg" />
         <MiniMap
           className="bg-surface-subtle border-border rounded-lg"
-          nodeColor="#3f3f46"
+          nodeColor="var(--minimap-node)"
           maskColor="rgba(0,0,0,0.8)"
         />
       </ReactFlow>

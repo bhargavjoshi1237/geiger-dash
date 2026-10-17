@@ -17,7 +17,7 @@ import {
   Sparkles,
   WandSparkles,
 } from "lucide-react";
-import ClientAssetsPlayground from "@/components/assets-playground/ClientAssetsPlayground";
+import PlaygroundFrame from "@/components/playground-frame";
 import { defaultDocsNavigation, getFallbackDocsPage } from "@/lib/docs/default-content";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -48,14 +48,14 @@ const topTabs = [
 
 function DocsTopBar({ activeSlug }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-border bg-background/95 text-white backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-border bg-background/95 text-foreground backdrop-blur">
       <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex h-full min-w-0 items-center gap-6">
           <Link href="/" className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md  ">
-            <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="h-5 w-5" />
+            <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="geiger-logo h-5 w-5" />
             </span>
-            <span className="hidden border-l border-border pl-3 text-sm font-semibold text-white sm:block">
+            <span className="hidden border-l border-border pl-3 text-sm font-semibold text-foreground sm:block">
               Geiger Docs
             </span>
           </Link>
@@ -69,7 +69,7 @@ function DocsTopBar({ activeSlug }) {
                 href={item.href}
                 className={`flex h-full items-center border-b-2 transition-colors ${
                   isActive
-                    ? "border-white text-white"
+                    ? "border-foreground text-foreground"
                     : "border-transparent hover:text-foreground"
                 }`}
               >
@@ -104,7 +104,7 @@ function DocsTopBar({ activeSlug }) {
           </Link>
           <Link
             href="#download"
-            className="h-8 rounded-md bg-white px-4 text-sm font-medium leading-8 text-black transition-colors hover:bg-[#e5e5e5]"
+            className="h-8 rounded-md bg-primary px-4 text-sm font-medium leading-8 text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Download
           </Link>
@@ -129,7 +129,7 @@ function LeftSidebar({ navigation, activeSlug }) {
                   href={link.href}
                   key={`${section.title}-${link.label}`}
                   className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium leading-5 transition-colors ${
-                    isActive ? "bg-surface-card text-white" : "text-muted-foreground hover:bg-surface-card hover:text-foreground"
+                    isActive ? "bg-surface-card text-foreground" : "text-muted-foreground hover:bg-surface-card hover:text-foreground"
                   }`}
                 >
                   <span>{link.label}</span>
@@ -193,9 +193,9 @@ function ProductPreview() {
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
       }}
     >
-      <div className="h-full w-full overflow-hidden rounded-lg border border-[#313131] bg-background shadow-2xl">
+      <div className="h-full w-full overflow-hidden rounded-lg border border-border dark:border-[#313131] bg-background shadow-2xl">
         <div className="h-[142.857%] w-[142.857%] origin-top-left scale-[0.7]">
-          <ClientAssetsPlayground />
+          <PlaygroundFrame src="/assets/playground" title="Geiger Assets playground" />
         </div>
       </div>
     </div>
@@ -212,9 +212,9 @@ function StartCard({ item }) {
     >
       <div className="flex h-12 items-center gap-3 border-b border-border px-4">
         <Icon className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-semibold text-white">{item.title}</span>
+        <span className="text-sm font-semibold text-foreground">{item.title}</span>
       </div>
-      <p className="px-4 pt-4 text-[15px] font-medium leading-6 text-[#e5e5e5]">{item.body}</p>
+      <p className="px-4 pt-4 text-[15px] font-medium leading-6 text-foreground">{item.body}</p>
     </Link>
   );
 }
@@ -223,7 +223,7 @@ function ContentSection({ id, eyebrow, title, children }) {
   return (
     <section id={id} className="pt-12">
       <p className="mb-3 text-sm text-muted-foreground">{eyebrow}</p>
-      <h2 className="text-2xl font-semibold text-white">{title}</h2>
+      <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
       <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">{children}</div>
     </section>
   );
@@ -240,7 +240,7 @@ function FeatureGrid({ features }) {
             className="flex items-center gap-3 rounded-md border border-border bg-surface-card p-3 transition-colors hover:border-border-strong hover:bg-surface-active"
           >
             <Icon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{item.text}</span>
+            <span className="text-sm font-medium text-foreground">{item.text}</span>
           </div>
         );
       })}
@@ -257,7 +257,7 @@ function ProductLinks({ links }) {
           <Link
             href={item.href || "#"}
             key={item.label}
-            className="flex items-center justify-between rounded-md border border-border bg-surface-card p-4 text-sm font-semibold text-[#e5e5e5] transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground"
+            className="flex items-center justify-between rounded-md border border-border bg-surface-card p-4 text-sm font-semibold text-foreground transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground"
           >
             <span className="flex items-center gap-2">
               <Icon className="h-4 w-4 text-muted-foreground" />
@@ -302,7 +302,7 @@ export default function DocsWidget({
       <LeftSidebar navigation={navigation} activeSlug={page.slug} />
       <RightSidebar toc={toc} />
 
-      <main className="min-h-screen bg-background pt-14 text-white lg:pl-[280px] xl:pr-[280px]">
+      <main className="min-h-screen bg-background pt-14 text-foreground lg:pl-[280px] xl:pr-[280px]">
         <div className="mx-auto w-full max-w-[704px] px-5 py-9 sm:px-0">
           <div className="docs-scrollbar-hidden mb-6 flex gap-2 overflow-x-auto pb-2 lg:hidden">
             {navigation.flatMap((section) =>
@@ -312,7 +312,7 @@ export default function DocsWidget({
                 href={link.href}
                 key={`mobile-${link.section}-${link.label}`}
                 className={`shrink-0 rounded-md border border-border px-3 py-1.5 text-sm font-medium ${
-                  link.slug === page.slug ? "bg-white text-black" : "bg-surface-card text-muted-foreground"
+                  link.slug === page.slug ? "bg-primary text-primary-foreground" : "bg-surface-card text-muted-foreground"
                 }`}
               >
                 {link.label}
@@ -322,10 +322,10 @@ export default function DocsWidget({
 
           <article>
             <p className="mb-3 text-sm font-medium text-muted-foreground">{page.groupTitle}</p>
-            <h1 className="text-[34px] font-semibold leading-tight text-white sm:text-[36px]">
+            <h1 className="text-[34px] font-semibold leading-tight text-foreground sm:text-[36px]">
               {page.title}
             </h1>
-            <p className="mt-9 max-w-[690px] text-[15px] font-medium leading-6 text-[#e5e5e5]">
+            <p className="mt-9 max-w-[690px] text-[15px] font-medium leading-6 text-foreground">
               {page.description}
             </p>
 

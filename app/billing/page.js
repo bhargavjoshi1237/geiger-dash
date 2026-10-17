@@ -181,7 +181,7 @@ export default async function BillingPage() {
                 ) : null}
 
                 {planState.phase === "grace" ? (
-                  <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
                     <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                     <div className="flex-1">
                       <p className="font-medium">
