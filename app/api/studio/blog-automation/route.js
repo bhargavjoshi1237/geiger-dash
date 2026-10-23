@@ -1,21 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { getUser } from '@/supabase/user/getUser'
+import { requireContentEditorApi } from '@/lib/studio/access'
 import { runBlogAutomation } from '@/lib/blog-automation/pipeline'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-async function authenticatedClient() {
-  const supabase = await createClient()
-  const user = await getUser(supabase)
-  return { supabase, user }
-}
-
 export async function GET() {
-  const { supabase, user } = await authenticatedClient()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { supabase, response: denied } = await requireContentEditorApi()
+  if (denied) return denied
 
   const [{ data: runs, error: runsError }, { data: usage, error: usageError }] =
     await Promise.all([
@@ -52,8 +45,8 @@ export async function GET() {
 }
 
 export async function POST() {
-  const { user } = await authenticatedClient()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { response: denied } = await requireContentEditorApi()
+  if (denied) return denied
 
   try {
     return NextResponse.json(await runBlogAutomation({ trigger: 'manual', force: true }))

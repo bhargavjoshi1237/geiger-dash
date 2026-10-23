@@ -20,9 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
-  Tabs,
-  TabsList,
-  TabsTrigger,
   Textarea,
 } from "@geiger/ui";
 import {
@@ -36,6 +33,7 @@ import {
   toDateTimeLocal,
 } from '@/components/content-studio/shared'
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
+import { StudioTabs } from '@/components/content-studio/studio-shell'
 import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dialog'
 import { useLlmConfig } from '@/components/content-studio/llm-config'
 import { PageGenerateDialog } from '@/components/pages-studio/page-generate-dialog'
@@ -420,16 +418,7 @@ export function PagesStudio({ pages, saved = false, error = '' }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Tabs value="pages" className="hidden sm:block">
-            <TabsList>
-              <TabsTrigger value="posts" asChild>
-                <Link href="/studio/posts">Posts</Link>
-              </TabsTrigger>
-              <TabsTrigger value="pages" asChild>
-                <Link href="/studio/pages">Pages</Link>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <StudioTabs active="pages" />
           <Button asChild type="button" size="sm" variant="ghost" className="hidden sm:inline-flex">
             <Link href={livePath} target="_blank">
               View live

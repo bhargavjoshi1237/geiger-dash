@@ -123,17 +123,21 @@ Both migration files include sample data to help you get started:
 
 ## Color Palette
 
-## Docs Content System
+## Help Center Content System
 
-Run `database/init/docs.sql` to create the Supabase-backed docs tables:
+The Help Center at `/help` reads three tables (migrations `20260718044513_docs.sql`, `20261023112956_docs_editing.sql`):
 
 | Table | Purpose |
 |-------|---------|
-| `docs_nav_groups` | Left-sidebar documentation groups |
-| `docs_pages` | Dynamic pages served by `/docs/[...slug]` |
-| `docs_content_blocks` | Ordered page sections rendered into the docs article |
+| `docs_nav_groups` | Left-sidebar groups |
+| `docs_pages` | Pages served by `/help/[...slug]` (`welcome` is `/help`); `parent_id` nests one level, `deleted_at` soft-deletes |
+| `docs_content_blocks` | Ordered page sections: `content` holds the section HTML, `cards` / `features` / `links` hold optional tiles |
 
-`docs_pages.toc` stores right-sidebar links as JSON, while `docs_content_blocks` stores section content in structured JSON fields for paragraphs, cards, feature rows, and product links.
+Pages are written in Studio at `/studio/help`, which saves through the `docs_save_page` RPC. The public sees only `published`, non-deleted pages; drafts are visible to editors at `/help/<slug>?preview=1`. The "On this page" list is derived from section titles, so the legacy `docs_pages.toc`, `docs_pages.has_children` and `docs_content_blocks.body` columns are no longer read.
+
+The `public.content_editors` allowlist gates all of Studio: the Help Center, blog, changelog and SEO page tables only accept writes from editors (RLS), and `/studio/*` plus `/api/studio/*` refuse everyone else. The changelog webhook and blog automation write with the service role, so they are unaffected. To add an editor, add their email to `supabase/seeds/content_editors.sql` and run `npm run db:seed -- content_editors` (they must have signed up first).
+
+Ask AI answers from published pages using `DOCS_LLM_BASE_URL` / `DOCS_LLM_API_KEY` / `DOCS_LLM_MODEL` (any OpenAI-compatible provider), falling back to the `CHANGELOG_LLM_*` settings. It is available to signed-in visitors only.
 
 ## Organization Project Access
 

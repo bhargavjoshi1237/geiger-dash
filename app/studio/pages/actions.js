@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
+import { isContentEditor } from '@/lib/studio/access'
 import { isValidPageType, PAGE_TYPE_PATH } from '@/lib/pages-studio/skills'
 import { resolveProductApp } from '@/lib/pages-studio/products'
 
@@ -48,8 +49,10 @@ function toActionErrorMessage(error, fallbackMessage) {
   return message || fallbackMessage
 }
 
-function ensureAuthUser(user) {
+// Non-editors land back on /studio/pages, which shows the no-access screen.
+async function ensureContentEditor(supabase, user) {
   if (!user) redirect('/login?next=/studio/pages')
+  if (!(await isContentEditor(supabase))) redirect('/studio/pages')
 }
 
 // Resolve the cover image from an upload, a storage path, a direct URL, or the
@@ -106,7 +109,7 @@ function authorFields(user) {
 export async function saveSeoPageAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const pageId = String(formData.get('id') || '').trim()
   const pageType = String(formData.get('page_type') || 'solution').trim()
@@ -197,7 +200,7 @@ export async function saveSeoPageAction(formData) {
 export async function deleteSeoPageAction(pageId) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const id = String(pageId || '').trim()
   if (!id) return { ok: false, error: 'Missing page id.' }
@@ -219,7 +222,7 @@ export async function deleteSeoPageAction(pageId) {
 export async function createGeneratedSeoPageAction(input) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const pageType = isValidPageType(input?.pageType) ? input.pageType : 'solution'
   const title = String(input?.title || '').trim()

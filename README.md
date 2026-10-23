@@ -28,7 +28,7 @@ Because every product is proxied through Dash and every product app runs under i
 | --- | --- |
 | **Public site** | Home, product and per-product feature pages, solutions, pricing, contact, privacy and terms, rendered with SEO metadata and OpenGraph images. |
 | **Blog & changelog** | Published posts and release notes with their own routes, widgets, and a daily automation job that drafts posts from search plus an LLM. |
-| **Docs** | Suite documentation served from `/docs/[...slug]`. |
+| **Help Center** | Suite documentation served from `/help/[...slug]` (with ⌘K search and Ask AI), edited by content editors in Studio at `/studio/help`. `/docs` belongs to the Geiger Docs product. |
 | **Auth & onboarding** | Login, signup, OAuth with PKCE, an auth callback, onboarding, and token-based invites. |
 | **Organisations** | Org creation and settings, membership, roles, and per-org usage. |
 | **Billing** | Stripe subscriptions, checkout, and a webhook endpoint for lifecycle events. |

@@ -31,7 +31,7 @@ export default function Footer() {
             <h2 className="font-bold text-foreground mb-4">Resources</h2>
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
               <li><Link href="/why-geiger" className="hover:text-foreground transition-colors">Why Geiger</Link></li>
-              <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
+              <li><Link href="/help" className="hover:text-foreground transition-colors">Help Center</Link></li>
               <li><a href="mailto:support@geiger.studio" className="hover:text-foreground transition-colors">Contact Support</a></li>
             </ul>
           </div>

@@ -2,13 +2,16 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
 import { ContentStudio } from '@/components/content-studio/content-studio'
+import { StudioNoAccess } from '@/components/content-studio/studio-shell'
+import { isContentEditor } from '@/lib/studio/access'
 
 export const dynamic = 'force-dynamic'
 
 export default async function StudioPostsPage({ searchParams }) {
   const params = await searchParams
   const supabase = await createClient()
-  const user = await requireUser(supabase, '/login')
+  const user = await requireUser(supabase, '/login?next=/studio/posts')
+  if (!(await isContentEditor(supabase))) return <StudioNoAccess active="posts" />
 
   const [{ data: categories }, { data: posts }, { data: changelogs }] = await Promise.all([
     supabase.from('dash_blog_categories').select('*').order('name'),

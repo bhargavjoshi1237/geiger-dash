@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { requireContentEditorApi } from '@/lib/studio/access'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,9 @@ function parseRepo(value) {
 }
 
 export async function GET(request) {
+  const { response: denied } = await requireContentEditorApi()
+  if (denied) return denied
+
   const { searchParams } = new URL(request.url)
   const repo = parseRepo(searchParams.get('repo'))
   const branch = String(searchParams.get('branch') || '').trim()

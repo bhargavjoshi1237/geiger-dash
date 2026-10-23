@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { requireContentEditorApi } from '@/lib/studio/access'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,6 +14,9 @@ function resolveEndpoint(baseUrl) {
 }
 
 export async function POST(request) {
+  const { response: denied } = await requireContentEditorApi()
+  if (denied) return denied
+
   let body
   try {
     body = await request.json()

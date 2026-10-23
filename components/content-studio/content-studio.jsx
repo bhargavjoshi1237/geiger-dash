@@ -58,6 +58,7 @@ import {
   toDateTimeLocal,
 } from '@/components/content-studio/shared'
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
+import { StudioTabs } from '@/components/content-studio/studio-shell'
 import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dialog'
 import { CommitChangelogDialog } from '@/components/content-studio/commit-changelog-dialog'
 import { AddCategoryDialog } from '@/components/content-studio/add-category-dialog'
@@ -758,16 +759,7 @@ export function ContentStudio({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Tabs value="posts" className="hidden sm:block">
-            <TabsList>
-              <TabsTrigger value="posts" asChild>
-                <Link href="/studio/posts">Posts</Link>
-              </TabsTrigger>
-              <TabsTrigger value="pages" asChild>
-                <Link href="/studio/pages">Pages</Link>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <StudioTabs active="posts" />
           <Button asChild type="button" size="sm" variant="ghost" className="hidden sm:inline-flex">
             <Link href={activeTab === 'blog' ? '/blog' : '/changelog'} target="_blank">
               View live

@@ -158,8 +158,8 @@ export default async function ChangelogPage() {
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">Looking for implementation details?</p>
           <Button asChild variant="outline">
-            <Link href="/docs">
-              Read the documentation
+            <Link href="/help">
+              Visit the Help Center
               <ArrowUpRight className="size-4" />
             </Link>
           </Button>

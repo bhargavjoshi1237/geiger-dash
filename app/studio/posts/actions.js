@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
+import { isContentEditor } from '@/lib/studio/access'
 import { fetchArticle, extractArticleText, extractArticleImages } from '@/lib/blog-import/extract-article'
 
 function slugify(value) {
@@ -139,10 +140,10 @@ async function resolveImageUrl({
   return String(fallbackUrl || '').trim() || null
 }
 
-function ensureAuthUser(user) {
-  if (!user) {
-    redirect('/login')
-  }
+// Non-editors land back on /studio/posts, which shows the no-access screen.
+async function ensureContentEditor(supabase, user) {
+  if (!user) redirect('/login?next=/studio/posts')
+  if (!(await isContentEditor(supabase))) redirect('/studio/posts')
 }
 
 async function listStorageFolder(supabase, bucket, prefix) {
@@ -191,7 +192,7 @@ async function listStorageFolder(supabase, bucket, prefix) {
 export async function listStudioMediaAction(contentType = 'blog', folderPath = '') {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const bucket = 'pfp'
   const selectedType = ['blog', 'changelog', 'pages'].includes(contentType) ? contentType : 'blog'
@@ -216,7 +217,7 @@ export async function listStudioMediaAction(contentType = 'blog', folderPath = '
 export async function createStudioMediaFolderAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const contentType = String(formData.get('content_type') || 'blog')
   const selectedType = ['blog', 'changelog', 'pages'].includes(contentType) ? contentType : 'blog'
@@ -259,7 +260,7 @@ export async function createStudioMediaFolderAction(formData) {
 export async function uploadStudioMediaAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const uploadFile = formData.get('media_upload')
   const contentType = String(formData.get('content_type') || 'blog')
@@ -307,7 +308,7 @@ export async function uploadStudioMediaAction(formData) {
 export async function deleteBlogPostAction(postId) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const id = String(postId || '').trim()
   if (!id) return { ok: false, error: 'Missing blog post id.' }
@@ -323,7 +324,7 @@ export async function deleteBlogPostAction(postId) {
 export async function deleteChangelogAction(changelogId) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const id = String(changelogId || '').trim()
   if (!id) return { ok: false, error: 'Missing release id.' }
@@ -340,7 +341,7 @@ export async function deleteChangelogAction(changelogId) {
 export async function createBlogCategoryAction(name) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const clean = String(name || '').trim()
   if (!clean) return { ok: false, error: 'Enter a category name.' }
@@ -369,7 +370,7 @@ export async function createBlogCategoryAction(name) {
 export async function extractArticleAction({ url, html } = {}) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   try {
     if (url && String(url).trim()) {
@@ -393,7 +394,7 @@ export async function extractArticleAction({ url, html } = {}) {
 export async function createImportedBlogPostAction(input) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const title = String(input?.title || '').trim()
   const content = String(input?.content || '').trim()
@@ -461,7 +462,7 @@ export async function createImportedBlogPostAction(input) {
 export async function saveBlogPostAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const postId = String(formData.get('id') || '').trim()
   const title = String(formData.get('title') || '').trim()
@@ -579,7 +580,7 @@ async function upsertChangelogRecord(supabase, recordId, payload) {
 export async function saveChangelogAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
-  ensureAuthUser(user)
+  await ensureContentEditor(supabase, user)
 
   const recordId = String(formData.get('id') || '').trim()
   const version = String(formData.get('version') || '').trim()
