@@ -3,6 +3,8 @@
 -- One-time content move, like 20261023112957_help_center_structure: rewrites the Welcome page and gives Flow its
 -- own sidebar group. The products/flow draft is re-homed as the published Flow Overview (with the /flow/playground
 -- hero), and Flow's other areas start as draft outlines. Later edits happen in Studio, so this must never re-run.
+-- Written from a survey of C:\Pro\geiger-flow (components/internal/sidebar/projects/sidebar_data.js, components/internal/screens/it/*,
+-- components/internal/screens/projects/grounding/*, settings/navigation/*).
 
 -- @up
 insert into public.docs_nav_groups (title, slug, sort_order)

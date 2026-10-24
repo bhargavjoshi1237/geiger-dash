@@ -3,6 +3,7 @@
 -- One-time content move, like 20261023200049_help_flow_guide: replaces the flow/tasks draft outline with the full
 -- Tasks guide and publishes it. Each part of the page embeds the live Flow component it describes (section
 -- showcases, 20261024123159_help_section_showcases); the whole-app preview stays on the Flow Overview.
+-- Written from a survey of C:\Pro\geiger-flow (components/internal/screens/projects/tasks/*, work_queue/*, features/tasks/*).
 -- Later edits happen in Studio, so this must never re-run.
 
 -- @up
