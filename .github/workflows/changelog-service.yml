@@ -1,0 +1,72 @@
+# Reusable workflow: asks the Geiger Dash changelog service to write and publish the entry for a push.
+# Dash reads the commits and diff from GitHub itself, so this only sends the product slug and commit ids.
+# Call it from a push workflow that passes the CHANGELOG_INGEST_SECRET repo secret (see changelog.yml).
+# Add [skip changelog] to a commit message to leave that commit out.
+name: Changelog service
+
+on:
+  workflow_call:
+    inputs:
+      product:
+        description: Changelog product slug, e.g. geiger-flow.
+        required: true
+        type: string
+      dash-url:
+        description: Geiger Dash base URL.
+        required: false
+        type: string
+        default: https://geiger.studio
+    secrets:
+      CHANGELOG_INGEST_SECRET:
+        required: false
+
+jobs:
+  changelog:
+    if: ${{ !github.event.deleted && github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - name: Request changelog entry
+        env:
+          INGEST_SECRET: ${{ secrets.CHANGELOG_INGEST_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DASH_URL: ${{ inputs.dash-url }}
+          PRODUCT: ${{ inputs.product }}
+          SHA: ${{ github.event.after || github.sha }}
+          BEFORE: ${{ github.event.before }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ -z "$INGEST_SECRET" ]; then
+            echo "::warning::CHANGELOG_INGEST_SECRET is not set; skipping changelog."
+            exit 0
+          fi
+
+          jq -n --arg product "$PRODUCT" --arg sha "$SHA" --arg before "$BEFORE" --arg branch "$BRANCH" \
+            '{product: $product, sha: $sha, before: $before, branch: $branch}' > payload.json
+
+          # Retry 404/5xx for a few minutes: Dash may still be deploying when this push lands.
+          for attempt in 1 2 3 4 5 6 7 8; do
+            status=$(curl --silent --show-error --max-time 150 -o result.json -w '%{http_code}' \
+              -X POST "$DASH_URL/api/changelog/ingest" \
+              -H "Authorization: Bearer $INGEST_SECRET" \
+              -H "X-GitHub-Token: $GITHUB_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data @payload.json || echo 000)
+            echo "Attempt $attempt: HTTP $status"
+            case "$status" in
+              2??) break ;;
+              404|000|5??) [ "$attempt" -lt 8 ] && sleep 30 ;;
+              *) cat result.json; exit 1 ;;
+            esac
+          done
+          cat result.json; echo
+          case "$status" in 2??) ;; *) exit 1 ;; esac
+
+          {
+            echo "### Changelog"
+            jq -r 'if .status == "created"
+              then "Published **v\(.version)**: \(.title) (\(.category), \(.items) items from \(.commits) commits)"
+              else "Skipped: \(.reason)" end' result.json
+          } >> "$GITHUB_STEP_SUMMARY"

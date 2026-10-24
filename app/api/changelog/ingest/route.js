@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { CHANGELOG_PRODUCTS, generateChangelogFromPush } from '@/lib/changelog/generate'
+import { isCommitSha } from '@/lib/changelog/github'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 150
 
-// Called by each product repo's GitHub "changelog" workflow with Bearer CHANGELOG_INGEST_SECRET.
+// Changelog service for every product: POST { product, sha, before?, branch? } with Bearer CHANGELOG_INGEST_SECRET.
+// Each repo calls it through the reusable .github/workflows/changelog-service.yml; an optional X-GitHub-Token lifts GitHub rate limits.
 function isAuthorized(request) {
   const secret = process.env.CHANGELOG_INGEST_SECRET
   const header = request.headers.get('authorization') || ''
@@ -25,13 +27,13 @@ export async function POST(request) {
 
   const body = await request.json().catch(() => null)
   const product = String(body?.product || '').trim()
-  const headSha = String(body?.headSha || '').trim()
+  const sha = String(body?.sha || '').trim()
 
   if (!CHANGELOG_PRODUCTS.includes(product)) {
     return NextResponse.json({ error: `Unknown product "${product}".` }, { status: 400 })
   }
-  if (!headSha || !Array.isArray(body?.commits)) {
-    return NextResponse.json({ error: 'headSha and commits are required.' }, { status: 400 })
+  if (!isCommitSha(sha)) {
+    return NextResponse.json({ error: 'sha must be a full 40-character commit id.' }, { status: 400 })
   }
 
   const supabase = createAdminClient()
@@ -43,10 +45,10 @@ export async function POST(request) {
     const result = await generateChangelogFromPush({
       supabase,
       product,
-      branch: String(body.branch || ''),
-      headSha,
-      commits: body.commits,
-      changes: { nameStatus: String(body.nameStatus || ''), patch: String(body.patch || '') },
+      sha,
+      before: String(body.before || '').trim(),
+      branch: String(body.branch || '').trim(),
+      githubToken: request.headers.get('x-github-token') || '',
     })
     if (result.status === 'created') {
       revalidatePath('/changelog')
