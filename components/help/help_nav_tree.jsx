@@ -8,8 +8,8 @@ function NavLink({ link, isActive, onNavigate, children }) {
       href={link.href}
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
-      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm font-medium leading-5 transition-colors ${
-        isActive ? "bg-surface-card text-foreground" : "text-muted-foreground hover:bg-surface-card hover:text-foreground"
+      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm leading-5 transition-colors hover:bg-surface-hover hover:text-foreground ${
+        isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground"
       }`}
     >
       <span className="flex min-w-0 items-center gap-2">
@@ -30,8 +30,9 @@ export function HelpNavTree({ navigation, activeSlug, onNavigate }) {
     <nav className="space-y-8">
       {navigation.map((group) => (
         <div key={group.title}>
-          <p className="mb-3 text-xs font-medium uppercase text-text-secondary">{group.title}</p>
-          <div className="space-y-1">
+          <p className="mb-1.5 text-xs text-text-secondary">{group.title}</p>
+          {/* Pulled out by the rows' px-2 so link text lines up with the group title while hover fills the full row. */}
+          <div className="-mx-2">
             {group.links.map((link) => {
               const expanded =
                 link.children.length > 0 &&
@@ -41,12 +42,12 @@ export function HelpNavTree({ navigation, activeSlug, onNavigate }) {
                   <NavLink link={link} isActive={link.slug === activeSlug} onNavigate={onNavigate}>
                     {link.children.length ? (
                       <ChevronRight
-                        className={`size-3.5 shrink-0 text-muted-foreground transition-transform ${expanded ? "rotate-90" : ""}`}
+                        className={`size-3.5 shrink-0 text-text-secondary transition-transform ${expanded ? "rotate-90" : ""}`}
                       />
                     ) : null}
                   </NavLink>
                   {expanded ? (
-                    <div className="ml-3 mt-1 space-y-1 border-l border-border pl-2">
+                    <div className="ml-3 border-l border-border pl-2">
                       {link.children.map((child) => (
                         <NavLink
                           key={child.slug}

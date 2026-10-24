@@ -24,7 +24,7 @@ export function HelpMobileNav({ navigation, activeSlug }) {
             <SheetTitle>Help Center</SheetTitle>
             <SheetDescription className="sr-only">Browse help pages</SheetDescription>
           </SheetHeader>
-          <div className="px-4 py-5">
+          <div className="px-5 py-5">
             <HelpNavTree navigation={navigation} activeSlug={activeSlug} onNavigate={() => setOpen(false)} />
           </div>
         </SheetContent>

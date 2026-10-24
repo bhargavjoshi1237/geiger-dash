@@ -27,14 +27,18 @@ function openAskAi(prompt = "") {
 export function AskAiButton() {
   const modifierKey = useModifierKeyLabel();
   return (
+    // Icon-only below md, labelled pill above, shortcut hint only where there is room for it.
     <button
       type="button"
       onClick={() => openAskAi()}
-      className="hidden h-8 items-center gap-2 rounded-md border border-border bg-surface-card px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-border-strong hover:bg-surface-active hover:text-foreground md:flex"
+      aria-label="Ask AI"
+      className="group flex size-8 shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground md:w-auto md:border md:border-border md:bg-surface-card md:px-3 md:hover:border-border-strong md:hover:bg-surface-active"
     >
-      <Sparkles className="size-3.5" />
-      <span>Ask AI</span>
-      <Kbd className="border border-border bg-surface-subtle px-1.5 text-[11px] text-muted-foreground">{modifierKey} I</Kbd>
+      <Sparkles className="size-4 md:size-3.5" />
+      <span className="hidden md:inline">Ask AI</span>
+      <Kbd className="hidden border border-border bg-surface-subtle px-1.5 text-[11px] text-muted-foreground transition-colors group-hover:bg-surface-hover group-hover:text-foreground xl:inline-flex">
+        {modifierKey} I
+      </Kbd>
     </button>
   );
 }

@@ -1,22 +1,17 @@
 import { createElement } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Bot, Box, ChevronRight, Eye, Rocket, icons } from "lucide-react";
 import PlaygroundFrame from "@/components/playground-frame";
+import { SANDBOX_APP_IDS } from "@/components/why-geiger/why_geiger_content";
+import { HelpHeader } from "@/components/help/help_header";
 import { HelpNavTree } from "@/components/help/help_nav_tree";
-import { HelpMobileNav } from "@/components/help/help_mobile_nav";
-import { HelpSearch } from "@/components/help/help_search";
-import { AskAiButton, ExplainMoreButton, HelpAskAi } from "@/components/help/help_ask_ai";
+import { ExplainMoreButton, HelpAskAi } from "@/components/help/help_ask_ai";
 import { CopyPageButton } from "@/components/help/help_copy_page";
-import { HELP_BASE_PATH } from "@/lib/docs/paths";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
-const siteLinks = [
-  { label: "Help Center", href: HELP_BASE_PATH },
-  { label: "Changelog", href: "/changelog" },
-  { label: "Blog", href: "/blog" },
-];
+// Fixed panels sit under the header, which itself sits under the global notice banner when one is shown.
+const belowHeader = "top-[calc(var(--geiger-banner-h,0px)_+_3.5rem)]";
+// The sticky TOC pins level with the article's top padding (header 3.5rem + py-9).
+const tocSticky = "top-[calc(var(--geiger-banner-h,0px)_+_5.75rem)] max-h-[calc(100vh_-_var(--geiger-banner-h,0px)_-_8rem)]";
 
 // Section HTML comes from the Studio editor (Tiptap), styled like the blog article body.
 const contentClassName =
@@ -28,91 +23,40 @@ function HelpIcon({ name, fallback, ...props }) {
   return createElement(icons[key] || fallback, props);
 }
 
-function HelpTopBar({ navigation, activeSlug }) {
+function RightSidebar({ page }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-border bg-background/95 text-foreground backdrop-blur">
-      <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex h-full min-w-0 items-center gap-3 lg:gap-6">
-          <HelpMobileNav navigation={navigation} activeSlug={activeSlug} />
-          <Link href={HELP_BASE_PATH} className="flex min-w-0 items-center gap-2">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-md">
-              <Image src={`${basePath}/logo1.svg`} alt="Geiger logo" width={20} height={20} className="geiger-logo size-5" />
-            </span>
-            <span className="hidden border-l border-border pl-3 text-sm font-semibold text-foreground sm:block">
-              Help Center
-            </span>
-          </Link>
-
-          <nav className="hidden h-full items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-            {siteLinks.map((item, index) => (
+    <aside className={`docs-scrollbar-hidden sticky ${tocSticky} hidden w-56 shrink-0 self-start overflow-y-auto xl:block`}>
+      {page.toc.length ? (
+        <>
+          {/* -mt-1 offsets the first link's py-1 so its text lines up with the article eyebrow. */}
+          <nav aria-label="On this page" className="-mt-1">
+            {page.toc.map((link) => (
               <Link
-                key={item.href}
-                href={item.href}
-                className={`flex h-full items-center border-b-2 transition-colors ${
-                  index === 0 ? "border-foreground text-foreground" : "border-transparent hover:text-foreground"
-                }`}
+                key={link.href}
+                href={link.href}
+                className="block py-1 text-sm leading-5 text-text-secondary transition-colors hover:text-foreground"
               >
-                {item.label}
+                {link.label}
               </Link>
             ))}
           </nav>
-        </div>
+          <div className="my-4 border-t border-border" />
+        </>
+      ) : null}
 
-        <div className="flex flex-1 items-center justify-end lg:justify-center">
-          <HelpSearch navigation={navigation} />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <AskAiButton />
-          <Link
-            href="/login"
-            className="hidden h-8 items-center rounded-md border border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground sm:flex"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="h-8 shrink-0 rounded-md bg-primary px-4 text-sm font-medium leading-8 text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Get started
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function RightSidebar({ page }) {
-  return (
-    <aside className="docs-scrollbar-hidden fixed bottom-0 right-0 top-14 hidden w-[280px] overflow-y-auto bg-background px-6 py-8 xl:block">
-      <div className="border-l border-border pl-5">
-        {page.toc.length ? (
-          <>
-            <p className="mb-4 text-xs font-medium uppercase text-text-secondary">On this page</p>
-            <div className="space-y-4 text-sm">
-              {page.toc.map((link) => (
-                <Link key={link.href} href={link.href} className="block text-text-secondary transition-colors hover:text-foreground">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-            <div className="my-5 h-px w-full bg-surface-hover" />
-          </>
-        ) : null}
-
-        <div className="space-y-4">
-          <CopyPageButton />
-          <ExplainMoreButton pageTitle={page.title} />
-        </div>
+      <div className="space-y-3">
+        <CopyPageButton />
+        <ExplainMoreButton pageTitle={page.title} />
       </div>
     </aside>
   );
 }
 
-function ProductPreview() {
+// A page's `preview` names the suite app whose live sandbox (/<app>/playground) fills the hero frame.
+function ProductPreview({ app }) {
   return (
     <div
-      className="relative mt-10 aspect-[704/411] overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-2 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:p-3"
+      className="relative mt-5 aspect-[3/2] overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:px-5 sm:py-8"
       style={{
         backgroundImage:
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
@@ -120,7 +64,7 @@ function ProductPreview() {
     >
       <div className="h-full w-full overflow-hidden rounded-lg border border-border bg-background shadow-2xl dark:border-[#313131]">
         <div className="h-[142.857%] w-[142.857%] origin-top-left scale-[0.7]">
-          <PlaygroundFrame src="/assets/playground" title="Geiger Assets playground" />
+          <PlaygroundFrame src={`/${app}/playground`} title={`Geiger ${app} playground`} />
         </div>
       </div>
     </div>
@@ -180,10 +124,10 @@ function SectionLinks({ links }) {
 
 function HelpSection({ section }) {
   return (
-    <section id={section.id} className="scroll-mt-20 pt-12">
-      {section.eyebrow ? <p className="mb-3 text-sm text-muted-foreground">{section.eyebrow}</p> : null}
-      {section.title ? <h2 className="text-2xl font-semibold text-foreground">{section.title}</h2> : null}
-      <div className="mt-4 space-y-6">
+    <section id={section.id} className="scroll-mt-20 pt-16">
+      {section.eyebrow ? <p className="mb-2 text-sm text-muted-foreground">{section.eyebrow}</p> : null}
+      {section.title ? <h2 className="text-[22px] font-medium tracking-tight text-foreground">{section.title}</h2> : null}
+      <div className="mt-6 space-y-6">
         {section.content ? (
           <div className={contentClassName} dangerouslySetInnerHTML={{ __html: section.content }} />
         ) : null}
@@ -204,41 +148,44 @@ function HelpSection({ section }) {
 export default function HelpCenter({ navigation, page }) {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
-      <HelpTopBar navigation={navigation} activeSlug={page.slug} />
+      <HelpHeader navigation={navigation} activeSlug={page.slug} />
 
-      <aside className="docs-scrollbar-hidden fixed bottom-0 left-0 top-14 hidden w-[280px] overflow-y-auto border-r border-border bg-background px-6 py-6 lg:block">
+      <aside className={`docs-scrollbar-hidden fixed bottom-0 left-0 ${belowHeader} hidden w-[280px] overflow-y-auto border-r border-border bg-surface-subtle px-5 py-6 lg:block`}>
         <HelpNavTree navigation={navigation} activeSlug={page.slug} />
       </aside>
 
-      <RightSidebar page={page} />
-
-      <main className="min-h-screen bg-background pt-14 text-foreground lg:pl-[280px] xl:pr-[280px]">
-        <div className="mx-auto w-full max-w-[704px] px-5 py-9 sm:px-0">
-          {page.status !== "published" ? (
-            <div className="mb-6 flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-              <Eye className="size-4 shrink-0" />
-              {page.status === "archived" ? "Archived" : "Draft"} preview. Only Help Center editors can see this page.
-            </div>
-          ) : null}
-
-          <article id="help-article">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">{page.groupTitle}</p>
-            <h1 className="text-[34px] font-semibold leading-tight text-foreground sm:text-[36px]">{page.title}</h1>
-            {page.description ? (
-              <p className="mt-9 max-w-[690px] text-[15px] font-medium leading-6 text-foreground">{page.description}</p>
+      <main className="min-h-screen bg-background pt-14 text-foreground lg:pl-[280px]">
+        {/* Article + TOC travel together; gap-14 + w-56 equals the left sidebar, so the article stays viewport-centred under the header search. */}
+        <div className="mx-auto flex w-full max-w-[984px] justify-center gap-14 px-5 py-9 sm:px-0">
+          <div className="w-full min-w-0 max-w-[704px]">
+            {page.status !== "published" ? (
+              <div className="mb-6 flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                <Eye className="size-4 shrink-0" />
+                {page.status === "archived" ? "Archived" : "Draft"} preview. Only Help Center editors can see this page.
+              </div>
             ) : null}
 
-            {page.preview === "assets" ? <ProductPreview /> : null}
+            <article id="help-article">
+              <p className="mb-2 text-sm text-muted-foreground">{page.groupTitle}</p>
+              <h1 className="text-[30px] font-medium leading-tight tracking-tight text-foreground sm:text-[34px]">{page.title}</h1>
+              {page.description ? (
+                <p className="mt-8 max-w-[690px] text-[15px] font-medium leading-6 text-foreground">{page.description}</p>
+              ) : null}
 
-            {page.sections.map((section, index) => (
-              <HelpSection key={section.id || index} section={section} />
-            ))}
-          </article>
+              {SANDBOX_APP_IDS.includes(page.preview) ? <ProductPreview app={page.preview} /> : null}
 
-          <div className="mt-12 flex gap-6 border-t border-border pt-6 xl:hidden">
-            <CopyPageButton />
-            <ExplainMoreButton pageTitle={page.title} />
+              {page.sections.map((section, index) => (
+                <HelpSection key={section.id || index} section={section} />
+              ))}
+            </article>
+
+            <div className="mt-12 flex gap-6 border-t border-border pt-6 xl:hidden">
+              <CopyPageButton />
+              <ExplainMoreButton pageTitle={page.title} />
+            </div>
           </div>
+
+          <RightSidebar page={page} />
         </div>
       </main>
 
