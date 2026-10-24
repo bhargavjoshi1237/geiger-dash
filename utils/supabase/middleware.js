@@ -41,9 +41,10 @@ function isProductLanding(pathname) {
   return GATED_SEGMENTS.has(segment)
 }
 
-// Each product's /<segment>/playground is the live demo the landing showcases iframe; it runs on in-memory data, so it's public.
+// Each product's /<segment>/playground (the whole live demo the landing showcases iframe) and /<segment>/playground/<component>
+// (one piece of it, which Help Center sections iframe) run on in-memory data, so they're public. Anything deeper stays gated.
 function isProductPlayground(pathname) {
-  const [, segment, page, ...rest] = pathname.split('/')
+  const [, segment, page, , ...rest] = pathname.split('/')
   return page === 'playground' && !rest.some(Boolean) && segment !== 'org' && GATED_SEGMENTS.has(segment)
 }
 
