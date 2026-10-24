@@ -27,10 +27,11 @@ import {
 import { CollapsibleSection, FormField, inputClassName, textareaClassName } from '@/components/content-studio/shared'
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
 import { ItemsEditor, ITEM_KINDS } from '@/components/help-studio/items-editor'
-import { NO_PARENT, PAGE_STATUS_BADGE, PAGE_STATUS_OPTIONS } from '@/components/help-studio/constants'
+import { NO_PARENT, NO_SHOWCASE, PAGE_STATUS_BADGE, PAGE_STATUS_OPTIONS } from '@/components/help-studio/constants'
 import { deleteHelpPageAction, saveHelpPageAction } from '@/app/studio/help/actions'
 import { HELP_HOME_SLUG, helpHref } from '@/lib/docs/paths'
 import { normalizeHelpSlug, slugify } from '@/lib/docs/text'
+import { HELP_SHOWCASES } from '@/lib/docs/showcases'
 
 function newSection(title = '') {
   return {
@@ -43,6 +44,7 @@ function newSection(title = '') {
     cards: [],
     features: [],
     links: [],
+    showcase: '',
   }
 }
 
@@ -158,6 +160,25 @@ function SectionEditor({ section, index, total, onPatch, onContent, onMove, onRe
         <div className="min-w-0" onPointerDownCapture={markTouched} onKeyDownCapture={markTouched} onPasteCapture={markTouched}>
           <TiptapBlogEditor name={`section-${section.id}`} defaultValue={section.initialContent} onChange={handleContent} />
         </div>
+
+        <FormField label="Showcase" hint="A live component from the app, shown under this section">
+          <Select
+            value={section.showcase || NO_SHOWCASE}
+            onValueChange={(value) => onPatch(section.id, { showcase: value === NO_SHOWCASE ? '' : value })}
+          >
+            <SelectTrigger className={`${inputClassName} w-full md:w-80`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_SHOWCASE}>None</SelectItem>
+              {HELP_SHOWCASES.map((showcase) => (
+                <SelectItem key={showcase.id} value={showcase.id}>
+                  {showcase.app} · {showcase.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
 
         <Accordion type="single" collapsible defaultValue={extrasCount ? 'extras' : undefined} className="rounded-md border border-border">
           <AccordionItem value="extras" className="border-0">

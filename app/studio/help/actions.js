@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { isContentEditor } from '@/lib/studio/access'
 import { HELP_HOME_SLUG } from '@/lib/docs/paths'
 import { normalizeHelpSlug, slugify } from '@/lib/docs/text'
+import { getHelpShowcase } from '@/lib/docs/showcases'
 
 const PAGE_STATUSES = ['draft', 'published', 'archived']
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -48,6 +49,7 @@ function cleanSections(sections) {
       cards: cleanItems(section?.cards, ['title', 'body', 'href']),
       features: cleanItems(section?.features, ['text']),
       links: cleanItems(section?.links, ['label', 'href']),
+      showcase: getHelpShowcase(section?.showcase)?.id || '',
     }
   })
 }

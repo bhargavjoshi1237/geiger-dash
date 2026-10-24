@@ -1,10 +1,13 @@
 import { createElement } from "react";
 import Link from "next/link";
-import { Bot, Box, ChevronRight, Eye, Rocket, icons } from "lucide-react";
+import { Bot, Box, ChevronRight, Eye, Radio, Rocket, icons } from "lucide-react";
 import PlaygroundFrame from "@/components/playground-frame";
+import { GridBackdrop } from "@/components/grid-backdrop";
 import { SANDBOX_APP_IDS } from "@/components/why-geiger/why_geiger_content";
+import { HELP_APP_VIEWPORT, getHelpShowcase } from "@/lib/docs/showcases";
 import { HelpHeader } from "@/components/help/help_header";
 import { HelpNavTree } from "@/components/help/help_nav_tree";
+import { HelpToc } from "@/components/help/help_toc";
 import { ExplainMoreButton, HelpAskAi } from "@/components/help/help_ask_ai";
 import { CopyPageButton } from "@/components/help/help_copy_page";
 
@@ -28,18 +31,7 @@ function RightSidebar({ page }) {
     <aside className={`docs-scrollbar-hidden sticky ${tocSticky} hidden w-56 shrink-0 self-start overflow-y-auto xl:block`}>
       {page.toc.length ? (
         <>
-          {/* -mt-1 offsets the first link's py-1 so its text lines up with the article eyebrow. */}
-          <nav aria-label="On this page" className="-mt-1">
-            {page.toc.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block py-1 text-sm leading-5 text-text-secondary transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <HelpToc links={page.toc} />
           <div className="my-4 border-t border-border" />
         </>
       ) : null}
@@ -52,22 +44,58 @@ function RightSidebar({ page }) {
   );
 }
 
-// A page's `preview` names the suite app whose live sandbox (/<app>/playground) fills the hero frame.
-function ProductPreview({ app }) {
+// Painted backdrop for a live app, marked with a live badge; the app sits in a window, or straight on the painting when `floating`.
+function PaintedStage({ floating = false, className = "", children }) {
   return (
     <div
-      className="relative mt-5 aspect-[3/2] overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 shadow-[0_24px_80px_rgba(0,0,0,0.35)] [&_*]:[-ms-overflow-style:none] [&_*]:[scrollbar-width:none] [&_*::-webkit-scrollbar]:hidden sm:px-5 sm:py-8"
+      className={`relative overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-5 sm:py-8 ${className}`}
       style={{
         backgroundImage:
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
       }}
     >
-      <div className="h-full w-full overflow-hidden rounded-lg border border-border bg-background shadow-2xl dark:border-[#313131]">
-        <div className="h-[142.857%] w-[142.857%] origin-top-left scale-[0.7]">
-          <PlaygroundFrame src={`/${app}/playground`} title={`Geiger ${app} playground`} />
+      <span
+        title="Live, try it out. Changes reset on reload."
+        className="absolute right-1.5 top-1.5 z-10 flex size-5 items-center justify-center rounded-full bg-black/50 text-emerald-400 backdrop-blur-sm"
+      >
+        <Radio className="size-3" aria-hidden />
+        <span className="sr-only">Live demo, changes reset on reload</span>
+      </span>
+      {floating ? (
+        children
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border bg-background shadow-2xl dark:border-[#313131]">
+          {children}
         </div>
-      </div>
+      )}
     </div>
+  );
+}
+
+// A page's `preview` names the suite app whose whole live sandbox (/<app>/playground) fills the hero; keep it to a home or overview page.
+function ProductPreview({ app }) {
+  return (
+    <PaintedStage className="mt-5">
+      <PlaygroundFrame src={`/${app}/playground`} title={`Geiger ${app} playground`} viewport={HELP_APP_VIEWPORT} />
+    </PaintedStage>
+  );
+}
+
+// One live component from an app, scoped to just that component; edits stay in the visitor's session.
+function SectionShowcase({ id }) {
+  const showcase = getHelpShowcase(id);
+  if (!showcase) return null;
+
+  return (
+    <PaintedStage floating={showcase.floating}>
+      <PlaygroundFrame
+        src={showcase.src}
+        title={`Geiger ${showcase.app}: ${showcase.label}`}
+        viewport={showcase.viewport}
+        loaderSize={48}
+        transparent={showcase.floating}
+      />
+    </PaintedStage>
   );
 }
 
@@ -140,6 +168,7 @@ function HelpSection({ section }) {
         ) : null}
         {section.features.length ? <FeatureGrid features={section.features} /> : null}
         {section.links.length ? <SectionLinks links={section.links} /> : null}
+        {section.showcase ? <SectionShowcase id={section.showcase} /> : null}
       </div>
     </section>
   );
@@ -148,13 +177,16 @@ function HelpSection({ section }) {
 export default function HelpCenter({ navigation, page }) {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
+      {/* Softened grid lines so they don't cut through the TOC links. */}
+      <GridBackdrop className="blur-[1px]" />
       <HelpHeader navigation={navigation} activeSlug={page.slug} />
 
-      <aside className={`docs-scrollbar-hidden fixed bottom-0 left-0 ${belowHeader} hidden w-[280px] overflow-y-auto border-r border-border bg-surface-subtle px-5 py-6 lg:block`}>
+      {/* z-20 keeps the nav above <main>, which spans the full width under it at z-10. */}
+      <aside className={`docs-scrollbar-hidden fixed bottom-0 left-0 z-20 ${belowHeader} hidden w-[280px] overflow-y-auto border-r border-border bg-surface-subtle px-5 py-6 lg:block`}>
         <HelpNavTree navigation={navigation} activeSlug={page.slug} />
       </aside>
 
-      <main className="min-h-screen bg-background pt-14 text-foreground lg:pl-[280px]">
+      <main className="relative z-10 min-h-screen pt-14 text-foreground lg:pl-[280px]">
         {/* Article + TOC travel together; gap-14 + w-56 equals the left sidebar, so the article stays viewport-centred under the header search. */}
         <div className="mx-auto flex w-full max-w-[984px] justify-center gap-14 px-5 py-9 sm:px-0">
           <div className="w-full min-w-0 max-w-[704px]">
