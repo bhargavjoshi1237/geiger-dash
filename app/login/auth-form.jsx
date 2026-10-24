@@ -9,6 +9,7 @@ import { createClient } from "@/utils/supabase/client";
 import { resolveLoginRedirectPath } from "@/lib/product-routes.mjs";
 import { getPasskeyPromptUser, signInWithPasskey } from "@/lib/auth/passkeys";
 import { PasskeySetupDialog } from "@/components/auth/passkey-setup-dialog";
+import { trackLoginCompleted, trackLoginStarted } from "@/lib/analytics/funnel";
 import { AppShowcase } from "./app-showcase";
 
 // Mock Google Icon since it's not in Lucide
@@ -99,6 +100,7 @@ export function AuthForm({ next, initialError = "" }) {
       return;
     }
 
+    trackLoginCompleted("password");
     const destination = data?.user ? resolveLoginRedirectPath(next) : "/";
     const promptUser = await getPasskeyPromptUser();
     if (promptUser) {
@@ -113,6 +115,7 @@ export function AuthForm({ next, initialError = "" }) {
     setError("");
     const result = await signInWithPasskey();
     if (result.ok) {
+      trackLoginCompleted("passkey");
       window.location.assign(resolveLoginRedirectPath(next));
       return;
     }
@@ -126,6 +129,7 @@ export function AuthForm({ next, initialError = "" }) {
   async function handleOAuth(provider) {
     setOauthLoading(provider);
     setError("");
+    trackLoginStarted(provider);
     const path = resolveLoginRedirectPath(next);
     // Only forward a real destination — a bare /auth/callback defaults to
     // /onboarding, which bounces existing members on to their org.
@@ -149,6 +153,7 @@ export function AuthForm({ next, initialError = "" }) {
     const value = email.trim();
     if (!value) return;
     setSsoLoading(true);
+    trackLoginStarted("sso");
     const path = next ? (next.startsWith("/") ? next : `/${next}`) : "";
     const params = new URLSearchParams({ email: value });
     if (path) params.set("next", path);

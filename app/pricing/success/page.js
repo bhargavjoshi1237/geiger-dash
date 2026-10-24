@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import { Button } from "@geiger/ui";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
 import { completeCheckout } from "@/lib/billing/store";
+import { CheckoutCompletedTracker } from "@/components/pricing/checkout_completed_tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,13 @@ export default async function CheckoutSuccessPage({ searchParams }) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <Header />
+      {paid ? (
+        <CheckoutCompletedTracker
+          sessionId={session.id}
+          planId={session.metadata?.planId || null}
+          amountUsd={(session.amount_total || 0) / 100}
+        />
+      ) : null}
       <main className="relative flex flex-1 items-center justify-center px-4 py-28 sm:py-36">
         <div className="w-full max-w-md rounded-2xl border border-border bg-surface-card p-8 text-center">
           <span

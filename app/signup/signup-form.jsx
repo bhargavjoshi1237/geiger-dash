@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, MailCheck } from "lucide-react";
 import { signUp } from "./actions";
 import { SsoSignIn } from "@/components/auth/sso-signin";
+import { trackSignupCompleted } from "@/lib/analytics/funnel";
 
 export function SignupForm() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export function SignupForm() {
       setError(result.error);
       return;
     }
+
+    trackSignupCompleted({ needsConfirmation: Boolean(result?.needsConfirmation) });
 
     if (result?.needsConfirmation) {
       setIsLoading(false);

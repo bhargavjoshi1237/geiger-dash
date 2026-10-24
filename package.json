@@ -28,6 +28,7 @@
     "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
     "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#3dedbc34c7bdb057c4d76aae638a584c39090fb9",
+    "@next/third-parties": "^16.3.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-accordion": "^1.2.2",

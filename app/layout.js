@@ -8,6 +8,7 @@ import { PlanBanner } from "@/components/billing/plan_banner";
 import { BannerProvider, GlobalBanner } from "@geiger/ui/global-banner";
 import { Toaster } from "@geiger/ui";
 import { getActiveNotice } from "@/lib/notices/queries";
+import { PublicGoogleAnalytics } from "@/components/analytics/public-google-analytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }) {
           <PlanBanner />
           <Toaster />
         </ThemeProvider>
+        <PublicGoogleAnalytics />
       </body>
     </html>
   );

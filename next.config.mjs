@@ -1,4 +1,5 @@
 import { productRouteRewrites } from "./lib/product-routes.mjs";
+import { posthogRelayRewrites } from "./lib/analytics/posthog-relay.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -19,8 +20,13 @@ const nextConfig = {
       },
     ],
   },
+  // PostHog's endpoints end in "/" (/e/, /flags/); proxy.js restores the /path/ → /path redirect for everything else.
+  skipTrailingSlashRedirect: true,
   async rewrites() {
-    return productRouteRewrites;
+    return [
+      ...posthogRelayRewrites(process.env.NEXT_PUBLIC_GEIGER_POSTHOG_HOST),
+      ...productRouteRewrites,
+    ];
   },
 };
 

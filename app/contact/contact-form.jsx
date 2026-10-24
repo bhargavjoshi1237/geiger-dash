@@ -14,6 +14,7 @@ import {
   Textarea,
 } from "@geiger/ui";
 import { submitContactForm } from "./actions";
+import { trackContactSubmitted } from "@/lib/analytics/funnel";
 
 const TEAM_SIZES = [
   "Just me",
@@ -54,6 +55,7 @@ export default function ContactForm() {
       if (result?.error) {
         setError(result.error);
       } else {
+        trackContactSubmitted();
         setSuccess(true);
       }
     } catch {

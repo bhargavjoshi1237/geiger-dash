@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { KeyRound, Loader2 } from "lucide-react";
+import { trackLoginStarted } from "@/lib/analytics/funnel";
 
 const BTN =
   "inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md border border-border bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50";
@@ -19,6 +20,7 @@ export function SsoSignIn({ next = "" }) {
     const value = email.trim();
     if (!value) return;
     setLoading(true);
+    trackLoginStarted("sso");
     // Normalize to a leading-slash path so /auth/callback's `${origin}${next}`
     // concatenation stays well-formed; blank lets the start route default it.
     const path = next ? (next.startsWith("/") ? next : `/${next}`) : "";

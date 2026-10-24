@@ -25,7 +25,7 @@ export default function PrivacyPage() {
       eyebrow="Legal"
       title="Privacy Policy"
       summary="This policy explains what personal data Geiger Studios processes, why we process it, who helps us provide the services, and the choices available to you."
-      updated="June 13, 2026"
+      updated="October 25, 2026"
     >
       <h2>1. Who we are</h2>
       <p>
@@ -99,11 +99,20 @@ export default function PrivacyPage() {
 
       <h2>6. Analytics and cookies</h2>
       <p>
-        We use PostHog for limited product and traffic measurement. Our current
-        configuration is cookieless, does not persist a PostHog identifier in
-        cookies or browser storage, disables autocapture and session recording,
-        and does not intentionally send image contents, filenames, form values,
-        or account identity with tool events. Authentication and security
+        We use PostHog for limited product and traffic measurement across the
+        site and the signed-in app. Our PostHog configuration is cookieless,
+        does not persist a PostHog identifier in cookies or browser storage,
+        disables autocapture and session recording, and does not intentionally
+        send image contents, filenames, form values, or account identity with
+        its events. PostHog requests are relayed through our own domain.
+      </p>
+      <p>
+        On our public marketing pages (not the signed-in app) we also use Google
+        Analytics 4 to understand traffic sources and page performance. Google
+        Analytics sets first-party cookies (such as _ga) to distinguish visits
+        and processes your IP address and device information to derive
+        approximate location. You can opt out with Google&apos;s browser add-on
+        or by blocking cookies in your browser. Authentication and security
         features may still use strictly necessary cookies.
       </p>
 
@@ -111,7 +120,8 @@ export default function PrivacyPage() {
       <p>
         We use service providers to host and operate Geiger. These currently
         include Vercel for hosting and delivery, Supabase for authentication and
-        data services, PostHog for privacy-reduced analytics, Vercel Blob or
+        data services, PostHog for privacy-reduced analytics, Google for
+        website analytics on public pages, Vercel Blob or
         connected storage providers for files, and communication or payment
         providers when those features are used. They process data under their
         own terms and our instructions where applicable.

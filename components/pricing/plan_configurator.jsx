@@ -36,6 +36,7 @@ import { PRODUCT_ICONS, FallbackProductIcon } from "@/lib/pricing/product-icons"
 import { AVAILABLE_PRODUCT_APPS } from "@/lib/org/product-apps";
 import { createCheckoutAction } from "@/app/pricing/actions";
 import { startTrialAction } from "@/app/pricing/trial-actions";
+import { trackCheckoutStarted, trackTrialStarted } from "@/lib/analytics/funnel";
 
 const BILLING_TABS = [
   { label: "Monthly", value: "month" },
@@ -346,6 +347,7 @@ export function PlanConfigurator({
         organizationId: selectedOrgId,
       });
       if (result?.url) {
+        trackCheckoutStarted({ planId: plan.id, isYearly, productCount: selectedProducts.length });
         window.location.href = result.url;
         return;
       }
@@ -394,6 +396,7 @@ export function PlanConfigurator({
     try {
       const result = await startTrialAction({ organizationId: trialOrgId });
       if (result?.ok) {
+        trackTrialStarted();
         toast.success("Your 15-day Basic trial has started.");
         router.push("/billing");
         return;
