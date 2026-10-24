@@ -25,7 +25,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#400b90fabefe15df2ef80bf7857d5b2228272277",
+    "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
     "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#0b6db0c6317c6af0be1b4b560eb6bde3d7dcdbae",
     "@prisma/adapter-pg": "^7.8.0",
