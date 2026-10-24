@@ -240,7 +240,7 @@ export function CommitChangelogDialog({ open, onOpenChange, product, onApply }) 
       return
     }
     if (!isConfigured) {
-      toast.error('Connect an AI model first (AI Settings)')
+      toast.error('Connect an AI model first (AI model, bottom of the sidebar)')
       return
     }
     setIsGenerating(true)

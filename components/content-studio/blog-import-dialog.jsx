@@ -97,7 +97,7 @@ export function BlogImportDialog({ open, onOpenChange, categories = [], onPublis
       return
     }
     if (!isConfigured) {
-      toast.error('Connect an AI model first (AI model button).')
+      toast.error('Connect an AI model first (AI model, bottom of the sidebar).')
       return
     }
 
@@ -230,7 +230,7 @@ export function BlogImportDialog({ open, onOpenChange, categories = [], onPublis
 
           {!isConfigured ? (
             <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-              No AI model connected. Use the AI model button in the top bar to add one.
+              No AI model connected. Open AI model at the bottom of the sidebar to add one.
             </p>
           ) : null}
 

@@ -1,120 +1,227 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
-import { ArrowUpRight, Calendar, FileText, LayoutGrid, Save, Sparkles, Wand2 } from 'lucide-react'
-import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { ArrowRight, Link2, Plus, WandSparkles } from 'lucide-react'
 import {
-  Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  Field,
+  InlineTitleInput,
   Input,
-  Label,
+  Logo,
+  Progress,
+  SearchInput,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
+  StatusPill,
   Textarea,
-} from "@geiger/ui";
+  cn,
+} from '@geiger/ui'
 import {
-  CollapsibleSection,
-  CoverImageUpload,
-  FormField,
-  MediaLibrary,
-  RecordList,
-  inputClassName,
-  textareaClassName,
-  toDateTimeLocal,
-} from '@/components/content-studio/shared'
+  CountedLabel,
+  DangerMenuItem,
+  DocumentCanvas,
+  DocumentEyebrow,
+  DocumentTitle,
+  EditorTopBar,
+  InspectorPane,
+  InspectorPanel,
+  InspectorSection,
+  ListEmpty,
+  ListGroupLabel,
+  ListItem,
+  ListPane,
+  MoreMenu,
+  Req,
+  SaveState,
+  SlugLine,
+  StudioFrame,
+  SwitchRow,
+  TopBarDivider,
+  ViewLiveLink,
+  handleEditorKeys,
+  useUnsavedGuard,
+} from '@/components/content-studio/editor-kit'
+import { CoverImageField, MediaLibrary, toDateTimeLocal } from '@/components/content-studio/shared'
+import { SITE_HOST, STUDIO_STATUS_MAP, countWords, publishStatus } from '@/components/content-studio/constants'
+import { useStudioRecord } from '@/components/content-studio/use-studio-record'
+import { SubmitButton } from '@/components/content-studio/submit-button'
 import { TiptapBlogEditor } from '@/components/content-studio/tiptap-blog-editor'
-import { StudioTabs } from '@/components/content-studio/studio-shell'
-import { LlmSettingsDialog } from '@/components/content-studio/llm-settings-dialog'
-import { useLlmConfig } from '@/components/content-studio/llm-config'
 import { PageGenerateDialog } from '@/components/pages-studio/page-generate-dialog'
 import { saveSeoPageAction, deleteSeoPageAction } from '@/app/studio/pages/actions'
-import { PAGE_PRODUCTS } from '@/lib/pages-studio/products'
-import { PAGE_TYPE_OPTIONS, PAGE_TYPE_LABEL, PAGE_TYPE_PATH, buildSeoPagePath } from '@/lib/pages-studio/skills'
+import { PAGE_PRODUCTS, resolveProductApp } from '@/lib/pages-studio/products'
+import { PAGE_TYPE_HUB, PAGE_TYPE_LABEL, PAGE_TYPE_OPTIONS, PAGE_TYPE_PATH, buildSeoPagePath } from '@/lib/pages-studio/skills'
+import { slugify } from '@/lib/docs/text'
 
+const INSPECTOR_TABS = [
+  { label: 'Settings', value: 'settings' },
+  { label: 'SEO', value: 'seo' },
+  { label: 'Media', value: 'media' },
+]
 const MEDIA_TYPES = [{ value: 'pages', label: 'Pages' }]
+const META_TITLE_LIMIT = 60
+const META_DESCRIPTION_LIMIT = 160
 
-const getPageDraft = (record) => {
-  if (!record) {
-    return {
-      id: '',
-      page_type: 'solution',
-      product: PAGE_PRODUCTS[0]?.value || '',
-      title: '',
-      slug: '',
-      excerpt: '',
-      content: '',
-      hero_heading: '',
-      hero_subheading: '',
-      hero_cta_text: '',
-      meta_title: '',
-      meta_description: '',
-      keywords: '',
-      cover_image: '',
-      image_bucket: 'pfp',
-      image_path: '',
-      image_url: '',
-      is_published: false,
-      is_featured: false,
-      published_at: '',
-    }
-  }
-
+function toDraft(record) {
   return {
-    id: record.id || '',
-    page_type: record.page_type || 'solution',
-    product: record.product || '',
-    title: record.title || '',
-    slug: record.slug || '',
-    excerpt: record.excerpt || '',
-    content: record.content || '',
-    hero_heading: record.hero_heading || '',
-    hero_subheading: record.hero_subheading || '',
-    hero_cta_text: record.hero_cta_text || '',
-    meta_title: record.meta_title || '',
-    meta_description: record.meta_description || '',
-    keywords: Array.isArray(record.keywords) ? record.keywords.join(', ') : '',
-    cover_image: record.cover_image || '',
-    image_bucket: 'pfp',
-    image_path: '',
-    image_url: '',
-    is_published: Boolean(record.is_published),
-    is_featured: Boolean(record.is_featured),
-    published_at: toDateTimeLocal(record.published_at),
+    pageType: record?.page_type || 'solution',
+    product: record?.product || PAGE_PRODUCTS[0]?.value || '',
+    title: record?.title || '',
+    slug: record?.slug || '',
+    excerpt: record?.excerpt || '',
+    content: record?.content || '',
+    heroHeading: record?.hero_heading || '',
+    heroSubheading: record?.hero_subheading || '',
+    heroCtaText: record?.hero_cta_text || '',
+    metaTitle: record?.meta_title || '',
+    metaDescription: record?.meta_description || '',
+    keywords: Array.isArray(record?.keywords) ? record.keywords.join(', ') : '',
+    coverImage: record?.cover_image || '',
+    isPublished: Boolean(record?.is_published),
+    isFeatured: Boolean(record?.is_featured),
+    publishedAt: toDateTimeLocal(record?.published_at),
   }
 }
 
-const SeoPageForm = ({ pageDraft, onReset, formKey }) => {
-  const [pageType, setPageType] = useState(pageDraft.page_type || 'solution')
-  const [product, setProduct] = useState(pageDraft.product || PAGE_PRODUCTS[0]?.value || '')
-  const [isPublished, setIsPublished] = useState(pageDraft.is_published)
-  const [isFeatured, setIsFeatured] = useState(pageDraft.is_featured)
+// Length meter under a meta field: emerald within the limit, amber over it.
+function LengthMeter({ count, limit }) {
+  return (
+    <Progress
+      value={Math.min(100, Math.round((count / limit) * 100))}
+      className={cn(
+        'h-1 bg-surface-hover',
+        count > limit ? '[&>[data-slot=progress-indicator]]:bg-amber-500' : '[&>[data-slot=progress-indicator]]:bg-emerald-500',
+      )}
+    />
+  )
+}
 
-  const publicPath = buildSeoPagePath(pageType, product, pageDraft.slug || '…')
+function PageEditor({ page, onDirtyChange, onDelete, onOpenList }) {
+  const [initial] = useState(() => toDraft(page))
+  const [fields, setFields] = useState(initial)
+  const [coverPreview, setCoverPreview] = useState(initial.coverImage)
+  const [tab, setTab] = useState('settings')
+  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const [dirty, setDirty] = useState(false)
+  const [openedAt] = useState(Date.now)
+
+  const markDirty = useCallback(() => setDirty(true), [])
+  const set = (key) => (value) => {
+    setFields((current) => ({ ...current, [key]: value }))
+    setDirty(true)
+  }
+  const bind = (key) => ({ value: fields[key], onChange: (event) => set(key)(event.target.value) })
+  // The editor mirrors its HTML on load too, so this must stay stable and not mark the page dirty.
+  const setContent = useCallback((html) => setFields((current) => (current.content === html ? current : { ...current, content: html })), [])
+
+  useEffect(() => {
+    onDirtyChange(dirty)
+  }, [dirty, onDirtyChange])
+  useUnsavedGuard(dirty)
+
+  const isNew = !page
+  const status = publishStatus(page)
+  const typeHub = PAGE_TYPE_HUB[fields.pageType] || PAGE_TYPE_HUB.solution
+  const productApp = resolveProductApp(fields.product)
+  const slugValue = fields.slug || slugify(fields.title)
+  const publicPath = buildSeoPagePath(fields.pageType, fields.product, slugValue || '…')
+  const future = fields.publishedAt && new Date(fields.publishedAt).getTime() > openedAt
+  const snippetTitle = fields.metaTitle || fields.title || 'Page title'
+  const snippetDescription = fields.metaDescription || fields.excerpt || 'Add a meta description to control the search snippet.'
+
+  const validate = (event) => {
+    const problem = !fields.title.trim() ? 'Give the page a title.' : !countWords(fields.content) ? 'Write some content first.' : ''
+    if (!problem) return
+    event.preventDefault()
+    toast.error(problem)
+  }
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(`https://${SITE_HOST}${buildSeoPagePath(page.page_type, page.product, page.slug)}`)
+    toast.success('Link copied')
+  }
 
   return (
-    <form key={formKey} action={saveSeoPageAction} className="min-w-0 max-w-full space-y-6 overflow-x-clip">
-      <input type="hidden" name="id" defaultValue={pageDraft.id} />
-      <input type="hidden" name="page_type" value={pageType} readOnly />
-      <input type="hidden" name="product" value={product} readOnly />
-      <input type="hidden" name="is_published" value={isPublished ? 'on' : ''} readOnly />
-      <input type="hidden" name="is_featured" value={isFeatured ? 'on' : ''} readOnly />
+    <form
+      action={saveSeoPageAction}
+      onSubmit={validate}
+      onInput={markDirty}
+      onKeyDown={handleEditorKeys}
+      noValidate
+      className="flex min-h-0 min-w-0 flex-1"
+    >
+      <input type="hidden" name="id" value={page?.id || ''} />
+      <input type="hidden" name="page_type" value={fields.pageType} />
+      <input type="hidden" name="product" value={fields.product} />
+      <input type="hidden" name="is_published" value={fields.isPublished ? 'on' : ''} />
+      <input type="hidden" name="is_featured" value={fields.isFeatured ? 'on' : ''} />
 
-      <CollapsibleSection value="page-details" icon={FileText} title="Page Details">
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Page Type" required>
-              <Select value={pageType} onValueChange={setPageType}>
-                <SelectTrigger className={`${inputClassName} w-full`}>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <EditorTopBar
+          crumbs={['Pages', typeHub.label]}
+          current={fields.title || 'Untitled page'}
+          meta={
+            <>
+              {!isNew ? <StatusPill status={status} map={STUDIO_STATUS_MAP} /> : null}
+              <SaveState dirty={dirty} isNew={isNew} savedAt={page?.updated_at} />
+            </>
+          }
+          onOpenList={onOpenList}
+          onOpenInspector={() => setInspectorOpen(true)}
+          actions={
+            <>
+              <ViewLiveLink href={page?.is_published ? buildSeoPagePath(page.page_type, page.product, page.slug) : `/${PAGE_TYPE_PATH[fields.pageType] || 'solutions'}`} />
+              <MoreMenu>
+                <DropdownMenuItem onSelect={() => { setTab('seo'); setInspectorOpen(true) }} className="cursor-pointer">
+                  Edit SEO
+                </DropdownMenuItem>
+                {!isNew ? (
+                  <>
+                    <DropdownMenuItem onSelect={copyLink} className="cursor-pointer gap-2">
+                      <Link2 className="size-3.5" />
+                      Copy link
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DangerMenuItem onSelect={() => onDelete(page)}>Delete page</DangerMenuItem>
+                  </>
+                ) : null}
+              </MoreMenu>
+              <TopBarDivider />
+              {fields.isPublished ? (
+                <SubmitButton intent="publish">{future ? 'Schedule' : page?.is_published ? 'Update' : 'Publish'}</SubmitButton>
+              ) : (
+                <>
+                  <SubmitButton intent="draft" variant="outline">
+                    Save draft
+                  </SubmitButton>
+                  <SubmitButton intent="publish">{future ? 'Schedule' : 'Publish'}</SubmitButton>
+                </>
+              )}
+            </>
+          }
+        />
+
+        <DocumentCanvas>
+          <DocumentEyebrow>{PAGE_TYPE_LABEL[fields.pageType] || 'SEO'} page</DocumentEyebrow>
+          <DocumentTitle name="title" value={fields.title} onChange={set('title')} placeholder="Untitled page" aria-label="Title" />
+          <SlugLine
+            prefix={`${SITE_HOST}${buildSeoPagePath(fields.pageType, fields.product, '')}`}
+            slug={fields.slug}
+            onChange={set('slug')}
+            name="slug"
+            placeholder={slugify(fields.title) || 'auto-from-title'}
+          />
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Field label={<>Page type<Req /></>} className="gap-1.5">
+              <Select value={fields.pageType} onValueChange={set('pageType')}>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -125,10 +232,10 @@ const SeoPageForm = ({ pageDraft, onReset, formKey }) => {
                   ))}
                 </SelectContent>
               </Select>
-            </FormField>
-            <FormField label="Product" hint="Linked as the page's call-to-action">
-              <Select value={product} onValueChange={setProduct}>
-                <SelectTrigger className={`${inputClassName} w-full`}>
+            </Field>
+            <Field label="Product" hint="Used as the hero call-to-action" className="gap-1.5">
+              <Select value={fields.product} onValueChange={set('product')}>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select product" />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,362 +246,243 @@ const SeoPageForm = ({ pageDraft, onReset, formKey }) => {
                   ))}
                 </SelectContent>
               </Select>
-            </FormField>
+            </Field>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Title" required>
-              <Input
-                name="title"
-                defaultValue={pageDraft.title}
-                placeholder="Page title (H1)"
-                className={inputClassName}
-                required
-              />
-            </FormField>
-            <FormField label="Slug" hint={`URL: ${publicPath}`}>
-              <Input
-                name="slug"
-                defaultValue={pageDraft.slug}
-                placeholder="page-url-slug"
-                className={inputClassName}
-              />
-            </FormField>
-          </div>
+          <Field label="Excerpt / summary" hint="Fallback description used in listings and social cards" className="mt-3 gap-1.5">
+            <Textarea name="excerpt" rows={2} {...bind('excerpt')} placeholder="One or two sentences summarising the page" className="min-h-0" />
+          </Field>
 
-          <FormField label="Excerpt / summary" hint="Fallback description used in listings and social cards">
-            <Textarea
-              name="excerpt"
-              rows={2}
-              defaultValue={pageDraft.excerpt}
-              placeholder="One or two sentences summarising the page"
-              className={textareaClassName}
-            />
-          </FormField>
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection value="hero" icon={Sparkles} title="Hero">
-        <div className="space-y-4">
-          <FormField label="Hero heading">
-            <Input
+          <div className="relative mt-6 flex flex-col items-center gap-3.5 rounded-xl border border-border bg-surface-subtle bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] px-6 pb-10 pt-11 text-center sm:px-10">
+            <span className="absolute left-3 top-3 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Hero</span>
+            <span className="absolute right-3 top-3 hidden text-[11px] text-text-secondary sm:inline">Click any line to edit</span>
+            <DocumentTitle
               name="hero_heading"
-              defaultValue={pageDraft.hero_heading}
-              placeholder="Punchy headline shown above the content"
-              className={inputClassName}
+              value={fields.heroHeading}
+              onChange={set('heroHeading')}
+              placeholder="Punchy headline above the content"
+              aria-label="Hero heading"
+              className="mt-0 max-w-[560px] border-b border-dashed border-border-strong pb-0.5 text-center [text-wrap:balance]"
             />
-          </FormField>
-          <FormField label="Hero subheading">
-            <Textarea
+            <DocumentTitle
               name="hero_subheading"
-              rows={2}
-              defaultValue={pageDraft.hero_subheading}
+              value={fields.heroSubheading}
+              onChange={set('heroSubheading')}
               placeholder="Supporting sentence under the headline"
-              className={textareaClassName}
+              aria-label="Hero subheading"
+              className="mt-0 max-w-[500px] text-center text-[15px] font-normal leading-relaxed tracking-normal text-muted-foreground"
             />
-          </FormField>
-          <FormField label="CTA button text" hint="Links to the selected product">
-            <Input
-              name="hero_cta_text"
-              defaultValue={pageDraft.hero_cta_text}
-              placeholder="Start with Geiger Flow"
-              className={inputClassName}
-            />
-          </FormField>
-        </div>
-      </CollapsibleSection>
-
-      <Card className="min-w-0 max-w-full overflow-hidden rounded-lg border-border bg-card/45 shadow-none">
-        <CardHeader className="p-4">
-          <CardTitle className="text-base">Content</CardTitle>
-        </CardHeader>
-        <CardContent className="min-w-0 max-w-full overflow-hidden p-4 pt-0">
-          <TiptapBlogEditor name="content" defaultValue={pageDraft.content} />
-        </CardContent>
-      </Card>
-
-      <CollapsibleSection value="seo" icon={FileText} title="SEO">
-        <div className="space-y-4">
-          <FormField label="Meta title" hint="Browser tab + search result title (~60 chars)">
-            <Input
-              name="meta_title"
-              defaultValue={pageDraft.meta_title}
-              placeholder="Defaults to the page title if blank"
-              className={inputClassName}
-            />
-          </FormField>
-          <FormField label="Meta description" hint="Search result snippet (150-160 chars)">
-            <Textarea
-              name="meta_description"
-              rows={2}
-              defaultValue={pageDraft.meta_description}
-              placeholder="Defaults to the excerpt if blank"
-              className={textareaClassName}
-            />
-          </FormField>
-          <FormField label="Keywords" hint="Comma separated">
-            <Input
-              name="keywords"
-              defaultValue={pageDraft.keywords}
-              placeholder="crm for agencies, client workflow"
-              className={inputClassName}
-            />
-          </FormField>
-        </div>
-      </CollapsibleSection>
-
-      <CoverImageUpload draft={pageDraft} existingUrl={pageDraft.cover_image} />
-
-      <Card className="rounded-lg border-border bg-card/45 shadow-none">
-        <CardHeader className="p-4">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Publishing
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 p-4 pt-0">
-          <FormField label="Publish Date & Time">
-            <Input
-              type="datetime-local"
-              name="published_at"
-              defaultValue={pageDraft.published_at}
-              className={inputClassName}
-            />
-          </FormField>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="page-published"
-                checked={isPublished}
-                onCheckedChange={setIsPublished}
-                className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
+            <div className="mt-1.5 inline-flex h-9 max-w-full items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">
+              <InlineTitleInput
+                name="hero_cta_text"
+                value={fields.heroCtaText}
+                onChange={(event) => set('heroCtaText')(event.target.value)}
+                placeholder={productApp ? `Start with Geiger ${productApp.name}` : 'Call to action'}
+                aria-label="Call-to-action text"
+                className="min-w-[4ch] text-center placeholder:text-primary-foreground/60"
               />
-              <Label htmlFor="page-published" className="cursor-pointer">Published</Label>
+              <ArrowRight className="size-4 shrink-0" />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="page-featured"
-                checked={isFeatured}
-                onCheckedChange={setIsFeatured}
-                className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-muted"
-              />
-              <Label htmlFor="page-featured" className="cursor-pointer">Featured</Label>
-            </div>
+            <span className="text-[11px] text-text-secondary">CTA links to {productApp ? `Geiger ${productApp.name}` : 'the selected product'}</span>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="sticky bottom-3 z-20 flex items-center justify-between gap-4 rounded-lg border border-border bg-background/95 p-3 shadow-xl backdrop-blur">
-        <p className="text-sm text-muted-foreground">
-          {pageDraft.id ? 'Editing existing page' : 'Creating new page'}
-        </p>
-        <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={onReset}>
-            Reset
-          </Button>
-          <Button type="submit" className="gap-2">
-            <Save className="h-4 w-4" />
-            {pageDraft.id ? 'Update Page' : 'Create Page'}
-          </Button>
-        </div>
+          <TiptapBlogEditor name="content" defaultValue={initial.content} onChange={setContent} onEdit={markDirty} className="mt-5" />
+        </DocumentCanvas>
       </div>
+
+      <InspectorPane tabs={INSPECTOR_TABS} value={tab} onChange={setTab} open={inspectorOpen} onClose={() => setInspectorOpen(false)}>
+        <InspectorPanel active={tab === 'settings'}>
+          <InspectorSection title="Publishing">
+            <SwitchRow title="Published" description={`Visible under /${typeHub.path} once saved`} checked={fields.isPublished} onCheckedChange={set('isPublished')} />
+            <SwitchRow title="Featured" description="Highlighted on the hub page" checked={fields.isFeatured} onCheckedChange={set('isFeatured')} />
+            <Field label="Publish date & time" hint={future ? 'Goes live at this time' : 'Defaults to now when published'} className="gap-1.5">
+              <Input type="datetime-local" name="published_at" {...bind('publishedAt')} />
+            </Field>
+          </InspectorSection>
+          <InspectorSection title="Cover image" aside="16:9 · social image">
+            <CoverImageField existingUrl={initial.coverImage} onBrowse={() => setTab('media')} onPreviewChange={setCoverPreview} onEdit={markDirty} />
+          </InspectorSection>
+        </InspectorPanel>
+
+        <InspectorPanel active={tab === 'seo'}>
+          <InspectorSection title="Search preview">
+            <div className="flex flex-col gap-1.5 rounded-[10px] border border-border bg-background p-3.5">
+              <div className="flex items-center gap-2">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-surface-hover text-foreground">
+                  <Logo size={11} />
+                </span>
+                <div className="flex min-w-0 flex-col leading-tight">
+                  <span className="text-xs text-foreground">Geiger</span>
+                  <span className="truncate text-[11px] text-muted-foreground">{[SITE_HOST, ...publicPath.split('/').filter(Boolean)].join(' › ')}</span>
+                </div>
+              </div>
+              <span className="line-clamp-2 text-[15px] leading-snug text-sky-700 dark:text-sky-400">{snippetTitle}</span>
+              <span className="line-clamp-3 text-xs leading-normal text-muted-foreground">{snippetDescription}</span>
+            </div>
+          </InspectorSection>
+          <InspectorSection>
+            <div className="flex flex-col gap-1.5">
+              <CountedLabel label="Meta title" count={fields.metaTitle.length} limit={META_TITLE_LIMIT} />
+              <Input name="meta_title" {...bind('metaTitle')} placeholder={fields.title || 'Defaults to the page title'} />
+              <LengthMeter count={fields.metaTitle.length} limit={META_TITLE_LIMIT} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <CountedLabel label="Meta description" count={fields.metaDescription.length} limit={META_DESCRIPTION_LIMIT} />
+              <Textarea name="meta_description" rows={4} {...bind('metaDescription')} placeholder="Search result snippet, 150–160 characters" className="min-h-0" />
+              <LengthMeter count={fields.metaDescription.length} limit={META_DESCRIPTION_LIMIT} />
+              <span className="text-xs text-muted-foreground">Defaults to the excerpt if left blank</span>
+            </div>
+            <Field label="Keywords" hint="Comma separated" className="gap-1.5">
+              <Input name="keywords" defaultValue={initial.keywords} placeholder="client onboarding, agency crm" />
+            </Field>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between text-xs">
+                <span className="font-medium text-muted-foreground">Social card</span>
+                <span className="text-text-secondary">Uses the cover image</span>
+              </div>
+              <div className="overflow-hidden rounded-[10px] border border-border bg-background">
+                <div className="aspect-[1.91/1] bg-[repeating-linear-gradient(45deg,rgb(128_128_128/0.08)_0_1px,transparent_1px_10px)] bg-surface-card">
+                  {coverPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={coverPreview} alt="" className="h-full w-full object-cover" />
+                  ) : null}
+                </div>
+                <div className="flex flex-col gap-0.5 px-3 py-2.5">
+                  <span className="text-[11px] text-muted-foreground">{SITE_HOST}</span>
+                  <span className="truncate text-[13px] font-medium text-foreground">{snippetTitle}</span>
+                </div>
+              </div>
+            </div>
+          </InspectorSection>
+        </InspectorPanel>
+
+        <InspectorPanel active={tab === 'media'} className="min-h-full">
+          {tab === 'media' ? <MediaLibrary activeTab="pages" types={MEDIA_TYPES} /> : null}
+        </InspectorPanel>
+      </InspectorPane>
     </form>
   )
 }
 
-export function PagesStudio({ pages, saved = false, error = '' }) {
+export function PagesStudio({ pages, selectedId, saved = false, error = '' }) {
   const router = useRouter()
-  const hasShownRouteToast = useRef(false)
-  const [llmOpen, setLlmOpen] = useState(false)
-  const [generateOpen, setGenerateOpen] = useState(false)
-  const { isConfigured } = useLlmConfig()
-  const [editingPageId, setEditingPageId] = useState('')
-  const [revision, setRevision] = useState(0)
+  const { openId, open, formKey } = useStudioRecord({
+    basePath: '/studio/pages',
+    param: 'page',
+    selectedId,
+    saved,
+    error,
+    savedMessage: 'Page saved',
+  })
   const [query, setQuery] = useState('')
+  const [listOpen, setListOpen] = useState(false)
+  const [generateOpen, setGenerateOpen] = useState(false)
   const [generatedPages, setGeneratedPages] = useState([])
+  const dirtyRef = useRef(false)
 
-  // Merge freshly generated drafts with the server list (de-duped by id) so a new
-  // draft is selectable and editable immediately, before the RSC refetch lands.
+  // Freshly generated drafts first so they open before the server list catches up.
   const pageList = useMemo(() => {
     const seen = new Set()
-    const merged = []
-    for (const page of [...generatedPages, ...pages]) {
-      if (!page?.id || seen.has(page.id)) continue
+    return [...generatedPages, ...pages].filter((page) => {
+      if (!page?.id || seen.has(page.id)) return false
       seen.add(page.id)
-      merged.push(page)
-    }
-    return merged
+      return true
+    })
   }, [generatedPages, pages])
 
-  const editingPage = useMemo(
-    () => pageList.find((page) => page.id === editingPageId),
-    [editingPageId, pageList]
-  )
-
-  const filteredPages = useMemo(() => {
+  // The list is grouped by page type, in picker order.
+  const groups = useMemo(() => {
     const q = query.toLowerCase().trim()
-    if (!q) return pageList
-    return pageList.filter((page) =>
-      `${page.title} ${page.slug} ${page.page_type} ${page.product}`.toLowerCase().includes(q)
-    )
-  }, [query, pageList])
+    const matches = (page) => !q || `${page.title} ${page.slug} ${page.page_type} ${page.product}`.toLowerCase().includes(q)
+    return PAGE_TYPE_OPTIONS.map((option) => ({
+      type: option.value,
+      label: PAGE_TYPE_HUB[option.value]?.label || option.label,
+      pages: pageList.filter((page) => (page.page_type || 'solution') === option.value && matches(page)),
+    })).filter((group) => group.pages.length)
+  }, [pageList, query])
 
-  const pageDraft = getPageDraft(editingPage)
-  const publishedCount = pageList.filter((page) => page.is_published).length
+  const editing = pageList.find((page) => page.id === openId)
 
-  useEffect(() => {
-    const previousHtmlOverflow = document.documentElement.style.overflow
-    const previousBodyOverflow = document.body.style.overflow
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow
-      document.body.style.overflow = previousBodyOverflow
-    }
+  const handleDirtyChange = useCallback((dirty) => {
+    dirtyRef.current = dirty
   }, [])
 
-  useEffect(() => {
-    if (hasShownRouteToast.current || (!saved && !error)) return
-    hasShownRouteToast.current = true
+  const select = (id) => {
+    if (id !== openId && dirtyRef.current && !window.confirm('Discard your unsaved changes?')) return
+    dirtyRef.current = false
+    open(id)
+    setListOpen(false)
+  }
 
-    if (error) {
-      toast.error('Could not save', { description: error })
-    } else {
-      toast.success('Page saved', { description: 'Public pages were revalidated.' })
-    }
-
-    router.replace('/studio/pages', { scroll: false })
-  }, [error, router, saved])
-
-  // Add the generated draft to the local list and open it for review.
   const handleGenerated = (record) => {
     if (record?.id) {
       setGeneratedPages((prev) => [record, ...prev.filter((page) => page.id !== record.id)])
-      setEditingPageId(record.id)
-      setRevision((value) => value + 1)
+      dirtyRef.current = false
+      open(record.id)
     }
     router.refresh()
   }
 
   const deletePage = async (page) => {
+    if (!window.confirm(`Delete “${page.title}”? This cannot be undone.`)) return
     const result = await deleteSeoPageAction(page.id)
     if (!result.ok) {
-      toast.error(result.error || 'Unable to delete page')
+      toast.error(result.error || 'Unable to delete the page')
       return
     }
-    if (editingPageId === page.id) {
-      setEditingPageId('')
-      setRevision((value) => value + 1)
-    }
+    setGeneratedPages((prev) => prev.filter((entry) => entry.id !== page.id))
+    dirtyRef.current = false
+    if (openId === page.id) open('')
     toast.success('Page deleted')
     router.refresh()
   }
 
-  const livePath = editingPage
-    ? `/${PAGE_TYPE_PATH[editingPage.page_type] || 'solutions'}`
-    : '/solutions'
-
   return (
-    <div className="fixed inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-background text-foreground">
-      <LlmSettingsDialog open={llmOpen} onOpenChange={setLlmOpen} />
+    <StudioFrame>
       <PageGenerateDialog open={generateOpen} onOpenChange={setGenerateOpen} onGenerated={handleGenerated} />
 
-      <header className="flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur sm:px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link href="/" className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-card">
-            <LayoutGrid className="size-4" />
-            <span className="sr-only">Back to Geiger</span>
-          </Link>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="truncate text-sm font-semibold">Geiger Pages Studio</h1>
-              <Badge variant="outline" className="hidden font-mono text-[10px] sm:inline-flex">SEO</Badge>
-            </div>
-            <p className="hidden text-xs text-muted-foreground sm:block">
-              {publishedCount} published pages
-            </p>
+      <ListPane
+        title="Pages"
+        count={pageList.length}
+        open={listOpen}
+        onClose={() => setListOpen(false)}
+        actions={
+          <>
+            <Button type="button" variant="ghost" size="icon-sm" onClick={() => setGenerateOpen(true)} aria-label="New page with AI" title="New page with AI" className="text-muted-foreground">
+              <WandSparkles className="size-4" />
+            </Button>
+            <Button type="button" size="sm" onClick={() => select('')}>
+              <Plus className="size-4" />
+              New
+            </Button>
+          </>
+        }
+        search={<SearchInput expanded value={query} onChange={setQuery} placeholder="Search pages…" />}
+      >
+        {groups.map((group) => (
+          <div key={group.type} className="flex flex-col gap-0.5">
+            <ListGroupLabel label={group.label} count={group.pages.length} />
+            {group.pages.map((page) => (
+              <ListItem key={page.id} selected={page.id === openId} onClick={() => select(page.id)} className="flex-row items-center gap-2.5 py-2">
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="truncate text-[13px] font-medium text-foreground">{page.title || 'Untitled page'}</span>
+                  <span className="truncate font-mono text-[11px] text-muted-foreground">{buildSeoPagePath(page.page_type, page.product, page.slug)}</span>
+                </span>
+                <StatusPill status={publishStatus(page)} map={STUDIO_STATUS_MAP} className="shrink-0" />
+              </ListItem>
+            ))}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <StudioTabs active="pages" />
-          <Button asChild type="button" size="sm" variant="ghost" className="hidden sm:inline-flex">
-            <Link href={livePath} target="_blank">
-              View live
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => setGenerateOpen(true)} className="gap-1.5">
-            <Wand2 className="size-3.5" />
-            <span className="hidden sm:inline">New with AI</span>
-          </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => setLlmOpen(true)}>
-            <Sparkles className={isConfigured ? 'text-emerald-600 dark:text-emerald-400' : ''} />
-            <span className="hidden sm:inline">AI model</span>
-            <span
-              className={`size-1.5 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-muted-foreground'}`}
-              aria-label={isConfigured ? 'AI connected' : 'AI disconnected'}
-            />
-          </Button>
-        </div>
-      </header>
+        ))}
+        {groups.length === 0 ? <ListEmpty>{query ? 'No pages match.' : 'No pages yet. Generate one with AI.'}</ListEmpty> : null}
+      </ListPane>
 
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 overflow-x-hidden lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_330px]">
-        <aside className="hidden min-h-0 min-w-0 overflow-x-hidden border-r border-border bg-card/25 lg:flex lg:flex-col">
-          <div className="min-h-0 flex-1">
-            <RecordList
-              title="SEO pages"
-              items={filteredPages}
-              empty="No pages yet — generate one with AI"
-              query={query}
-              onQuery={setQuery}
-              selectedId={editingPageId}
-              type="pages"
-              searchPlaceholder="Search pages..."
-              onDelete={deletePage}
-              onNew={() => {
-                setEditingPageId('')
-                setRevision((v) => v + 1)
-              }}
-              onSelect={(id) => {
-                setEditingPageId(id)
-                setRevision((v) => v + 1)
-              }}
-            />
-          </div>
-        </aside>
-
-        <main className="min-h-0 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
-          <div className="mx-auto min-w-0 max-w-4xl px-3 py-4 sm:px-6 sm:py-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  {editingPage ? PAGE_TYPE_LABEL[editingPage.page_type] || 'SEO page' : 'SEO page'}
-                </p>
-                <h2 className="mt-1 text-xl font-semibold tracking-tight">
-                  {editingPage?.title || 'Untitled page'}
-                </h2>
-              </div>
-            </div>
-
-            <SeoPageForm
-              pageDraft={pageDraft}
-              formKey={`${editingPageId || 'new'}-${revision}`}
-              onReset={() => {
-                setEditingPageId('')
-                setRevision((v) => v + 1)
-              }}
-            />
-          </div>
-        </main>
-
-        <aside className="hidden min-h-0 min-w-0 overflow-x-hidden border-l border-border bg-card/25 xl:flex xl:flex-col">
-          <div className="min-h-0 flex-1">
-            <MediaLibrary activeTab="pages" types={MEDIA_TYPES} />
-          </div>
-        </aside>
-      </div>
-    </div>
+      <PageEditor
+        key={formKey}
+        page={editing}
+        onDirtyChange={handleDirtyChange}
+        onDelete={deletePage}
+        onOpenList={() => setListOpen(true)}
+      />
+    </StudioFrame>
   )
 }

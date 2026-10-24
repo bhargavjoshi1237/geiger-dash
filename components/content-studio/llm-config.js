@@ -86,7 +86,7 @@ export function useLlmConfig() {
  */
 export async function callLlmChat({ config, messages, temperature = 0.7, signal, onToken }) {
   if (!config?.baseUrl || !config?.apiKey || !config?.model) {
-    throw new Error('Connect an AI model first (open AI Settings).')
+    throw new Error('Connect an AI model first (AI model, bottom of the sidebar).')
   }
 
   const response = await fetch('/api/studio/llm', {

@@ -34,8 +34,23 @@ function getServerSnapshot() {
   return false;
 }
 
+// Whether this session has unlocked /admin; the Console sidebar shows it next to the Admin group.
+export function useAdminUnlocked() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+// Re-lock the admin area for this session.
+export function lockAdmin() {
+  try {
+    window.sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // sessionStorage may be unavailable; nothing is stored to clear.
+  }
+  window.dispatchEvent(new Event(UNLOCK_EVENT));
+}
+
 export function AdminGate({ children }) {
-  const unlocked = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const unlocked = useAdminUnlocked();
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
 
@@ -58,8 +73,8 @@ export function AdminGate({ children }) {
   if (unlocked) return children;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-      <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_50%,transparent_100%)]" />
+    <div className="relative flex h-full min-h-full items-center justify-center overflow-hidden bg-background px-4 text-foreground">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_50%,transparent_100%)]" />
       <form
         onSubmit={submit}
         className="relative w-full max-w-sm space-y-5 rounded-xl border border-border bg-card/70 p-8 shadow-xl backdrop-blur"

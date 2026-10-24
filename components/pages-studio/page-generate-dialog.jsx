@@ -111,7 +111,7 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
       return
     }
     if (!isConfigured) {
-      toast.error('Connect an AI model first (AI model button).')
+      toast.error('Connect an AI model first (AI model, bottom of the sidebar).')
       return
     }
 
@@ -163,12 +163,12 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Generate a page with AI
           </DialogTitle>
           <DialogDescription>
-            Pick the page type and product, describe what it should cover, attach any images, and
-            AI writes an SEO landing page. It saves as a draft you review and publish.
+            Pick the page type and product, describe what it should cover and attach any images. The AI
+            writes an SEO landing page and saves it as a draft for you to review.
           </DialogDescription>
         </DialogHeader>
 
@@ -292,14 +292,13 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
               </div>
             ) : null}
             <p className="text-xs text-muted-foreground">
-              Attached images are offered to the AI to place in the page; the first becomes the
-              cover / social image.
+              The AI places attached images in the page. The first one becomes the cover and social image.
             </p>
           </div>
 
           {!isConfigured ? (
             <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-              No AI model connected. Use the AI model button in the top bar to add one.
+              No AI model connected. Open AI model at the bottom of the sidebar to add one.
             </p>
           ) : null}
 
@@ -311,14 +310,20 @@ export function PageGenerateDialog({ open, onOpenChange, onGenerated }) {
           ) : null}
         </div>
 
-        <DialogFooter>
-          <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} disabled={isBusy}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={run} disabled={isBusy || !isConfigured} className="gap-2">
-            {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            Generate draft
-          </Button>
+        <DialogFooter className="items-center gap-2 border-t border-border pt-4 sm:justify-between">
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className={`size-1.5 rounded-full ${isConfigured ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-muted-foreground'}`} />
+            {isConfigured ? 'AI model connected' : 'No AI model connected'}
+          </span>
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} disabled={isBusy}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={run} disabled={isBusy || !isConfigured} className="gap-2">
+              {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Generate draft
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

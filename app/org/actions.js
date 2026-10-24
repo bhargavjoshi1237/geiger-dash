@@ -7,7 +7,8 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
 import { sendTemplateEmail } from '@/lib/email/send'
-import { notifyMemberJoined, notifyMemberRemoved, notifyRoleChanged } from '@/lib/notifications/send'
+import { notifyJoinDecided, notifyMemberRemoved, notifyRoleChanged } from '@/lib/notifications/send'
+import { listPendingJoinRequests, requestToJoin } from '@/lib/org/join-requests'
 
 function cleanText(value) {
   return String(value || '').trim()
@@ -117,30 +118,13 @@ export async function updateOrgAvatarAction(formData) {
   return { ok: true, url: publicUrl }
 }
 
-export async function joinOrganizationAction(formData) {
+// Asks to join by ID or slug; the owner approves it from Members settings. Returns a result for the dialog's toasts.
+export async function requestToJoinOrganizationAction({ query, message } = {}) {
   const supabase = await createClient()
   const user = await requireUser(supabase, '/login?next=org')
-  const organizationId = cleanText(formData.get('organization_id'))
-
-  if (!organizationId) {
-    redirect(`${ORG_ROUTE}?error=missing_join_id`)
-  }
-
-  // Join through the SECURITY DEFINER RPC: under RLS a non-member can't read the
-  // org row directly, and the RPC keeps organization_users + metadata in sync.
-  const { data, error } = await supabase.rpc('join_organization', { q: organizationId })
-
-  if (error) {
-    redirect(`${ORG_ROUTE}?error=${encodeURIComponent(error.message)}`)
-  }
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row) {
-    redirect(`${ORG_ROUTE}?error=organization_not_found`)
-  }
-
-  notifyMemberJoined(supabase, { user, organizationId: row.id, orgName: row.name })
-  revalidatePath(ORG_ROUTE)
-  redirect(`${ORG_ROUTE}?joined=1`)
+  const result = await requestToJoin(supabase, user, { query, message })
+  if (result.ok) revalidatePath(ORG_ROUTE)
+  return result
 }
 
 // --- Members -----------------------------------------------------------------
@@ -155,7 +139,7 @@ export async function listOrgMembersAction(organizationId) {
   const orgId = cleanText(organizationId)
   if (!orgId) return { ok: false, error: 'Missing organization.' }
 
-  const [{ data: members, error: membersError }, { data: invites }] = await Promise.all([
+  const [{ data: members, error: membersError }, { data: invites }, requests] = await Promise.all([
     supabase.rpc('organization_members', { p_org: orgId }),
     supabase
       .from('organization_invites')
@@ -163,6 +147,7 @@ export async function listOrgMembersAction(organizationId) {
       .eq('organization_id', orgId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
+    listPendingJoinRequests(supabase, orgId),
   ])
 
   if (membersError) return { ok: false, error: membersError.message }
@@ -185,7 +170,46 @@ export async function listOrgMembersAction(organizationId) {
       role: i.role,
       createdAt: i.created_at,
     })),
+    requests,
   }
+}
+
+// Approve or decline a join request through its SECURITY DEFINER RPC, which checks the caller holds members.add.
+async function decideJoinRequest({ requestId }, approve) {
+  const supabase = await createClient()
+  const user = await requireUser(supabase, '/login?next=org')
+  const id = cleanText(requestId)
+  if (!id) return { ok: false, error: 'Missing request.' }
+
+  const { data, error } = await supabase.rpc(approve ? 'approve_join_request' : 'decline_join_request', {
+    p_request: id,
+  })
+  if (error) {
+    return {
+      ok: false,
+      error: error.code === '42501' ? "You can't decide requests for this organization." : error.message,
+    }
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  if (!row) return { ok: false, error: 'This request is no longer pending.' }
+
+  notifyJoinDecided({
+    actorId: user.id,
+    organizationId: row.organization_id,
+    orgName: row.org_name,
+    userId: row.user_id,
+    approved: approve,
+  })
+  revalidatePath(ORG_ROUTE)
+  return { ok: true }
+}
+
+export async function approveJoinRequestAction(input) {
+  return decideJoinRequest(input || {}, true)
+}
+
+export async function declineJoinRequestAction(input) {
+  return decideJoinRequest(input || {}, false)
 }
 
 export async function inviteOrgMembersAction({ organizationId, organizationName, emails, role = 'User' }) {

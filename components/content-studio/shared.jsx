@@ -1,56 +1,43 @@
 'use client'
 
-// Shared studio primitives used by both the Content Studio (posts/changelog) and
-// the Pages Studio (SEO pages): form scaffolding, the cover-image uploader, the
-// left-hand record list, and the right-hand media library. Kept here so the two
-// studios stay visually and behaviourally identical without duplicating code.
+// Shared Studio pieces used by Posts, Releases and Pages: date/size helpers, the
+// inspector's cover-image field and the inspector's Media tab (storage browser).
 
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  Field,
   Input,
-  Label,
   LogoLoading,
-  ScrollArea,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@geiger/ui";
+  SegmentedTabs,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  cn,
+} from '@geiger/ui'
 import {
   ArrowLeft,
+  ChevronDown,
   ChevronRight,
-  Circle,
   Copy,
-  FileText,
   Folder,
   FolderPlus,
   Image as ImageIcon,
+  Images,
   Loader2,
-  PlusCircle,
   RefreshCw,
   Search,
-  Settings2,
-  Trash2,
+  TextCursorInput,
   Upload,
+  X,
 } from 'lucide-react'
 import {
   createStudioMediaFolderAction,
   listStudioMediaAction,
   uploadStudioMediaAction,
 } from '@/app/studio/posts/actions'
-export const inputClassName = 'bg-background text-foreground placeholder:text-muted-foreground'
-export const textareaClassName =
-  'min-h-[80px] bg-background text-foreground placeholder:text-muted-foreground'
 
 export const toDateTimeLocal = (value) => {
   if (!value) return ''
@@ -92,50 +79,37 @@ export const readingMinutesFromHtml = (value) => {
   return Math.max(1, Math.round(words / 200))
 }
 
-export const FormField = ({ label, children, hint, required }) => (
-  <div className="min-w-0 space-y-2">
-    <Label className="text-sm font-medium text-foreground">
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </Label>
-    {children}
-    {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-  </div>
-)
+const STRIPES =
+  'bg-[repeating-linear-gradient(45deg,rgb(128_128_128/0.08)_0_1px,transparent_1px_10px)] bg-surface-card'
 
-export const CollapsibleSection = ({ value, icon: Icon, title, children }) => (
-  <Card className="min-w-0 max-w-full overflow-hidden border-border bg-card/45 shadow-none">
-    <Accordion type="single" collapsible defaultValue={value} className="min-w-0 max-w-full">
-      <AccordionItem value={value} className="border-0">
-        <CardHeader className="p-0">
-          <AccordionTrigger className="px-4 py-4 hover:no-underline">
-            <span className="flex items-center gap-2 text-base">
-              {Icon ? <Icon className="size-4" /> : null}
-              {title}
-            </span>
-          </AccordionTrigger>
-        </CardHeader>
-        <AccordionContent className="min-w-0 max-w-full overflow-hidden px-4 pb-4">
-          {children}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  </Card>
-)
+// Last path segment of a URL, for the preview's file label.
+const fileLabel = (url) => {
+  try {
+    return decodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).slice(-2).join('/'))
+  } catch {
+    return url
+  }
+}
 
-// Cover / OG image picker: upload a file, point at a storage object, or paste a
-// direct URL. Listens for the media library's "use as cover" event.
-export const CoverImageUpload = ({ draft, existingUrl }) => {
+// Inspector cover / OG image: upload, pick from the Media tab, or point at a bucket path or URL.
+// Emits the image_upload / image_bucket / image_path / image_url / existing_image_url form fields.
+export function CoverImageField({ existingUrl, onBrowse, onPreviewChange, onEdit }) {
   const fileInputId = useId()
-  const [bucket, setBucket] = useState(draft.image_bucket || 'pfp')
-  const [path, setPath] = useState(draft.image_path || '')
-  const [url, setUrl] = useState(draft.image_url || '')
-  const [fileName, setFileName] = useState('')
-  const [previewUrl, setPreviewUrl] = useState(
-    existingUrl || draft.image_url || publicObjectUrl(draft.image_bucket, draft.image_path)
-  )
+  const [bucket, setBucket] = useState('pfp')
+  const [path, setPath] = useState('')
+  const [url, setUrl] = useState('')
+  const [existing, setExisting] = useState(existingUrl || '')
+  const [previewUrl, setPreviewUrl] = useState(existingUrl || '')
+  const [advanced, setAdvanced] = useState(false)
+  const onEditRef = useRef(onEdit)
 
-  const resolvedStorageUrl = useMemo(() => publicObjectUrl(bucket, path), [bucket, path])
+  useEffect(() => {
+    onEditRef.current = onEdit
+  }, [onEdit])
+
+  useEffect(() => {
+    onPreviewChange?.(previewUrl)
+  }, [previewUrl, onPreviewChange])
 
   useEffect(() => {
     const handleMediaSelected = (event) => {
@@ -145,210 +119,117 @@ export const CoverImageUpload = ({ draft, existingUrl }) => {
       setPath('')
       setUrl(media.publicUrl)
       setPreviewUrl(media.publicUrl)
+      onEditRef.current?.()
     }
-
     window.addEventListener('content-studio:use-cover', handleMediaSelected)
     return () => window.removeEventListener('content-studio:use-cover', handleMediaSelected)
   }, [])
 
-  const handleFilePreview = (event) => {
+  const handleFile = (event) => {
     const file = event.target.files?.[0]
-    if (!file) return
-    setFileName(file.name)
-    setPreviewUrl(URL.createObjectURL(file))
+    if (file) setPreviewUrl(URL.createObjectURL(file))
+  }
+
+  const clear = () => {
+    const input = document.getElementById(fileInputId)
+    if (input) input.value = ''
+    setPath('')
+    setUrl('')
+    setExisting('')
+    setPreviewUrl('')
+    onEdit?.()
   }
 
   return (
-    <CollapsibleSection value="cover-image" icon={ImageIcon} title="Cover Image">
-      <div className="space-y-4">
-        <input type="hidden" name="existing_image_url" defaultValue={existingUrl || ''} />
+    <div className="flex flex-col gap-3">
+      <input type="hidden" name="existing_image_url" value={existing} />
 
-        <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted">
-          {previewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="Cover preview" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-
-        <FormField label="Upload Image">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button type="button" variant="outline" asChild>
-              <Label htmlFor={fileInputId} className="cursor-pointer">
-                <Upload className="size-4" />
-                Choose image
-              </Label>
-            </Button>
-            <span className="min-w-0 truncate text-sm text-muted-foreground">
-              {fileName || 'No file selected'}
+      <div className={cn('relative flex aspect-video items-end overflow-hidden rounded-lg border border-border p-2.5', !previewUrl && STRIPES)}>
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewUrl} alt="Cover preview" className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ImageIcon className="size-4" />
+            No cover yet
+          </span>
+        )}
+        {previewUrl ? (
+          <>
+            <span className="relative max-w-full truncate rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+              {previewUrl.startsWith('blob:') ? 'New upload' : fileLabel(previewUrl)}
             </span>
-          </div>
-          <Input
-            id={fileInputId}
-            name="image_upload"
-            type="file"
-            accept="image/*"
-            onChange={handleFilePreview}
-            className="sr-only"
-          />
-        </FormField>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-xs"
+              onClick={clear}
+              aria-label="Remove cover image"
+              className="absolute right-2 top-2"
+            >
+              <X />
+            </Button>
+          </>
+        ) : null}
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Storage Bucket">
-            <Input
-              name="image_bucket"
-              value={bucket}
-              onChange={(e) => setBucket(e.target.value)}
-              className="bg-background border-input"
-            />
-          </FormField>
-          <FormField label="Object Path">
+      <div className="grid grid-cols-2 gap-1.5">
+        <Button type="button" variant="outline" size="sm" asChild className="w-full cursor-pointer">
+          <label htmlFor={fileInputId}>
+            <Upload className="size-3.5" />
+            Upload
+          </label>
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onBrowse} className="w-full">
+          <Images className="size-3.5" />
+          From library
+        </Button>
+      </div>
+      <input id={fileInputId} name="image_upload" type="file" accept="image/*" onChange={handleFile} className="sr-only" />
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setAdvanced((value) => !value)}
+        aria-expanded={advanced}
+        className="w-full text-muted-foreground"
+      >
+        <span className="flex-1 text-left font-normal">Bucket, path or direct URL</span>
+        {advanced ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+      </Button>
+      <div className={cn('flex-col gap-3', advanced ? 'flex' : 'hidden')}>
+        <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-2">
+          <Field label="Bucket" className="gap-1.5">
+            <Input name="image_bucket" value={bucket} onChange={(e) => setBucket(e.target.value)} />
+          </Field>
+          <Field label="Object path" className="gap-1.5">
             <Input
               name="image_path"
               value={path}
               onChange={(e) => {
                 setPath(e.target.value)
                 setUrl('')
-                setPreviewUrl(publicObjectUrl(bucket, e.target.value))
+                setPreviewUrl(publicObjectUrl(bucket, e.target.value) || existing)
               }}
               placeholder="path/to/image.jpg"
-              className="bg-background border-input"
             />
-          </FormField>
+          </Field>
         </div>
-
-        <FormField label="Direct URL" hint={resolvedStorageUrl || 'Or paste a direct image URL'}>
+        <Field label="Direct URL" className="gap-1.5">
           <Input
             name="image_url"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value)
               setPath('')
-              setPreviewUrl(e.target.value || resolvedStorageUrl)
+              setPreviewUrl(e.target.value || existing)
             }}
-            placeholder="https://..."
-            className="bg-background border-input"
+            placeholder="https://…"
           />
-        </FormField>
+        </Field>
       </div>
-    </CollapsibleSection>
-  )
-}
-
-// Left-hand searchable record list. `type` drives the subtitle + status badge:
-// 'blog'/'pages' show a Live/Draft badge, 'changelog' shows a Featured badge.
-export const RecordList = ({
-  title,
-  items,
-  empty,
-  query,
-  onQuery,
-  onNew,
-  onSelect,
-  onDelete,
-  selectedId,
-  type,
-  searchPlaceholder,
-}) => {
-  const [deletingId, setDeletingId] = useState('')
-  const showPublished = type === 'blog' || type === 'pages'
-
-  const handleDelete = async (item) => {
-    const label = type === 'blog' ? 'blog post' : type === 'pages' ? 'page' : 'release'
-    if (!window.confirm(`Delete this ${label}? This cannot be undone.`)) return
-
-    setDeletingId(item.id)
-    await onDelete(item)
-    setDeletingId('')
-  }
-
-  const subtitleFor = (item) => {
-    if (type === 'blog') return item.slug
-    if (type === 'pages') return `${item.page_type} · ${item.slug}`
-    return `v${item.version} - ${item.product}`
-  }
-
-  return (
-    <Card className="h-full rounded-none border-0 bg-transparent shadow-none">
-      <CardHeader className="border-b border-border p-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{title}</CardTitle>
-          <Button type="button" size="sm" variant="outline" onClick={onNew}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New
-          </Button>
-        </div>
-        <div className="relative mt-3">
-          <Search className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => onQuery(e.target.value)}
-            placeholder={searchPlaceholder || 'Search...'}
-            className={`${inputClassName} pl-9`}
-          />
-        </div>
-      </CardHeader>
-      <CardContent className="min-w-0 overflow-hidden p-2">
-        <ScrollArea className="h-[calc(100vh-215px)] min-h-72 min-w-0 max-w-full [&_[data-slot=scroll-area-viewport]>div]:!block">
-          <div className="min-w-0 max-w-full space-y-1 pr-3">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className={`grid w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-1 overflow-hidden rounded-md border p-1 transition-colors ${
-                  selectedId === item.id ? 'border-border bg-accent' : 'bg-transparent hover:border-border'
-                }`}
-              >
-                <button
-                  type="button"
-                  className="min-w-0 overflow-hidden rounded-sm px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  onClick={() => onSelect(item.id)}
-                >
-                  <p className="block w-full truncate text-sm font-medium">{item.title}</p>
-                  <p className="mt-1 truncate text-xs text-muted-foreground">{subtitleFor(item)}</p>
-                </button>
-                <div className="flex shrink-0 items-center gap-1 pr-1">
-                  {showPublished ? (
-                    <Badge
-                      variant={item.is_published ? 'success' : 'outline'}
-                      className="gap-1 px-1.5 py-0.5 text-[10px]"
-                    >
-                      <Circle className={`size-1.5 ${item.is_published ? 'fill-current' : ''}`} />
-                      {item.is_published ? 'Live' : 'Draft'}
-                    </Badge>
-                  ) : item.is_featured ? (
-                    <Badge variant="info" className="px-1.5 py-0.5 text-[10px]">
-                      Featured
-                    </Badge>
-                  ) : null}
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    className="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => handleDelete(item)}
-                    disabled={deletingId === item.id}
-                    aria-label={`Delete ${item.title}`}
-                    title={`Delete ${item.title}`}
-                  >
-                    {deletingId === item.id ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-3.5" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {items.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-8">{empty}</p>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    </div>
   )
 }
 
@@ -357,10 +238,21 @@ const DEFAULT_MEDIA_TYPES = [
   { value: 'changelog', label: 'Changelog' },
 ]
 
-// Right-hand media browser: folder navigation, upload, and per-asset actions
-// (use as cover, insert in editor, copy URL). `types` sets which storage roots
-// the tabs switch between.
-export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
+function MediaAction({ label, onClick, children }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button type="button" variant="outline" size="icon-sm" aria-label={label} onClick={onClick}>
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// Inspector Media tab: browse a storage root, make folders, upload, and use an image as cover, insert it, or copy its URL.
+export function MediaLibrary({ activeTab, types = DEFAULT_MEDIA_TYPES }) {
   const initialType = types.find((entry) => entry.value === activeTab)?.value || types[0].value
   const [contentType, setContentType] = useState(initialType)
   const [folders, setFolders] = useState([])
@@ -368,9 +260,11 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
   const [query, setQuery] = useState('')
   const [currentFolder, setCurrentFolder] = useState('')
   const [newFolderName, setNewFolderName] = useState('')
+  const [isNamingFolder, setIsNamingFolder] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isCreatingFolder, setIsCreatingFolder] = useState(false)
+  const uploadId = useId()
 
   useEffect(() => {
     let isCurrent = true
@@ -399,22 +293,17 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
 
   const breadcrumbs = useMemo(() => {
     const parts = currentFolder.split('/').filter(Boolean)
-    return parts.map((part, index) => ({
-      name: part,
-      path: parts.slice(0, index + 1).join('/'),
-    }))
+    return parts.map((part, index) => ({ name: part, path: parts.slice(0, index + 1).join('/') }))
   }, [currentFolder])
 
   const filteredFolders = useMemo(() => {
-    const normalizedQuery = query.toLowerCase().trim()
-    if (!normalizedQuery) return folders
-    return folders.filter((item) => `${item.name} ${item.path}`.toLowerCase().includes(normalizedQuery))
+    const q = query.toLowerCase().trim()
+    return q ? folders.filter((item) => `${item.name} ${item.path}`.toLowerCase().includes(q)) : folders
   }, [folders, query])
 
   const filteredMedia = useMemo(() => {
-    const normalizedQuery = query.toLowerCase().trim()
-    if (!normalizedQuery) return media
-    return media.filter((item) => `${item.name} ${item.path}`.toLowerCase().includes(normalizedQuery))
+    const q = query.toLowerCase().trim()
+    return q ? media.filter((item) => `${item.name} ${item.path}`.toLowerCase().includes(q)) : media
   }, [media, query])
 
   const refreshMedia = async () => {
@@ -423,7 +312,6 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
     if (result.ok) {
       setFolders(result.folders || [])
       setMedia(result.media || [])
-      toast.success('Assets refreshed')
     } else {
       toast.error(result.error || 'Unable to refresh media.')
     }
@@ -452,6 +340,7 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
   }
 
   const createFolder = async () => {
+    if (!newFolderName.trim()) return
     const formData = new FormData()
     formData.set('content_type', contentType)
     formData.set('parent_folder', currentFolder)
@@ -462,6 +351,7 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
     if (result.ok) {
       setFolders((items) => [result.folder, ...items.filter((item) => item.path !== result.folder.path)])
       setNewFolderName('')
+      setIsNamingFolder(false)
       toast.success('Folder created')
     } else {
       toast.error(result.error || 'Unable to create folder.')
@@ -471,12 +361,12 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
 
   const copyUrl = async (item) => {
     await navigator.clipboard.writeText(item.publicUrl)
-    toast.success('URL copied to clipboard')
+    toast.success('URL copied')
   }
 
   const applyAsCover = (item) => {
     window.dispatchEvent(new CustomEvent('content-studio:use-cover', { detail: item }))
-    toast.success('Applied as cover image')
+    toast.success('Set as cover image')
   }
 
   const insertInEditor = (item) => {
@@ -485,214 +375,179 @@ export const MediaLibrary = ({ activeTab, types = DEFAULT_MEDIA_TYPES }) => {
 
   const openFolder = (folderPath) => {
     const rootPrefix = folderPath.split('/').slice(0, 2).join('/')
-    const relativePath = folderPath.replace(`${rootPrefix}/`, '')
-    setCurrentFolder(relativePath)
+    setCurrentFolder(folderPath.replace(`${rootPrefix}/`, ''))
     setQuery('')
   }
 
   const goBack = () => {
-    const parts = currentFolder.split('/').filter(Boolean)
-    setCurrentFolder(parts.slice(0, -1).join('/'))
+    setCurrentFolder(currentFolder.split('/').filter(Boolean).slice(0, -1).join('/'))
     setQuery('')
   }
 
+  const rootLabel = types.find((entry) => entry.value === contentType)?.label || contentType
+
   return (
-    <Card className="h-full rounded-none border-0 bg-transparent shadow-none">
-      <CardHeader className="border-b border-border p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Settings2 className="size-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-              Assets
-            </span>
-          </div>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            onClick={refreshMedia}
-            disabled={isLoading}
-            aria-label="Refresh assets"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4 p-4">
-        {types.length > 1 ? (
-          <Tabs value={contentType} onValueChange={setContentType}>
-            <TabsList
-              className={`grid w-full bg-muted ${types.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'}`}
-            >
-              {types.map((entry) => (
-                <TabsTrigger
-                  key={entry.value}
-                  value={entry.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  {entry.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        ) : null}
-
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <Button type="button" size="sm" variant="ghost" onClick={goBack} disabled={!currentFolder}>
-              <ArrowLeft className="h-3 w-3" />
-            </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setCurrentFolder('')}>
-              {contentType}
-            </Button>
-            {breadcrumbs.map((crumb) => (
-              <div key={crumb.path} className="flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <Button type="button" size="sm" variant="ghost" onClick={() => setCurrentFolder(crumb.path)}>
-                  {crumb.name}
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="New folder name"
-              className={inputClassName}
+    <TooltipProvider delayDuration={300}>
+      {/* Browsing the library isn't an edit to the document around it. */}
+      <div className="flex min-h-full flex-col" onInput={(event) => event.stopPropagation()}>
+        <div className="flex flex-col gap-3 border-b border-sidebar-border p-3">
+          {types.length > 1 ? (
+            <SegmentedTabs
+              fullWidth
+              tabs={types}
+              value={contentType}
+              onChange={(value) => {
+                setContentType(value)
+                setCurrentFolder('')
+                setQuery('')
+              }}
+              buttonClassName="h-7 text-xs"
             />
-            <Button type="button" onClick={createFolder} disabled={isCreatingFolder || !newFolderName.trim()}>
-              {isCreatingFolder ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FolderPlus className="h-4 w-4" />
-              )}
+          ) : null}
+
+          <div className="flex min-w-0 items-center gap-0.5 text-xs text-muted-foreground">
+            <Button type="button" variant="ghost" size="icon-xs" onClick={goBack} disabled={!currentFolder} aria-label="Up one folder" className="text-muted-foreground">
+              <ArrowLeft />
+            </Button>
+            <button type="button" onClick={() => setCurrentFolder('')} className={cn('shrink-0 px-1 hover:text-foreground', !currentFolder && 'text-foreground')}>
+              {rootLabel.toLowerCase()}
+            </button>
+            <div className="flex min-w-0 items-center gap-0.5 overflow-hidden">
+              {breadcrumbs.map((crumb, index) => (
+                <span key={crumb.path} className="flex min-w-0 items-center gap-0.5">
+                  <ChevronRight className="size-3 shrink-0 text-text-secondary" />
+                  <button
+                    type="button"
+                    onClick={() => setCurrentFolder(crumb.path)}
+                    className={cn('truncate px-1 hover:text-foreground', index === breadcrumbs.length - 1 && 'text-foreground')}
+                  >
+                    {crumb.name}
+                  </button>
+                </span>
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={refreshMedia}
+              disabled={isLoading}
+              aria-label="Refresh assets"
+              className="ml-auto text-muted-foreground"
+            >
+              <RefreshCw className={cn(isLoading && 'animate-spin')} />
             </Button>
           </div>
 
-          <div className="flex gap-2">
-            <div className="flex-1 text-xs text-muted-foreground border rounded-md px-3 py-2 bg-muted">
-              Target: {currentFolder || 'library'}
-            </div>
-            <Label className="inline-flex cursor-pointer">
-              <Button type="button" disabled={isUploading} asChild>
-                <span>
-                  {isUploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Upload className="h-4 w-4 mr-2" />
-                  )}
-                  Upload
-                </span>
-              </Button>
+          {isNamingFolder ? (
+            <div className="flex gap-1.5">
               <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={uploadMedia}
-                disabled={isUploading}
+                autoFocus
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    createFolder()
+                  }
+                  if (e.key === 'Escape') setIsNamingFolder(false)
+                }}
+                placeholder="Folder name"
+                className="h-8"
               />
-            </Label>
-          </div>
+              <Button type="button" size="sm" onClick={createFolder} disabled={isCreatingFolder || !newFolderName.trim()}>
+                {isCreatingFolder ? <Loader2 className="size-3.5 animate-spin" /> : 'Create'}
+              </Button>
+              <Button type="button" variant="ghost" size="icon-sm" onClick={() => setIsNamingFolder(false)} aria-label="Cancel" className="text-muted-foreground">
+                <X className="size-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsNamingFolder(true)} className="w-full">
+                <FolderPlus className="size-3.5" />
+                New folder
+              </Button>
+              <Button type="button" size="sm" asChild className={cn('w-full cursor-pointer', isUploading && 'pointer-events-none opacity-60')}>
+                <label htmlFor={uploadId}>
+                  {isUploading ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                  Upload
+                </label>
+              </Button>
+              <input id={uploadId} type="file" accept="image/*" className="sr-only" onChange={uploadMedia} disabled={isUploading} />
+            </div>
+          )}
 
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search assets..."
-              className={`${inputClassName} pl-9`}
-            />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search assets…" className="pl-9" />
           </div>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-430px)] min-h-64">
-          <div className="grid grid-cols-2 gap-3 pr-4">
-            {filteredFolders.map((item) => (
-              <button
-                key={item.path}
-                type="button"
-                className="rounded-lg border p-3 text-left hover:bg-accent transition-colors"
-                onClick={() => openFolder(item.path)}
-              >
-                <div className="flex aspect-video items-center justify-center rounded-md bg-muted">
-                  <Folder className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="mt-2 text-xs font-medium truncate">{item.name}</p>
-                <p className="text-[11px] text-muted-foreground">Folder</p>
-              </button>
-            ))}
+        <div className="grid flex-1 content-start grid-cols-2 gap-2.5 p-3">
+          {filteredFolders.map((item) => (
+            <button
+              key={item.path}
+              type="button"
+              onClick={() => openFolder(item.path)}
+              className="flex flex-col gap-2 rounded-lg border border-border bg-background p-2 text-left transition-colors hover:border-border-strong"
+            >
+              <span className="flex aspect-[16/10] items-center justify-center rounded-md bg-surface-card">
+                <Folder className="size-6 text-muted-foreground" />
+              </span>
+              <span className="flex min-w-0 flex-col px-0.5">
+                <span className="truncate text-xs font-medium text-foreground">{item.name}</span>
+                <span className="text-[11px] text-muted-foreground">Folder</span>
+              </span>
+            </button>
+          ))}
 
-            {filteredMedia.map((item) => (
-              <div key={item.path} className="rounded-lg border overflow-hidden">
-                <div className="aspect-video bg-muted">
-                  {item.publicUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.publicUrl}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-2 space-y-2">
-                  <div>
-                    <p className="text-xs font-medium truncate">{item.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{formatFileSize(item.size)}</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => applyAsCover(item)}
-                      title="Use as cover"
-                    >
-                      <ImageIcon className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => insertInEditor(item)}
-                      title="Insert in editor"
-                    >
-                      <FileText className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => copyUrl(item)}
-                      title="Copy URL"
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+          {filteredMedia.map((item) => (
+            <div key={item.path} className="group flex min-w-0 flex-col gap-2 rounded-lg border border-border bg-background p-2">
+              <div className={cn('relative aspect-[16/10] overflow-hidden rounded-md', STRIPES)}>
+                {item.publicUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item.publicUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                ) : null}
+                <div className="absolute inset-0 flex items-center justify-center gap-1 bg-background/75 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                  <MediaAction label="Use as cover" onClick={() => applyAsCover(item)}>
+                    <ImageIcon className="size-3.5" />
+                  </MediaAction>
+                  <MediaAction label="Insert in editor" onClick={() => insertInEditor(item)}>
+                    <TextCursorInput className="size-3.5" />
+                  </MediaAction>
+                  <MediaAction label="Copy URL" onClick={() => copyUrl(item)}>
+                    <Copy className="size-3.5" />
+                  </MediaAction>
                 </div>
               </div>
-            ))}
-
-            {!isLoading && filteredFolders.length === 0 && filteredMedia.length === 0 && (
-              <p className="col-span-2 text-center text-sm text-muted-foreground py-8">
-                No media found. Upload an image or create a folder.
-              </p>
-            )}
-
-            {isLoading && (
-              <div className="col-span-2 flex items-center justify-center py-8">
-                <LogoLoading size={48} />
+              <div className="flex min-w-0 flex-col px-0.5">
+                <span className="truncate text-xs font-medium text-foreground">{item.name}</span>
+                <span className="text-[11px] text-muted-foreground">{formatFileSize(item.size)}</span>
               </div>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+            </div>
+          ))}
+
+          {!isLoading && filteredFolders.length === 0 && filteredMedia.length === 0 ? (
+            <p className="col-span-2 py-10 text-center text-sm text-muted-foreground">
+              {query ? 'No assets match your search.' : 'Nothing here yet. Upload an image or create a folder.'}
+            </p>
+          ) : null}
+
+          {isLoading && filteredFolders.length === 0 && filteredMedia.length === 0 ? (
+            <div className="col-span-2 flex items-center justify-center py-10">
+              <LogoLoading size={36} />
+            </div>
+          ) : null}
+        </div>
+
+        <div className="sticky bottom-0 flex justify-between gap-2 border-t border-sidebar-border bg-surface-subtle px-3 py-2.5 text-[11px] text-muted-foreground">
+          <span>Hover an image: cover · insert · copy URL</span>
+          <span className="shrink-0 tabular-nums">
+            {folders.length} {folders.length === 1 ? 'folder' : 'folders'} · {media.length} {media.length === 1 ? 'file' : 'files'}
+          </span>
+        </div>
+      </div>
+    </TooltipProvider>
   )
 }

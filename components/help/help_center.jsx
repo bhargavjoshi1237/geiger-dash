@@ -8,6 +8,7 @@ import { HELP_APP_VIEWPORT, getHelpShowcase } from "@/lib/docs/showcases";
 import { getRandomShowcaseBackgrounds } from "@/lib/showcase-backgrounds";
 import { HelpHeader } from "@/components/help/help_header";
 import { HelpNavTree } from "@/components/help/help_nav_tree";
+import { HelpSidebar } from "@/components/help/help_sidebar";
 import { HelpToc } from "@/components/help/help_toc";
 import { ExplainMoreButton, HelpAskAi } from "@/components/help/help_ask_ai";
 import { CopyPageButton } from "@/components/help/help_copy_page";
@@ -194,9 +195,12 @@ export default function HelpCenter({ navigation, page }) {
       <HelpHeader navigation={navigation} activeSlug={page.slug} />
 
       {/* z-20 keeps the nav above <main>, which spans the full width under it at z-10. */}
-      <aside className={`docs-scrollbar-hidden fixed bottom-0 left-0 z-20 ${belowHeader} hidden w-[280px] overflow-y-auto border-r border-border bg-surface-subtle px-5 py-6 lg:block`}>
+      <HelpSidebar
+        activeSlug={page.slug}
+        className={`docs-scrollbar-hidden fixed bottom-0 left-0 z-20 ${belowHeader} hidden w-[280px] overflow-y-auto border-r border-border bg-surface-subtle px-5 py-6 lg:block`}
+      >
         <HelpNavTree navigation={navigation} activeSlug={page.slug} />
-      </aside>
+      </HelpSidebar>
 
       <main className="relative z-10 min-h-screen pt-14 text-foreground lg:pl-[280px]">
         {/* Article + TOC travel together; gap-14 + w-56 equals the left sidebar, so the article stays viewport-centred under the header search. */}

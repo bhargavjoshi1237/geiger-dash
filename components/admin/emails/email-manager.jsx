@@ -3,7 +3,7 @@
 // Top-level shell for the email admin: a header and three sections — the
 // template directory (master-detail), the send log, and cross-app API keys.
 
-import { useState } from "react";
+import { useSectionParam } from "@/components/console/use-section-param";
 import { Mail, ScrollText, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TemplateWorkspace } from "./template-workspace";
@@ -15,9 +15,10 @@ const SECTIONS = [
   { id: "logs", label: "Send log", icon: ScrollText },
   { id: "keys", label: "API keys", icon: KeyRound },
 ];
+const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function EmailManager({ templates, messages, apiKeys }) {
-  const [section, setSection] = useState("templates");
+  const [section, setSection] = useSectionParam(SECTION_IDS, "templates");
 
   return (
     <div className="mx-auto w-full max-w-[1240px] px-4 py-6 lg:px-6">

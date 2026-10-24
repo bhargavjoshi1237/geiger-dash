@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 import { isContentEditor } from '@/lib/studio/access'
+import { publishIntent, studioUrl } from '@/lib/studio/form'
 import { isValidPageType, PAGE_TYPE_PATH } from '@/lib/pages-studio/skills'
 import { resolveProductApp } from '@/lib/pages-studio/products'
 
@@ -125,7 +126,7 @@ export async function saveSeoPageAction(formData) {
   const metaTitle = String(formData.get('meta_title') || '').trim()
   const metaDescription = String(formData.get('meta_description') || '').trim()
   const keywords = parseKeywords(formData.get('keywords'))
-  const isPublished = formData.get('is_published') === 'on'
+  const isPublished = publishIntent(formData)
   const isFeatured = formData.get('is_featured') === 'on'
   const providedPublishedAt = String(formData.get('published_at') || '').trim()
   const publishedAt = isPublished
@@ -135,9 +136,10 @@ export async function saveSeoPageAction(formData) {
     : null
 
   const validType = isValidPageType(pageType) ? pageType : 'solution'
+  const back = (params) => redirect(studioUrl('/studio/pages', { page: pageId || 'new', ...params }))
 
   if (!title || !content || !normalizedSlug) {
-    redirect('/studio/pages?error=missing_required')
+    back({ error: 'missing_required' })
   }
 
   const uploadFile = formData.get('image_upload')
@@ -154,8 +156,7 @@ export async function saveSeoPageAction(formData) {
       fallbackUrl: formData.get('existing_image_url'),
     })
   } catch (error) {
-    const message = toActionErrorMessage(error, 'Unable to process the cover image')
-    redirect(`/studio/pages?error=${encodeURIComponent(message)}`)
+    back({ error: toActionErrorMessage(error, 'Unable to process the cover image') })
   }
 
   const payload = {
@@ -178,23 +179,18 @@ export async function saveSeoPageAction(formData) {
     ...authorFields(user),
   }
 
-  let query
-  if (pageId) {
-    query = supabase.from('dash_seo_pages').update(payload).eq('id', pageId)
-  } else {
-    query = supabase.from('dash_seo_pages').insert(payload)
-  }
-
-  const { error } = await query
+  const { data: saved, error } = pageId
+    ? await supabase.from('dash_seo_pages').update(payload).eq('id', pageId).select('id').single()
+    : await supabase.from('dash_seo_pages').insert(payload).select('id').single()
   if (error) {
     if (error.code === '23505' || /duplicate|unique/i.test(error.message)) {
-      redirect(`/studio/pages?error=${encodeURIComponent('That slug is already used for this page type.')}`)
+      back({ error: 'That slug is already used for this page type.' })
     }
-    redirect(`/studio/pages?error=${encodeURIComponent(error.message)}`)
+    back({ error: error.message })
   }
 
   revalidatePublic(validType, product, normalizedSlug)
-  redirect('/studio/pages?saved=1')
+  redirect(studioUrl('/studio/pages', { page: saved.id, saved: '1' }))
 }
 
 export async function deleteSeoPageAction(pageId) {

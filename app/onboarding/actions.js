@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
 import { sendTemplateEmail } from '@/lib/email/send'
+import { requestToJoin } from '@/lib/org/join-requests'
 
 async function requestOrigin() {
   const h = await headers()
@@ -137,27 +138,12 @@ export async function findOrganization(query) {
   }
 }
 
-// Join via the join_organization RPC (SECURITY DEFINER): it looks the org up
-// past RLS, adds the caller to organization_users + metadata.members, and is the
-// only sanctioned path to join an org you can't yet see.
-export async function joinOrganization(query) {
+// Asks to join by ID or slug: the owner approves the request before the caller becomes a member.
+// status is 'pending', or 'member' when the caller already belongs to the organization.
+export async function requestToJoinOrganization({ query, message } = {}) {
   const supabase = await createClient()
-  await requireUser(supabase, '/login?next=org')
-
-  const term = cleanText(query)
-  if (!term) {
-    return { ok: false, error: 'Enter an organization ID or workspace URL.' }
-  }
-
-  const { data, error } = await supabase.rpc('join_organization', { q: term })
-  if (error) {
-    return { ok: false, error: error.message }
-  }
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row) {
-    return { ok: false, error: 'No organization found for that ID or URL.' }
-  }
-
-  revalidatePath('/org')
-  return { ok: true, organizationId: row.id, name: row.name }
+  const user = await requireUser(supabase, '/login?next=org')
+  const result = await requestToJoin(supabase, user, { query, message })
+  if (result.ok) revalidatePath('/org')
+  return result
 }

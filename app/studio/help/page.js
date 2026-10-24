@@ -12,7 +12,7 @@ export default async function StudioHelpPage({ searchParams }) {
   const supabase = await createClient()
   await requireUser(supabase, '/login?next=/studio/help')
 
-  if (!(await isContentEditor(supabase))) return <StudioNoAccess active="help" />
+  if (!(await isContentEditor(supabase))) return <StudioNoAccess />
 
   // The open page lives in the URL (?page=<id>, or ?page=new) so a refresh stays on it.
   const selected = typeof params?.page === 'string' ? params.page : ''

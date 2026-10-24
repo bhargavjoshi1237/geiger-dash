@@ -4,7 +4,7 @@
 // overview, the providers in it, the virtual file browser, the placement rules,
 // and the keys other apps upload with alongside the activity log.
 
-import { useState } from "react";
+import { useSectionParam } from "@/components/console/use-section-param";
 import {
   LayoutDashboard,
   HardDrive,
@@ -27,6 +27,7 @@ const SECTIONS = [
   { id: "rules", label: "Rules", icon: Route },
   { id: "keys", label: "Keys & activity", icon: KeyRound },
 ];
+const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function StorageManager({
   snapshot,
@@ -38,7 +39,7 @@ export function StorageManager({
   initialNamespaceId,
   secretKeyReady,
 }) {
-  const [section, setSection] = useState("overview");
+  const [section, setSection] = useSectionParam(SECTION_IDS, "overview");
 
   const counts = {
     overview: snapshot.totals.fileCount,

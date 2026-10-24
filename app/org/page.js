@@ -5,6 +5,7 @@ import { GridBackdrop } from '@/components/grid-backdrop'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
 import { getUserOrganizations } from '@/lib/org/membership'
+import { getMyPendingJoinRequests } from '@/lib/org/join-requests'
 import { getOrgBySubdomain } from '@/lib/domains/store'
 import { OrganizationsClient } from './organizations-client'
 
@@ -15,7 +16,10 @@ export default async function OrganizationsPage({ searchParams }) {
   const supabase = await createClient()
   const user = await requireUser(supabase, '/login?next=org')
 
-  const { organizations, error: loadError } = await getUserOrganizations(supabase, user.id)
+  const [{ organizations, error: loadError }, pendingRequests] = await Promise.all([
+    getUserOrganizations(supabase, user.id),
+    getMyPendingJoinRequests(supabase),
+  ])
 
   // On a subdomain host (set by middleware), pin the page to that one org.
   const subdomain = (await headers()).get('x-geiger-subdomain') || ''
@@ -65,6 +69,8 @@ export default async function OrganizationsPage({ searchParams }) {
           error,
         }}
         scope={scope}
+        pendingRequests={pendingRequests}
+        openMembersFor={typeof params?.members === 'string' ? params.members : ''}
       />
     </div>
   )

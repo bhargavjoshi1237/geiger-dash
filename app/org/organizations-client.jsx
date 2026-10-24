@@ -8,6 +8,7 @@ import {
   Building2,
   Camera,
   Check,
+  Clock,
   Copy,
   ExternalLink,
   Gauge,
@@ -62,11 +63,13 @@ import {
   Textarea,
 } from "@geiger/ui";
 import {
+  approveJoinRequestAction,
   createOrganizationAction,
+  declineJoinRequestAction,
   inviteOrgMembersAction,
-  joinOrganizationAction,
   listOrgMembersAction,
   removeOrgMemberAction,
+  requestToJoinOrganizationAction,
   revokeOrgInviteAction,
   setOrgMemberRoleAction,
   updateOrgAvatarAction,
@@ -125,12 +128,6 @@ function getMessage(searchState) {
   if (searchState.error === 'missing_required') {
     return { id: 'missing_required', type: 'error', text: 'Name and description are required.' }
   }
-  if (searchState.error === 'missing_join_id') {
-    return { id: 'missing_join_id', type: 'error', text: 'Enter an organization ID to join.' }
-  }
-  if (searchState.error === 'organization_not_found') {
-    return { id: 'organization_not_found', type: 'error', text: 'No organization was found for that ID.' }
-  }
   if (searchState.error) return { id: searchState.error, type: 'error', text: searchState.error }
   return null
 }
@@ -178,17 +175,62 @@ function OrganizationForm({ onSubmitted }) {
   )
 }
 
-function JoinForm({ onSubmitted }) {
+// Asks to join by ID; the owner approves it, so success is a "request sent" toast, not a new card.
+function JoinForm({ onDone }) {
+  const [query, setQuery] = useState('')
+  const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    if (pending || !query.trim()) return
+    setPending(true)
+    const result = await requestToJoinOrganizationAction({ query, message })
+    setPending(false)
+    if (!result?.ok) {
+      toast.error(result?.error || 'Could not send your request.')
+      return
+    }
+    const name = result.organization.name || 'the organization'
+    if (result.status === 'member') {
+      toast.info(`You're already a member of ${name}.`)
+    } else {
+      toast.success(`Request sent to ${name}.`, {
+        description: "You'll get a notification when the owner decides.",
+      })
+    }
+    onDone()
+  }
+
   return (
-    <form action={joinOrganizationAction} className="space-y-4" onSubmit={onSubmitted}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-2">
         <Label htmlFor="organization_id">Organization ID</Label>
-        <Input id="organization_id" name="organization_id" placeholder="Paste the organization ID" required />
+        <Input
+          id="organization_id"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Paste the organization ID"
+          required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="join_message">
+          Note for the owner <span className="font-normal text-muted-foreground">optional</span>
+        </Label>
+        <Textarea
+          id="join_message"
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          placeholder="Who you are and why you're joining"
+          maxLength={500}
+          className="min-h-20 resize-none"
+        />
       </div>
       <DialogFooter>
-        <Button type="submit" className="w-full sm:w-auto">
-          <UserPlus className="h-4 w-4" />
-          Join organization
+        <Button type="submit" disabled={pending || !query.trim()} className="w-full sm:w-auto">
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+          Request to join
         </Button>
       </DialogFooter>
     </form>
@@ -212,9 +254,11 @@ function ActionDialogs() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Join organization</DialogTitle>
-            <DialogDescription>Use an organization ID shared by an owner or admin.</DialogDescription>
+            <DialogDescription>
+              Paste an organization ID shared by one of its members. The owner approves your request before you join.
+            </DialogDescription>
           </DialogHeader>
-          <JoinForm onSubmitted={() => setJoinOpen(false)} />
+          <JoinForm onDone={() => setJoinOpen(false)} />
         </DialogContent>
       </Dialog>
 
@@ -346,13 +390,14 @@ function MemberAvatar({ member }) {
   )
 }
 
-// Members tab: fetches the directory + pending invites on open, renders the
-// invite row, the member list (with role + remove for managers), and pending
-// invites. Reads through server actions; owns its own toasts.
+// Members tab: fetches the directory, pending invites and join requests on open, renders the invite row,
+// requests to approve, the member list (with role + remove for managers), and pending invites.
+// Reads through server actions; owns its own toasts.
 function MembersTab({ organization, userId, roleLabel, canManage }) {
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState([])
   const [invites, setInvites] = useState([])
+  const [requests, setRequests] = useState([])
   const [busyId, setBusyId] = useState(null)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('User')
@@ -365,6 +410,7 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
     if (result?.ok) {
       setMembers(result.members)
       setInvites(result.invites)
+      setRequests(result.requests || [])
     }
   }
 
@@ -377,6 +423,7 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
       if (result?.ok) {
         setMembers(result.members)
         setInvites(result.invites)
+        setRequests(result.requests || [])
       } else if (result?.error) {
         toast.error(result.error)
       }
@@ -446,6 +493,21 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
     }
   }
 
+  // Optimistic: the row leaves at once; a failure puts the list back from the server.
+  async function handleDecide(request, approve) {
+    setRequests((prev) => prev.filter((r) => r.id !== request.id))
+    const decide = approve ? approveJoinRequestAction : declineJoinRequestAction
+    const result = await decide({ requestId: request.id })
+    if (result?.ok) {
+      toast.success(approve ? 'Request approved.' : 'Request declined.')
+      // Only the member list changes, so other requests being decided don't flicker back.
+      if (approve) listOrgMembersAction(organization.id).then((r) => r?.ok && setMembers(r.members))
+    } else {
+      toast.error(result?.error || (approve ? 'Could not approve the request.' : 'Could not decline the request.'))
+      reload()
+    }
+  }
+
   async function handleRevoke(invite) {
     setBusyId(invite.id)
     const result = await revokeOrgInviteAction({ organizationId: organization.id, inviteId: invite.id })
@@ -487,6 +549,40 @@ function MembersTab({ organization, userId, roleLabel, canManage }) {
               Invite
             </Button>
           </form>
+        </SettingsSection>
+      )}
+
+      {canManage && requests.length > 0 && (
+        <SettingsSection
+          title="Requests to join"
+          description="People who asked to join with the organization ID. Approved requests join as User."
+          aside={<span className="text-xs text-muted-foreground">{requests.length}</span>}
+          bodyClassName="p-0"
+        >
+          <div className="divide-y divide-border">
+            {requests.map((r) => (
+              <div key={r.id} className="flex items-center gap-3 px-4 py-3">
+                <MemberAvatar member={r} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{r.name || r.email || 'Unknown user'}</p>
+                  {r.name && r.email && <p className="truncate text-xs text-muted-foreground">{r.email}</p>}
+                  {r.message && <p className="mt-1 line-clamp-2 break-words text-xs text-text-secondary">{r.message}</p>}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDecide(r, false)}
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                >
+                  Decline
+                </Button>
+                <Button size="sm" onClick={() => handleDecide(r, true)} className="shrink-0">
+                  <Check className="size-4" />
+                  Approve
+                </Button>
+              </div>
+            ))}
+          </div>
         </SettingsSection>
       )}
 
@@ -1612,7 +1708,7 @@ function EmailTemplatesTab({ organization }) {
   )
 }
 
-function OrganizationCard({ organization, userId }) {
+function OrganizationCard({ organization, userId, openMembers = false }) {
   const router = useRouter()
   const members = Array.isArray(organization.metadata?.members) ? organization.metadata.members : []
   // Prefer the authoritative count computed in the data layer (union of the
@@ -1647,8 +1743,9 @@ function OrganizationCard({ organization, userId }) {
   const [editOpen, setEditOpen] = useState(false)
   const [archiveOpen, setArchiveOpen] = useState(false)
   const [deactivateOpen, setDeactivateOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [activeSettingsTab, setActiveSettingsTab] = useState('general')
+  // A join-request notification links here with ?members=<id>, opening Members settings straight away.
+  const [settingsOpen, setSettingsOpen] = useState(openMembers && canManage)
+  const [activeSettingsTab, setActiveSettingsTab] = useState(openMembers ? 'members' : 'general')
   const [editForm, setEditForm] = useState({
     name: organization.name || '',
     description: organization.description || '',
@@ -2155,7 +2252,42 @@ function SubdomainNotice({ scope }) {
   )
 }
 
-export function OrganizationsClient({ organizations, userId, searchState, scope = null }) {
+// Requests the viewer sent with an organization ID that an owner hasn't decided yet.
+function PendingJoinRequests({ requests }) {
+  return (
+    <section className="mt-6 overflow-hidden rounded-lg border border-border bg-surface-subtle">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <p className="text-sm font-medium text-foreground">Requests to join</p>
+        <span className="text-xs text-muted-foreground">You&apos;ll get a notification when an owner decides</span>
+      </header>
+      <div className="divide-y divide-border">
+        {requests.map((request) => (
+          <div key={request.id} className="flex items-center gap-3 px-4 py-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-card text-sm font-semibold text-foreground">
+              {(request.orgName || 'O').slice(0, 1).toUpperCase()}
+            </span>
+            <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+              {request.orgName || 'Untitled organization'}
+            </p>
+            <Badge variant="warning" className="shrink-0">
+              <Clock />
+              Pending approval
+            </Badge>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function OrganizationsClient({
+  organizations,
+  userId,
+  searchState,
+  scope = null,
+  pendingRequests = [],
+  openMembersFor = '',
+}) {
   const router = useRouter()
   const message = useMemo(() => getMessage(searchState), [searchState])
   const notifiedMessage = useRef(null)
@@ -2167,6 +2299,11 @@ export function OrganizationsClient({ organizations, userId, searchState, scope 
     toast[message.type](message.text)
     router.replace(ORG_ROUTE, { scroll: false })
   }, [message, router])
+
+  // The card already opened its Members settings from ?members=; drop the param so a refresh doesn't reopen it.
+  useEffect(() => {
+    if (openMembersFor) router.replace(ORG_ROUTE, { scroll: false })
+  }, [openMembersFor, router])
 
   // On a subdomain host the page is pinned to a single organization: no create /
   // join affordances, and a tailored notice when the user can't see it.
@@ -2193,6 +2330,8 @@ export function OrganizationsClient({ organizations, userId, searchState, scope 
           </div>
         </div>
 
+        {!scoped && pendingRequests.length > 0 ? <PendingJoinRequests requests={pendingRequests} /> : null}
+
         {scopedBlocked ? (
           <SubdomainNotice scope={scope} />
         ) : organizations.length === 0 ? (
@@ -2200,7 +2339,12 @@ export function OrganizationsClient({ organizations, userId, searchState, scope 
         ) : (
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {organizations.map((organization) => (
-              <OrganizationCard key={organization.id} organization={organization} userId={userId} />
+              <OrganizationCard
+                key={organization.id}
+                organization={organization}
+                userId={userId}
+                openMembers={organization.id === openMembersFor}
+              />
             ))}
           </div>
         )}

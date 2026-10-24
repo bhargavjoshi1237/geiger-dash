@@ -1,12 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import Link from 'next/link'
+import { useCallback, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowUpRight, FilePlus2, FolderPlus, LayoutGrid, Loader2, Pencil, Search } from 'lucide-react'
+import { FolderPlus, House, LifeBuoy, Loader2, Pencil, Plus } from 'lucide-react'
 import {
-  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -14,35 +12,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  EmptyState,
+  Field,
   Input,
+  SearchInput,
+  cn,
 } from '@geiger/ui'
-import { FormField, inputClassName } from '@/components/content-studio/shared'
-import { StudioTabs } from '@/components/content-studio/studio-shell'
+import { EditorTopBar, ListEmpty, ListGroupLabel, ListPane, Req, StudioFrame, ViewLiveLink } from '@/components/content-studio/editor-kit'
 import { PageEditor } from '@/components/help-studio/page-editor'
-import { PAGE_STATUS_BADGE } from '@/components/help-studio/constants'
+import { HELP_STATUS, HELP_STATUS_DOT } from '@/components/help-studio/constants'
 import { deleteHelpGroupAction, saveHelpGroupAction } from '@/app/studio/help/actions'
+import { HELP_HOME_SLUG } from '@/lib/docs/paths'
 import { slugify } from '@/lib/docs/text'
-
-function StudioHeader({ children }) {
-  return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur sm:px-4">
-      <div className="flex min-w-0 items-center gap-3">
-        <Link href="/" className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-card">
-          <LayoutGrid className="size-4" />
-          <span className="sr-only">Back to Geiger</span>
-        </Link>
-        <div className="flex min-w-0 items-center gap-2">
-          <h1 className="truncate text-sm font-semibold">Geiger Help Studio</h1>
-          <Badge variant="outline" className="hidden font-mono text-[10px] sm:inline-flex">Help</Badge>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <StudioTabs active="help" />
-        {children}
-      </div>
-    </header>
-  )
-}
 
 function GroupDialog({ group, onOpenChange }) {
   const router = useRouter()
@@ -85,16 +66,16 @@ function GroupDialog({ group, onOpenChange }) {
             <DialogTitle>{draft.id ? 'Edit group' : 'New group'}</DialogTitle>
             <DialogDescription>Groups are the headings in the Help Center sidebar.</DialogDescription>
           </DialogHeader>
-          <FormField label="Title" required>
-            <Input value={draft.title} onChange={set('title')} placeholder="Workspace" className={inputClassName} autoFocus />
-          </FormField>
+          <Field label={<>Title<Req /></>} className="gap-1.5">
+            <Input value={draft.title} onChange={set('title')} placeholder="Workspace" autoFocus />
+          </Field>
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_110px]">
-            <FormField label="Slug" hint="Prefix for new pages in this group">
-              <Input value={draft.slug} onChange={set('slug')} placeholder={slugify(draft.title) || 'workspace'} className={inputClassName} />
-            </FormField>
-            <FormField label="Order">
-              <Input type="number" value={draft.sortOrder} onChange={set('sortOrder')} className={inputClassName} />
-            </FormField>
+            <Field label="Slug" hint="Prefix for new pages in this group" className="gap-1.5">
+              <Input value={draft.slug} onChange={set('slug')} placeholder={slugify(draft.title) || 'workspace'} className="font-mono text-xs" />
+            </Field>
+            <Field label="Order" className="gap-1.5">
+              <Input type="number" value={draft.sortOrder} onChange={set('sortOrder')} />
+            </Field>
           </div>
           <DialogFooter className="gap-2 sm:justify-between">
             {draft.id ? (
@@ -129,7 +110,7 @@ function GroupDialog({ group, onOpenChange }) {
 // Each group's pages, children listed right after their parent.
 function buildTree(groups, pages, query) {
   const q = query.trim().toLowerCase()
-  const matches = (page) => !q || `${page.title} ${page.slug}`.toLowerCase().includes(q)
+  const matches = (page) => !q || `${page.title} ${page.nav_label || ''} ${page.slug}`.toLowerCase().includes(q)
   const bySort = (a, b) => a.sort_order - b.sort_order || a.title.localeCompare(b.title)
 
   return groups.map((group) => {
@@ -144,27 +125,26 @@ function buildTree(groups, pages, query) {
   })
 }
 
+function StatusDot({ status }) {
+  return <span aria-hidden className={cn('mx-[3px] size-[7px] shrink-0 rounded-full', HELP_STATUS_DOT[status])} />
+}
+
+const LEGEND = [
+  { status: 'live', label: 'Live' },
+  { status: 'draft', label: 'Draft' },
+  { status: 'archived', label: 'Archived' },
+]
+
 export function HelpStudio({ groups, pages, page, isNew }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [groupDialog, setGroupDialog] = useState(null)
+  const [listOpen, setListOpen] = useState(false)
   const dirtyRef = useRef(false)
 
   const tree = useMemo(() => buildTree(groups, pages, query), [groups, pages, query])
-  const publishedCount = pages.filter((entry) => entry.status === 'published').length
-  const selectedId = page?.id || ''
-
-  // Same full-height shell as the other Studio screens.
-  useEffect(() => {
-    const previousHtmlOverflow = document.documentElement.style.overflow
-    const previousBodyOverflow = document.body.style.overflow
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow
-      document.body.style.overflow = previousBodyOverflow
-    }
-  }, [])
+  const liveCount = pages.filter((entry) => entry.status === 'published').length
+  const selectedId = isNew ? '' : page?.id || ''
 
   const handleDirtyChange = useCallback((dirty) => {
     dirtyRef.current = dirty
@@ -173,125 +153,111 @@ export function HelpStudio({ groups, pages, page, isNew }) {
   const open = (id) => {
     if (dirtyRef.current && !window.confirm('Discard your unsaved changes?')) return
     dirtyRef.current = false
+    setListOpen(false)
     router.push(`/studio/help?page=${id}`, { scroll: false })
   }
 
   return (
-    <div className="fixed inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-background text-foreground">
+    <StudioFrame>
       {groupDialog ? <GroupDialog group={groupDialog.group} onOpenChange={(next) => !next && setGroupDialog(null)} /> : null}
 
-      <StudioHeader>
-        <Button asChild type="button" size="sm" variant="ghost" className="hidden sm:inline-flex">
-          <Link href="/help" target="_blank">
-            View live
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        </Button>
-        <Button type="button" size="sm" onClick={() => open('new')} disabled={!groups.length} className="gap-1.5">
-          <FilePlus2 className="size-3.5" />
-          <span className="hidden sm:inline">New page</span>
-        </Button>
-      </StudioHeader>
-
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 overflow-x-hidden lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="hidden min-h-0 min-w-0 flex-col border-r border-border bg-card/25 lg:flex">
-          <div className="space-y-3 border-b border-border p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold">Pages</p>
-                <p className="text-xs text-muted-foreground">
-                  {publishedCount} of {pages.length} live
-                </p>
-              </div>
-              <Button type="button" size="sm" variant="outline" onClick={() => setGroupDialog({ group: null })}>
-                <FolderPlus className="size-3.5" />
-                Group
-              </Button>
-            </div>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search pages..."
-                className={`${inputClassName} pl-9`}
-              />
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-2">
-            {tree.map(({ group, rows }) => (
-              <div key={group.id} className="space-y-1">
-                <div className="flex items-center justify-between gap-2 px-2 pt-2">
-                  <p className="truncate text-xs font-medium uppercase text-text-secondary">{group.title}</p>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => setGroupDialog({ group })}
-                    aria-label={`Edit the ${group.title} group`}
-                    className="size-7 text-muted-foreground"
-                  >
-                    <Pencil className="size-3" />
-                  </Button>
-                </div>
-                {rows.length === 0 ? (
-                  <p className="px-2 py-1 text-xs text-muted-foreground">{query ? 'No matches' : 'No pages yet'}</p>
-                ) : null}
-                {rows.map(({ page: entry, depth }) => {
-                  const badge = PAGE_STATUS_BADGE[entry.status] || PAGE_STATUS_BADGE.draft
-                  return (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      onClick={() => open(entry.id)}
-                      className={`grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md border px-2 py-1.5 text-left transition-colors ${
-                        depth ? 'ml-4 w-[calc(100%-1rem)]' : ''
-                      } ${selectedId === entry.id ? 'border-border bg-surface-active' : 'border-transparent hover:bg-surface-hover'}`}
-                    >
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium">{entry.nav_label || entry.title}</span>
-                        <span className="block truncate text-xs text-muted-foreground">{entry.slug}</span>
-                      </span>
-                      <Badge variant={badge.variant} className="px-1.5 py-0.5 text-[10px]">
-                        {badge.label}
-                      </Badge>
-                    </button>
-                  )
-                })}
-              </div>
+      <ListPane
+        title="Help Center"
+        subtitle={`${liveCount} of ${pages.length} live`}
+        open={listOpen}
+        onClose={() => setListOpen(false)}
+        actions={
+          <>
+            <Button type="button" variant="ghost" size="icon-sm" onClick={() => setGroupDialog({ group: null })} aria-label="New group" title="New group" className="text-muted-foreground">
+              <FolderPlus className="size-4" />
+            </Button>
+            <Button type="button" size="sm" onClick={() => open('new')} disabled={!groups.length}>
+              <Plus className="size-4" />
+              Page
+            </Button>
+          </>
+        }
+        search={<SearchInput expanded value={query} onChange={setQuery} placeholder="Search pages…" />}
+        footer={
+          <div className="flex shrink-0 gap-3.5 border-t border-sidebar-border px-4 py-2.5 text-[11px] text-muted-foreground">
+            {LEGEND.map((entry) => (
+              <span key={entry.status} className="inline-flex items-center gap-1.5">
+                <StatusDot status={entry.status} />
+                {entry.label}
+              </span>
             ))}
-            {groups.length === 0 ? (
-              <p className="px-2 py-8 text-center text-sm text-muted-foreground">Create a group to start adding pages.</p>
-            ) : null}
           </div>
-        </aside>
-
-        <main className="min-h-0 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
-          <div className="mx-auto min-w-0 max-w-4xl px-3 py-4 sm:px-6 sm:py-6">
-            {page || isNew ? (
-              <PageEditor
-                key={page ? `${page.id}-${page.updated_at}` : 'new'}
-                page={page}
-                groups={groups}
-                pages={pages}
-                onDirtyChange={handleDirtyChange}
-              />
-            ) : (
-              <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-                <p className="text-base font-semibold">Pick a page to edit</p>
-                <p className="max-w-sm text-sm text-muted-foreground">
-                  Choose a page from the list, or create a new one. Drafts stay hidden until you publish them.
-                </p>
-                <Button type="button" size="sm" onClick={() => open('new')} disabled={!groups.length}>
-                  <FilePlus2 className="size-3.5" />
-                  New page
+        }
+      >
+        {tree.map(({ group, rows }) => (
+          <div key={group.id} className="flex flex-col gap-px">
+            <ListGroupLabel
+              label={group.title}
+              action={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setGroupDialog({ group })}
+                  aria-label={`Edit the ${group.title} group`}
+                  className="text-text-secondary"
+                >
+                  <Pencil />
                 </Button>
-              </div>
-            )}
+              }
+            />
+            {rows.length === 0 ? <p className="px-2.5 py-1 text-xs text-muted-foreground">{query ? 'No matches' : 'No pages yet'}</p> : null}
+            {rows.map(({ page: entry, depth }) => (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => open(entry.id)}
+                aria-current={selectedId === entry.id ? 'page' : undefined}
+                className={cn(
+                  'flex h-8 w-full shrink-0 items-center gap-2 rounded-md border pr-2.5 text-left transition-colors',
+                  depth ? 'pl-7' : 'pl-2.5',
+                  selectedId === entry.id ? 'border-border bg-surface-active' : 'border-transparent hover:bg-surface-hover',
+                )}
+              >
+                {entry.slug === HELP_HOME_SLUG ? (
+                  <House className="size-3.5 shrink-0 text-muted-foreground" />
+                ) : (
+                  <StatusDot status={HELP_STATUS[entry.status] || 'draft'} />
+                )}
+                <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">{entry.nav_label || entry.title}</span>
+              </button>
+            ))}
           </div>
-        </main>
-      </div>
-    </div>
+        ))}
+        {groups.length === 0 ? <ListEmpty>Create a group to start adding pages.</ListEmpty> : null}
+      </ListPane>
+
+      {page || isNew ? (
+        <PageEditor
+          key={page ? `${page.id}-${page.updated_at}` : 'new'}
+          page={page}
+          groups={groups}
+          pages={pages}
+          onDirtyChange={handleDirtyChange}
+          onOpenList={() => setListOpen(true)}
+        />
+      ) : (
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <EditorTopBar current="Help Center" onOpenList={() => setListOpen(true)} actions={<ViewLiveLink href="/help">View /help</ViewLiveLink>} />
+          <EmptyState
+            icon={LifeBuoy}
+            title="Pick a page to edit"
+            description="Choose a page from the tree, or create a new one. Drafts stay hidden until you publish them."
+            className="[&_p]:normal-case"
+            action={
+              <Button type="button" size="sm" onClick={() => open('new')} disabled={!groups.length}>
+                <Plus className="size-3.5" />
+                New page
+              </Button>
+            }
+          />
+        </div>
+      )}
+    </StudioFrame>
   )
 }

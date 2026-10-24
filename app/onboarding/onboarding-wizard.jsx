@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Building2,
@@ -9,15 +9,18 @@ import {
   ArrowRight,
   Loader2,
   Check,
+  Clock,
+  RefreshCw,
   Search,
   AlertCircle,
 } from "lucide-react";
+import { Badge } from "@geiger/ui";
 import { cn } from "@/lib/utils";
 import { logout } from "@/app/login/actions";
 import {
   createOrganization,
   findOrganization,
-  joinOrganization,
+  requestToJoinOrganization,
   inviteTeammates,
 } from "./actions";
 
@@ -86,19 +89,29 @@ function PathCard({ icon: Icon, title, description, selected, onSelect }) {
   );
 }
 
-export function OnboardingWizard({ email }) {
+export function OnboardingWizard({ email, pendingRequests = [] }) {
   const router = useRouter();
 
-  // step: "choose" | "create" | "join" | "invite"
-  const [step, setStep] = useState("choose");
-  const [path, setPath] = useState("create");
+  // step: "choose" | "create" | "join" | "requested" | "invite"
+  const [step, setStep] = useState(pendingRequests.length > 0 ? "requested" : "choose");
+  const [path, setPath] = useState(pendingRequests.length > 0 ? "join" : "create");
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [teamSize, setTeamSize] = useState("");
 
   const [joinQuery, setJoinQuery] = useState("");
+  const [joinNote, setJoinNote] = useState("");
   const [found, setFound] = useState(null);
+
+  // The request sent this session, shown until a refresh brings it back from the server.
+  const [sent, setSent] = useState(null);
+  const [checked, setChecked] = useState(false);
+  const [checking, startChecking] = useTransition();
+  const requests = useMemo(() => {
+    if (!sent || pendingRequests.some((r) => r.organizationId === sent.organizationId)) return pendingRequests;
+    return [sent, ...pendingRequests];
+  }, [pendingRequests, sent]);
 
   const [created, setCreated] = useState(null); // { id, name } after org creation
   const [inviteEmails, setInviteEmails] = useState("");
@@ -210,13 +223,34 @@ export function OnboardingWizard({ email }) {
     if (pending || !found) return;
     setPending(true);
     setError("");
-    const result = await joinOrganization(found.id);
+    const result = await requestToJoinOrganization({ query: found.id, message: joinNote });
     if (!result?.ok) {
       setPending(false);
-      setError(result?.error || "Could not join that organization.");
+      setError(result?.error || "Could not send your request.");
       return;
     }
-    finish(found.name || "your organization");
+    const orgName = result.organization.name || found.name || "your organization";
+    // Already a member: nothing to approve, go straight in.
+    if (result.status === "member") {
+      finish(orgName);
+      return;
+    }
+    setSent({ organizationId: result.organization.id, orgName });
+    setPending(false);
+    setFound(null);
+    setJoinQuery("");
+    setJoinNote("");
+    setChecked(false);
+    setStep("requested");
+  }
+
+  // Re-reads the page: once an owner approves, the server sends the user on to /org.
+  function checkStatus() {
+    startChecking(() => {
+      router.refresh();
+      setSent(null);
+      setChecked(true);
+    });
   }
 
   // ----- success splash -----
@@ -356,11 +390,13 @@ export function OnboardingWizard({ email }) {
         <div
           key="join"
           className="animate-in fade-in slide-in-from-right-2 duration-300"
-          onKeyDown={(e) => e.key === "Enter" && (found ? handleJoin() : handleFind())}
+          onKeyDown={(e) =>
+            e.key === "Enter" && e.target.tagName !== "TEXTAREA" && (found ? handleJoin() : handleFind())
+          }
         >
           <Heading
             title="Join an organization"
-            subtitle="Paste the organization ID or workspace URL your team shared."
+            subtitle="Paste the organization ID or workspace URL your team shared. Its owner approves your request."
           />
           <div className="mt-8 space-y-5 text-left">
             <Field label="Organization ID or URL">
@@ -407,6 +443,19 @@ export function OnboardingWizard({ email }) {
                 <Check className="h-4 w-4 text-foreground" />
               </div>
             )}
+
+            {found && (
+              <Field label="Note for the owner" optional>
+                <textarea
+                  value={joinNote}
+                  onChange={(e) => setJoinNote(e.target.value)}
+                  placeholder="Who you are and why you're joining"
+                  rows={3}
+                  maxLength={500}
+                  className="flex w-full resize-none rounded-md border border-border bg-surface-card px-3 py-2 text-sm text-foreground placeholder:text-tertiary outline-none transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                />
+              </Field>
+            )}
           </div>
 
           <ErrorNote error={error} />
@@ -421,11 +470,11 @@ export function OnboardingWizard({ email }) {
               {pending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {found ? "Joining…" : "Finding…"}
+                  {found ? "Sending request…" : "Finding…"}
                 </>
               ) : found ? (
                 <>
-                  Join {found.name}
+                  <span className="min-w-0 truncate">Request to join {found.name}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               ) : (
@@ -435,6 +484,83 @@ export function OnboardingWizard({ email }) {
                 </>
               )}
             </PrimaryButton>
+          </div>
+        </div>
+      )}
+
+      {step === "requested" && (
+        <div key="requested" className="animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className="mb-6 flex justify-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10 ring-1 ring-foreground/20">
+              <Clock className="h-7 w-7 text-foreground" />
+            </span>
+          </div>
+          {requests.length > 0 ? (
+            <Heading
+              title="Request sent"
+              subtitle={
+                requests.length === 1
+                  ? `The owner of ${requests[0].orgName || "the organization"} needs to approve it before you can join. You'll get a notification when they decide.`
+                  : "Each organization's owner needs to approve your request before you can join. You'll get a notification when they decide."
+              }
+            />
+          ) : (
+            <Heading
+              title="No pending requests"
+              subtitle="Ask your team to invite you, request to join again, or create your own organization."
+            />
+          )}
+
+          {requests.length > 0 && (
+            <div className="mt-8 space-y-2">
+              {requests.map((request) => (
+                <div
+                  key={request.organizationId}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-surface-card p-4"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-foreground/10 text-sm font-semibold text-foreground">
+                    {(request.orgName || "?").slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                    {request.orgName || "Untitled organization"}
+                  </span>
+                  <Badge variant="warning">
+                    <Clock />
+                    Pending approval
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {checked && !checking && requests.length > 0 && (
+            <p className="mt-5 text-center text-xs text-muted-foreground animate-in fade-in duration-200">
+              Not approved yet. Check again after the owner decides.
+            </p>
+          )}
+
+          <div className="mt-8 flex items-center gap-3">
+            <BackButton onClick={back} disabled={checking} />
+            {requests.length > 0 ? (
+              <PrimaryButton onClick={checkStatus} disabled={checking} className="flex-1">
+                {checking ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Checking…
+                  </>
+                ) : (
+                  <>
+                    Check status
+                    <RefreshCw className="h-4 w-4" />
+                  </>
+                )}
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={back} className="flex-1">
+                Start again
+                <ArrowRight className="h-4 w-4" />
+              </PrimaryButton>
+            )}
           </div>
         </div>
       )}

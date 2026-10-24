@@ -546,6 +546,35 @@ export const TEMPLATES = [
     },
     variables: ["recipientName", "ctaUrl"],
   },
+  {
+    key: "geiger.beta_request",
+    project: "geiger",
+    category: "Internal",
+    name: "Beta request",
+    description: "Sent to info@geiger.studio when someone asks to join the beta from the pricing page.",
+    subject: "Beta request: {{name}}",
+    content: {
+      heading: "New beta request",
+      intro: "{{name}} asked to join the Geiger beta from the pricing page.",
+      cta_label: "Reply to {{name}}",
+    },
+    fields: [
+      text("heading", "Heading"),
+      area("intro", "Intro paragraph"),
+      text("cta_label", "Button label"),
+    ],
+    sampleData: {
+      name: "Alex Johnson",
+      email: "alex@company.com",
+      company: "Acme Inc.",
+      teamSize: "2–10",
+      apps: "Flow, Notes, Events",
+      useCase: "We run client projects and events and want one place for both.",
+      account: "Signed in as alex@company.com",
+      submittedAt: "Oct 25, 2026, 10:30 AM UTC",
+    },
+    variables: ["name", "email", "company", "teamSize", "apps", "useCase", "account", "submittedAt"],
+  },
   // ---- Geiger Property ----------------------------------------------------
   {
     key: "property.rent_reminder",

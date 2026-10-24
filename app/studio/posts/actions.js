@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 import { isContentEditor } from '@/lib/studio/access'
+import { publishIntent, studioUrl } from '@/lib/studio/form'
 import { fetchArticle, extractArticleText, extractArticleImages } from '@/lib/blog-import/extract-article'
 
 function slugify(value) {
@@ -334,7 +335,7 @@ export async function deleteChangelogAction(changelogId) {
 
   revalidatePath('/changelog')
   revalidatePath(`/changelog/${id}`)
-  revalidatePath('/studio/posts')
+  revalidatePath('/studio/releases')
   return { ok: true }
 }
 
@@ -478,15 +479,16 @@ export async function saveBlogPostAction(formData) {
     readingAuto || !Number.isFinite(manualReading) || manualReading < 1
       ? readingTimeFromContent(content)
       : Math.round(manualReading)
-  const isPublished = formData.get('is_published') === 'on'
+  const isPublished = publishIntent(formData)
   const isFeatured = formData.get('is_featured') === 'on'
   const providedPublishedAt = String(formData.get('published_at') || '').trim()
   const publishedAt = isPublished
     ? (providedPublishedAt ? new Date(providedPublishedAt).toISOString() : new Date().toISOString())
     : null
+  const back = (params) => redirect(studioUrl('/studio/posts', { post: postId || 'new', ...params }))
 
   if (!title || !excerpt || !content || !category || !normalizedSlug) {
-    redirect('/studio/posts?tab=blog&error=missing_required')
+    back({ error: 'missing_required' })
   }
 
   const uploadFile = formData.get('image_upload')
@@ -504,8 +506,7 @@ export async function saveBlogPostAction(formData) {
       fallbackUrl: formData.get('existing_image_url'),
     })
   } catch (error) {
-    const message = toActionErrorMessage(error, 'Unable to process blog image')
-    redirect(`/studio/posts?tab=blog&error=${encodeURIComponent(message)}`)
+    back({ error: toActionErrorMessage(error, 'Unable to process blog image') })
   }
 
   const displayName =
@@ -532,21 +533,16 @@ export async function saveBlogPostAction(formData) {
     reading_time_minutes: readingMinutes,
   }
 
-  let query
-  if (postId) {
-    query = supabase.from('dash_blog_posts').update(payload).eq('id', postId)
-  } else {
-    query = supabase.from('dash_blog_posts').insert(payload)
-  }
-
-  const { error } = await query
+  const { data: saved, error } = postId
+    ? await supabase.from('dash_blog_posts').update(payload).eq('id', postId).select('id').single()
+    : await supabase.from('dash_blog_posts').insert(payload).select('id').single()
   if (error) {
-    redirect(`/studio/posts?tab=blog&error=${encodeURIComponent(error.message)}`)
+    back({ error: error.message })
   }
 
   revalidatePath('/blog')
   revalidatePath('/studio/posts')
-  redirect('/studio/posts?tab=blog&saved=1')
+  redirect(studioUrl('/studio/posts', { post: saved.id, saved: '1' }))
 }
 
 function buildChangelogItems(formData) {
@@ -591,9 +587,10 @@ export async function saveChangelogAction(formData) {
   const releaseDateInput = String(formData.get('release_date') || '').trim()
   const releaseDate = releaseDateInput ? new Date(releaseDateInput).toISOString() : new Date().toISOString()
   const isFeatured = formData.get('is_featured') === 'on'
+  const back = (params) => redirect(studioUrl('/studio/releases', { release: recordId || 'new', ...params }))
 
   if (!version || !title || !description || !category || !product) {
-    redirect('/studio/posts?tab=changelog&error=missing_required')
+    back({ error: 'missing_required' })
   }
 
   const uploadFile = formData.get('image_upload')
@@ -612,8 +609,7 @@ export async function saveChangelogAction(formData) {
       fallbackUrl: formData.get('existing_image_url'),
     })
   } catch (error) {
-    const message = toActionErrorMessage(error, 'Unable to process changelog image')
-    redirect(`/studio/posts?tab=changelog&error=${encodeURIComponent(message)}`)
+    back({ error: toActionErrorMessage(error, 'Unable to process changelog image') })
   }
 
   const payload = {
@@ -629,8 +625,7 @@ export async function saveChangelogAction(formData) {
 
   const upsertResult = await upsertChangelogRecord(supabase, recordId, payload)
   if (upsertResult.error || !upsertResult.id) {
-    const message = upsertResult.error?.message || 'Unable to save changelog'
-    redirect(`/studio/posts?tab=changelog&error=${encodeURIComponent(message)}`)
+    back({ error: upsertResult.error?.message || 'Unable to save changelog' })
   }
 
   const changelogId = upsertResult.id
@@ -641,7 +636,7 @@ export async function saveChangelogAction(formData) {
     .delete()
     .eq('changelog_id', changelogId)
   if (deleteError) {
-    redirect(`/studio/posts?tab=changelog&error=${encodeURIComponent(deleteError.message)}`)
+    back({ release: changelogId, error: deleteError.message })
   }
 
   if (items.length > 0) {
@@ -652,12 +647,12 @@ export async function saveChangelogAction(formData) {
     }))
     const { error: insertItemsError } = await supabase.from('dash_changelog_items').insert(payloadItems)
     if (insertItemsError) {
-      redirect(`/studio/posts?tab=changelog&error=${encodeURIComponent(insertItemsError.message)}`)
+      back({ release: changelogId, error: insertItemsError.message })
     }
   }
 
   revalidatePath('/changelog')
   revalidatePath(`/changelog/${changelogId}`)
-  revalidatePath('/studio/posts')
-  redirect('/studio/posts?tab=changelog&saved=1')
+  revalidatePath('/studio/releases')
+  redirect(studioUrl('/studio/releases', { release: changelogId, saved: '1' }))
 }

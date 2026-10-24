@@ -8,8 +8,6 @@ import { toast } from 'sonner'
 import {
   Bold,
   Code,
-  Code2,
-  Eye,
   Heading1,
   Heading2,
   Heading3,
@@ -22,13 +20,14 @@ import {
   Minimize2,
   Minus,
   Pilcrow,
-  Quote,
   Redo2,
   Sparkles,
+  SquareCode,
   Strikethrough,
+  TextQuote,
   Undo2,
   Unlink,
-  WrapText,
+  Upload,
 } from 'lucide-react'
 import {
   Button,
@@ -41,20 +40,26 @@ import {
   DialogTrigger,
   Input,
   Label,
-  Separator,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  SegmentedTabs,
   Textarea,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  cn,
 } from "@geiger/ui";
 import { callLlmChat, useLlmConfig } from '@/components/content-studio/llm-config'
 
-function ToolbarButton({ active = false, label, children, ...props }) {
+const EDITOR_MODES = [
+  { label: 'Write', value: 'write' },
+  { label: 'Preview', value: 'preview' },
+  { label: 'HTML', value: 'html' },
+]
+
+function ToolbarButton({ active = false, label, children, className, ...props }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -62,9 +67,8 @@ function ToolbarButton({ active = false, label, children, ...props }) {
           type="button"
           size="icon-sm"
           variant="ghost"
-          className={`border border-transparent text-muted-foreground hover:border-border-strong hover:bg-surface-hover hover:text-foreground ${
-            active ? 'border-zinc-600 bg-surface-hover text-foreground' : ''
-          }`}
+          aria-label={label}
+          className={cn(active ? 'bg-surface-active text-foreground' : 'text-muted-foreground', className)}
           {...props}
         >
           {children}
@@ -75,8 +79,17 @@ function ToolbarButton({ active = false, label, children, ...props }) {
   )
 }
 
+function ToolbarGroup({ children }) {
+  return <div className="flex shrink-0 items-center gap-0.5 border-r border-border pr-1.5 mr-1 last:mr-0 last:border-r-0 last:pr-0">{children}</div>
+}
+
 const editorSurfaceClass =
-  'prose prose-invert min-h-[460px] min-w-0 max-w-full overflow-x-hidden break-words rounded-md border border-border bg-background px-6 py-5 text-sm leading-relaxed text-foreground focus:outline-none [&_a]:break-all [&_a]:text-blue-700 dark:[&_a]:text-blue-300 [&_blockquote]:border-l-zinc-600 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-surface-hover [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-border [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:bg-surface-subtle [&_pre]:border [&_pre]:border-border'
+  'prose dark:prose-invert min-w-0 max-w-full overflow-x-hidden break-words leading-[1.7] text-foreground focus:outline-none [&_a]:break-all [&_a]:text-blue-700 dark:[&_a]:text-blue-300 [&_blockquote]:border-l-border-strong [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-surface-hover [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:text-[22px] [&_h2]:font-semibold [&_h2]:tracking-[-0.01em] [&_h3]:text-lg [&_h3]:font-semibold [&_hr]:border-border [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:border [&_pre]:border-border [&_pre]:bg-surface-subtle'
+
+const SURFACE_SIZE = {
+  lg: 'min-h-[420px] px-6 py-7 text-base sm:px-8',
+  sm: 'min-h-[180px] px-5 py-4 text-sm',
+}
 
 const AI_SYSTEM_PROMPT =
   'You are an expert technical blog writer for a modern SaaS product suite. ' +
@@ -97,7 +110,7 @@ function countWords(text) {
   return clean.split(/\s+/).filter(Boolean).length
 }
 
-function AiAssist({ editor }) {
+function AiAssist({ editor, onEdit }) {
   const { isConfigured, config } = useLlmConfig()
   const [open, setOpen] = useState(false)
   const [prompt, setPrompt] = useState('')
@@ -125,7 +138,7 @@ function AiAssist({ editor }) {
       return
     }
     if (!isConfigured) {
-      toast.error('Connect an AI model first (AI Settings)')
+      toast.error('Connect an AI model first (AI model, bottom of the sidebar)')
       return
     }
     setIsStreaming(true)
@@ -170,6 +183,7 @@ function AiAssist({ editor }) {
         .deleteSelection()
     }
     chain.insertContent(html).run()
+    onEdit?.()
     setOpen(false)
   }
 
@@ -178,14 +192,9 @@ function AiAssist({ editor }) {
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-200"
-            >
-              <Sparkles className="h-4 w-4" />
-              AI
+            <Button type="button" size="sm" variant="ghost" className="text-muted-foreground">
+              <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Assist</span>
             </Button>
           </DialogTrigger>
         </TooltipTrigger>
@@ -195,7 +204,7 @@ function AiAssist({ editor }) {
       <DialogContent className="max-h-[85dvh] max-w-3xl overflow-hidden p-0">
         <DialogHeader className="border-b border-border px-6 py-5 pr-12">
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="size-4 text-indigo-600 dark:text-indigo-400" />
+            <Sparkles className="size-4 text-emerald-600 dark:text-emerald-400" />
             AI writing assistant
           </DialogTitle>
           <DialogDescription>
@@ -213,7 +222,7 @@ function AiAssist({ editor }) {
                     {countWords(selectionText)} words
                   </span>
                 </div>
-                <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-3 text-sm leading-relaxed text-muted-foreground">
+                <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md border border-border bg-surface-card p-3 text-sm leading-relaxed text-muted-foreground">
                   {selectionText}
                 </div>
               </div>
@@ -231,27 +240,27 @@ function AiAssist({ editor }) {
                     : 'Write an intro about real-time collaboration in Geiger Flow'
                 }
                 rows={8}
-                className="min-h-44 resize-y border-border bg-background text-sm text-foreground"
+                className="min-h-44 resize-y"
               />
             </div>
 
             {!isConfigured ? (
               <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-                No AI model connected yet. Open AI Settings to add one.
+                No AI model connected yet. Open AI model at the bottom of the sidebar to add one.
               </p>
             ) : null}
 
             <div>
-            {isStreaming ? (
-              <Button type="button" size="sm" variant="outline" onClick={stop}>
-                Stop
-              </Button>
-            ) : (
-              <Button type="button" size="sm" variant="outline" onClick={run} disabled={!isConfigured}>
-                <Sparkles className="h-3.5 w-3.5" />
-                {draft ? 'Regenerate' : 'Generate'}
-              </Button>
-            )}
+              {isStreaming ? (
+                <Button type="button" size="sm" variant="outline" onClick={stop}>
+                  Stop
+                </Button>
+              ) : (
+                <Button type="button" size="sm" variant="outline" onClick={run} disabled={!isConfigured}>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {draft ? 'Regenerate' : 'Generate'}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -265,7 +274,7 @@ function AiAssist({ editor }) {
               ) : null}
             </div>
             <div
-              className="prose prose-invert min-h-64 flex-1 overflow-y-auto rounded-md border border-border bg-muted/30 p-4 text-sm leading-relaxed text-foreground [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold"
+              className="prose dark:prose-invert min-h-64 flex-1 overflow-y-auto rounded-md border border-border bg-surface-card p-4 text-sm leading-relaxed text-foreground [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold"
               dangerouslySetInnerHTML={{
                 __html: draft
                   ? stripFences(draft)
@@ -295,13 +304,84 @@ function AiAssist({ editor }) {
   )
 }
 
-export function TiptapBlogEditor({ name, defaultValue, onChange }) {
+// Paste a URL or upload a file (inlined) to place an image at the cursor.
+function InsertImage({ editor, name, onEdit }) {
+  const [open, setOpen] = useState(false)
+  const [src, setSrc] = useState('')
+
+  const insert = (value, alt = '') => {
+    if (!value || !editor) return
+    editor.chain().focus().setImage({ src: value, alt }).run()
+    onEdit?.()
+    setSrc('')
+    setOpen(false)
+  }
+
+  const upload = (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => insert(String(reader.result || ''), file.name)
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button type="button" size="icon-sm" variant="ghost" aria-label="Insert image" className="text-muted-foreground">
+              <ImagePlus />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Insert image</TooltipContent>
+      </Tooltip>
+      <PopoverContent align="start" className="w-80 space-y-3 border-border bg-surface-subtle p-3">
+        <div className="flex gap-2">
+          <Input
+            value={src}
+            onChange={(event) => setSrc(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                insert(src.trim())
+              }
+            }}
+            placeholder="Paste an image URL"
+            className="h-8"
+          />
+          <Button type="button" size="sm" onClick={() => insert(src.trim())} disabled={!src.trim()}>
+            Insert
+          </Button>
+        </div>
+        <Label
+          htmlFor={`${name}-inline-image`}
+          className="flex h-8 cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-background text-sm font-normal text-foreground transition-colors hover:bg-surface-active"
+        >
+          <Upload className="size-3.5" />
+          Upload from this device
+        </Label>
+        <input id={`${name}-inline-image`} type="file" accept="image/*" className="sr-only" onChange={upload} />
+        <p className="text-xs text-muted-foreground">Images from the Media tab can be inserted from there too.</p>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// Rich-text field: header (label, stats, Assist, Write/Preview/HTML, fullscreen), a grouped toolbar, then the document.
+// `onChange` mirrors the HTML; `onEdit` fires only for edits the user made.
+export function TiptapBlogEditor({ name, defaultValue, onChange, onEdit, label = 'Content', readingTime = false, size = 'lg', className }) {
   const [html, setHtml] = useState(defaultValue || '')
-  const [imageSrc, setImageSrc] = useState('')
   const [activeView, setActiveView] = useState('write')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const onEditRef = useRef(onEdit)
 
-  // Surface content changes to the parent (e.g. live reading-time estimate).
+  useEffect(() => {
+    onEditRef.current = onEdit
+  }, [onEdit])
+
   useEffect(() => {
     onChange?.(html)
   }, [html, onChange])
@@ -324,10 +404,12 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
     ],
     content: defaultValue || '',
     editorProps: {
-      attributes: { class: editorSurfaceClass },
+      attributes: { class: cn(editorSurfaceClass, SURFACE_SIZE[size]) },
     },
     onUpdate: ({ editor: activeEditor }) => {
       setHtml(activeEditor.getHTML())
+      // Only focused updates are the user's; loading content also emits updates.
+      if (activeEditor.isFocused) onEditRef.current?.()
     },
     immediatelyRender: false,
   })
@@ -346,13 +428,13 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
       const media = event.detail
       if (!media?.publicUrl) return
       editor.chain().focus().setImage({ src: media.publicUrl, alt: media.name || '' }).run()
+      onEditRef.current?.()
       toast.success('Image inserted')
     }
     window.addEventListener('content-studio:insert-image', handleInsertImage)
     return () => window.removeEventListener('content-studio:insert-image', handleInsertImage)
   }, [editor])
 
-  // Allow Esc to leave fullscreen.
   useEffect(() => {
     if (!isFullscreen) return
     const onKey = (e) => e.key === 'Escape' && setIsFullscreen(false)
@@ -367,21 +449,8 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
       .replace(/\s+/g, ' ')
       .trim()
     const words = countWords(text)
-    return {
-      words,
-      chars: text.length,
-      minutes: Math.max(1, Math.round(words / 200)),
-    }
+    return { words, minutes: Math.max(1, Math.round(words / 200)) }
   }, [html])
-
-  const canInsertImage = imageSrc.trim().length > 0
-
-  function addImageBySrc() {
-    const src = imageSrc.trim()
-    if (!src || !editor) return
-    editor.chain().focus().setImage({ src }).run()
-    setImageSrc('')
-  }
 
   function setLink() {
     if (!editor) return
@@ -399,172 +468,139 @@ export function TiptapBlogEditor({ name, defaultValue, onChange }) {
     const nextHtml = event.target.value
     setHtml(nextHtml)
     editor?.commands.setContent(nextHtml)
+    onEditRef.current?.()
   }
 
-  function insertUploadedImage(event) {
-    const file = event.target.files?.[0]
-    if (!file || !editor) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      const src = String(reader.result || '')
-      if (src) editor.chain().focus().setImage({ src, alt: file.name }).run()
-    }
-    reader.readAsDataURL(file)
-    event.target.value = ''
-  }
-
-  const shell = isFullscreen
-    ? 'fixed inset-0 z-50 flex min-w-0 flex-col gap-3 overflow-x-hidden overflow-y-auto bg-background p-4'
-    : 'min-w-0 max-w-full space-y-3 overflow-x-hidden'
+  const run = (command) => () => command(editor?.chain().focus())
+  const is = (type, attrs) => Boolean(editor?.isActive(type, attrs))
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className={shell}>
+      <div
+        className={cn(
+          isFullscreen
+            ? 'fixed inset-0 z-50 flex flex-col bg-background'
+            : 'min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-background',
+          className,
+        )}
+      >
         <input type="hidden" name={name} value={html} />
 
-        <Tabs value={activeView} onValueChange={setActiveView} className="min-w-0 max-w-full flex-1 space-y-3 overflow-x-hidden">
-          {/* Toolbar */}
-          <div className="sticky top-0 z-10 flex min-w-0 max-w-full flex-wrap items-center justify-between gap-3 overflow-hidden rounded-lg border border-border bg-surface-subtle/90 p-2 backdrop-blur">
-            <div className="flex min-w-0 flex-wrap items-center gap-0.5">
-              <ToolbarButton label="Undo" onClick={() => editor?.chain().focus().undo().run()} disabled={!editor?.can().undo()}>
+        <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-border pl-4 pr-2">
+          <span className="text-[13px] font-semibold text-foreground">{label}</span>
+          <span className="hidden truncate text-xs tabular-nums text-text-secondary sm:inline">
+            {stats.words.toLocaleString()} words{readingTime ? ` · ${stats.minutes} min read` : ''}
+          </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <AiAssist editor={editor} onEdit={() => onEditRef.current?.()} />
+            <SegmentedTabs
+              tabs={EDITOR_MODES}
+              value={activeView}
+              onChange={setActiveView}
+              className="w-auto p-0.5"
+              buttonClassName="h-7 px-2.5 text-xs"
+            />
+            <ToolbarButton
+              label={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
+              onClick={() => setIsFullscreen((v) => !v)}
+            >
+              {isFullscreen ? <Minimize2 /> : <Maximize2 />}
+            </ToolbarButton>
+          </div>
+        </div>
+
+        {activeView === 'write' ? (
+          <div className="flex h-11 shrink-0 items-center overflow-x-auto border-b border-border bg-surface-subtle px-2 [scrollbar-width:none]">
+            <ToolbarGroup>
+              <ToolbarButton label="Undo" onClick={run((c) => c?.undo().run())} disabled={!editor?.can().undo()}>
                 <Undo2 />
               </ToolbarButton>
-              <ToolbarButton label="Redo" onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().redo()}>
+              <ToolbarButton label="Redo" onClick={run((c) => c?.redo().run())} disabled={!editor?.can().redo()}>
                 <Redo2 />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
-              <ToolbarButton label="Paragraph" active={editor?.isActive('paragraph')} onClick={() => editor?.chain().focus().setParagraph().run()}>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <ToolbarButton label="Paragraph" active={is('paragraph')} onClick={run((c) => c?.setParagraph().run())}>
                 <Pilcrow />
               </ToolbarButton>
-              <ToolbarButton label="Heading 1" active={editor?.isActive('heading', { level: 1 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
+              <ToolbarButton label="Heading 1" active={is('heading', { level: 1 })} onClick={run((c) => c?.toggleHeading({ level: 1 }).run())}>
                 <Heading1 />
               </ToolbarButton>
-              <ToolbarButton label="Heading 2" active={editor?.isActive('heading', { level: 2 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
+              <ToolbarButton label="Heading 2" active={is('heading', { level: 2 })} onClick={run((c) => c?.toggleHeading({ level: 2 }).run())}>
                 <Heading2 />
               </ToolbarButton>
-              <ToolbarButton label="Heading 3" active={editor?.isActive('heading', { level: 3 })} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
+              <ToolbarButton label="Heading 3" active={is('heading', { level: 3 })} onClick={run((c) => c?.toggleHeading({ level: 3 }).run())}>
                 <Heading3 />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
-              <ToolbarButton label="Bold" active={editor?.isActive('bold')} onClick={() => editor?.chain().focus().toggleBold().run()}>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <ToolbarButton label="Bold" active={is('bold')} onClick={run((c) => c?.toggleBold().run())}>
                 <Bold />
               </ToolbarButton>
-              <ToolbarButton label="Italic" active={editor?.isActive('italic')} onClick={() => editor?.chain().focus().toggleItalic().run()}>
+              <ToolbarButton label="Italic" active={is('italic')} onClick={run((c) => c?.toggleItalic().run())}>
                 <Italic />
               </ToolbarButton>
-              <ToolbarButton label="Strikethrough" active={editor?.isActive('strike')} onClick={() => editor?.chain().focus().toggleStrike().run()}>
+              <ToolbarButton label="Strikethrough" active={is('strike')} onClick={run((c) => c?.toggleStrike().run())}>
                 <Strikethrough />
               </ToolbarButton>
-              <ToolbarButton label="Inline code" active={editor?.isActive('code')} onClick={() => editor?.chain().focus().toggleCode().run()}>
+              <ToolbarButton label="Inline code" active={is('code')} onClick={run((c) => c?.toggleCode().run())}>
                 <Code />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
-              <ToolbarButton label="Bullet list" active={editor?.isActive('bulletList')} onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <ToolbarButton label="Bullet list" active={is('bulletList')} onClick={run((c) => c?.toggleBulletList().run())}>
                 <List />
               </ToolbarButton>
-              <ToolbarButton label="Numbered list" active={editor?.isActive('orderedList')} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+              <ToolbarButton label="Numbered list" active={is('orderedList')} onClick={run((c) => c?.toggleOrderedList().run())}>
                 <ListOrdered />
               </ToolbarButton>
-              <ToolbarButton label="Quote" active={editor?.isActive('blockquote')} onClick={() => editor?.chain().focus().toggleBlockquote().run()}>
-                <Quote />
+              <ToolbarButton label="Quote" active={is('blockquote')} onClick={run((c) => c?.toggleBlockquote().run())}>
+                <TextQuote />
               </ToolbarButton>
-              <ToolbarButton label="Code block" active={editor?.isActive('codeBlock')} onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
-                <Code2 />
+              <ToolbarButton label="Code block" active={is('codeBlock')} onClick={run((c) => c?.toggleCodeBlock().run())}>
+                <SquareCode />
               </ToolbarButton>
-              <ToolbarButton label="Divider" onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+              <ToolbarButton label="Divider" onClick={run((c) => c?.setHorizontalRule().run())}>
                 <Minus />
               </ToolbarButton>
-              <Separator orientation="vertical" className="mx-1 h-7 bg-surface-hover" />
-              <ToolbarButton label="Add link" active={editor?.isActive('link')} onClick={setLink}>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <ToolbarButton label="Add link" active={is('link')} onClick={setLink}>
                 <Link2 />
               </ToolbarButton>
-              <ToolbarButton label="Remove link" onClick={() => editor?.chain().focus().unsetLink().run()} disabled={!editor?.isActive('link')}>
+              <ToolbarButton label="Remove link" onClick={run((c) => c?.unsetLink().run())} disabled={!is('link')}>
                 <Unlink />
               </ToolbarButton>
-            </div>
-
-            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
-              <AiAssist editor={editor} />
-              <ToolbarButton
-                label={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
-                onClick={() => setIsFullscreen((v) => !v)}
-              >
-                {isFullscreen ? <Minimize2 /> : <Maximize2 />}
-              </ToolbarButton>
-              <TabsList className="max-w-full bg-background">
-                <TabsTrigger value="write" className="gap-1">
-                  <Pilcrow className="h-3.5 w-3.5" />
-                  Write
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="gap-1">
-                  <Eye className="h-3.5 w-3.5" />
-                  Preview
-                </TabsTrigger>
-                <TabsTrigger value="html" className="gap-1">
-                  <WrapText className="h-3.5 w-3.5" />
-                  HTML
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            </ToolbarGroup>
+            <ToolbarGroup>
+              <InsertImage editor={editor} name={name} onEdit={() => onEditRef.current?.()} />
+            </ToolbarGroup>
           </div>
+        ) : null}
 
-          {/* Image insertion bar */}
-          <div className="grid min-w-0 max-w-full gap-3 overflow-hidden rounded-lg border border-border bg-surface-subtle/40 p-3 md:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="flex min-w-0 gap-2">
-              <Input
-                value={imageSrc}
-                onChange={(event) => setImageSrc(event.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImageBySrc())}
-                placeholder="Paste an image URL to place it in the article"
-                className="border-border-strong bg-background text-foreground placeholder:text-muted-foreground"
+        <div className={cn('min-w-0 max-w-full overflow-x-hidden', isFullscreen && 'min-h-0 flex-1 overflow-y-auto')}>
+          <div className={cn(isFullscreen && 'mx-auto max-w-3xl')}>
+            <div className={activeView === 'write' ? '' : 'hidden'}>
+              <EditorContent editor={editor} />
+            </div>
+            {activeView === 'preview' ? (
+              <div
+                className={cn(editorSurfaceClass, SURFACE_SIZE[size])}
+                dangerouslySetInnerHTML={{
+                  __html: html || '<p class="text-muted-foreground">Your formatted preview will appear here.</p>',
+                }}
               />
-              <Button type="button" variant="outline" onClick={addImageBySrc} disabled={!canInsertImage}>
-                <ImagePlus className="h-4 w-4" />
-                Insert
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label
-                htmlFor={`${name}-inline-image`}
-                className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-border-strong bg-background px-3 text-sm text-foreground transition-colors hover:bg-surface-hover"
-              >
-                <ImagePlus className="h-4 w-4" />
-                Upload inline
-              </Label>
-              <Input id={`${name}-inline-image`} type="file" accept="image/*" className="hidden" onChange={insertUploadedImage} />
-            </div>
+            ) : null}
+            {activeView === 'html' ? (
+              <Textarea
+                value={html}
+                onChange={handleHtmlChange}
+                spellCheck={false}
+                className="min-h-[420px] resize-y rounded-none border-0 bg-background px-6 py-5 font-mono text-xs leading-6 focus-visible:ring-0"
+                placeholder="<h2>Write with HTML</h2>"
+              />
+            ) : null}
           </div>
-
-          <TabsContent value="write" className="mt-0 min-w-0 max-w-full flex-1 overflow-x-hidden">
-            <EditorContent editor={editor} />
-          </TabsContent>
-
-          <TabsContent value="preview" className="mt-0 min-w-0 max-w-full flex-1 overflow-x-hidden">
-            <div
-              className={editorSurfaceClass}
-              dangerouslySetInnerHTML={{
-                __html: html || '<p class="text-muted-foreground">Your formatted post preview will appear here.</p>',
-              }}
-            />
-          </TabsContent>
-
-          <TabsContent value="html" className="mt-0 min-w-0 max-w-full flex-1 overflow-x-hidden">
-            <Textarea
-              value={html}
-              onChange={handleHtmlChange}
-              spellCheck={false}
-              className="min-h-[460px] resize-y border-border bg-background font-mono text-xs leading-6 text-foreground placeholder:text-muted-foreground"
-              placeholder="<h2>Write with HTML</h2>"
-            />
-          </TabsContent>
-        </Tabs>
-
-        {/* Status bar */}
-        <div className="flex items-center justify-between rounded-md border border-border bg-surface-subtle/60 px-3 py-1.5 text-[11px] text-muted-foreground">
-          <span>
-            {stats.words} words · {stats.chars} characters
-          </span>
-          <span>~{stats.minutes} min read</span>
         </div>
       </div>
     </TooltipProvider>
