@@ -22,8 +22,19 @@ const PUBLIC_PREFIXES = [
   '/events/e/', // public event page — where tickets are bought
   '/events/w/', // public event website
   '/events/r/', // public registration page
+  '/events/api/checkout', // ticket checkout, verify and ticket email, called from the public event page
+  '/events/api/stripe/webhook', // Stripe's signed server-to-server callback
+  '/events/display/', // venue display boards
+  '/events/operations/', // operations portal for invited staff (members-portal sign-in + invite tokens)
+  '/events/api/nfc/', // on-site NFC gateway (key-gated)
   '/assets/d/', // public asset delivery — <img src> targets, never a suite user
   '/assets/g/', // published public gallery (own password/expiry gate)
+  '/property/portal', // resident, owner and vendor portal (own email sign-in)
+  '/property/api/portal/', // the portal's API
+  '/property/api/payments/link/', // token-gated payment links from emails
+  '/property/api/stripe/webhook', // Stripe's signed server-to-server callback
+  '/property/api/messages/inbound', // inbound email webhook (bearer secret)
+  '/property/api/cron/', // scheduler endpoints (bearer CRON_SECRET)
 ]
 
 const HAS_ORG_COOKIE = 'geiger_has_org'

@@ -14,11 +14,11 @@ Reference pages, which show these rules applied:
 Every Flow area has a guide, written in `20261024142436_help_flow_structure.sql`
 through `20261024143901_help_flow_tasks_related_guides.sql`; the Flow overview was
 brought in line with this file in `20261024142451_help_flow_overview_page.sql`.
-One older part still doesn't follow it. Don't copy it, and fix it the next time
-you touch the page:
-
-- Welcome's "How Geiger fits together" and "Apps in the suite" feature tiles hold
-  facts no section text repeats (§2.3).
+Every other available app, plus the Workspace and Get Started pages, followed in
+`20261024182622_help_products_group_last.sql` through
+`20261024192045_help_quickstart_page.sql`, one set of files per app (each file is
+named `*_help_<app>_*`), and Welcome was brought in line in
+`20261024194720_help_welcome_suite_guides.sql`.
 
 Related playbooks: `MIGRATION_CONVENTIONS.md` (content ships as migrations),
 `SUPABASE_CONVENTIONS.md`, `crafting.md` (UI work on the Help Center itself).
@@ -119,7 +119,7 @@ it. It isn't the place to sell, announce or explain internals.
 |---|---|
 | `title` | Group heading in the sidebar |
 | `slug` | Unique key (`get-started`, `workspace`, `flow`, `products`) |
-| `sort_order` | Lower comes first. Today: Get Started 10, Workspace 20, Flow 25, Products 30 |
+| `sort_order` | Lower comes first. Today: Get Started 10, Workspace 20, then the product groups (Flow 25, Notes 26, Events 27, Assets 28, Campaign 29, Content 31, Pods 32, Forms 33, Grey 34, Comms 35, Property 36), and Products 90 last |
 
 A group with no visible pages is hidden. Groups have no soft delete: only an
 empty group can be deleted.
@@ -226,8 +226,9 @@ What follows from this:
 **Graduating a product** (what Flow did in `20261023200049_help_flow_guide`).
 When a product is about to get its second page:
 
-1. Create the group: slug = app id, title = product short name (`Flow`), and a
-   `sort_order` between Workspace (20) and Products (30). Flow took 25.
+1. Create the group: slug = app id, title = product short name (`Flow`), and the
+   next free `sort_order` after the last product group (37 today), so it sits
+   between Workspace (20) and Products (90).
 2. Re-home `products/<app>` by **updating** its row, so it keeps its id: slug
    `<app>`, `nav_label` `Overview`, the new group, and `preview` set to the app id
    if the app is in `SANDBOX_APP_IDS`.
