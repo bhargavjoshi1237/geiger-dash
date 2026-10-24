@@ -10,7 +10,6 @@ import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlayg
 import CollaboratorTabsShowcase from "@/components/collaborator-tabs-showcase";
 import PlaygroundFrame from "@/components/playground-frame";
 import BlogComponent from "@/components/blog_component";
-import TrustedByComponent from "@/components/trusted_by_component";
 import { displayFont } from "@/components/suite-landing/display_font";
 import { StartPaths } from "@/components/suite-landing/start_paths";
 import { ShippingLog } from "@/components/suite-landing/shipping_log";
@@ -93,10 +92,6 @@ export default function Home() {
         </section>
 
         <Section />
-        
-        <div className="mt-22 mb-10 w-full">
-          <TrustedByComponent />
-        </div>
 
         <div className="mx-auto my-10 w-full max-w-7xl space-y-8 px-4 sm:my-20 sm:space-y-20 sm:px-6">
           <LandingBoardShowcase
@@ -112,7 +107,7 @@ export default function Home() {
           <CollaboratorTabsShowcase
             backgroundImage={flowShowcaseBg}
             ctaHref="/login"
-            ctaLabel="Checkout Flow"
+            ctaLabel="Checkout Notes"
           />
         </div>
 

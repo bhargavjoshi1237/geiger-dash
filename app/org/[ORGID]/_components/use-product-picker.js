@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { PRODUCT_APPS } from "@/lib/org/product-apps";
+import { AVAILABLE_PRODUCT_APPS } from "@/lib/org/product-apps";
 import { productLocked, productUsedElsewhere, useEntitlements } from "./entitlements";
 
 const NO_OWN_IDS = [];
@@ -14,7 +14,7 @@ export function useProductPicker({ initialSelected = NO_OWN_IDS, ownProductIds =
 
   const selectableProducts = useMemo(
     () =>
-      PRODUCT_APPS.filter(
+      AVAILABLE_PRODUCT_APPS.filter(
         (p) => !productLocked(entitlements, p.id) && !productUsedElsewhere(entitlements, p.id, ownProductIds),
       ),
     [entitlements, ownProductIds],
@@ -22,8 +22,8 @@ export function useProductPicker({ initialSelected = NO_OWN_IDS, ownProductIds =
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return PRODUCT_APPS;
-    return PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
+    if (!q) return AVAILABLE_PRODUCT_APPS;
+    return AVAILABLE_PRODUCT_APPS.filter((p) => `${p.name} ${p.detail}`.toLowerCase().includes(q));
   }, [search]);
 
   const allSelected = selectableProducts.length > 0 && selected.length === selectableProducts.length;

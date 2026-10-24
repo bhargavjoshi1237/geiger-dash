@@ -60,10 +60,10 @@ export async function HelpHeader({ navigation, activeSlug }) {
           <HelpSearch navigation={navigation} />
         </div>
 
-        {/* Actions: the Ask AI pill, then theme / bell / avatar evenly spaced (avatar's own ml-1 + gap-2 = gap-3). */}
-        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+        {/* Actions: the Ask AI pill, then theme / bell / avatar, all gap-2 like the suite header. */}
+        <div className="ml-auto flex shrink-0 items-center gap-4">
           <AskAiButton />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ThemeToggle className="hidden sm:flex" />
             {user ? <SessionProfile user={user} /> : <GuestActions />}
           </div>

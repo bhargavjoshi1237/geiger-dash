@@ -48,7 +48,7 @@ function RightSidebar({ page }) {
 function PaintedStage({ floating = false, className = "", children }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:px-5 sm:py-8 ${className}`}
+      className={`relative overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 ${floating ? "sm:p-4" : "sm:px-5 sm:py-8"} ${className}`}
       style={{
         backgroundImage:
           "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
@@ -64,7 +64,7 @@ function PaintedStage({ floating = false, className = "", children }) {
       {floating ? (
         children
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border bg-background shadow-2xl dark:border-[#313131]">
+        <div className="overflow-hidden rounded-lg border border-border bg-background dark:border-[#313131]">
           {children}
         </div>
       )}
@@ -176,9 +176,9 @@ function HelpSection({ section }) {
 
 export default function HelpCenter({ navigation, page }) {
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
-      {/* Softened grid lines so they don't cut through the TOC links. */}
-      <GridBackdrop className="blur-[1px]" />
+    <div className="relative min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
+      {/* The grid only frames the top of the page and scrolls away once reading starts. */}
+      <GridBackdrop scrolls />
       <HelpHeader navigation={navigation} activeSlug={page.slug} />
 
       {/* z-20 keeps the nav above <main>, which spans the full width under it at z-10. */}

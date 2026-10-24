@@ -1,19 +1,4 @@
-import {
-  BookOpen,
-  Boxes,
-  Building2,
-  CalendarDays,
-  ClipboardList,
-  GitBranch,
-  House,
-  Images,
-  Megaphone,
-  Mic,
-  NotebookPen,
-  PenLine,
-  Radio,
-  Sparkles,
-} from "lucide-react";
+import { FallbackProductIcon, PRODUCT_ICONS } from "@/lib/pricing/product-icons";
 
 export const DEFAULT_SELECTED_PRODUCT_IDS = ["flow"];
 
@@ -35,31 +20,31 @@ export function projectAvatarColor(id = "") {
   return PROJECT_AVATAR_COLORS[h % PROJECT_AVATAR_COLORS.length];
 }
 
-const PRODUCT_META = {
-  campaign: { Icon: Megaphone, icon: "text-pink-600 dark:text-pink-400", tile: "bg-pink-500/10 border-pink-500/20", hover: "group-hover/row:text-pink-600 dark:group-hover/row:text-pink-400" },
-  flow: { Icon: GitBranch, icon: "text-blue-600 dark:text-blue-400", tile: "bg-blue-500/10 border-blue-500/20", hover: "group-hover/row:text-blue-600 dark:group-hover/row:text-blue-400" },
-  events: { Icon: CalendarDays, icon: "text-orange-600 dark:text-orange-400", tile: "bg-orange-500/10 border-orange-500/20", hover: "group-hover/row:text-orange-600 dark:group-hover/row:text-orange-400" },
-  assets: { Icon: Images, icon: "text-violet-600 dark:text-violet-400", tile: "bg-violet-500/10 border-violet-500/20", hover: "group-hover/row:text-violet-600 dark:group-hover/row:text-violet-400" },
-  comms: { Icon: Radio, icon: "text-cyan-600 dark:text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20", hover: "group-hover/row:text-cyan-600 dark:group-hover/row:text-cyan-400" },
-  forms: { Icon: ClipboardList, icon: "text-teal-600 dark:text-teal-400", tile: "bg-teal-500/10 border-teal-500/20", hover: "group-hover/row:text-teal-600 dark:group-hover/row:text-teal-400" },
-  grey: { Icon: Sparkles, icon: "text-indigo-600 dark:text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20", hover: "group-hover/row:text-indigo-600 dark:group-hover/row:text-indigo-400" },
-  office: { Icon: Building2, icon: "text-amber-600 dark:text-amber-400", tile: "bg-amber-500/10 border-amber-500/20", hover: "group-hover/row:text-amber-600 dark:group-hover/row:text-amber-400" },
-  docs: { Icon: BookOpen, icon: "text-sky-600 dark:text-sky-400", tile: "bg-sky-500/10 border-sky-500/20", hover: "group-hover/row:text-sky-600 dark:group-hover/row:text-sky-400" },
-  content: { Icon: PenLine, icon: "text-rose-600 dark:text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-600 dark:group-hover/row:text-rose-400" },
-  pods: { Icon: Mic, icon: "text-purple-600 dark:text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-600 dark:group-hover/row:text-purple-400" },
-  notes: { Icon: NotebookPen, icon: "text-yellow-600 dark:text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20", hover: "group-hover/row:text-yellow-600 dark:group-hover/row:text-yellow-400" },
-  property: { Icon: House, icon: "text-emerald-600 dark:text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20", hover: "group-hover/row:text-emerald-600 dark:group-hover/row:text-emerald-400" },
+// Per-product accent classes; icons come from the shared PRODUCT_ICONS map so this page matches pricing and billing.
+const PRODUCT_COLORS = {
+  campaign: { icon: "text-pink-600 dark:text-pink-400", tile: "bg-pink-500/10 border-pink-500/20", hover: "group-hover/row:text-pink-600 dark:group-hover/row:text-pink-400" },
+  flow: { icon: "text-blue-600 dark:text-blue-400", tile: "bg-blue-500/10 border-blue-500/20", hover: "group-hover/row:text-blue-600 dark:group-hover/row:text-blue-400" },
+  events: { icon: "text-orange-600 dark:text-orange-400", tile: "bg-orange-500/10 border-orange-500/20", hover: "group-hover/row:text-orange-600 dark:group-hover/row:text-orange-400" },
+  assets: { icon: "text-violet-600 dark:text-violet-400", tile: "bg-violet-500/10 border-violet-500/20", hover: "group-hover/row:text-violet-600 dark:group-hover/row:text-violet-400" },
+  comms: { icon: "text-cyan-600 dark:text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20", hover: "group-hover/row:text-cyan-600 dark:group-hover/row:text-cyan-400" },
+  forms: { icon: "text-teal-600 dark:text-teal-400", tile: "bg-teal-500/10 border-teal-500/20", hover: "group-hover/row:text-teal-600 dark:group-hover/row:text-teal-400" },
+  grey: { icon: "text-indigo-600 dark:text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20", hover: "group-hover/row:text-indigo-600 dark:group-hover/row:text-indigo-400" },
+  office: { icon: "text-amber-600 dark:text-amber-400", tile: "bg-amber-500/10 border-amber-500/20", hover: "group-hover/row:text-amber-600 dark:group-hover/row:text-amber-400" },
+  docs: { icon: "text-sky-600 dark:text-sky-400", tile: "bg-sky-500/10 border-sky-500/20", hover: "group-hover/row:text-sky-600 dark:group-hover/row:text-sky-400" },
+  content: { icon: "text-rose-600 dark:text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-600 dark:group-hover/row:text-rose-400" },
+  pods: { icon: "text-purple-600 dark:text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-600 dark:group-hover/row:text-purple-400" },
+  notes: { icon: "text-yellow-600 dark:text-yellow-400", tile: "bg-yellow-500/10 border-yellow-500/20", hover: "group-hover/row:text-yellow-600 dark:group-hover/row:text-yellow-400" },
+  property: { icon: "text-emerald-600 dark:text-emerald-400", tile: "bg-emerald-500/10 border-emerald-500/20", hover: "group-hover/row:text-emerald-600 dark:group-hover/row:text-emerald-400" },
+};
+
+const FALLBACK_COLORS = {
+  icon: "text-muted-foreground",
+  tile: "bg-surface-strong border-border",
+  hover: "group-hover/row:text-foreground",
 };
 
 export function productMeta(id) {
-  return (
-    PRODUCT_META[id] || {
-      Icon: Boxes,
-      icon: "text-muted-foreground",
-      tile: "bg-surface-strong border-border",
-      hover: "group-hover/row:text-foreground",
-    }
-  );
+  return { Icon: PRODUCT_ICONS[id] || FallbackProductIcon, ...(PRODUCT_COLORS[id] || FALLBACK_COLORS) };
 }
 
 export function formatDate(value) {

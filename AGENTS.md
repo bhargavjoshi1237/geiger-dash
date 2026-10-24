@@ -3,6 +3,7 @@
 @SUPABASE_CONVENTIONS.md
 @MIGRATION_CONVENTIONS.md
 @crafting.md
+Before writing, updating or publishing any Help Center page (`/help`, the `docs_*` tables), read `DOCUMENTATION_CONVENTIONS.md` in full and follow it.
 Use the shared UI components from `@geiger/ui` instead of building your own; only create a bespoke component when the shared library genuinely lacks what you need.
 General Guidelines
 Do not run a build unless:

@@ -3,6 +3,7 @@
 @SUPABASE_CONVENTIONS.md
 @MIGRATION_CONVENTIONS.md
 @crafting.md
+Before writing, updating or publishing any Help Center page (`/help`, the `docs_*` tables), read `DOCUMENTATION_CONVENTIONS.md` in full and follow it.
 Use the shared UI components from `@geiger/ui` instead of building your own; only create a bespoke component when the shared library genuinely lacks what you need.
 For loading states, use `LogoLoading` from `@geiger/ui` on full-page and section-level loaders — a screen's initial data fetch, a dialog/panel body, a route-level `loading.jsx`/Suspense fallback. Omit its `name` prop so it randomly picks one of its animated Geiger-mark treatments per mount; pass `size` to fit the space (roughly 32-40px for a compact panel, 40-56px for a standard section card, 72-96px for a full-page loader). Keep the plain `Loader2`/`animate-spin` spinner on buttons and small inline/icon-sized indicators — never put `LogoLoading` there.
 General Guidelines

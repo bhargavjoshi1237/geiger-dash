@@ -11,7 +11,6 @@ import {
 } from "@geiger/ui";
 import {
   Users2,
-  Crown,
   UserMinus,
   ShieldCheck,
   CircuitBoard,
@@ -145,7 +144,7 @@ export default function UserDrawer({
                           </div>
                           {member.role === "Owner" && (
                             <div className="absolute -bottom-1 -right-1 bg-surface-subtle rounded-full p-0.5 border border-border">
-                              <Crown className="w-3 h-3 text-amber-500 fill-amber-500" />
+                              <ShieldCheck className="w-3 h-3 text-amber-500" />
                             </div>
                           )}
                         </div>

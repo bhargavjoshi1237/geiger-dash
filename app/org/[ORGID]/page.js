@@ -49,7 +49,8 @@ export default async function OrganizationDetailPage({ params, searchParams }) {
       <GridBackdrop variant="subtle" />
       <Header megaMenue={false} />
 
-      <main className="relative z-10 mx-auto flex min-h-[60vh] w-full max-w-5xl flex-1 flex-col px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+      {/* Same max-w-6xl / px-4 sm:px-6 box as the SuiteHeader so the logo and org title share an edge. */}
+      <main className="relative z-10 mx-auto flex min-h-[60vh] w-full max-w-6xl flex-1 flex-col px-4 pb-20 pt-24 sm:px-6">
         <Link
           href="/org"
           className="mb-6 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

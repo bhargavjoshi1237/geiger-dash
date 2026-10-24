@@ -15,7 +15,7 @@ export default function EventsPlaygroundShowcase({ backgroundImage, ctaHref, cta
 
         <div className="w-full flex-1 lg:w-[70%]">
           <div className="relative overflow-hidden rounded-2xl border border-[#313131] bg-surface-card p-1.5 shadow-2xl">
-            <div className="h-[620px] overflow-hidden rounded-xl border border-[#313131] bg-background sm:h-[680px] lg:h-[720px]">
+            <div className="h-[520px] overflow-hidden rounded-xl border border-[#313131] bg-background sm:h-[560px] lg:h-[600px]">
               <EventBookingFlow />
             </div>
           </div>

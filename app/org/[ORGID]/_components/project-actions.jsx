@@ -14,8 +14,8 @@ import {
 import { DeleteProjectDialog } from "./delete-project-dialog";
 import { EditProjectDialog } from "./edit-project-dialog";
 
-export function ProjectActions({ project, name, organizationId }) {
-  const [editOpen, setEditOpen] = useState(false);
+// Edit state is owned by the row so its overflow menu can open the same dialog.
+export function ProjectActions({ project, name, organizationId, editOpen, onEditOpenChange }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   function copyId() {
@@ -43,7 +43,7 @@ export function ProjectActions({ project, name, organizationId }) {
             <Copy className="size-4" />
             Copy ID
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+          <DropdownMenuItem onSelect={() => onEditOpenChange(true)}>
             <PenLine className="size-4" />
             Edit
           </DropdownMenuItem>
@@ -60,7 +60,7 @@ export function ProjectActions({ project, name, organizationId }) {
         name={name}
         organizationId={organizationId}
         open={editOpen}
-        onOpenChange={setEditOpen}
+        onOpenChange={onEditOpenChange}
       />
       <DeleteProjectDialog
         project={project}

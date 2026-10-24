@@ -3,13 +3,13 @@
 import { randomUUID } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { PRODUCT_APPS } from '@/lib/org/product-apps'
+import { AVAILABLE_PRODUCT_APPS } from '@/lib/org/product-apps'
 import { createClient as createServerClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
 import { getOrgEntitlements, canAddProject, isProductUnlocked } from '@/lib/billing/entitlements'
 
-const PRODUCT_ID_SET = new Set(PRODUCT_APPS.map((product) => product.id))
+const PRODUCT_ID_SET = new Set(AVAILABLE_PRODUCT_APPS.map((product) => product.id))
 
 function cleanText(value) {
   return typeof value === 'string' ? value.trim() : ''

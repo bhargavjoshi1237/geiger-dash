@@ -34,7 +34,7 @@ export function UserProfileDropdown({ user }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="ml-1 h-8 w-8 overflow-hidden rounded-full border border-border transition-colors hover:border-border-strong"
+          className="h-8 w-8 overflow-hidden rounded-full border border-border transition-colors hover:border-border-strong"
         >
           <Avatar className="size-full">
             {user?.avatarUrl && (
