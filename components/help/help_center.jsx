@@ -5,6 +5,7 @@ import PlaygroundFrame from "@/components/playground-frame";
 import { GridBackdrop } from "@/components/grid-backdrop";
 import { SANDBOX_APP_IDS } from "@/components/why-geiger/why_geiger_content";
 import { HELP_APP_VIEWPORT, getHelpShowcase } from "@/lib/docs/showcases";
+import { getRandomShowcaseBackgrounds } from "@/lib/showcase-backgrounds";
 import { HelpHeader } from "@/components/help/help_header";
 import { HelpNavTree } from "@/components/help/help_nav_tree";
 import { HelpToc } from "@/components/help/help_toc";
@@ -45,14 +46,11 @@ function RightSidebar({ page }) {
 }
 
 // Painted backdrop for a live app, marked with a live badge; the app sits in a window, or straight on the painting when `floating`.
-function PaintedStage({ floating = false, className = "", children }) {
+function PaintedStage({ backdrop, floating = false, className = "", children }) {
   return (
     <div
       className={`relative overflow-hidden rounded-lg border border-border bg-cover bg-center bg-no-repeat p-3 ${floating ? "sm:p-4" : "sm:px-5 sm:py-8"} ${className}`}
-      style={{
-        backgroundImage:
-          "url('https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg')",
-      }}
+      style={{ backgroundImage: `url('${backdrop}')` }}
     >
       <span
         title="Live, try it out. Changes reset on reload."
@@ -73,21 +71,21 @@ function PaintedStage({ floating = false, className = "", children }) {
 }
 
 // A page's `preview` names the suite app whose whole live sandbox (/<app>/playground) fills the hero; keep it to a home or overview page.
-function ProductPreview({ app }) {
+function ProductPreview({ app, backdrop }) {
   return (
-    <PaintedStage className="mt-5">
+    <PaintedStage backdrop={backdrop} className="mt-5">
       <PlaygroundFrame src={`/${app}/playground`} title={`Geiger ${app} playground`} viewport={HELP_APP_VIEWPORT} />
     </PaintedStage>
   );
 }
 
 // One live component from an app, scoped to just that component; edits stay in the visitor's session.
-function SectionShowcase({ id }) {
+function SectionShowcase({ id, backdrop }) {
   const showcase = getHelpShowcase(id);
   if (!showcase) return null;
 
   return (
-    <PaintedStage floating={showcase.floating}>
+    <PaintedStage backdrop={backdrop} floating={showcase.floating}>
       <PlaygroundFrame
         src={showcase.src}
         title={`Geiger ${showcase.app}: ${showcase.label}`}
@@ -150,7 +148,7 @@ function SectionLinks({ links }) {
   );
 }
 
-function HelpSection({ section }) {
+function HelpSection({ section, backdrop }) {
   return (
     <section id={section.id} className="scroll-mt-20 pt-16">
       {section.eyebrow ? <p className="mb-2 text-sm text-muted-foreground">{section.eyebrow}</p> : null}
@@ -168,13 +166,27 @@ function HelpSection({ section }) {
         ) : null}
         {section.features.length ? <FeatureGrid features={section.features} /> : null}
         {section.links.length ? <SectionLinks links={section.links} /> : null}
-        {section.showcase ? <SectionShowcase id={section.showcase} /> : null}
+        {section.showcase ? <SectionShowcase id={section.showcase} backdrop={backdrop} /> : null}
       </div>
     </section>
   );
 }
 
+// One painting per live stage on the page, the hero first, in a fresh random order so neighboring stages differ.
+function assignBackdrops(page, hasPreview) {
+  const stages = (hasPreview ? 1 : 0) + page.sections.filter((section) => section.showcase).length;
+  const backdrops = getRandomShowcaseBackgrounds(stages);
+  let next = hasPreview ? 1 : 0;
+  return {
+    preview: hasPreview ? backdrops[0] : null,
+    sections: page.sections.map((section) => (section.showcase ? backdrops[next++] : null)),
+  };
+}
+
 export default function HelpCenter({ navigation, page }) {
+  const hasPreview = SANDBOX_APP_IDS.includes(page.preview);
+  const backdrops = assignBackdrops(page, hasPreview);
+
   return (
     <div className="relative min-h-screen bg-background font-sans text-foreground antialiased selection:bg-surface-strong selection:text-foreground">
       {/* The grid only frames the top of the page and scrolls away once reading starts. */}
@@ -204,10 +216,10 @@ export default function HelpCenter({ navigation, page }) {
                 <p className="mt-8 max-w-[690px] text-[15px] font-medium leading-6 text-foreground">{page.description}</p>
               ) : null}
 
-              {SANDBOX_APP_IDS.includes(page.preview) ? <ProductPreview app={page.preview} /> : null}
+              {hasPreview ? <ProductPreview app={page.preview} backdrop={backdrops.preview} /> : null}
 
               {page.sections.map((section, index) => (
-                <HelpSection key={section.id || index} section={section} />
+                <HelpSection key={section.id || index} section={section} backdrop={backdrops.sections[index]} />
               ))}
             </article>
 

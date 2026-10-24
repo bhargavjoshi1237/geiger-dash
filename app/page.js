@@ -14,6 +14,7 @@ import { displayFont } from "@/components/suite-landing/display_font";
 import { StartPaths } from "@/components/suite-landing/start_paths";
 import { ShippingLog } from "@/components/suite-landing/shipping_log";
 import { SpectrumHeader } from "@/components/why-geiger/why_geiger_kit";
+import { getRandomShowcaseBackgrounds } from "@/lib/showcase-backgrounds";
 // Statically generated and served from the CDN; the build fails if anything here starts reading request-time data.
 export const dynamic = "error";
 // ISR window: matches the notice cache so scheduled notices, new posts and the showcase shuffle refresh in the background.
@@ -31,25 +32,6 @@ export const metadata = {
     canonical: "/",
   },
 };
-
-const showcaseBackgroundImages = [
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-00a586c62c8782e65c0a.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/internal-brand-023-3291bb4c.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-0ec1f3ba625f482c9dc3.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-85923e7fafe00c9c0d1f.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-8e2e88cff7f33224ddd7.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-0a66efa21dd4b7e6c526.jpg",
-  "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/cursor-assets/asset-cc24ca462279ca23250c.jpg",
-];
-
-function getRandomShowcaseBackgrounds(count) {
-  const shuffledImages = [...showcaseBackgroundImages].sort(() => Math.random() - 0.5);
-
-  return Array.from(
-    { length: count },
-    (_, index) => shuffledImages[index % shuffledImages.length],
-  );
-}
 
 export default function Home() {
   const [notesShowcaseBg, eventsShowcaseBg, flowShowcaseBg] =
