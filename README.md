@@ -87,6 +87,7 @@ GEIGER_STRIPE_SECRET_KEY=your-stripe-secret-key
 GEIGER_STRIPE_WEBHOOK_SECRET=your-stripe-webhook-signing-secret
 
 # Email
+RESEND_API_KEY=your-resend-api-key
 EMAIL_FROM=your-sender-address
 
 # Analytics
