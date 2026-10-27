@@ -20,6 +20,9 @@
 # production
 /build
 
+# film music: Mixkit tracks may not be redistributed as standalone files, and this repo is public
+/scripts/film/music/
+
 # misc
 .DS_Store
 *.pem
