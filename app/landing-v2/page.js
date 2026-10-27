@@ -7,11 +7,12 @@ import { GlassBackdrop } from "@/components/glass-backdrop/glass_backdrop";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
 import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlaygroundShowcase";
-import CollaboratorTabsShowcase from "@/components/collaborator-tabs-showcase";
+import GreyPlaygroundShowcase from "@/components/grey-playground/GreyPlaygroundShowcase";
 import PlaygroundFrame from "@/components/playground-frame";
 import BlogComponent from "@/components/blog_component";
 import { displayFont } from "@/components/suite-landing/display_font";
 import { StartPaths } from "@/components/suite-landing/start_paths";
+import { TeamCards } from "@/components/suite-landing/team_cards";
 import { ShippingLog } from "@/components/suite-landing/shipping_log";
 import { SpectrumHeader } from "@/components/why-geiger/why_geiger_kit";
 import { getRandomShowcaseBackgrounds } from "@/lib/showcase-backgrounds";
@@ -30,7 +31,7 @@ export const metadata = {
 };
 
 export default function LandingV2() {
-  const [notesShowcaseBg, eventsShowcaseBg, flowShowcaseBg] =
+  const [notesShowcaseBg, eventsShowcaseBg, greyShowcaseBg] =
     getRandomShowcaseBackgrounds(3);
 
   return (
@@ -79,10 +80,10 @@ export default function LandingV2() {
             ctaHref="/login"
             ctaLabel="Checkout Events"
           />
-          <CollaboratorTabsShowcase
-            backgroundImage={flowShowcaseBg}
+          <GreyPlaygroundShowcase
+            backgroundImage={greyShowcaseBg}
             ctaHref="/login"
-            ctaLabel="Checkout Notes"
+            ctaLabel="Checkout Grey"
           />
         </div>
 
@@ -100,42 +101,7 @@ export default function LandingV2() {
           </div>
         </div>
 
-        <section className="mx-auto mb-10 w-full max-w-6xl px-4 sm:mb-16 sm:px-6">
-          <p className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">Made for how you work</p>
-          <h2 className="mb-8 text-2xl font-semibold text-foreground sm:text-3xl">Your whole team, one workspace</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
-            {[
-              {
-                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-swe.jpg",
-                label: "Corporate",
-                desc: "Structured workflows and shared visibility across every department.",
-              },
-              {
-                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-research.jpg",
-                label: "Creative",
-                desc: "A workspace that moves as faster as your ideas. & help you focus on what matters most.",
-              },
-              {
-                image: "https://200rfrtp5x71tlmk.public.blob.vercel-storage.com/geiger-dash/data_curv_assets/role-ops.jpg",
-                label: "Management",
-                desc: "Full project visibility and team progress — from a single view.",
-              },
-            ].map(({ image, label, desc }) => (
-              <div key={label} className="group relative h-[420px] overflow-hidden rounded-xl sm:h-[520px]">
-                <img
-                  src={image}
-                  alt={label}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-5 sm:p-6">
-                  <p className="text-lg font-semibold text-white sm:text-xl">{label}</p>
-                  <p className="mt-1 text-sm text-white/65">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <TeamCards />
 
         <StartPaths />
         <ShippingLog />

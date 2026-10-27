@@ -49,6 +49,43 @@ export const AUDIENCE_PAGES = [
   },
 ];
 
+// Team shapes from the landing's "Your whole team, one workspace" cards (/teams/<id>); copy re-checked against the apps on 2026-10-28.
+export const TEAM_PAGES = [
+  {
+    id: "corporate",
+    href: "/teams/corporate",
+    label: "For corporate teams",
+    short: "Corporate teams",
+    eyebrow: "For corporate teams",
+    headline: "Every department, one structure",
+    title: "Geiger for corporate teams",
+    description:
+      "Run each department as a project in one organisation, bring people in by invitation or request with the right role, route requests through approvals and keep usage and billing in one place, on one Geiger account.",
+  },
+  {
+    id: "creative",
+    href: "/teams/creative",
+    label: "For in-house creative teams",
+    short: "In-house creative",
+    eyebrow: "For in-house creative teams",
+    headline: "A workspace that keeps up with your ideas",
+    title: "Geiger for in-house creative teams",
+    description:
+      "Sketch ideas together on a live canvas, keep every brand file and version in one library, get sign-off in stages and publish through structured content, on one Geiger account.",
+  },
+  {
+    id: "management",
+    href: "/teams/management",
+    label: "For managers and team leads",
+    short: "Managers and leads",
+    eyebrow: "For managers and team leads",
+    headline: "Every project and every team, in one view",
+    title: "Geiger for managers and team leads",
+    description:
+      "See every project in your organisation from one place, set goals and milestones, approve resource requests and follow the budget against forecast, on one Geiger account.",
+  },
+];
+
 const tour = (app, name, pages) => ({
   app,
   name,
@@ -251,6 +288,10 @@ export function findAudiencePage(id) {
   return AUDIENCE_PAGES.find((page) => page.id === id) ?? null;
 }
 
+export function findTeamPage(id) {
+  return TEAM_PAGES.find((page) => page.id === id) ?? null;
+}
+
 export function findTour(app) {
   return APP_TOURS.find((entry) => entry.app === app) ?? null;
 }
@@ -263,4 +304,4 @@ export function pageMetadata(page) {
   return page ? { title: page.title, description: page.description, alternates: { canonical: page.href } } : {};
 }
 
-export const ALL_TOUR_PAGES =[...AUDIENCE_PAGES, ...APP_TOURS.flatMap((entry) => entry.pages)];
+export const ALL_TOUR_PAGES = [...AUDIENCE_PAGES, ...TEAM_PAGES, ...APP_TOURS.flatMap((entry) => entry.pages)];

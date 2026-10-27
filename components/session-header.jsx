@@ -1,7 +1,6 @@
 "use client";
 
-// Subpath import, not the barrel: keeps @geiger/ui's optional peers out of the graph.
-import { SuiteHeader } from "@geiger/ui/suite-header";
+import { DashSuiteHeader } from "@/components/dash-suite-header";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
 import { avatarUrlForUser } from "@/lib/avatar-url";
 import { useSessionUser } from "@/lib/hooks/use-session-user";
@@ -24,5 +23,5 @@ export function SessionHeader({ megaMenue = true }) {
     />
   ) : null;
 
-  return <SuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;
+  return <DashSuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;
 }

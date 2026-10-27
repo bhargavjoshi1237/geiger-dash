@@ -121,77 +121,137 @@ export function RoadmapWindow() {
   );
 }
 
-// Burn-up for Cycle 7: scope against completed, a point a day, with the days still to come hatched.
-function BurnUp({ width = 420, height = 150 }) {
+// Three fortnights of the seeded project: two finished cycles and the active one, a point a day on each burn-up.
+const CYCLES = [
+  {
+    title: "Cycle 5 - Sharing & Permissions",
+    from: "Aug 3",
+    to: "Aug 16",
+    tab: "Completed",
+    description: "Public share links, per-note roles, an audit trail and the SSO groundwork.",
+    progress: 100,
+    scope: [[0, 8], [3, 8], [3, 10], [6, 10], [6, 11], [13, 11]],
+    completed: [[0, 0], [1.6, 0], [2.4, 1], [4, 2], [5.5, 4], [7, 5], [8.5, 7], [10, 8], [11.5, 10], [12.6, 11], [13, 11]],
+    stats: { scope: 11, started: 0, completed: 11, points: 68 },
+    issues: [
+      { id: "GEIG-45", title: "Per-note roles: owner, editor, commenter, viewer", status: "done", priority: "urgent", assignee: "Marcus Whitfield" },
+      { id: "GEIG-48", title: "Expired share links still resolve for five minutes", status: "done", priority: "urgent", assignee: "Aisha Bennett" },
+      { id: "GEIG-52", title: "Revoke access propagates to open sessions", status: "done", priority: "high", assignee: "Tyler Brennan" },
+      { id: "GEIG-47", title: "Share dialog redesign", status: "done", priority: "medium", assignee: "Grace Donnelly" },
+    ],
+  },
+  {
+    title: "Cycle 6 - Offline & Mobile",
+    from: "Aug 31",
+    to: "Sep 13",
+    tab: "Completed",
+    description: "Offline-first sync, conflict resolution and the installable mobile app.",
+    progress: 100,
+    scope: [[0, 7], [2, 7], [2, 9], [5, 9], [5, 10], [13, 10]],
+    completed: [[0, 0], [2.6, 0], [3.4, 1], [5, 2], [6.5, 3], [8, 5], [9.5, 6], [11, 8], [12.4, 10], [13, 10]],
+    stats: { scope: 10, started: 0, completed: 10, points: 44 },
+    issues: [
+      { id: "GEIG-55", title: "Offline-first sync engine", status: "done", priority: "urgent", assignee: "Aisha Bennett" },
+      { id: "GEIG-56", title: "Conflict resolution UI for divergent edits", status: "done", priority: "urgent", assignee: "Ethan Caldwell" },
+      { id: "GEIG-59", title: "Sync queue stalls after a long offline window", status: "done", priority: "urgent", assignee: "Aisha Bennett" },
+      { id: "GEIG-57", title: "Installable PWA with a service worker", status: "done", priority: "high", assignee: "Tyler Brennan" },
+    ],
+  },
+  {
+    title: "Cycle 7 - GA Hardening",
+    from: "Sep 14",
+    to: "Sep 27",
+    tab: "Active",
+    description: "Rehearse the rollback, lock the release checklist and clear every urgent issue before GA.",
+    progress: 8,
+    today: 6,
+    scope: [[0, 9], [2, 9], [2, 11], [4, 11], [4, 12], [6, 12]],
+    completed: [[0, 0], [4.6, 0], [5.4, 1], [6, 1]],
+    stats: { scope: 12, started: 7, completed: 1, points: 36 },
+    issues: ["GEIG-70", "GEIG-71", "GEIG-69", "GEIG-77"].map((id) => ISSUES.find((issue) => issue.id === id)),
+  },
+];
+
+// Burn-up of scope against completed; an active cycle hatches the days still to come and projects its scope forward.
+function BurnUp({ cycle, width = 420, height = 150 }) {
   const days = 13;
-  const max = 12;
+  const max = Math.max(...cycle.scope.map(([, value]) => value));
   const x = (day) => (day / days) * width;
   const y = (value) => height - (value / max) * (height - 12);
-  const today = 6;
-  const scope = [
-    [0, 9],
-    [2, 9],
-    [2, 11],
-    [4, 11],
-    [4, 12],
-    [today, 12],
-  ];
-  const completed = [
-    [0, 0],
-    [4.6, 0],
-    [5.4, 1],
-    [today, 1],
-  ];
+  const end = cycle.today ?? days;
+  const scopeNow = cycle.scope.at(-1)[1];
+  const doneNow = cycle.completed.at(-1)[1];
   const line = (points) => points.map(([day, value], index) => `${index ? "L" : "M"}${x(day).toFixed(1)} ${y(value).toFixed(1)}`).join(" ");
   return (
     <svg width={width} height={height + 22} viewBox={`0 0 ${width} ${height + 22}`} className="overflow-visible">
-      <defs>
-        <pattern id="plan-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1.5" />
-        </pattern>
-      </defs>
+      {cycle.today != null ? (
+        <defs>
+          <pattern id="plan-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1.5" />
+          </pattern>
+        </defs>
+      ) : null}
       {Array.from({ length: days + 1 }, (_, day) => (
         <line key={day} x1={x(day)} x2={x(day)} y1="0" y2={height} stroke="currentColor" strokeOpacity="0.06" />
       ))}
-      <rect x={x(today)} y="0" width={width - x(today)} height={height} fill="url(#plan-hatch)" className="text-foreground" />
-      <path d={`${line(scope)} L${x(days)} ${y(12)}`} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeDasharray="3 4" className="text-foreground" />
-      <path d={line(scope)} fill="none" stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.5" className="text-foreground" />
-      <path d={`${line(completed)} L${x(today)} ${height} L0 ${height} Z`} className="fill-emerald-500/15" />
-      <path d={line(completed)} fill="none" strokeWidth="1.75" className="stroke-emerald-500" />
-      <line x1={x(today)} x2={x(today)} y1="0" y2={height} stroke="currentColor" strokeOpacity="0.55" className="text-foreground" />
-      <circle cx={x(today)} cy={y(1)} r="3" className="fill-emerald-500" />
-      <circle cx={x(today)} cy={y(12)} r="3" className="fill-foreground/70" />
+      {cycle.today != null ? (
+        <>
+          <rect x={x(end)} y="0" width={width - x(end)} height={height} fill="url(#plan-hatch)" className="text-foreground" />
+          <path d={`M${x(end)} ${y(scopeNow)} L${x(days)} ${y(scopeNow)}`} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeDasharray="3 4" className="text-foreground" />
+        </>
+      ) : null}
+      <path d={line(cycle.scope)} fill="none" stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.5" className="text-foreground" />
+      <path d={`${line(cycle.completed)} L${x(end)} ${height} L0 ${height} Z`} className="fill-emerald-500/15" />
+      <path d={line(cycle.completed)} fill="none" strokeWidth="1.75" className="stroke-emerald-500" />
+      {cycle.today != null ? <line x1={x(end)} x2={x(end)} y1="0" y2={height} stroke="currentColor" strokeOpacity="0.55" className="text-foreground" /> : null}
+      <circle cx={x(end)} cy={y(scopeNow)} r="3" className="fill-foreground/70" />
+      <circle cx={x(end)} cy={y(doneNow)} r="3" className="fill-emerald-500" />
       <line x1="0" x2={width} y1={height} y2={height} stroke="currentColor" strokeOpacity="0.15" className="text-foreground" />
       <text x="0" y={height + 16} className="fill-muted-foreground text-[11px]">
-        Sep 14
+        {cycle.from}
       </text>
       <text x={width} y={height + 16} textAnchor="end" className="fill-muted-foreground text-[11px]">
-        Sep 27
+        {cycle.to}
       </text>
     </svg>
   );
 }
 
+// Flow's stat tile: label, value, then the unit on its own line so it never crowds the number.
 function StatTile({ label, value, hint, className }) {
   return (
-    <div className={cn("px-4 py-3", className)}>
-      <div className="text-[11px] text-muted-foreground">{label}</div>
-      <div className="mt-1 flex items-baseline gap-1.5">
-        <span className="text-[20px] font-medium tracking-[-0.01em] tabular-nums">{value}</span>
-        {hint ? <span className="text-[11px] text-muted-foreground">{hint}</span> : null}
-      </div>
+    <div className={cn("flex flex-col px-4 py-3", className)}>
+      <span className="text-[11px] text-muted-foreground">{label}</span>
+      <span className="mt-1 text-[20px] leading-7 font-medium tracking-[-0.01em] tabular-nums">{value}</span>
+      {hint ? <span className="text-[11px] text-muted-foreground">{hint}</span> : null}
     </div>
   );
 }
 
-function CycleTabs() {
+function CycleStats({ stats }) {
+  const tiles = [
+    { label: "Scope", value: stats.scope, hint: "issues" },
+    { label: "Started", value: stats.started },
+    { label: "Completed", value: stats.completed },
+    { label: "Points", value: stats.points, hint: "estimated" },
+  ];
+  return (
+    <div className={cn("grid h-fit w-[208px] shrink-0 grid-cols-2 overflow-hidden rounded-lg border", LINE)}>
+      {tiles.map((tile, index) => (
+        <StatTile key={tile.label} {...tile} className={cn(LINE, index % 2 && "border-l", index > 1 && "border-t")} />
+      ))}
+    </div>
+  );
+}
+
+function CycleTabs({ active }) {
   return (
     <div className={cn("flex h-12 shrink-0 items-center gap-2 border-b px-5", LINE)}>
       <Repeat className="size-4 text-muted-foreground" strokeWidth={1.75} />
       <span className="font-medium">Cycles</span>
       <span className="ml-3 flex gap-1 text-[12px]">
-        {["Active", "Upcoming", "Completed"].map((tab, index) => (
-          <span key={tab} className={cn("rounded-md px-2 py-0.5", index === 0 ? "bg-foreground/[0.08] text-foreground" : "text-muted-foreground")}>
+        {["Active", "Upcoming", "Completed"].map((tab) => (
+          <span key={tab} className={cn("rounded-md px-2 py-0.5", tab === active ? "bg-foreground/[0.08] text-foreground" : "text-muted-foreground")}>
             {tab}
           </span>
         ))}
@@ -203,72 +263,51 @@ function CycleTabs() {
   );
 }
 
-// A past cycle peeking out behind the active one.
-function GhostCycle({ title, window, dim, className }) {
+// One cycle as Flow shows it: header, burn-up and stat tiles, then the cycle's issues; `dim` fades a cycle sitting behind.
+function CycleWindow({ cycle, dim, className }) {
   return (
-    <Window className={cn("relative", className)}>
-      <span className="pointer-events-none absolute inset-0 z-[1] bg-background" style={{ opacity: dim }} />
-      <div className="px-6 py-6">
-        <div className="flex items-center gap-2">
-          <ProgressRing value={100} size={16} className="text-emerald-500" />
-          <span className="text-[15px] font-medium">{title}</span>
+    <Window className={className}>
+      {dim ? <span className="pointer-events-none absolute inset-0 z-[1] bg-background" style={{ opacity: dim }} /> : null}
+      <CycleTabs active={cycle.tab} />
+      <div className={cn("flex gap-6 border-b px-6 py-6", LINE)}>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <ProgressRing value={cycle.progress} size={16} className="text-emerald-500" />
+            <span className="truncate text-[15px] font-medium">{cycle.title}</span>
+            <span className="shrink-0 text-[12px] text-muted-foreground">
+              {cycle.from} – {cycle.to}
+            </span>
+          </div>
+          <p className="mt-1 text-[12px] text-muted-foreground">{cycle.description}</p>
+          <div className="mt-5">
+            <BurnUp cycle={cycle} />
+          </div>
+          <div className="mt-2 flex items-center gap-4 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="h-[2px] w-3 bg-emerald-500" /> Completed
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-[2px] w-3 bg-foreground/45" /> Scope
+            </span>
+          </div>
         </div>
-        <div className="mt-1 text-[12px] text-muted-foreground">{window}</div>
-        <svg width="100%" height="150" viewBox="0 0 300 150" preserveAspectRatio="none" className="mt-6 text-foreground">
-          <path d="M0 110 L60 100 L120 80 L200 70 L300 70" fill="none" stroke="currentColor" strokeOpacity="0.35" strokeWidth="1.5" />
-          <path d="M0 150 C 70 140, 110 120, 160 100 S 260 72, 300 70 L300 150 Z" className="fill-emerald-500/10" />
-          <path d="M0 150 C 70 140, 110 120, 160 100 S 260 72, 300 70" fill="none" strokeWidth="1.5" className="stroke-emerald-500/70" />
-        </svg>
-        <div className="mt-6 flex flex-col gap-3">
-          {[70, 52, 64].map((width) => (
-            <span key={width} className="block h-2 rounded-full bg-foreground/[0.07]" style={{ width: `${width}%` }} />
-          ))}
-        </div>
+        <CycleStats stats={cycle.stats} />
       </div>
+      {cycle.issues.map((issue) => (
+        <IssueRow key={issue.id} issue={issue} compact />
+      ))}
     </Window>
   );
 }
 
-// Section stage: the active cycle with its burn-up, stat tiles and issues, two finished cycles behind it.
+// Section stage: the active cycle in front, the two finished cycles stacked behind it.
 export function CycleStage() {
-  const cycleIssues = ISSUES.filter((issue) => ["GEIG-70", "GEIG-71", "GEIG-69", "GEIG-77"].includes(issue.id));
+  const [fifth, sixth, active] = CYCLES;
   return (
     <div className="relative h-[620px] w-[1000px]">
-      <GhostCycle title="Cycle 5 - Sharing & Permissions" window="Aug 3 – Aug 16" dim={0.5} className="absolute top-[72px] left-0 h-[520px] w-[330px]" />
-      <GhostCycle title="Cycle 6 - Offline & Mobile" window="Aug 31 – Sep 13" dim={0.3} className="absolute top-[36px] left-[150px] h-[560px] w-[330px]" />
-      <Window className="absolute top-0 left-[290px] z-[2] h-[680px] w-[710px]">
-        <CycleTabs />
-        <div className={cn("flex gap-6 border-b px-6 py-6", LINE)}>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <ProgressRing value={8} size={16} className="text-emerald-500" />
-              <span className="text-[15px] font-medium">Cycle 7 - GA Hardening</span>
-              <span className="text-[12px] text-muted-foreground">Sep 14 – Sep 27</span>
-            </div>
-            <p className="mt-1 text-[12px] text-muted-foreground">Rehearse the rollback, lock the release checklist and clear every urgent issue before GA.</p>
-            <div className="mt-5">
-              <BurnUp />
-            </div>
-            <div className="mt-2 flex items-center gap-4 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="h-[2px] w-3 bg-emerald-500" /> Completed
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-[2px] w-3 bg-foreground/45" /> Scope
-              </span>
-            </div>
-          </div>
-          <div className={cn("grid h-fit w-[200px] shrink-0 grid-cols-2 divide-x divide-y overflow-hidden rounded-lg border [&>*]:border-foreground/[0.07]", LINE)}>
-            <StatTile label="Scope" value="12" hint="issues" />
-            <StatTile label="Started" value="7" />
-            <StatTile label="Completed" value="1" />
-            <StatTile label="Points" value="36" hint="estimated" />
-          </div>
-        </div>
-        {cycleIssues.map((issue) => (
-          <IssueRow key={issue.id} issue={issue} compact />
-        ))}
-      </Window>
+      <CycleWindow cycle={fifth} dim={0.5} className="absolute top-[72px] left-0 z-0 h-[680px] w-[710px]" />
+      <CycleWindow cycle={sixth} dim={0.3} className="absolute top-[36px] left-[150px] z-[1] h-[680px] w-[710px]" />
+      <CycleWindow cycle={active} className="absolute top-0 left-[290px] z-[2] h-[680px] w-[710px]" />
     </div>
   );
 }

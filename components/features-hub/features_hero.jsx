@@ -1,4 +1,4 @@
-import { Logo } from "@geiger/ui";
+import { LogoLoading } from "@geiger/ui/logo-loading";
 import { SUITE_APPS } from "@/components/landing/suite_apps";
 import { seededRandom } from "@/components/features-hub/random";
 import styles from "@/components/features-hub/features_hub.module.css";
@@ -50,12 +50,12 @@ export function FeaturesHero({ title, description }) {
         <div className={`absolute inset-0 m-auto size-[72px] sm:size-[120px] ${styles.markHalo} ${styles.iconEnter}`} style={{ "--delay": "1s" }}>
           <span className={`absolute inset-3 rounded-[24px] bg-foreground sm:inset-5 ${styles.markGlow}`} />
           <span className="relative flex size-full items-center justify-center rounded-[18px] border border-border bg-surface-card bg-linear-to-b from-foreground/[0.06] to-transparent shadow-2xl shadow-black/20 sm:rounded-[28px]">
-            <Logo className="size-10 text-foreground sm:size-[60px]" />
+            <LogoLoading size={70} aria-hidden="true" className="text-foreground [&_svg]:size-10 sm:[&_svg]:size-[70px] -mt-0.5" />
           </span>
         </div>
       </div>
 
-      <hgroup className="mx-auto mt-6 max-w-3xl px-4 text-center sm:mt-2">
+      <hgroup className="mx-auto mt- max-w-3xl px-4 text-center sm:mt-2">
         <h1 className="text-[2.6rem] leading-[1.05] font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-[4rem] sm:leading-[1.06]">
           {words.map((word, index) => (
             <span key={index}>

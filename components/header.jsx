@@ -1,7 +1,4 @@
-// Subpath import, not the barrel: this is a Server Component, so pulling
-// @geiger/ui's index would resolve every optional peer (input-otp, recharts...)
-// this app does not install.
-import { SuiteHeader } from "@geiger/ui/suite-header";
+import { DashSuiteHeader } from "@/components/dash-suite-header";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { UserProfileDropdown } from "@/components/user-profile-dropdown";
@@ -28,5 +25,5 @@ export async function Header({ megaMenue = true }) {
     />
   ) : null;
 
-  return <SuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;
+  return <DashSuiteHeader userId={userId} profile={profile} megaMenu={megaMenue} />;
 }

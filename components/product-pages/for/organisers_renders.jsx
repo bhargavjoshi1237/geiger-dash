@@ -82,7 +82,7 @@ function Viewfinder({ seed, className }) {
       {["top-4 left-4 border-t-2 border-l-2", "top-4 right-4 border-t-2 border-r-2", "bottom-4 left-4 border-b-2 border-l-2", "right-4 bottom-4 border-r-2 border-b-2"].map((corner) => (
         <span key={corner} className={cn("absolute size-6 rounded-[3px] border-foreground/60", corner)} />
       ))}
-      <div className="relative rotate-[-4deg] rounded-xl bg-white p-2 text-black shadow-lg shadow-black/20">
+      <div className="relative rounded-xl bg-white p-2 text-black shadow-lg shadow-black/20">
         <QrGlyph seed={seed} className="size-[88px]" />
       </div>
       <span className="absolute inset-x-8 top-1/2 h-px bg-emerald-500/70 shadow-[0_0_10px_1px] shadow-emerald-500/40" />

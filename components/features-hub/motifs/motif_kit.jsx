@@ -4,11 +4,15 @@ import { seededRandom } from "@/components/features-hub/random";
 export function QrGlyph({ seed = "qr", size = 21, className = "" }) {
   const random = seededRandom(seed);
   const finder = (row, col) => {
-    const inBox = (r, c) => row >= r && row < r + 7 && col >= c && col < c + 7;
-    const ring = (r, c) => Math.max(Math.abs(row - (r + 3)), Math.abs(col - (c + 3)));
+    // Each finder keeps a one-module blank separator, so the three corners read clearly and the code sits the right way up.
     for (const [r, c] of [[0, 0], [0, size - 7], [size - 7, 0]]) {
-      if (inBox(r, c)) return ring(r, c) !== 2;
+      if (row >= r - 1 && row <= r + 7 && col >= c - 1 && col <= c + 7) {
+        const ring = Math.max(Math.abs(row - (r + 3)), Math.abs(col - (c + 3)));
+        return ring <= 3 && ring !== 2;
+      }
     }
+    // Timing patterns: alternating modules along row and column 6 between the finders.
+    if (row === 6 || col === 6) return (row + col) % 2 === 0;
     return null;
   };
   const cells = [];
