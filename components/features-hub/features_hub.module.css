@@ -1,0 +1,721 @@
+/* Features hub motion: the Linear-style hero marquee and every card motif's keyframes. */
+
+/* ---------- Hero ---------- */
+
+.heroRows {
+  -webkit-mask-image: radial-gradient(50% 50%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(50% 50%, #000 20%, transparent 100%);
+}
+
+.track {
+  transform: translateX(var(--start, 0%));
+}
+
+/* A disc of the surface colour behind the centre mark so the tiles fade out around it. */
+.markHalo {
+  isolation: isolate;
+}
+
+.markHalo::before {
+  content: "";
+  position: absolute;
+  inset: -100px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(var(--halo, var(--background)) 0px, var(--halo, var(--background)) 40px, transparent 50%);
+}
+
+.markGlow {
+  filter: blur(28px);
+  opacity: 0.12;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .track {
+    animation: marquee var(--duration, 30s) linear infinite backwards;
+  }
+
+  .fadeIn {
+    animation: fadeIn 0.7s var(--delay, 0s) ease-out backwards;
+  }
+
+  .blurIn {
+    animation: blurIn 1s var(--delay, 0s) cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .iconEnter {
+    animation: iconEnter 1.2s var(--delay, 0s) ease-out backwards;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(var(--start, 0%));
+  }
+  to {
+    transform: translateX(calc(-100% + var(--start, 0%)));
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes blurIn {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    translate: 0 20%;
+  }
+}
+
+@keyframes iconEnter {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* ---------- Card shell ---------- */
+
+/* Off-screen cards freeze their motif; reduced motion stills every loop. */
+.card[data-inview="false"] *,
+.card[data-inview="false"] *::before,
+.card[data-inview="false"] *::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card *,
+  .card *::before,
+  .card *::after {
+    animation: none !important;
+  }
+}
+
+.radialFade {
+  -webkit-mask-image: radial-gradient(50% 50%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(50% 50%, #000 20%, transparent 100%);
+}
+
+.topFade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 34%);
+  mask-image: linear-gradient(to bottom, transparent, #000 34%);
+}
+
+/* Shared entrance for anything that lands: toasts, messages, avatars. */
+.popIn {
+  animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.96;
+  }
+}
+
+/* ---------- Cards (tickets, passes, memberships, certificates, templates) ---------- */
+
+.floatY {
+  animation: floatY 5s ease-in-out infinite;
+}
+
+@keyframes floatY {
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+.shine {
+  animation: shine 5s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%,
+  55% {
+    translate: -160% 0;
+  }
+  85%,
+  100% {
+    translate: 320% 0;
+  }
+}
+
+.passRise {
+  animation: passRise 6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes passRise {
+  0%,
+  100% {
+    translate: 0 34px;
+    scale: 0.94;
+  }
+  20%,
+  80% {
+    translate: 0 -6px;
+    scale: 1;
+  }
+}
+
+.cloneOut {
+  animation: cloneOut 6s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) infinite both;
+}
+
+@keyframes cloneOut {
+  0%,
+  10% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  26%,
+  80% {
+    translate: var(--tx) var(--ty);
+    opacity: 1;
+  }
+  94%,
+  100% {
+    translate: 0 0;
+    opacity: 0;
+  }
+}
+
+.stamp {
+  animation: stamp 5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+@keyframes stamp {
+  0%,
+  22% {
+    scale: 1.8;
+    opacity: 0;
+    rotate: -20deg;
+  }
+  32%,
+  90% {
+    scale: 1;
+    opacity: 1;
+    rotate: 0deg;
+  }
+  100% {
+    scale: 1;
+    opacity: 0;
+  }
+}
+
+.renew {
+  animation: renew 4s linear infinite;
+}
+
+@keyframes renew {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Seats ---------- */
+
+.seat {
+  fill: transparent;
+  animation: seatFill var(--dur, 10s) var(--d, 0s) infinite;
+}
+
+@keyframes seatFill {
+  0%,
+  14% {
+    fill: transparent;
+  }
+  18%,
+  84% {
+    fill: color-mix(in oklab, var(--ink) 42%, transparent);
+  }
+  90%,
+  100% {
+    fill: transparent;
+  }
+}
+
+.ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  0% {
+    scale: 1;
+    opacity: 0.7;
+  }
+  80%,
+  100% {
+    scale: 2.6;
+    opacity: 0;
+  }
+}
+
+/* ---------- Scan ---------- */
+
+.sweep {
+  top: 50%;
+  animation: sweep 2.4s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  0%,
+  100% {
+    top: 8%;
+    opacity: 0.35;
+  }
+  50% {
+    top: 90%;
+    opacity: 1;
+  }
+}
+
+.printOut {
+  animation: printOut 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes printOut {
+  from {
+    translate: 0 -100%;
+  }
+  70% {
+    translate: 0 0;
+  }
+}
+
+/* ---------- Pulse (NFC) ---------- */
+
+.ripple {
+  opacity: 0.25;
+  animation: ripple 3s cubic-bezier(0, 0, 0.2, 1) var(--d, 0s) infinite;
+}
+
+@keyframes ripple {
+  0%,
+  30% {
+    scale: 0.6;
+    opacity: 0;
+  }
+  34% {
+    opacity: 0.8;
+  }
+  100% {
+    scale: 2.6;
+    opacity: 0;
+  }
+}
+
+.readerFlash {
+  animation: readerFlash 3s ease-out infinite;
+}
+
+@keyframes readerFlash {
+  0%,
+  30% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  34% {
+    box-shadow: 0 0 0 10px color-mix(in oklab, var(--ink) 28%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 26px transparent;
+  }
+}
+
+.tapIn {
+  animation: tapIn 3s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes tapIn {
+  0%,
+  6% {
+    translate: -96px 34px;
+    rotate: -18deg;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  30%,
+  56% {
+    translate: 10px 0;
+    rotate: -4deg;
+    opacity: 1;
+  }
+  84%,
+  100% {
+    translate: -96px 34px;
+    rotate: -18deg;
+    opacity: 0;
+  }
+}
+
+.grant {
+  animation: grant 3s ease-out infinite;
+}
+
+@keyframes grant {
+  0%,
+  32% {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  40%,
+  72% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  84%,
+  100% {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+/* ---------- Timeline ---------- */
+
+.reveal {
+  clip-path: inset(0 38% 0 0);
+  animation: reveal 9s linear infinite;
+}
+
+@keyframes reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.playhead {
+  left: 62%;
+  animation: playhead 9s linear infinite;
+}
+
+@keyframes playhead {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+.seriesPop {
+  animation: seriesPop 6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0s) infinite both;
+}
+
+@keyframes seriesPop {
+  0%,
+  6% {
+    scale: 0;
+    opacity: 0;
+  }
+  14%,
+  82% {
+    scale: 1;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    scale: 0.6;
+    opacity: 0;
+  }
+}
+
+/* ---------- Nodes ---------- */
+
+.dashFlow {
+  animation: dashFlow 1.2s linear infinite;
+}
+
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+.travel {
+  offset-distance: 0%;
+  opacity: 0;
+  animation: travel 3s ease-in-out var(--d, 0s) infinite;
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  28% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  32%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.nodeFire {
+  animation: nodeFire 3s ease-out var(--d, 0s) infinite;
+}
+
+@keyframes nodeFire {
+  0% {
+    border-color: var(--border);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  6% {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ink) 22%, transparent);
+  }
+  36%,
+  100% {
+    border-color: var(--border);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ---------- Builder ---------- */
+
+.blockIn {
+  animation: blockIn 8s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) infinite both;
+}
+
+@keyframes blockIn {
+  0%,
+  3% {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.97;
+  }
+  12%,
+  88% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+.typing {
+  width: calc(var(--chars) * 1ch);
+  animation: typing 8s infinite;
+}
+
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  40%,
+  88% {
+    width: calc(var(--chars) * 1ch);
+  }
+  100% {
+    width: 0;
+  }
+}
+
+.cursor {
+  translate: 330px 92px;
+  animation: cursor 8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes cursor {
+  0%,
+  20% {
+    translate: 400px 230px;
+    scale: 1;
+  }
+  42% {
+    translate: 330px 92px;
+    scale: 1;
+  }
+  46% {
+    translate: 330px 92px;
+    scale: 0.82;
+  }
+  50% {
+    translate: 330px 92px;
+    scale: 1;
+  }
+  74%,
+  100% {
+    translate: 190px 190px;
+    scale: 1;
+  }
+}
+
+/* ---------- People ---------- */
+
+.orbit {
+  animation: orbit 48s linear infinite;
+}
+
+@keyframes orbit {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.press {
+  animation: press 1.6s ease-in-out infinite;
+}
+
+@keyframes press {
+  0%,
+  60%,
+  100% {
+    scale: 1;
+  }
+  70% {
+    scale: 0.9;
+  }
+  80% {
+    scale: 1.04;
+  }
+}
+
+/* ---------- Board ---------- */
+
+.boardMove {
+  animation: boardMove 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes boardMove {
+  0% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 0;
+  }
+  5%,
+  14% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 1;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  20% {
+    translate: 0 -8px;
+    rotate: -3deg;
+    box-shadow: 0 14px 30px -10px rgb(0 0 0 / 0.35);
+  }
+  32%,
+  44% {
+    translate: var(--col) 0;
+    rotate: 0deg;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    translate: var(--col) -8px;
+    rotate: 3deg;
+    box-shadow: 0 14px 30px -10px rgb(0 0 0 / 0.35);
+  }
+  62%,
+  92% {
+    translate: calc(var(--col) * 2) 0;
+    rotate: 0deg;
+    opacity: 1;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  100% {
+    translate: calc(var(--col) * 2) 0;
+    opacity: 0;
+  }
+}
+
+.boardDone {
+  animation: boardDone 7s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+@keyframes boardDone {
+  0%,
+  62% {
+    scale: 0;
+    opacity: 0;
+  }
+  68%,
+  92% {
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+    opacity: 0;
+  }
+}
+
+/* ---------- Live ---------- */
+
+.blink {
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.eq {
+  transform-origin: bottom;
+  scale: 1 0.5;
+  animation: eq 0.9s ease-in-out var(--d, 0s) infinite alternate;
+}
+
+@keyframes eq {
+  from {
+    scale: 1 0.18;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+.floatUp {
+  animation: floatUp 3.2s ease-out var(--d, 0s) infinite both;
+}
+
+@keyframes floatUp {
+  0% {
+    translate: 0 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    translate: var(--x, 0) -110px;
+    scale: 0.9;
+    opacity: 0;
+  }
+}

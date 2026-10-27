@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import { SeoHubPage } from "@/components/pages-studio/seo-hub-page";
+import { FeaturesHubPage } from "@/components/features-hub/features_hub_page";
 import { resolveProductApp } from "@/lib/pages-studio/products";
 import { findPublishedSeoPageBySlug } from "@/lib/public-content/queries";
 import { buildSeoPagePath } from "@/lib/pages-studio/skills";
@@ -9,6 +10,7 @@ import { buildSeoPagePath } from "@/lib/pages-studio/skills";
 // /<type>/<slug> URL and 301-redirects to the canonical nested path (or 404s).
 export async function SeoProductHub({ pageType, segment }) {
   const app = resolveProductApp(segment);
+  if (app && pageType === "feature") return <FeaturesHubPage product={app.value} />;
   if (app) return <SeoHubPage pageType={pageType} product={app.value} />;
 
   const legacy = await findPublishedSeoPageBySlug(pageType, segment);

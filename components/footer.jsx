@@ -1,12 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import FooterProducts from "@/components/footer-products";
+import { AREAS } from "@/components/product-pages/areas";
+import { AUDIENCE_PAGES } from "@/components/product-pages/tours";
 
 export default function Footer() {
   return (
    <div className="bg-background"> <footer className="w-full border-t border-border/50 bg-background pt-16 pb-8 relative z-30 px-6">
       <div className="container mx-auto max-w-6xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-8 mb-12">
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-6 h-6 flex items-center justify-center">
@@ -25,6 +27,24 @@ export default function Footer() {
           <div>
             <h2 className="font-bold text-foreground mb-4">Products</h2>
             <FooterProducts />
+          </div>
+
+          <div>
+            <h2 className="font-bold text-foreground mb-4">Built for</h2>
+            <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+              {AUDIENCE_PAGES.map((page) => (
+                <li key={page.id}><Link href={page.href} className="hover:text-foreground transition-colors">{page.short}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-foreground mb-4">Explore</h2>
+            <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+              {AREAS.map((area) => (
+                <li key={area.id}><Link href={area.href} className="hover:text-foreground transition-colors">{area.label}</Link></li>
+              ))}
+            </ul>
           </div>
 
           <div>

@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Events hero film set</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=block" rel="stylesheet" />
+    <!--
+      Film set for the /launch hero video. scripts/hero-video/render.mjs opens this page, calls window.render(t) for every
+      frame and screenshots it, so nothing here animates on its own: all motion is a pure function of t (seconds, 0..LOOP).
+      Two shots crossfade: tickets selling (shot A), then the door (shot B), and B fades back into A so the clip loops.
+    -->
+    <style>
+      :root {
+        --bg: #161616;
+        --win: #1a1a1a;
+        --card: #1f1f1f;
+        --raised: #262626;
+        --line: rgb(255 255 255 / 0.07);
+        --line-strong: rgb(255 255 255 / 0.12);
+        --fg: #e7e7e7;
+        --fg-2: #c7c7c7;
+        --muted: #8e8e8e;
+        --faint: rgb(255 255 255 / 0.06);
+        --track: rgb(255 255 255 / 0.08);
+        --bar: #d4d4d4;
+        --shadow: 0 2px 0 rgb(255 255 255 / 0.03) inset, 0 30px 80px -20px rgb(0 0 0 / 0.75), 0 8px 24px rgb(0 0 0 / 0.35);
+        --qr: #e7e7e7;
+        --emerald: #34d399;
+        --emerald-bg: rgb(16 185 129 / 0.12);
+        --amber: #fbbf24;
+        --amber-bg: rgb(245 158 11 / 0.12);
+        --red: #f87171;
+        --red-bg: rgb(239 68 68 / 0.12);
+        --blur: 7px;
+        --blur-opacity: 0.62;
+      }
+
+      body.light {
+        --bg: #ffffff;
+        --win: #ffffff;
+        --card: #ffffff;
+        --raised: #f4f4f5;
+        --line: rgb(0 0 0 / 0.07);
+        --line-strong: rgb(0 0 0 / 0.12);
+        --fg: #18181b;
+        --fg-2: #3f3f46;
+        --muted: #71717a;
+        --faint: rgb(0 0 0 / 0.04);
+        --track: rgb(0 0 0 / 0.07);
+        --bar: #3f3f46;
+        --shadow: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 30px 70px -24px rgb(0 0 0 / 0.22), 0 6px 18px rgb(0 0 0 / 0.07);
+        --qr: #18181b;
+        --emerald: #059669;
+        --emerald-bg: rgb(16 185 129 / 0.12);
+        --amber: #d97706;
+        --amber-bg: rgb(245 158 11 / 0.14);
+        --red: #dc2626;
+        --red-bg: rgb(239 68 68 / 0.1);
+        --blur-opacity: 0.7;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: "Geist", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .mono {
+        font-family: "Geist Mono", ui-monospace, monospace;
+      }
+
+      #stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      .shot {
+        position: absolute;
+        inset: 0;
+      }
+
+      .layer {
+        position: absolute;
+        inset: 0;
+        perspective: 1800px;
+        perspective-origin: 55% 30%;
+      }
+
+      .layer.blur {
+        filter: blur(var(--blur));
+        opacity: var(--blur-opacity);
+      }
+
+      .plane {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+
+      /* Shared window chrome. */
+      .win {
+        background: var(--win);
+        border: 1px solid var(--line-strong);
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 76px;
+        padding: 0 32px;
+        border-bottom: 1px solid var(--line);
+        font-size: 22px;
+      }
+
+      .bar b {
+        font-weight: 600;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line-strong);
+        font-size: 18px;
+        white-space: nowrap;
+        color: var(--fg-2);
+      }
+
+      .chip i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--muted);
+      }
+
+      .chip.on {
+        border-color: transparent;
+        background: var(--emerald-bg);
+        color: var(--emerald);
+      }
+
+      .chip.on i {
+        background: var(--emerald);
+      }
+
+      .chip.warn {
+        border-color: transparent;
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+
+      .chip.warn i {
+        background: var(--amber);
+      }
+
+      .chip.out {
+        border-color: transparent;
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .chip.out i {
+        background: var(--red);
+      }
+
+      .tab {
+        padding: 8px 18px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 20px;
+      }
+
+      .tab.active {
+        background: var(--faint);
+        color: var(--fg);
+      }
+
+      /* ---------- Shot A: tickets selling ---------- */
+      #tickets {
+        width: 2700px;
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .kpi {
+        padding: 26px 32px;
+        border-left: 1px solid var(--line);
+      }
+
+      .kpi:first-child {
+        border-left: 0;
+      }
+
+      .kpi .label {
+        font-size: 18px;
+        color: var(--muted);
+      }
+
+      .kpi .value {
+        margin-top: 6px;
+        font-size: 44px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .body-a {
+        display: grid;
+        grid-template-columns: 1fr 620px;
+        gap: 0;
+      }
+
+      .tiers {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px;
+        padding: 32px;
+        border-right: 1px solid var(--line);
+      }
+
+      .tier {
+        padding: 26px 28px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: var(--card);
+      }
+
+      .tier.focus {
+        border-color: var(--line-strong);
+      }
+
+      .tier .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .tier .name {
+        font-size: 22px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tier .price {
+        margin-top: 14px;
+        font-size: 40px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
+
+      .tier .release {
+        margin-top: 2px;
+        font-size: 18px;
+        color: var(--muted);
+      }
+
+      .track {
+        margin-top: 22px;
+        height: 10px;
+        border-radius: 99px;
+        background: var(--track);
+        overflow: hidden;
+      }
+
+      .track span {
+        display: block;
+        height: 100%;
+        border-radius: 99px;
+        background: var(--bar);
+      }
+
+      .tier .sold {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 18px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .orders {
+        padding: 28px 30px;
+      }
+
+      .orders h4 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+
+      .live-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--emerald);
+      }
+
+      .order-list {
+        position: relative;
+        height: 760px;
+      }
+
+      .order {
+        position: absolute;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 22px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--card);
+      }
+
+      .avatar {
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, color-mix(in oklab, var(--fg) 45%, transparent), color-mix(in oklab, var(--fg) 14%, transparent));
+        color: var(--bg);
+        font-weight: 600;
+        font-size: 20px;
+      }
+
+      .order .who {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .order .who b {
+        display: block;
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .order .who span {
+        font-size: 17px;
+        color: var(--muted);
+      }
+
+      .order .amt {
+        text-align: right;
+        font-size: 20px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .order .amt span {
+        display: block;
+        margin-top: 4px;
+        font-size: 15px;
+        color: var(--emerald);
+      }
+
+      /* ---------- Shot B: the door ---------- */
+      #door {
+        width: 2600px;
+      }
+
+      .body-b {
+        display: grid;
+        grid-template-columns: 640px 1fr 760px;
+      }
+
+      .scanner {
+        padding: 34px;
+        border-right: 1px solid var(--line);
+      }
+
+      .viewfinder {
+        position: relative;
+        height: 470px;
+        border-radius: 20px;
+        background: color-mix(in oklab, var(--fg) 5%, var(--win));
+        overflow: hidden;
+      }
+
+      .corner {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        border-color: var(--fg-2);
+        border-style: solid;
+        border-width: 0;
+      }
+
+      .qr {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 290px;
+        height: 290px;
+        translate: -50% -50%;
+        padding: 18px;
+        border-radius: 18px;
+        background: #ffffff;
+        display: grid;
+        grid-template-columns: repeat(25, 1fr);
+      }
+
+      body.light .qr {
+        background: #ffffff;
+        box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+      }
+
+      .qr i {
+        background: #111111;
+      }
+
+      .scanline {
+        position: absolute;
+        left: 60px;
+        right: 60px;
+        height: 3px;
+        border-radius: 3px;
+        background: var(--emerald);
+        box-shadow: 0 0 24px 4px color-mix(in oklab, var(--emerald) 60%, transparent);
+      }
+
+      .result {
+        margin-top: 26px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 24px;
+        border-radius: 18px;
+        border: 1px solid color-mix(in oklab, var(--emerald) 35%, transparent);
+        background: var(--emerald-bg);
+      }
+
+      .tick {
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--emerald);
+        color: var(--bg);
+      }
+
+      .result b {
+        display: block;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--emerald);
+      }
+
+      .result span {
+        font-size: 18px;
+        color: var(--fg-2);
+      }
+
+      .attendance {
+        padding: 34px 38px;
+        border-right: 1px solid var(--line);
+      }
+
+      .attendance .label {
+        font-size: 20px;
+        color: var(--muted);
+      }
+
+      .big {
+        margin-top: 8px;
+        font-size: 120px;
+        line-height: 1;
+        font-weight: 500;
+        letter-spacing: -0.04em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .big small {
+        font-size: 44px;
+        color: var(--muted);
+        letter-spacing: -0.02em;
+      }
+
+      .gates {
+        margin-top: 44px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+
+      .gate {
+        display: grid;
+        grid-template-columns: 110px 1fr 90px;
+        align-items: center;
+        gap: 18px;
+        font-size: 20px;
+      }
+
+      .gate .track {
+        margin: 0;
+        height: 14px;
+      }
+
+      .gate .n {
+        text-align: right;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .search {
+        margin-top: 46px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 76px;
+        padding: 0 24px;
+        border-radius: 16px;
+        border: 1px solid var(--line-strong);
+        background: var(--card);
+        font-size: 24px;
+      }
+
+      .caret {
+        display: inline-block;
+        width: 2px;
+        height: 30px;
+        margin-left: 2px;
+        vertical-align: -6px;
+        background: var(--fg);
+      }
+
+      .lookup {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 18px 22px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--card);
+      }
+
+      .lookup .who {
+        flex: 1;
+      }
+
+      .lookup b {
+        display: block;
+        font-size: 21px;
+        font-weight: 500;
+      }
+
+      .lookup span {
+        font-size: 17px;
+        color: var(--muted);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 12px;
+        background: var(--fg);
+        color: var(--bg);
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .feed {
+        padding: 30px 32px;
+      }
+
+      .feed h4 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .feed-list {
+        position: relative;
+        height: 820px;
+      }
+
+      .row {
+        position: absolute;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        height: 96px;
+        padding: 0 22px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .row .who {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .row b {
+        display: block;
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .row span {
+        font-size: 17px;
+        color: var(--muted);
+      }
+
+      .row .time {
+        font-size: 17px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .row .ok {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 17px;
+        color: var(--emerald);
+      }
+
+      .strip {
+        display: grid;
+        gap: 22px;
+        padding: 30px 32px 36px;
+        border-top: 1px solid var(--line);
+      }
+
+      .strip h4 {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .releases {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .release-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 24px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        font-size: 20px;
+      }
+
+      .release-row .who {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .release-row b {
+        display: block;
+        font-weight: 500;
+      }
+
+      .release-row span.sub {
+        font-size: 17px;
+        color: var(--muted);
+      }
+
+      .door-bottom {
+        grid-template-columns: 1fr 1fr 1fr 1.4fr;
+      }
+
+      .kiosk {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 26px 26px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        font-size: 21px;
+      }
+
+      .kiosk.active {
+        border-color: var(--line-strong);
+        background: var(--raised);
+      }
+
+      .board {
+        padding: 22px 28px;
+        border-radius: 16px;
+        background: #0c0c0c;
+        color: #f4f4f5;
+      }
+
+      .board .now {
+        font-size: 15px;
+        letter-spacing: 0.14em;
+        color: #34d399;
+      }
+
+      .board .title {
+        margin-top: 4px;
+        font-size: 30px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .board .next {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 18px;
+        color: #a1a1aa;
+      }
+
+      /* Soft vignette so the frame edges sink into the page. */
+      .vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(120% 90% at 62% 30%, transparent 55%, var(--bg) 100%),
+          linear-gradient(to bottom, transparent 70%, var(--bg) 100%);
+      }
+
+      .grain {
+        position: absolute;
+        inset: -50%;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      }
+
+      body.light .grain {
+        opacity: 0.035;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div class="shot" id="shotA"></div>
+      <div class="shot" id="shotB"></div>
+      <div class="vignette"></div>
+      <div class="grain" id="grain"></div>
+    </div>
+
+    <template id="ticketsTpl">
+      <div class="plane win" id="tickets">
+        <div class="bar">
+          <b>Tickets</b>
+          <span class="muted">Fight Night 12 · Harbour Arena</span>
+          <span style="margin-left: 28px" class="tab active">Ticket Tiers</span>
+          <span class="tab">Batched Releases</span>
+          <span class="tab">Discounts &amp; Codes</span>
+          <span style="margin-left: auto" class="chip on"><i></i>On sale</span>
+          <span class="chip">Express Lane</span>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Tickets sold</div><div class="value" data-k="sold">14,927</div></div>
+          <div class="kpi"><div class="label">Ticket revenue</div><div class="value" data-k="revenue">$9,842,310</div></div>
+          <div class="kpi"><div class="label">Sell-through</div><div class="value" data-k="through">87%</div></div>
+          <div class="kpi"><div class="label">Days to go</div><div class="value">12</div></div>
+        </div>
+        <div class="body-a">
+          <div class="tiers" id="tiers"></div>
+          <div class="orders">
+            <h4><span class="live-dot"></span>Live orders</h4>
+            <div class="order-list" id="orders"></div>
+          </div>
+        </div>
+        <div class="strip">
+          <h4>Batched Releases</h4>
+          <div class="strip releases" style="padding: 0; border: 0">
+            <div class="release-row"><div class="who"><b>General on-sale — 17 August</b><span class="sub">On Sale now · 1,710 tickets</span></div><span class="chip on"><i></i>Live</span></div>
+            <div class="release-row"><div class="who"><b>Fight-week release</b><span class="sub">On a date · 50 tickets</span></div><span class="chip"><i></i>Scheduled</span></div>
+            <div class="release-row"><div class="who"><b>Upper tier top-up</b><span class="sub">After a sell-out · Category 8</span></div><span class="chip"><i></i>Waiting</span></div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="doorTpl">
+      <div class="plane win" id="door">
+        <div class="bar">
+          <b>Check-in</b>
+          <span class="muted">Fight Night 12 · Gate B</span>
+          <span style="margin-left: 28px" class="tab active">Check-in App</span>
+          <span class="tab">Real-time Attendance</span>
+          <span class="tab">Name-search Lookup</span>
+          <span style="margin-left: auto" class="chip on"><i></i>Doors open</span>
+        </div>
+        <div class="body-b">
+          <div class="scanner">
+            <div class="viewfinder">
+              <div class="corner" style="left: 40px; top: 40px; border-left-width: 4px; border-top-width: 4px; border-top-left-radius: 16px"></div>
+              <div class="corner" style="right: 40px; top: 40px; border-right-width: 4px; border-top-width: 4px; border-top-right-radius: 16px"></div>
+              <div class="corner" style="left: 40px; bottom: 40px; border-left-width: 4px; border-bottom-width: 4px; border-bottom-left-radius: 16px"></div>
+              <div class="corner" style="right: 40px; bottom: 40px; border-right-width: 4px; border-bottom-width: 4px; border-bottom-right-radius: 16px"></div>
+              <div class="qr" data-k="qr"></div>
+              <div class="scanline" data-k="scanline"></div>
+            </div>
+            <div class="result" data-k="result">
+              <span class="tick">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+              </span>
+              <div>
+                <b>Checked in</b>
+                <span>Aisha Bennett · Category 5 · 2 of 2 tickets</span>
+              </div>
+            </div>
+            <div class="mono muted" style="margin-top: 22px; font-size: 16px; letter-spacing: 0.08em">ROTATING CODE · REFRESHES EVERY FEW SECONDS</div>
+          </div>
+          <div class="attendance">
+            <div class="label">Checked in</div>
+            <div class="big"><span data-k="attendance">1,284</span> <small>/ 1,710</small></div>
+            <div class="gates" id="gates"></div>
+            <div class="search">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--muted)"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <span data-k="query"></span><span class="caret" data-k="caret"></span>
+            </div>
+            <div class="lookup" data-k="lookup">
+              <span class="avatar">H</span>
+              <div class="who"><b>Hana Ito</b><span>Category 3 · Not checked in</span></div>
+              <span class="btn">Check in</span>
+            </div>
+          </div>
+          <div class="feed">
+            <h4><span class="live-dot"></span>Recent check-ins</h4>
+            <div class="feed-list" id="feed"></div>
+          </div>
+        </div>
+        <div class="strip door-bottom">
+          <div class="kiosk active"><span class="chip on" style="height: 30px"><i></i></span>Self check-in</div>
+          <div class="kiosk">On-site registration</div>
+          <div class="kiosk">Buy a ticket</div>
+          <div class="board">
+            <div class="now mono">NOW</div>
+            <div class="title">Prelims · Bout 4 of 6</div>
+            <div class="next"><span>Next · Main card walkouts</span><span>22:00</span></div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      const LOOP = 12;
+      const FADE = 0.7;
+      const SWITCH = 6;
+
+      const TIERS = [
+        { name: "Category 1 — Cageside centre", price: "$3,974", release: "General on-sale", sold: 222, cap: 240 },
+        { name: "Category 2 — Cageside ends", price: "$2,450", release: "General on-sale", sold: 388, cap: 420 },
+        { name: "Category 3 — Floor", price: "$1,280", release: "General on-sale", sold: 1016, cap: 1200 },
+        { name: "Category 4 — Lower bowl centre", price: "$890", release: "General on-sale", sold: 2101, cap: 2400 },
+        { name: "Category 5 — Lower bowl front", price: "$707", release: "General on-sale", sold: 3512, cap: 3744, rate: 3.2, focus: true },
+        { name: "Category 6 — Lower bowl ends", price: "$468", release: "General on-sale", sold: 1990, cap: 2240 },
+        { name: "Category 7 — Upper tier centre", price: "$216", release: "Fight-week release", sold: 1402, cap: 1710, rate: 9.5, focus: true },
+        { name: "Category 8 — Upper tier ends", price: "$135", release: "General on-sale", sold: 1336, cap: 1344, rate: 1.6, soldOutAt: 3.4 },
+        { name: "Record Lounge — hospitality", price: "$163", release: "Add-on", sold: 96, cap: 120, rate: 0.6 },
+      ];
+
+      const ORDERS = [
+        { name: "Marcus Hale", what: "2 × Category 7", amt: "$388.80" },
+        { name: "Priya Shah", what: "4 × Category 5 · RECORD10", amt: "$2,545.20" },
+        { name: "Tom Becker", what: "1 × Category 1", amt: "$3,974.00" },
+        { name: "Lena Ortiz", what: "2 × Category 8", amt: "$270.00" },
+        { name: "Kofi Mensah", what: "3 × Category 6", amt: "$1,404.00" },
+        { name: "Ines Duarte", what: "2 × Category 7", amt: "$432.00" },
+        { name: "Sam Okoro", what: "2 × Category 3 + Lounge", amt: "$2,886.00" },
+      ];
+
+      const ORDER_AT = [-3.2, -1.6, 0.3, 1.9, 3.5, 5.1, 6.7];
+
+      const GATES = [
+        { name: "Gate A", n: 402, cap: 520, rate: 1.2 },
+        { name: "Gate B", n: 377, cap: 470, rate: 2.4 },
+        { name: "Gate C", n: 311, cap: 420, rate: 0.9 },
+        { name: "Gate D", n: 194, cap: 300, rate: 0.5 },
+      ];
+
+      const FEED = [
+        { name: "Aisha Bennett", what: "Category 5 · 2 tickets", gate: "Gate B" },
+        { name: "Daniel Price", what: "Category 7", gate: "Gate B" },
+        { name: "Mei Tanaka", what: "Category 3 · 2 tickets", gate: "Gate A" },
+        { name: "Oscar Lind", what: "Category 6", gate: "Gate C" },
+        { name: "Rosa Martín", what: "Category 1", gate: "Gate B" },
+        { name: "Yusuf Kaya", what: "Category 5", gate: "Gate A" },
+        { name: "Chloe Martin", what: "Category 8 · 3 tickets", gate: "Gate D" },
+        { name: "Ben Adler", what: "Record Lounge", gate: "Gate B" },
+        { name: "Grace Liu", what: "Category 4", gate: "Gate C" },
+        { name: "Theo Walsh", what: "Category 7", gate: "Gate B" },
+      ];
+
+      const FEED_AT = [1.0, 2.7, 4.4];
+      const QUERY = "Hana I";
+
+      const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+      const smooth = (v) => {
+        const x = clamp(v);
+        return x * x * (3 - 2 * x);
+      };
+      const ease = (v) => 1 - Math.pow(1 - clamp(v), 3);
+      const fmt = (n) => Math.round(n).toLocaleString("en-US");
+
+      function mulberry(seed) {
+        return () => {
+          seed |= 0;
+          seed = (seed + 0x6d2b79f5) | 0;
+          let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+          return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      // A QR-looking 25×25 grid with the three finder squares; `seed` changes the data modules so the code "rotates".
+      function qrCells(seed) {
+        const rand = mulberry(seed);
+        const cells = [];
+        const finder = (x, y, ox, oy) => {
+          const dx = x - ox;
+          const dy = y - oy;
+          if (dx < 0 || dy < 0 || dx > 6 || dy > 6) return null;
+          return dx === 0 || dy === 0 || dx === 6 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4);
+        };
+        for (let y = 0; y < 25; y++) {
+          for (let x = 0; x < 25; x++) {
+            const f = finder(x, y, 0, 0) ?? finder(x, y, 18, 0) ?? finder(x, y, 0, 18);
+            const nearFinder = (x < 8 && y < 8) || (x > 16 && y < 8) || (x < 8 && y > 16);
+            cells.push(f ?? (nearFinder ? false : rand() > 0.52));
+          }
+        }
+        return cells;
+      }
+
+      function initials(name) {
+        return name.slice(0, 1);
+      }
+
+      function build() {
+        const theme = new URLSearchParams(location.search).get("theme") || "dark";
+        document.body.className = theme;
+
+        for (const [shotId, tplId] of [
+          ["shotA", "ticketsTpl"],
+          ["shotB", "doorTpl"],
+        ]) {
+          const shot = document.getElementById(shotId);
+          for (const kind of ["blur", "sharp"]) {
+            const layer = document.createElement("div");
+            layer.className = `layer ${kind}`;
+            layer.appendChild(document.getElementById(tplId).content.cloneNode(true));
+            shot.appendChild(layer);
+          }
+        }
+
+        document.querySelectorAll("#tiers").forEach((host) => {
+          host.innerHTML = TIERS.map(
+            (tier, i) => `
+            <div class="tier${tier.focus ? " focus" : ""}">
+              <div class="top"><span class="name">${tier.name}</span><span class="chip" data-tier-chip="${i}"><i></i>On sale</span></div>
+              <div class="price">${tier.price}</div>
+              <div class="release">${tier.release}</div>
+              <div class="track"><span data-tier-bar="${i}"></span></div>
+              <div class="sold"><span data-tier-sold="${i}"></span><span>${fmt(tier.cap)}</span></div>
+            </div>`,
+          ).join("");
+        });
+
+        document.querySelectorAll("#orders").forEach((host) => {
+          host.innerHTML = ORDERS.map(
+            (order, i) => `
+            <div class="order" data-order="${i}">
+              <span class="avatar">${initials(order.name)}</span>
+              <div class="who"><b>${order.name}</b><span>${order.what}</span></div>
+              <div class="amt">${order.amt}<span>Paid · Stripe</span></div>
+            </div>`,
+          ).join("");
+        });
+
+        document.querySelectorAll("#gates").forEach((host) => {
+          host.innerHTML = GATES.map(
+            (gate, i) => `
+            <div class="gate"><span>${gate.name}</span><div class="track"><span data-gate-bar="${i}"></span></div><span class="n" data-gate-n="${i}"></span></div>`,
+          ).join("");
+        });
+
+        document.querySelectorAll("#feed").forEach((host) => {
+          host.innerHTML = FEED.map(
+            (row, i) => `
+            <div class="row" data-feed="${i}">
+              <span class="avatar">${initials(row.name)}</span>
+              <div class="who"><b>${row.name}</b><span>${row.what} · ${row.gate}</span></div>
+              <span class="ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>In</span>
+              <span class="time" data-feed-time="${i}"></span>
+            </div>`,
+          ).join("");
+        });
+      }
+
+      const all = (selector) => document.querySelectorAll(selector);
+      const setText = (selector, text) => all(selector).forEach((el) => (el.textContent = text));
+      const setStyle = (selector, prop, value) => all(selector).forEach((el) => el.style.setProperty(prop, value));
+
+      // Camera: the plane is centred, laid back like a table top, then slid across its own surface (pan, in plane pixels)
+      // while the lens creeps closer (dolly); `shift` nudges where the plane sits in the frame.
+      const CAMERA = { tilt: 42, turn: -14, yaw: 6 };
+
+      function camera(shotId, local, from, to, dollyFrom, dollyTo, duration, shift) {
+        const p = clamp((local + FADE) / (duration + FADE * 2));
+        const x = from[0] + (to[0] - from[0]) * p;
+        const y = from[1] + (to[1] - from[1]) * p;
+        const z = dollyFrom + (dollyTo - dollyFrom) * p;
+        document.querySelectorAll(`#${shotId} .plane`).forEach((plane) => {
+          plane.style.transform = `translate(-50%, -50%) translate(${shift[0]}px, ${shift[1]}px) translateZ(${z}px) rotateX(${CAMERA.tilt}deg) rotateY(${CAMERA.yaw}deg) rotateZ(${CAMERA.turn}deg) translate(${x}px, ${y}px)`;
+        });
+      }
+
+      function focus(shotId, fx, fy) {
+        document.querySelectorAll(`#${shotId} .layer.sharp`).forEach((layer) => {
+          const mask = `radial-gradient(34% 30% at ${fx}% ${fy}%, #000 35%, transparent 100%)`;
+          layer.style.maskImage = mask;
+          layer.style.webkitMaskImage = mask;
+        });
+      }
+
+      function renderTickets(a) {
+        let soldTotal = 14927;
+        TIERS.forEach((tier, i) => {
+          const sold = Math.min(tier.cap, tier.sold + (tier.rate || 0) * (a + 1));
+          const done = tier.soldOutAt !== undefined && a >= tier.soldOutAt;
+          const value = done ? tier.cap : sold;
+          soldTotal += value - tier.sold;
+          setStyle(`[data-tier-bar="${i}"]`, "width", `${(value / tier.cap) * 100}%`);
+          setText(`[data-tier-sold="${i}"]`, `${fmt(value)} sold`);
+          const left = tier.cap - value;
+          all(`[data-tier-chip="${i}"]`).forEach((chip) => {
+            chip.className = done ? "chip out" : left / tier.cap < 0.1 ? "chip warn" : "chip on";
+            chip.innerHTML = `<i></i>${done ? "Sold out" : left / tier.cap < 0.1 ? `Last ${fmt(left)}` : "On sale"}`;
+          });
+        });
+        setText('[data-k="sold"]', fmt(soldTotal));
+        setText('[data-k="revenue"]', `$${fmt(9842310 + (soldTotal - 14927) * 512)}`);
+        setText('[data-k="through"]', `${Math.round((soldTotal / 17134) * 100)}%`);
+
+        // Orders arrive at the top and push the list down.
+        const arrived = ORDER_AT.map((at) => ease((a - at) / 0.55));
+        ORDERS.forEach((_, i) => {
+          let y = 0;
+          for (let j = i + 1; j < ORDERS.length; j++) y += arrived[j] * 108;
+          const shown = arrived[i];
+          setStyle(`[data-order="${i}"]`, "transform", `translateY(${y - (1 - shown) * 30}px) scale(${0.96 + shown * 0.04})`);
+          setStyle(`[data-order="${i}"]`, "opacity", String(shown));
+        });
+      }
+
+      function renderDoor(b) {
+        // The code refreshes every 1.5s; the scan line sweeps continuously.
+        const code = Math.floor((b + 10) / 1.5);
+        all('[data-k="qr"]').forEach((el) => {
+          if (el.dataset.code === String(code)) return;
+          el.dataset.code = String(code);
+          el.innerHTML = qrCells(code * 7919 + 13)
+            .map((on) => `<i style="${on ? "" : "background:transparent"}"></i>`)
+            .join("");
+        });
+        const sweep = ((b + 10) % 1.6) / 1.6;
+        setStyle('[data-k="scanline"]', "top", `${60 + Math.sin(sweep * Math.PI) * 340}px`);
+
+        const shownResult = ease((b - 1.0) / 0.4) * (1 - ease((b - 5.4) / 0.4));
+        setStyle('[data-k="result"]', "opacity", String(shownResult));
+        setStyle('[data-k="result"]', "transform", `translateY(${(1 - shownResult) * 14}px)`);
+
+        let total = 1284;
+        GATES.forEach((gate, i) => {
+          const n = gate.n + gate.rate * (b + FADE);
+          total += n - gate.n;
+          setStyle(`[data-gate-bar="${i}"]`, "width", `${(n / gate.cap) * 100}%`);
+          setText(`[data-gate-n="${i}"]`, fmt(n));
+        });
+        setText('[data-k="attendance"]', fmt(total));
+
+        // Name search types, holds, then the match appears.
+        const chars = Math.floor(clamp((b - 2.1) / 1.1) * QUERY.length);
+        setText('[data-k="query"]', QUERY.slice(0, chars));
+        setStyle('[data-k="caret"]', "opacity", Math.floor(b * 2.2) % 2 === 0 || (b > 2.1 && b < 3.3) ? "1" : "0");
+        const lookup = ease((b - 3.45) / 0.4);
+        setStyle('[data-k="lookup"]', "opacity", String(lookup));
+        setStyle('[data-k="lookup"]', "transform", `translateY(${(1 - lookup) * 12}px)`);
+
+        // New check-ins slide in from the top.
+        const arrived = FEED_AT.map((at) => ease((b - at) / 0.5));
+        FEED.forEach((_, i) => {
+          const isNew = i < FEED_AT.length;
+          const newIndex = FEED_AT.length - 1 - i;
+          let y = 0;
+          if (isNew) {
+            for (let j = newIndex + 1; j < FEED_AT.length; j++) y += arrived[j] * 96;
+            const shown = arrived[newIndex];
+            setStyle(`[data-feed="${i}"]`, "opacity", String(shown));
+            setStyle(`[data-feed="${i}"]`, "transform", `translateY(${y - (1 - shown) * 40}px)`);
+            setText(`[data-feed-time="${i}"]`, "now");
+          } else {
+            const pushed = arrived.reduce((sum, v) => sum + v, 0);
+            setStyle(`[data-feed="${i}"]`, "opacity", "1");
+            setStyle(`[data-feed="${i}"]`, "transform", `translateY(${(i - FEED_AT.length + pushed) * 96}px)`);
+            setText(`[data-feed-time="${i}"]`, `${i - 2}m`);
+          }
+        });
+      }
+
+      window.render = (time) => {
+        const t = ((time % LOOP) + LOOP) % LOOP;
+
+        // Shot A runs across the loop seam: local time a ∈ [-FADE, SWITCH + FADE).
+        const a = t >= LOOP - FADE ? t - LOOP : t;
+        const b = t - SWITCH;
+        let opacityA;
+        if (t < SWITCH) opacityA = 1;
+        else if (t < SWITCH + FADE) opacityA = 1 - smooth((t - SWITCH) / FADE);
+        else if (t >= LOOP - FADE) opacityA = smooth((t - (LOOP - FADE)) / FADE);
+        else opacityA = 0;
+
+        document.getElementById("shotA").style.opacity = String(opacityA);
+        document.getElementById("shotB").style.opacity = String(1 - opacityA);
+
+        if (opacityA > 0) {
+          camera("shotA", a, [120, 120], [-120, 60], 0, 120, SWITCH, [300, -40]);
+          focus("shotA", 64, 44);
+          renderTickets(a);
+        }
+        if (opacityA < 1) {
+          const local = b >= 0 ? b : b + LOOP;
+          camera("shotB", local, [520, 120], [300, 60], 0, 120, LOOP - SWITCH, [380, -40]);
+          focus("shotB", 58, 50);
+          renderDoor(local);
+        }
+
+        document.getElementById("grain").style.transform = `translate(${(Math.floor(t * 24) * 37) % 200}px, ${(Math.floor(t * 24) * 53) % 200}px)`;
+        return true;
+      };
+
+      build();
+      window.ready = document.fonts.ready.then(() => {
+        window.render(0);
+        return true;
+      });
+    </script>
+  </body>
+</html>
