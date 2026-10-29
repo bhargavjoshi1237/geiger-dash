@@ -84,6 +84,17 @@ export const TEAM_PAGES = [
     description:
       "See every project in your organisation from one place, set goals and milestones, approve resource requests and follow the budget against forecast, on one Geiger account.",
   },
+  {
+    id: "marketing",
+    href: "/teams/marketing",
+    label: "For marketing teams",
+    short: "Marketing teams",
+    eyebrow: "For marketing teams",
+    headline: "From the launch plan to the people it brings in",
+    title: "Geiger for marketing teams",
+    description:
+      "Plan each launch on one board, collect sign-ups and feedback with forms, run the launch event from tickets to the door and publish the pages it needs, on one Geiger account.",
+  },
 ];
 
 const tour = (app, name, pages) => ({

@@ -59,10 +59,12 @@ export async function createCheckoutAction(payload = {}) {
   if (!org) return { error: "invalid_org" };
 
   const entitlements = getOrgEntitlements(org);
+  // The free beta is no floor: upgrading from it is a fresh purchase.
+  const hasPaidPlan = entitlements.hasSubscription && !entitlements.isBeta;
 
   // No downgrades: the plan tier, every previously-owned product, and every
   // previously-purchased metric floor must all be present in this submission.
-  if (entitlements.hasSubscription) {
+  if (hasPaidPlan) {
     if (getPlanRank(planId) < entitlements.planRank) return { error: "downgrade_blocked" };
     const missingOwnedProduct = entitlements.unlockedProducts.some((id) => !purchasableProducts.includes(id));
     if (missingOwnedProduct) return { error: "downgrade_blocked" };
@@ -78,13 +80,13 @@ export async function createCheckoutAction(payload = {}) {
   // Charge only the incremental difference over what the org already paid —
   // normalize both totals to a monthly figure before comparing so switching
   // billing interval (monthly <-> yearly) mid-upgrade can't skew the delta.
-  const currentMonthlyTotal = entitlements.hasSubscription
+  const currentMonthlyTotal = hasPaidPlan
     ? entitlements.amountTotal / 100 / (entitlements.billingInterval === "year" ? YEARLY_MULTIPLIER : 1)
     : 0;
   const deltaMonthly = Math.max(0, total - currentMonthlyTotal);
   const amountCents = Math.round(deltaMonthly * multiplier * 100);
 
-  if (entitlements.hasSubscription && deltaMonthly <= 0) {
+  if (hasPaidPlan && deltaMonthly <= 0) {
     return { error: "no_change" };
   }
 
@@ -96,7 +98,7 @@ export async function createCheckoutAction(payload = {}) {
   const interval = isYearly ? "year" : "month";
   const productIds = purchasableProducts.filter((id) => PRODUCT_NAMES.has(id));
   const productList = productIds.map((id) => PRODUCT_NAMES.get(id));
-  const descriptionPrefix = entitlements.hasSubscription ? "Upgrade — " : "";
+  const descriptionPrefix = hasPaidPlan ? "Upgrade — " : "";
   const description = productList.length
     ? `${descriptionPrefix}${selectedPlan.name} foundation · ${productList.join(", ")}`
     : `${descriptionPrefix}${selectedPlan.name} foundation`;
@@ -130,7 +132,7 @@ export async function createCheckoutAction(payload = {}) {
         billing: interval,
         products: productList.join(","),
         estimateUsd: String(amountCents / 100),
-        isUpgrade: String(entitlements.hasSubscription),
+        isUpgrade: String(hasPaidPlan),
       },
       success_url: `${origin}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?checkout=canceled`,

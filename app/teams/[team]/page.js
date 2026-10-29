@@ -3,6 +3,7 @@ import { TEAM_PAGES, findTeamPage, pageMetadata } from "@/components/product-pag
 import { CorporatePage } from "@/components/product-pages/teams/corporate_page";
 import { CreativePage } from "@/components/product-pages/teams/creative_page";
 import { ManagementPage } from "@/components/product-pages/teams/management_page";
+import { MarketingPage } from "@/components/product-pages/teams/marketing_page";
 
 // Statically generated and served from the CDN; the build fails if anything here starts reading request-time data.
 export const dynamic = "error";
@@ -12,6 +13,7 @@ const PAGES = {
   corporate: CorporatePage,
   creative: CreativePage,
   management: ManagementPage,
+  marketing: MarketingPage,
 };
 
 export function generateStaticParams() {

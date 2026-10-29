@@ -78,7 +78,7 @@ const DEFAULT_CONFIG = { planId: "plus", apps: ["flow", "campaign", "forms", "gr
 
 // A subscribed org opens on what it already owns, so those selections act as floors.
 function configForEntitlements(entitlements) {
-  if (!entitlements?.hasSubscription) return DEFAULT_CONFIG;
+  if (!entitlements?.hasSubscription || entitlements.isBeta) return DEFAULT_CONFIG;
   const owned = entitlements.unlockedProducts;
   return {
     planId: entitlements.planKey,
@@ -224,7 +224,7 @@ export function PlanConfigurator({
   const [startingTrial, setStartingTrial] = useState(false);
 
   const entitlements = entitlementsByOrg[selectedOrgId] || null;
-  const hasSubscription = Boolean(entitlements?.hasSubscription);
+  const hasSubscription = Boolean(entitlements?.hasSubscription) && !entitlements.isBeta;
   const ownedProducts = useMemo(() => (hasSubscription ? entitlements.unlockedProducts : []), [hasSubscription, entitlements]);
   const ownedMetrics = hasSubscription ? entitlements.currentMetrics : null;
   const plan = plans.find((p) => p.id === planId) || plans[0];

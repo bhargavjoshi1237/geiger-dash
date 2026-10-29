@@ -105,10 +105,7 @@ export default async function PricingPage() {
             canStartTrial={canStartTrial}
           />
 
-          <BetaSignup
-            defaultName={user?.user_metadata?.full_name || user?.user_metadata?.name || ""}
-            defaultEmail={user?.email || ""}
-          />
+          <BetaSignup isAuthed={isAuthed} organizations={organizations} entitlementsByOrg={entitlementsByOrg} />
 
           <section className="mt-24 grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16" aria-labelledby="faq-heading">
             <div>

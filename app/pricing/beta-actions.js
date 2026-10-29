@@ -2,53 +2,31 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
-import { sendTemplateEmail } from "@/lib/email/send";
-import { BETA_APPS, BETA_LIMITS, BETA_TEAM_SIZES } from "@/lib/pricing/beta";
+import { startBeta } from "@/lib/billing/store";
+import { BETA_APPS } from "@/lib/pricing/beta";
 
-const BETA_INBOX = "info@geiger.studio";
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const BETA_APP_IDS = new Set(BETA_APPS.map((app) => app.id));
 
-const clean = (value, max) => (typeof value === "string" ? value.trim().slice(0, max) : "");
-
-// Emails a beta request to the team inbox with replies going to the applicant; returns { ok } or { error } for the dialog.
-export async function requestBetaAccessAction(input = {}) {
-  // Bots fill the hidden "website" field; report success so they don't retry.
-  if (clean(input.website, 200)) return { ok: true };
-
-  const name = clean(input.name, BETA_LIMITS.name);
-  const email = clean(input.email, BETA_LIMITS.email).toLowerCase();
-  const company = clean(input.company, BETA_LIMITS.company);
-  const useCase = clean(input.useCase, BETA_LIMITS.useCase);
-  const teamSize = BETA_TEAM_SIZES.includes(input.teamSize) ? input.teamSize : "";
-  const picked = Array.isArray(input.apps) ? input.apps : [];
-  const apps = BETA_APPS.filter((app) => picked.includes(app.id)).map((app) => app.name);
-
-  if (!name || !email || !useCase) return { error: "missing_fields" };
-  if (!EMAIL_PATTERN.test(email)) return { error: "invalid_email" };
-
+// Signs the chosen org up for the free Beta Tester plan with the picked apps; returns { ok } or { error } for the dialog.
+export async function joinBetaAction({ organizationId, apps } = {}) {
   const supabase = await createClient();
   const user = await getUser(supabase);
+  if (!user) return { error: "auth" };
 
-  const result = await sendTemplateEmail({
-    key: "geiger.beta_request",
-    to: BETA_INBOX,
-    replyTo: email,
-    project: "geiger-dash",
-    data: {
-      name,
-      email,
-      company,
-      teamSize,
-      apps: apps.join(", "),
-      useCase,
-      account: user ? `Signed in as ${user.email}` : "Not signed in",
-      submittedAt: new Date().toUTCString(),
-    },
-  });
+  const products = Array.from(new Set(Array.isArray(apps) ? apps : [])).filter((id) => BETA_APP_IDS.has(id));
+  if (!products.length) return { error: "no_apps" };
+  if (!organizationId) return { error: "invalid_org" };
 
-  if (!result?.ok) {
-    console.error("[pricing.betaRequest]", result?.error);
-    return { error: "send_failed" };
-  }
-  return { ok: true };
+  // A row back from the user's RLS-scoped client proves they belong to the org.
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("id", organizationId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!org) return { error: "invalid_org" };
+
+  const result = await startBeta({ organizationId, products });
+  if (!result) return { error: "failed" };
+  return result;
 }
