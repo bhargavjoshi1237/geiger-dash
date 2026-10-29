@@ -16,13 +16,14 @@ async function countRows(query) {
 // Sidebar counts are for content editors only; everyone else just sees the nav.
 async function studioCounts(supabase) {
   const head = { count: 'exact', head: true }
-  const [posts, releases, pages, help] = await Promise.all([
+  const [posts, releases, pages, help, announcements] = await Promise.all([
     countRows(supabase.from('dash_blog_posts').select('id', head)),
     countRows(supabase.from('dash_changelog').select('id', head)),
     countRows(supabase.from('dash_seo_pages').select('id', head)),
     countRows(supabase.from('docs_pages').select('id', head).is('deleted_at', null)),
+    countRows(supabase.from('announcements').select('id', head).is('deleted_at', null)),
   ])
-  return { posts, releases, pages, help }
+  return { posts, releases, pages, help, announcements }
 }
 
 function toAccount(user, isEditor) {

@@ -479,7 +479,7 @@ export function TiptapBlogEditor({ name, defaultValue, onChange, onEdit, label =
       <div
         className={cn(
           isFullscreen
-            ? 'fixed inset-0 z-50 flex flex-col bg-background'
+            ? 'fixed inset-x-0 bottom-0 top-[var(--geiger-banner-h,0px)] z-50 flex flex-col bg-background'
             : 'min-w-0 max-w-full overflow-hidden rounded-[10px] border border-border bg-background',
           className,
         )}

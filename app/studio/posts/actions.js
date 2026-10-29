@@ -196,7 +196,7 @@ export async function listStudioMediaAction(contentType = 'blog', folderPath = '
   await ensureContentEditor(supabase, user)
 
   const bucket = 'pfp'
-  const selectedType = ['blog', 'changelog', 'pages'].includes(contentType) ? contentType : 'blog'
+  const selectedType = ['blog', 'changelog', 'pages', 'announcements'].includes(contentType) ? contentType : 'blog'
   const selectedFolder = sanitizeRelativeFolder(folderPath)
   const rootPath = `${user.id}/${selectedType}`
   const currentPath = selectedFolder ? `${rootPath}/${selectedFolder}` : rootPath
@@ -221,7 +221,7 @@ export async function createStudioMediaFolderAction(formData) {
   await ensureContentEditor(supabase, user)
 
   const contentType = String(formData.get('content_type') || 'blog')
-  const selectedType = ['blog', 'changelog', 'pages'].includes(contentType) ? contentType : 'blog'
+  const selectedType = ['blog', 'changelog', 'pages', 'announcements'].includes(contentType) ? contentType : 'blog'
   const parentFolder = sanitizeRelativeFolder(formData.get('parent_folder'))
   const folderName = slugify(formData.get('folder_name'))
 
@@ -265,7 +265,7 @@ export async function uploadStudioMediaAction(formData) {
 
   const uploadFile = formData.get('media_upload')
   const contentType = String(formData.get('content_type') || 'blog')
-  const selectedType = ['blog', 'changelog', 'pages'].includes(contentType) ? contentType : 'blog'
+  const selectedType = ['blog', 'changelog', 'pages', 'announcements'].includes(contentType) ? contentType : 'blog'
   const selectedFolder = sanitizeRelativeFolder(formData.get('folder')) || 'library'
 
   if (!(uploadFile instanceof File) || uploadFile.size <= 0) {

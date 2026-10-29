@@ -34,7 +34,7 @@ function paletteItems() {
 }
 const PALETTE_ITEMS = paletteItems()
 
-// Full-height Console frame shared by Studio and Admin; editor screens (all of /studio) get the 56px rail.
+// Full-height Console frame shared by Studio and Admin, starting below the global notice strip; editor screens (all of /studio) get the 56px rail.
 export function ConsoleShell({ counts, noticeLive, account, children }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -58,7 +58,7 @@ export function ConsoleShell({ counts, noticeLive, account, children }) {
   }, [])
 
   return (
-    <SidebarProvider open onOpenChange={() => {}} className="fixed inset-0 min-h-0 overflow-hidden bg-background text-foreground">
+    <SidebarProvider open onOpenChange={() => {}} className="fixed inset-x-0 bottom-0 top-[var(--geiger-banner-h,0px)] min-h-0 overflow-hidden bg-background text-foreground">
       <ConsoleSidebar
         rail={rail}
         counts={counts}

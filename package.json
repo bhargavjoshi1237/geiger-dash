@@ -27,7 +27,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
-    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#059ecae07e76d3076032f81ae7c44e432b84a978",
+    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#e5fac77bc4fd7beaa95bc3d9299727662dbb8cf2",
     "@next/third-parties": "^16.3.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",

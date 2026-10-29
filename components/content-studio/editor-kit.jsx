@@ -42,7 +42,7 @@ export function ListPane({ title, count, subtitle, actions, search, filters, foo
       <aside
         className={cn(
           'w-[280px] shrink-0 flex-col border-r border-sidebar-border bg-surface-subtle',
-          open ? 'fixed inset-y-0 left-14 z-30 flex shadow-2xl lg:static lg:z-auto lg:shadow-none' : 'hidden lg:flex',
+          open ? 'fixed bottom-0 left-14 top-[var(--geiger-banner-h,0px)] z-30 flex shadow-2xl lg:static lg:z-auto lg:shadow-none' : 'hidden lg:flex',
         )}
       >
         <div className={cn(PANE_HEADER, 'gap-2 pl-4 pr-2.5')}>
@@ -296,7 +296,7 @@ export function InspectorPane({ tabs, value, onChange, open, onClose, children }
       <aside
         className={cn(
           'w-[320px] max-w-[calc(100vw-3.5rem)] shrink-0 flex-col border-l border-sidebar-border bg-surface-subtle',
-          open ? 'fixed inset-y-0 right-0 z-30 flex shadow-2xl xl:static xl:z-auto xl:shadow-none' : 'hidden xl:flex',
+          open ? 'fixed bottom-0 right-0 top-[var(--geiger-banner-h,0px)] z-30 flex shadow-2xl xl:static xl:z-auto xl:shadow-none' : 'hidden xl:flex',
         )}
       >
         <div className={cn(PANE_HEADER, 'gap-2 px-3')}>

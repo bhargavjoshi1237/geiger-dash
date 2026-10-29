@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SystemFavicon } from "@/components/system-favicon";
 import { PlanBanner } from "@/components/billing/plan_banner";
+import { AnnouncementMount } from "@/components/announcements/announcement-mount";
 // Subpath import: the barrel would drag every component (and their optional
 // peer deps) into this server component's module graph.
 import { BannerProvider, GlobalBanner } from "@geiger/ui/global-banner";
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }) {
             {children}
           </BannerProvider>
           <PlanBanner />
+          <AnnouncementMount />
           <Toaster />
         </ThemeProvider>
         <PublicGoogleAnalytics />

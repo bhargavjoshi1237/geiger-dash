@@ -1,0 +1,61 @@
+Announcement images: shortlist
+=============================
+
+Painted landscapes that match the "/" showcase backdrops (lib/showcase-backgrounds.js): soft, muted, lots of open sky.
+All are public domain (The Met Open Access, CC0). They're free to use, and credit is optional.
+
+Original URLs are full resolution (often several MB). Before using one, scale it to about 1600px wide, for example:
+  ffmpeg -i original.jpg -vf "scale=1600:-2" -q:v 3 out.jpg
+then upload it to Studio > Announcements > Media, or to the public "pfp" bucket.
+
+Find more: https://collectionapi.metmuseum.org/public/collection/v1.1/search?isPublicDomain=true&hasImages=true&limit=20&q=<artist or subject>
+Object details: https://collectionapi.metmuseum.org/public/collection/v1/objects/<id>  (use "primaryImage", the original)
+
+
+1. John Frederick Kensett, "Passing off of the Storm" (1872)  [IN USE: demo announcement]
+   Still water, a clearing sky, tiny sailboats.
+   Page:     https://www.metmuseum.org/art/collection/search/11319
+   Original: https://images.metmuseum.org/CRDImages/ad/original/ap74.27.jpg
+   Hosted (1600x746): https://dyjiyzcsdaeuxtueslqr.supabase.co/storage/v1/object/public/pfp/announcements/demo/kensett-passing-off-of-the-storm.jpg
+
+2. John Frederick Kensett, "A Foggy Sky" (1872)
+   Grey mist over a headland.
+   Page:     https://www.metmuseum.org/art/collection/search/11308
+   Original: https://images.metmuseum.org/CRDImages/ad/original/APS530.jpg
+
+3. John Frederick Kensett, "Newport Rocks" (1872)
+   Pale sea, a warm rock edge.
+   Page:     https://www.metmuseum.org/art/collection/search/11316
+   Original: https://images.metmuseum.org/CRDImages/ad/original/ap74.6.jpg
+
+4. John Frederick Kensett, "Lake George, 1872" (1872)
+   Calm lake, soft hills.
+   Page:     https://www.metmuseum.org/art/collection/search/11312
+   Original: https://images.metmuseum.org/CRDImages/ad/original/APS3540.jpg
+
+5. John Frederick Kensett, "Lake George, A Reminiscence" (1872)
+   Almost monochrome.
+   Page:     https://www.metmuseum.org/art/collection/search/11313
+   Original: https://images.metmuseum.org/CRDImages/ad/original/ap74.11.jpg
+
+6. William Trost Richards, "Moonlight on Mount Lafayette, New Hampshire" (1873)
+   Dark and moody; suits dark mode.
+   Page:     https://www.metmuseum.org/art/collection/search/11900
+   Original: https://images.metmuseum.org/CRDImages/ad/original/ap80.1.2.R.jpg
+
+7. Utagawa Hiroshige, "The Kiso Mountains in Snow" (1857)
+   Snow triptych; a match for the Hokusai backdrop.
+   Page:     https://www.metmuseum.org/art/collection/search/36545
+   Original: https://images.metmuseum.org/CRDImages/as/original/DP146827.jpg
+
+8. Sanford Robinson Gifford, "Isola Bella in Lago Maggiore" (1871)
+   A warm golden glow.
+   Page:     https://www.metmuseum.org/art/collection/search/10945
+   Original: https://images.metmuseum.org/CRDImages/ad/original/DT1550.jpg
+
+
+Already used as "/" showcase backdrops (don't repeat them in announcements):
+  - Winslow Homer, "Natural Bridge, Bermuda"            https://www.metmuseum.org/art/collection/search/11129
+  - William Trost Richards, "Lake Squam from Red Hill"   https://www.metmuseum.org/art/collection/search/11897
+  - John Frederick Kensett, Eaton's Neck seascape
+  - Katsushika Hokusai, "Seaside Village in Winter"     https://www.metmuseum.org/art/collection/search/37193
