@@ -23,7 +23,6 @@ export function AssetsApprovalsPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("assets").pages} linksLabel="More from Geiger Assets">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["68%", "46%"]} plane={{ "--plane-top": "-6%", "--plane-left": "20%" }}>

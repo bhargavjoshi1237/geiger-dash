@@ -9,7 +9,6 @@ export function IntakePage() {
   return (
     <AreaPage area="intake">
       <AreaHero
-        eyebrow="Intake and inboxes"
         title="Every request has somewhere to land"
         art={
           <HeroArt focus={["66%", "44%"]} plane={{ "--plane-top": "-34%" }}>

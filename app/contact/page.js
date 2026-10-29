@@ -40,7 +40,6 @@ export default function ContactPage() {
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-16">
             <PublicPageHero
-              eyebrow="Contact sales"
               title="Let's talk about your team."
               description="Tell us about your organisation and what you're trying to accomplish. We'll find the right plan and get you set up."
             />

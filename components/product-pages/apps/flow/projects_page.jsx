@@ -23,7 +23,6 @@ export function FlowProjectsPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("flow").pages} linksLabel="More from Geiger Flow">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["68%", "40%"]} plane={{ "--plane-top": "-2%", "--plane-left": "24%" }}>

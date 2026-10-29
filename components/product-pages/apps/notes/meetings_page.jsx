@@ -23,7 +23,6 @@ export function NotesMeetingsPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("notes").pages} linksLabel="More from Geiger Notes">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["66%", "44%"]} plane={{ "--plane-top": "-24%", "--plane-left": "24%" }}>

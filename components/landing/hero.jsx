@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 import { SessionLink } from "@/components/session-link";
 import { AppSpectrum } from "@/components/landing/app_spectrum";
 import { DISPLAY } from "@/components/landing/landing_font";
-import { LIVE_APP_COUNT, UPCOMING_APP_COUNT } from "@/components/landing/suite_apps";
 
 export const PRIMARY_CTA =
   "inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
@@ -13,11 +12,7 @@ export const SECONDARY_CTA =
 export function LandingHero() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 pt-10 pb-20 sm:px-6 sm:pt-16 sm:pb-28">
-      <p className="font-mono text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
-        Geiger Studios · {LIVE_APP_COUNT} apps live, {UPCOMING_APP_COUNT} on the way
-      </p>
-
-      <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-10">
+      <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-10">
         <h1 className={`${DISPLAY} text-[3.4rem] leading-[0.86] text-balance text-foreground sm:text-7xl lg:col-span-8 lg:text-[6.25rem]`}>
           Everything your team runs, on one account.
         </h1>

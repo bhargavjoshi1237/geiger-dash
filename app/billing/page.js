@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { ProductAccess, titleCaseId } from "@/components/billing/product-access";
+import { PaymentHistory } from "@/components/billing/payment-history";
 import { Button, ScreenHeader, SectionCard, cn } from "@geiger/ui";
 import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
@@ -301,6 +302,20 @@ export default async function BillingPage() {
         metrics: currentPurchase?.metrics || {},
       })
     : null;
+  // Pre-formatted on the server so the paged client table only renders strings.
+  const paymentRows = purchases.map((purchase) => {
+    const status = PURCHASE_STATUS[purchase.status] || PURCHASE_STATUS.pending;
+    return {
+      id: purchase.id,
+      date: formatDate(purchase.createdAt),
+      plan: planLabel(purchase.planKey),
+      interval: purchase.billingInterval,
+      products: productNames(purchase.products),
+      amount: formatUsd(purchase.amountTotal, purchase.currency),
+      statusLabel: status.label,
+      statusMuted: status.muted,
+    };
+  });
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
@@ -353,55 +368,7 @@ export default async function BillingPage() {
           }
           className="mt-12"
         >
-          {purchases.length ? (
-            <div className="-mx-1 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-muted-foreground">
-                    <th className="px-1 pb-2 font-medium">Date</th>
-                    <th className="px-1 pb-2 font-medium">Description</th>
-                    <th className="px-1 pb-2 text-right font-medium">Amount</th>
-                    <th className="px-1 pb-2 text-right font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border border-t border-border">
-                  {purchases.map((purchase) => {
-                    const status = PURCHASE_STATUS[purchase.status] || PURCHASE_STATUS.pending;
-                    const names = productNames(purchase.products);
-                    return (
-                      <tr key={purchase.id} className="align-top">
-                        <td className="whitespace-nowrap px-1 py-3 text-muted-foreground">
-                          {formatDate(purchase.createdAt)}
-                        </td>
-                        <td className="max-w-0 px-1 py-3 sm:w-1/2">
-                          <span className="font-medium">{planLabel(purchase.planKey)}</span>
-                          <span className="text-muted-foreground"> · {purchase.billingInterval}ly</span>
-                          {names.length ? (
-                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                              {names.length} {names.length === 1 ? "product" : "products"}: {names.join(", ")}
-                            </span>
-                          ) : null}
-                        </td>
-                        <td className="whitespace-nowrap px-1 py-3 text-right font-medium tabular-nums">
-                          {formatUsd(purchase.amountTotal, purchase.currency)}
-                        </td>
-                        <td
-                          className={cn(
-                            "whitespace-nowrap px-1 py-3 text-right",
-                            status.muted ? "text-muted-foreground" : "text-foreground",
-                          )}
-                        >
-                          {status.label}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No payments yet. Receipts appear here after checkout.</p>
-          )}
+          <PaymentHistory rows={paymentRows} />
         </SectionCard>
       </main>
       <Footer />

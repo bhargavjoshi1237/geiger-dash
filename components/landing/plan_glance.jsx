@@ -15,7 +15,6 @@ export function PlanGlance() {
     <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <SectionHeading
-          eyebrow="Pricing"
           title={`Plans from $${startingPrice} a month.`}
           description="Each plan includes a set of apps, seats and storage. Add more of either as you grow."
         />
@@ -32,8 +31,7 @@ export function PlanGlance() {
         {plans.map((plan) => (
           <div key={plan.id} className="relative flex flex-col bg-background p-6 sm:p-8">
             {plan.featured ? <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundImage: SPECTRUM_GRADIENT }} /> : null}
-            <p className="font-mono text-[11px] tracking-[0.16em] text-muted-foreground uppercase">{plan.eyebrow}</p>
-            <h3 className="mt-3 text-lg font-semibold text-foreground">{plan.name}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
             <p className="mt-4 flex items-baseline gap-1.5">
               <span className={`${DISPLAY} text-6xl leading-none text-foreground`}>${plan.price}</span>
               <span className="text-sm text-muted-foreground">/ month</span>

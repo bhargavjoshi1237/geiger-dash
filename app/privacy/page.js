@@ -22,7 +22,6 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <LegalPage
-      eyebrow="Legal"
       title="Privacy Policy"
       summary="This policy explains what personal data Geiger Studios processes, why we process it, who helps us provide the services, and the choices available to you."
       updated="October 25, 2026"

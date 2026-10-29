@@ -22,7 +22,6 @@ export function FormsResponsesPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("forms").pages} linksLabel="More from Geiger Forms">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["70%", "40%"]} plane={{ "--plane-top": "-2%", "--plane-left": "20%" }}>

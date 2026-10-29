@@ -23,7 +23,6 @@ export function PropertyAccountingPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("property").pages} linksLabel="More from Geiger Property">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["72%", "46%"]} plane={{ "--plane-top": "-12%", "--plane-left": "26%" }}>

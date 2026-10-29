@@ -8,7 +8,6 @@ export const AUDIENCE_PAGES = [
     href: "/for/event-organisers",
     label: "For event organisers",
     short: "Event organisers",
-    eyebrow: "For event organisers",
     headline: "Fill the room, then run the door",
     title: "Geiger for event organisers",
     description:
@@ -19,7 +18,6 @@ export const AUDIENCE_PAGES = [
     href: "/for/creative-studios",
     label: "For creative studios",
     short: "Creative studios",
-    eyebrow: "For creative studios",
     headline: "From the client's brief to the final file",
     title: "Geiger for creative studios",
     description:
@@ -30,7 +28,6 @@ export const AUDIENCE_PAGES = [
     href: "/for/operations",
     label: "For operations teams",
     short: "Operations teams",
-    eyebrow: "For operations teams",
     headline: "Every request answered, every task tracked",
     title: "Geiger for operations teams",
     description:
@@ -41,7 +38,6 @@ export const AUDIENCE_PAGES = [
     href: "/for/developers",
     label: "For developers and data teams",
     short: "Developers",
-    eyebrow: "For developers and data teams",
     headline: "APIs for your content, files and answers",
     title: "Geiger for developers and data teams",
     description:
@@ -56,7 +52,6 @@ export const TEAM_PAGES = [
     href: "/teams/corporate",
     label: "For corporate teams",
     short: "Corporate teams",
-    eyebrow: "For corporate teams",
     headline: "Every department, one structure",
     title: "Geiger for corporate teams",
     description:
@@ -67,7 +62,6 @@ export const TEAM_PAGES = [
     href: "/teams/creative",
     label: "For in-house creative teams",
     short: "In-house creative",
-    eyebrow: "For in-house creative teams",
     headline: "A workspace that keeps up with your ideas",
     title: "Geiger for in-house creative teams",
     description:
@@ -78,7 +72,6 @@ export const TEAM_PAGES = [
     href: "/teams/management",
     label: "For managers and team leads",
     short: "Managers and leads",
-    eyebrow: "For managers and team leads",
     headline: "Every project and every team, in one view",
     title: "Geiger for managers and team leads",
     description:
@@ -89,7 +82,6 @@ export const TEAM_PAGES = [
     href: "/teams/marketing",
     label: "For marketing teams",
     short: "Marketing teams",
-    eyebrow: "For marketing teams",
     headline: "From the launch plan to the people it brings in",
     title: "Geiger for marketing teams",
     description:
@@ -103,7 +95,6 @@ const tour = (app, name, pages) => ({
   pages: pages.map((page) => ({
     ...page,
     href: `/apps/${app}/${page.id}`,
-    eyebrow: `${name} · ${page.label}`,
     title: `${page.label} · ${name}`,
   })),
 });

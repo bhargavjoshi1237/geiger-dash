@@ -34,7 +34,6 @@ export function OperationsPage() {
   return (
     <AreaPage area={PAGE.id} links={AUDIENCE_PAGES} linksLabel="Who Geiger is for">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["70%", "34%"]} plane={{ "--plane-top": "4%", "--plane-left": "22%" }}>

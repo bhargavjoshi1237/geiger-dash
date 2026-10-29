@@ -79,9 +79,6 @@ export function ToolPage({ content, children }) {
             </nav>
             <div className="grid gap-5 lg:grid-cols-[1fr_0.72fr] lg:items-end">
               <div>
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
-                  {content.eyebrow}
-                </p>
                 <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   {content.title}
                 </h1>
@@ -119,8 +116,7 @@ export function ToolPage({ content, children }) {
 
         <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:py-20">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">How it works</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.035em]">
               From source file to finished image.
             </h2>
           </div>
@@ -151,8 +147,7 @@ export function ToolPage({ content, children }) {
 
         <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Common questions</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em]">
+            <h2 className="text-3xl font-semibold tracking-[-0.035em]">
               What to know before you convert.
             </h2>
             <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
@@ -173,8 +168,7 @@ export function ToolPage({ content, children }) {
           <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
             <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Keep working</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight">Related image tools</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">Related image tools</h2>
               </div>
               <Link href="/tools" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                 Browse all tools <ArrowRight className="size-4" />

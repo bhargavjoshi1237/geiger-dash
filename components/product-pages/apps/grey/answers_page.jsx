@@ -24,7 +24,6 @@ export function GreyAnswersPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("grey").pages} linksLabel="More from Geiger Grey">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["60%", "36%"]} plane={{ "--plane-top": "6%", "--plane-left": "4%" }}>

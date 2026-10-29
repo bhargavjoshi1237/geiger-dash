@@ -15,7 +15,6 @@ export function StartPaths() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-20 sm:px-6 sm:pt-28">
       <SectionIntro
-        eyebrow="Start with one app"
         title="Most teams arrive for one job and stay for the second"
         description="Every app works on the same account from day one, so trying the next one takes a click."
       />

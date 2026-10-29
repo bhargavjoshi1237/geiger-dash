@@ -36,7 +36,6 @@ export function AiPage() {
   return (
     <AreaPage area="ai">
       <AreaHero
-        eyebrow="AI and automation"
         title="Put your team's knowledge to work"
         art={
           <HeroArt focus={["62%", "30%"]} plane={{ "--plane-top": "-2%" }}>

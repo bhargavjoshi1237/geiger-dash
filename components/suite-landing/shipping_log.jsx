@@ -16,7 +16,6 @@ export async function ShippingLog() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
       <SectionIntro
-        eyebrow="Shipping in the open"
         title="New in the suite"
         description="Every push to a Geiger app becomes a changelog entry, written from the actual change."
       >

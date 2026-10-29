@@ -141,11 +141,6 @@ export function SeoPageView({
         </nav>
 
         <header className="mt-10 border-b border-border/70 pb-10 sm:pb-12">
-          {productApp ? (
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              {productApp.name} · {hub.label}
-            </p>
-          ) : null}
           <h1 className="max-w-4xl text-4xl font-semibold leading-[1.03] tracking-[-0.045em] sm:text-6xl">
             {heroHeading}
           </h1>
@@ -187,10 +182,7 @@ export function SeoPageView({
 
         {relatedPosts.length ? (
           <section className="mt-20 border-t border-border/70 pt-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              From the blog
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Related reading</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Related reading</h2>
             <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
               {relatedPosts.map((post) => (
                 <Link

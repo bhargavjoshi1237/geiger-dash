@@ -23,7 +23,6 @@ export function ContentDeliveryPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("content").pages} linksLabel="More from Geiger Content">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["62%", "38%"]} plane={{ "--plane-top": "-8%", "--plane-left": "16%" }}>

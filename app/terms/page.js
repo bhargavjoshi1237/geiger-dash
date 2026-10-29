@@ -22,7 +22,6 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <LegalPage
-      eyebrow="Legal"
       title="Terms of Service"
       summary="These terms govern your access to Geiger Studios websites, applications, tools, and hosted services."
       updated="June 13, 2026"

@@ -11,7 +11,6 @@ import {
   AppChip,
   BodyNote,
   DISPLAY,
-  EYEBROW,
   FAINT,
   PANEL,
   Pill,
@@ -69,9 +68,8 @@ function Header() {
   return (
     <header className="pb-2">
       <SpectrumHeader />
-      <p className={`${EYEBROW} mt-10`}>Why Geiger</p>
       <h1
-        className={`${DISPLAY} mt-[18px] max-w-[17ch] text-[2.3rem] leading-[1.02] tracking-[-0.035em] text-balance text-foreground [font-stretch:112%] sm:text-5xl lg:text-[4.2rem]`}
+        className={`${DISPLAY} mt-10 max-w-[17ch] text-[2.3rem] leading-[1.02] tracking-[-0.035em] text-balance text-foreground [font-stretch:112%] sm:text-5xl lg:text-[4.2rem]`}
       >
         Why Teams Run Their Work on Geiger
       </h1>
@@ -100,7 +98,7 @@ function Header() {
 function Reasons() {
   return (
     <Section>
-      <SectionHead eyebrow="In short" title="Six Reasons Teams Switch" />
+      <SectionHead title="Six Reasons Teams Switch" />
       <div className="grid gap-px overflow-hidden rounded-[14px] border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
         {REASONS.map((reason) => (
           <div key={reason.title} className="min-w-0 bg-surface-subtle px-[22px] pt-[22px] pb-5">
@@ -123,7 +121,7 @@ function Reasons() {
 function Suite() {
   return (
     <Section>
-      <SectionHead eyebrow="01 · The suite" title={`${SUITE_APPS.length} Apps, Each Built for One Job`} />
+      <SectionHead title={`${SUITE_APPS.length} Apps, Each Built for One Job`} />
       <div className={`${PANEL} overflow-x-auto`}>
         <table className="w-full min-w-[720px] border-collapse text-[13.5px]">
           <thead>
@@ -188,7 +186,7 @@ function Suite() {
 function Audiences() {
   return (
     <Section>
-      <SectionHead eyebrow="02 · Who it's for" title="Start With One App, Then Add the Next" />
+      <SectionHead title="Start With One App, Then Add the Next" />
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {AUDIENCES.map((audience) => (
           <div key={audience.title} className={`${PANEL} flex min-w-0 flex-col p-5`}>
@@ -224,7 +222,6 @@ function Bill() {
   return (
     <Section>
       <SectionHead
-        eyebrow="03 · The bill"
         title={`A ${STACK_SEATS}-Person Team's Stack Costs About ${money(Math.round(STACK_TOTAL))} a Month`}
       />
       <div className="grid gap-3.5 lg:grid-cols-[1.35fr_1fr]">
@@ -298,7 +295,7 @@ function Bill() {
 function Alternatives() {
   return (
     <Section>
-      <SectionHead eyebrow="04 · Alternatives" title="How Geiger Compares With the Usual Options" />
+      <SectionHead title="How Geiger Compares With the Usual Options" />
       <div className={`${PANEL} overflow-x-auto`}>
         <table className="w-full min-w-[720px] border-collapse text-[13.5px]">
           <thead>
@@ -346,7 +343,7 @@ function Alternatives() {
 function Numbers() {
   return (
     <Section>
-      <SectionHead eyebrow="05 · The numbers" title="What Tool Sprawl Costs" />
+      <SectionHead title="What Tool Sprawl Costs" />
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {STATS.map((stat) => (
           <div key={stat.body} className="min-w-0 border-t border-border-strong pt-3.5">
@@ -367,7 +364,7 @@ function Numbers() {
 function Answers() {
   return (
     <Section>
-      <SectionHead eyebrow="06 · Straight answers" title="What People Ask Before They Switch" />
+      <SectionHead title="What People Ask Before They Switch" />
       <div className="grid gap-px overflow-hidden rounded-[14px] border border-border bg-border">
         {ANSWERS.map((item) => (
           <div key={item.question} className="grid items-start gap-2 bg-surface-subtle px-5 py-4 md:grid-cols-[120px_1fr] md:gap-[18px]">
@@ -388,7 +385,7 @@ function Answers() {
 function GettingStarted() {
   return (
     <Section>
-      <SectionHead eyebrow="07 · Getting started" title="From Sign-Up to Your Second App" />
+      <SectionHead title="From Sign-Up to Your Second App" />
       <ol className="grid">
         {STEPS.map((step, index) => (
           <li

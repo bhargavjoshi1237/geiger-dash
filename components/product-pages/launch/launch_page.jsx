@@ -27,7 +27,6 @@ export function LaunchPage() {
   return (
     <AreaPage area="launch">
       <AreaHero
-        eyebrow="Publish, sell and deliver"
         title="Ship it to the people it's for"
         art={<HeroVideo name="events-hero" />}
       />

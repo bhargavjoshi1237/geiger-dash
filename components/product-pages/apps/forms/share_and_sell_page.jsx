@@ -22,7 +22,6 @@ export function FormsShareAndSellPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("forms").pages} linksLabel="More from Geiger Forms">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["66%", "44%"]} plane={{ "--plane-top": "-6%", "--plane-left": "14%" }}>

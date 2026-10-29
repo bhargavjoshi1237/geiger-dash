@@ -43,17 +43,14 @@ export function AreaPage({ area, links, linksLabel, children }) {
 }
 
 // The opening shot: a tilted, half-focused render of the product behind a large headline.
-export function AreaHero({ eyebrow, title, art }) {
+export function AreaHero({ title, art }) {
   return (
     <section className={cn("relative isolate h-[34rem] overflow-hidden border-b sm:h-[40rem] lg:h-[48rem]", HAIRLINE)}>
       <div className={cn("absolute inset-0 -z-10", styles.heroEnter)}>{art}</div>
       <div className={cn(CONTAINER, "flex h-full flex-col justify-end pb-14 sm:pb-20 lg:pb-[8.5rem]")}>
         <div className="sm:px-8">
-          <p className={cn("text-[15px] text-foreground/60 sm:text-base", styles.blurIn)} style={{ "--delay": "0.2s" }}>
-            {eyebrow}
-          </p>
           <h1
-            className={cn("mt-3 max-w-[17ch] text-[2.75rem] leading-none font-medium tracking-[-0.032em] text-balance sm:mt-4 sm:text-6xl lg:text-[4.5rem]", styles.blurIn)}
+            className={cn("max-w-[17ch] text-[2.75rem] leading-none font-medium tracking-[-0.032em] text-balance sm:text-6xl lg:text-[4.5rem]", styles.blurIn)}
             style={{ "--delay": "0.3s" }}
           >
             {title}

@@ -23,7 +23,6 @@ export function EventsTicketingPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("events").pages} linksLabel="More from Geiger Events">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["68%", "44%"]} plane={{ "--plane-top": "-6%", "--plane-left": "16%" }}>

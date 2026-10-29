@@ -17,7 +17,6 @@ export function SharedLayer() {
         <div className="lg:col-span-5">
           <SectionHeading
             className="lg:sticky lg:top-28"
-            eyebrow="Shared underneath"
             title="Set it up once. Every app picks it up."
             description="The account does the boring parts, so a new app starts with your people and settings already in place."
           />

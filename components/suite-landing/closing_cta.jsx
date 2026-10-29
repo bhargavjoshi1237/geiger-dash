@@ -12,8 +12,7 @@ export function ClosingCta() {
           className="pointer-events-none absolute -right-24 -bottom-40 h-auto w-[420px] text-foreground/[0.04] sm:w-[560px]"
         />
         <div className="relative max-w-2xl">
-          <p className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground uppercase">For people who run things</p>
-          <h2 className="mt-4 text-4xl leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-foreground [font-family:var(--font-display)] [font-stretch:112%] sm:text-6xl">
+          <h2 className="text-4xl leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-foreground [font-family:var(--font-display)] [font-stretch:112%] sm:text-6xl">
             Run the whole thing from one place.
           </h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-text-secondary dark:text-muted-foreground sm:text-lg">

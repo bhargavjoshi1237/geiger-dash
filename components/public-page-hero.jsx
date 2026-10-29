@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PublicPageHero({
-  eyebrow,
   title,
   description,
   titleClassName,
@@ -20,12 +19,9 @@ export function PublicPageHero({
       </Link>
 
       <header className="mt-10 border-b border-border/70 pb-10 sm:mt-12 sm:pb-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          {eyebrow}
-        </p>
         <h1
           className={cn(
-            "mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.045em] sm:text-6xl",
+            "max-w-4xl text-4xl font-semibold tracking-[-0.045em] sm:text-6xl",
             titleClassName
           )}
         >

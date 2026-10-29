@@ -15,7 +15,6 @@ export function LaunchSequence() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
       <SectionHeading
-        eyebrow="One launch, six apps"
         title="Take a launch from first sketch to the door."
         description="The same people, files and sign-in carry through every step. Nobody exports a spreadsheet to hand work to the next tool."
       />

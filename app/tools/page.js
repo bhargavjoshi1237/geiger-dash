@@ -48,10 +48,7 @@ export default function ToolsPage() {
       <main className="relative z-10">
         <section className="border-b border-border px-4 pb-12 pt-28 sm:px-6 sm:pb-16 sm:pt-32">
           <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Image utilities
-            </p>
-            <h1 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               Fast image tools, built into Geiger.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">

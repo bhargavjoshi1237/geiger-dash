@@ -23,7 +23,6 @@ export function AssetsGalleriesPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("assets").pages} linksLabel="More from Geiger Assets">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["70%", "42%"]} plane={{ "--plane-top": "-8%", "--plane-left": "18%" }}>

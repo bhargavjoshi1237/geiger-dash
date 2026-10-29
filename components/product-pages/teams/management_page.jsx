@@ -40,7 +40,6 @@ export function ManagementPage() {
   return (
     <AreaPage area={PAGE.id} links={TEAM_PAGES} linksLabel="Teams on Geiger">
       <AreaHero
-        eyebrow={PAGE.eyebrow}
         title={PAGE.headline}
         art={
           <HeroArt focus={["68%", "40%"]} plane={{ "--plane-top": "6%", "--plane-left": "26%" }}>

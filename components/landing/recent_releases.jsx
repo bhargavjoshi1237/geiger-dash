@@ -16,8 +16,7 @@ export async function RecentReleases() {
   return (
     <section className="mx-auto grid w-full max-w-7xl gap-10 px-4 pb-20 sm:px-6 sm:pb-28 lg:grid-cols-12">
       <div className="lg:col-span-4">
-        <p className="font-mono text-[11px] tracking-[0.2em] text-muted-foreground uppercase">Changelog</p>
-        <h2 className={`${DISPLAY} mt-4 text-4xl leading-[0.9] text-foreground sm:text-5xl`}>Shipped lately.</h2>
+        <h2 className={`${DISPLAY} text-4xl leading-[0.9] text-foreground sm:text-5xl`}>Shipped lately.</h2>
         <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary dark:text-muted-foreground">
           Every push to a Geiger app becomes an entry, written from the change itself.
         </p>

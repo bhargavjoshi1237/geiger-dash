@@ -129,9 +129,6 @@ export default function Home() {
             <div className="mb-12 w-full max-w-6xl sm:mb-16">
               <SpectrumHeader />
             </div>
-            <h3 className="mb-4 text-xs font-semibold tracking-widest text-muted-foreground uppercase sm:text-sm">
-              Open source from day one
-            </h3>
             <h2 className="mb-8 bg-gradient-to-b from-foreground to-text-tertiary bg-clip-text text-3xl font-black tracking-tighter text-transparent drop-shadow-lg sm:mb-10 sm:text-5xl lg:text-6xl">
               TRY GEIGER NOW
             </h2>

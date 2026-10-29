@@ -16,7 +16,6 @@ export function PlanPage() {
   return (
     <AreaPage area="plan">
       <AreaHero
-        eyebrow="Planning and collaboration"
         title="Plan the work from first sketch to launch"
         art={
           <HeroArt focus={["66%", "46%"]} plane={{ "--plane-top": "-12%", "--plane-left": "24%" }}>

@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 
-export function LegalPage({ eyebrow, title, summary, updated, children }) {
+export function LegalPage({ title, summary, updated, children }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background font-sans text-foreground">
       <div
@@ -21,10 +21,7 @@ export function LegalPage({ eyebrow, title, summary, updated, children }) {
         </Link>
 
         <header className="mt-10 border-b border-border pb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {eyebrow}
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
+          <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
             {title}
           </h1>
           <p className="mt-6 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">

@@ -14,7 +14,6 @@ const CARDS = [
 export function TeamCards() {
   return (
     <section className="mx-auto mb-10 w-full max-w-6xl px-4 sm:mb-16 sm:px-6">
-      <p className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">Made for how you work</p>
       <h2 className="mb-8 text-2xl font-semibold text-foreground sm:text-3xl">Your whole team, one workspace</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
         {CARDS.map(({ id, image, label, desc }) => (

@@ -36,7 +36,6 @@ export default async function ChangelogPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
         <PublicPageHero
-          eyebrow="Product updates"
           title="Changelog"
           description="A running ledger of every meaningful change across Geiger, why it matters, and where the product is heading."
         />

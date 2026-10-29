@@ -60,7 +60,6 @@ export default async function BlogPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
         <PublicPageHero
-          eyebrow="Field notes"
           title="Blog"
           description="Ideas for teams that make things: product decisions, working methods, and dispatches from inside Geiger Studios."
         />

@@ -79,7 +79,6 @@ export default async function PricingPage() {
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-20">
             <PublicPageHero
-              eyebrow="Plans and pricing"
               title="One suite, priced around your team."
               titleClassName="[font-family:var(--font-display)]"
               description="Choose a plan, then shape the apps, people and usage around your work. Every allowance and overage stays visible as you configure."
@@ -109,8 +108,7 @@ export default async function PricingPage() {
 
           <section className="mt-24 grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16" aria-labelledby="faq-heading">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Questions</p>
-              <h2 id="faq-heading" className="mt-3 text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] [font-family:var(--font-display)]">
+              <h2 id="faq-heading" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] [font-family:var(--font-display)]">
                 How pricing works, in plain terms.
               </h2>
             </div>

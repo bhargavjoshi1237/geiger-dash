@@ -22,7 +22,7 @@ export async function SeoHubPage({ pageType, product }) {
       <Header />
 
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
-        <PublicPageHero eyebrow="Geiger Studio" title={hub.title} description={hub.description} />
+        <PublicPageHero title={hub.title} description={hub.description} />
 
         {pages.length ? (
           <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">

@@ -3,7 +3,6 @@ import { SUITE_APPS } from "@/components/suite-landing/suite_catalog";
 // Shared pieces for the /why-geiger page: the spectrum header, section heads, pills and app chips.
 
 export const FAINT = "text-text-tertiary dark:text-text-secondary";
-export const EYEBROW = `font-mono text-[11px] leading-none font-medium tracking-[0.16em] uppercase ${FAINT}`;
 export const DISPLAY = "[font-family:var(--font-display)] font-semibold";
 export const PANEL = "rounded-[14px] border border-border bg-surface-subtle";
 
@@ -60,10 +59,9 @@ export function Pill({ tone = "good", children }) {
   );
 }
 
-export function SectionHead({ eyebrow, title }) {
+export function SectionHead({ title }) {
   return (
-    <div className="mb-[22px] grid items-baseline gap-2.5 md:grid-cols-[180px_1fr] md:gap-6">
-      <p className={`${EYEBROW} md:pt-1.5`}>{eyebrow}</p>
+    <div className="mb-[22px]">
       <h2 className={`${DISPLAY} text-2xl leading-[1.15] tracking-[-0.025em] text-balance text-foreground [font-stretch:108%] sm:text-[2rem]`}>
         {title}
       </h2>

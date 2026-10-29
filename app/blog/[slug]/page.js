@@ -180,10 +180,7 @@ export default async function BlogPostPage({ params }) {
 
         {relatedPosts?.length ? (
           <section className="mt-20 border-t border-border/70 pt-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Keep reading
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Related articles</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Related articles</h2>
             <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
               {relatedPosts.map((relatedPost) => (
                 <Link
