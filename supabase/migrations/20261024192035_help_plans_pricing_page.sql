@@ -3,7 +3,7 @@
 -- One-time content move, like 20261024124814_help_flow_tasks_page: replaces the plans-pricing draft outline (created by
 -- 20261023112957_help_center_structure) with the Plans & pricing reference page and publishes it. published_at was
 -- already set before this move, so neither direction touches it beyond the coalesce.
--- Left out on purpose: the Beta Tester plan (only named in the pricing FAQ, never offered or purchasable), Own Domain
+-- Left out on purpose: the Alpha tester plan (only named in the pricing FAQ, never offered or purchasable), Own Domain
 -- (coming soon, stripped at checkout), usage metering (only projects are counted; everything else reads 0), the data
 -- deletion the grace countdown warns about (no job deletes anything), switching an existing plan between monthly and
 -- yearly (the upgrade charge mixes intervals), and what the free trial unlocks (it records no apps). Comms, Office and

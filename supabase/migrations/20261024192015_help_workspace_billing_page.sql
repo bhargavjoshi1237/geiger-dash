@@ -7,7 +7,7 @@
 -- Left out on purpose: Own Domain (coming soon, can't be bought); the Refunded and Canceled payment statuses (nothing
 -- sets them, and refunds aren't handled); the Usage page's used figures other than Active Projects (nothing meters them,
 -- so they always read 0) and its "metering rolls out soon" note; the setup-only "Payments aren't enabled yet" toast; the
--- pricing FAQ's "downgrade at any time" and "next monthly cycle" claims, the Beta Tester plan it mentions, and the
+-- pricing FAQ's "downgrade at any time" and "next monthly cycle" claims, the Alpha tester plan it mentions, and the
 -- "estimate excludes taxes" footnote, none of which the checkout code backs. Also held back by the lead: the free trial
 -- (it records no apps, so nothing unlocks, and it can overwrite an organization's paid plan), the grace banner's data
 -- deletion warning (no code deletes anything) and buying extra Active projects (the limit stays at the plan's allowance).

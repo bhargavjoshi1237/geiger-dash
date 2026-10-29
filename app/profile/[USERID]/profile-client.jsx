@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -13,19 +13,23 @@ import {
   Camera,
   Check,
   Copy,
+  CreditCard,
   Crown,
   Gauge,
   Globe,
   Loader2,
   LogOut,
+  Monitor,
   Moon,
+  MoreHorizontal,
   Plus,
   ShieldCheck,
   Sun,
   Trash2,
+  UserRound,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Card, Section } from '@/components/account/panel'
+import { SettingsBlock } from '@/components/account/panel'
 import { ProductAccess } from '@/components/billing/product-access'
 import { PasskeyManager } from '@/components/auth/passkey-manager'
 import {
@@ -34,18 +38,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Field,
   Input,
-  Label,
   Switch,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
   Textarea,
-} from "@geiger/ui";
+} from '@geiger/ui'
 import { clearProfileImageCache } from '@/lib/profile-image-cache'
 import { cn } from '@/lib/utils'
 import {
@@ -67,19 +66,34 @@ const PLAN_PHASE_BADGE = {
 }
 
 const PURCHASE_STATUS = {
-  completed: { label: 'Completed', variant: 'success' },
+  completed: { label: 'Paid', variant: 'success' },
   pending: { label: 'Pending', variant: 'secondary' },
   refunded: { label: 'Refunded', variant: 'secondary' },
   canceled: { label: 'Canceled', variant: 'secondary' },
 }
 
 const PROVIDER_LABEL = {
-  email: 'Email & password',
+  email: 'Email and password',
   google: 'Google',
   github: 'GitHub',
   azure: 'Microsoft',
   oauth: 'Single sign-on',
 }
+
+const SECTIONS = [
+  { id: 'general', label: 'General', icon: UserRound, description: 'How you appear to teammates across every Geiger product.' },
+  { id: 'organizations', label: 'Organizations', icon: Building2, description: 'The organizations you belong to and the invitations waiting for you.' },
+  { id: 'billing', label: 'Billing', icon: CreditCard, description: 'Your plan, the products it includes and what you have paid.' },
+  { id: 'security', label: 'Security', icon: ShieldCheck, description: 'How you sign in, where you are signed in, and your account.' },
+]
+
+const THEMES = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+]
+
+const BIO_LIMIT = 400
 
 function formatUsd(cents, currency = 'usd') {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format((cents || 0) / 100)
@@ -87,9 +101,7 @@ function formatUsd(cents, currency = 'usd') {
 
 function formatDate(value) {
   if (!value) return '—'
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(
-    new Date(value),
-  )
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
 }
 
 function formatRelative(value) {
@@ -117,49 +129,55 @@ function providerLabel(provider) {
   return PROVIDER_LABEL[provider] || provider.charAt(0).toUpperCase() + provider.slice(1)
 }
 
-// Line tabs. The shared trigger hangs its active underline 5px below the list,
-// so the list must not be a scroll container or the underline gets clipped —
-// pin it flush to the rail instead, and restore the pointer cursor Tailwind v4
-// no longer puts on buttons.
-const TAB_TRIGGER =
-  'h-full flex-none cursor-pointer px-3 text-text-secondary hover:text-foreground data-[state=active]:text-foreground group-data-[orientation=horizontal]/tabs:after:bottom-0'
+const subscribeNever = () => () => {}
 
-// Chrome-less field: the control only draws a border once you reach for it, so
-// a form reads as labelled rows rather than a stack of boxes inside a box.
-const QUIET_FIELD =
-  'border-transparent bg-transparent shadow-none hover:border-border hover:bg-surface-subtle focus-visible:border-border-strong focus-visible:bg-surface-subtle'
+function copyText(value, label) {
+  navigator.clipboard?.writeText(value)
+  toast.success(`${label} copied.`)
+}
 
-// A settings row: label (and hint) on a fixed rail, control on the right.
-function FieldRow({ htmlFor, label, hint, align = 'center', children }) {
+// Round avatar used in the rail and the profile editor; falls back to initials.
+function Avatar({ src, name, email, size = 40, className }) {
   return (
-    <div
+    <span
       className={cn(
-        'grid gap-1.5 px-5 py-3.5 sm:grid-cols-[12rem_1fr] sm:gap-6',
-        align === 'start' ? 'sm:items-start' : 'sm:items-center',
+        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-subtle font-semibold text-text-secondary',
+        className,
       )}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.34) }}
     >
-      <div className="min-w-0 sm:py-1.5">
-        <Label htmlFor={htmlFor}>{label}</Label>
-        {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
-      </div>
-      {children}
-    </div>
+      {src ? <Image src={src} alt="" fill sizes={`${size}px`} unoptimized className="object-cover" /> : initialsOf(name, email)}
+    </span>
   )
 }
 
-function Fact({ label, value }) {
+// Square tile for an organization: its logo, or its initials.
+function OrgTile({ src, name }) {
   return (
-    <div className="px-5 py-3">
-      <dt className="text-xs text-text-tertiary">{label}</dt>
-      <dd className="mt-0.5 truncate text-sm font-medium text-foreground">{value}</dd>
-    </div>
+    <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-surface-subtle text-xs font-semibold text-text-secondary">
+      {src ? <Image src={src} alt="" fill unoptimized className="object-cover" /> : initialsOf(name)}
+    </span>
   )
 }
 
-function Row({ label, children }) {
+// A label/value line inside a flush settings block.
+function DetailRow({ label, children }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-3 sm:px-6">
       <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="min-w-0 text-sm text-foreground">{children}</span>
+    </div>
+  )
+}
+
+// A setting with its explanation on the left and the control on the right.
+function ToggleRow({ title, description, children }) {
+  return (
+    <div className="flex items-center justify-between gap-6 px-5 py-4 sm:px-6">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+      </div>
       {children}
     </div>
   )
@@ -170,14 +188,13 @@ function CopyButton({ value, label }) {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon-sm"
       aria-label={`Copy ${label}`}
-      className="shrink-0 border-border bg-surface-subtle"
+      className="shrink-0 text-muted-foreground hover:text-foreground"
       onClick={() => {
-        navigator.clipboard?.writeText(value)
+        copyText(value, label)
         setCopied(true)
-        toast.success(`${label} copied.`)
         setTimeout(() => setCopied(false), 1500)
       }}
     >
@@ -186,124 +203,71 @@ function CopyButton({ value, label }) {
   )
 }
 
-// Identity first, then the four facts people actually look up on a profile.
-function ProfileHeader({
-  profile,
-  avatarSrc,
-  uploading,
-  onPickAvatar,
-  onRemoveAvatar,
-  workspaceCount,
-  projectCount,
-}) {
-  const initials = initialsOf(profile.displayName, profile.email)
-
+// Identity and section navigation; a sticky rail on desktop, a swipeable row on phones.
+function Rail({ profile, avatarSrc, tab, onTab, counts, hasInvites }) {
   return (
-    <Card className="relative overflow-hidden">
-      {/* Soft top-light, same as the plan card on /billing. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40" />
-      <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Change profile picture"
-              className="group relative size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {avatarSrc ? (
-                <Image src={avatarSrc} alt="" fill sizes="64px" unoptimized className="object-cover" />
-              ) : (
-                <span className="flex size-full items-center justify-center text-base font-semibold text-text-secondary">
-                  {initials}
-                </span>
-              )}
-              <span className="absolute inset-0 flex items-center justify-center bg-background/70 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                <Camera className="size-4 text-foreground" />
-              </span>
-              {uploading ? (
-                <span className="absolute inset-0 flex items-center justify-center bg-background/70">
-                  <Loader2 className="size-5 animate-spin text-foreground" />
-                </span>
-              ) : null}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              Square JPG or PNG, up to 2 MB
-            </DropdownMenuLabel>
-            <DropdownMenuItem onSelect={onPickAvatar}>
-              <Camera className="size-4" />
-              Upload a Picture
-            </DropdownMenuItem>
-            {avatarSrc ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onSelect={onRemoveAvatar}>
-                  <Trash2 className="size-4" />
-                  Remove Picture
-                </DropdownMenuItem>
-              </>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-semibold tracking-tight">{profile.displayName}</h1>
-
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-            <span className="truncate">{profile.email}</span>
-            {profile.emailVerified ? (
-              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                <ShieldCheck className="size-3.5" />
-                Verified
-              </span>
-            ) : (
-              <span className="text-amber-600 dark:text-amber-400">Unverified</span>
-            )}
-          </p>
-
-          {profile.jobTitle || profile.company || profile.location ? (
-            <p className="mt-2 truncate text-sm text-text-secondary">
-              {[profile.jobTitle, profile.company, profile.location].filter(Boolean).join(' · ')}
-            </p>
-          ) : null}
-
-          {profile.bio ? (
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{profile.bio}</p>
-          ) : null}
-
-          {profile.website ? (
-            <a
-              href={profile.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm text-text-secondary transition-colors hover:text-foreground"
-            >
-              <Globe className="size-3.5" />
-              {profile.website.replace(/^https?:\/\//, '')}
-            </a>
-          ) : null}
+    <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+      <div className="flex items-center gap-3">
+        <Avatar src={avatarSrc} name={profile.displayName} email={profile.email} size={44} />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">{profile.displayName}</p>
+          <p className="truncate text-xs text-muted-foreground">{profile.email}</p>
         </div>
       </div>
 
-      <dl className="relative grid grid-cols-2 divide-x divide-y divide-border border-t border-border sm:grid-cols-4 sm:divide-y-0">
-        <Fact label="Joined" value={formatDate(profile.createdAt)} />
-        <Fact label="Last Signed In" value={formatRelative(profile.lastSignInAt)} />
-        <Fact label="Organizations" value={workspaceCount} />
-        <Fact label="Projects" value={projectCount} />
-      </dl>
-    </Card>
+      <nav
+        aria-label="Account sections"
+        className="-mx-4 mt-6 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
+      >
+        {SECTIONS.map((section) => {
+          const Icon = section.icon
+          const active = tab === section.id
+          return (
+            <button
+              key={section.id}
+              type="button"
+              aria-current={active ? 'page' : undefined}
+              onClick={() => onTab(section.id)}
+              className={cn(
+                'flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                active
+                  ? 'bg-surface-hover font-medium text-foreground'
+                  : 'text-text-secondary hover:bg-surface-subtle hover:text-foreground',
+              )}
+            >
+              <Icon className="size-4 shrink-0" />
+              {section.label}
+              {counts[section.id] != null ? (
+                <span className="ml-auto pl-2 text-xs tabular-nums text-text-tertiary">{counts[section.id]}</span>
+              ) : null}
+              {section.id === 'organizations' && hasInvites ? (
+                <span className="size-1.5 shrink-0 rounded-full bg-foreground" aria-label="Pending invitations" />
+              ) : null}
+            </button>
+          )
+        })}
+      </nav>
+
+      <Link
+        href="/org"
+        className="mt-6 hidden items-center gap-1.5 border-t border-border px-3 pt-4 text-sm text-text-secondary transition-colors hover:text-foreground lg:flex"
+      >
+        Open workspace
+        <ArrowRight className="size-3.5" />
+      </Link>
+    </aside>
   )
 }
 
 export function ProfileClient({ profile, billing, workspaces, invites, projectCount, loadError }) {
   const router = useRouter()
-  const { resolvedTheme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
+  // The stored theme is only known in the browser, so highlight it after hydration to keep server and client markup equal.
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false)
   const fileRef = useRef(null)
 
   const [tab, setTab] = useState('general')
-  // Shows the freshly uploaded picture straight away; router.refresh() then
-  // brings the prop up to the same versioned URL.
+  // Shows the freshly uploaded picture straight away; router.refresh() then brings the prop up to the same versioned URL.
   const [avatarOverride, setAvatarOverride] = useState('')
   const [avatarRemoved, setAvatarRemoved] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -332,19 +296,22 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
   const [signingOut, setSigningOut] = useState(false)
 
   const phaseBadge = PLAN_PHASE_BADGE[billing.phase] || PLAN_PHASE_BADGE.none
-  const isDark = resolvedTheme === 'dark'
+  const section = SECTIONS.find((item) => item.id === tab) || SECTIONS[0]
 
-  // profile.avatarUrl already carries the ?v= cache buster (see lib/avatar-url),
-  // so nothing needs appending here.
+  // profile.avatarUrl already carries the ?v= cache buster (see lib/avatar-url).
   const avatarSrc = useMemo(() => {
     if (avatarRemoved) return ''
     return avatarOverride || profile.avatarUrl || ''
   }, [avatarRemoved, avatarOverride, profile.avatarUrl])
 
-  const dirty = useMemo(
-    () => Object.keys(form).some((key) => form[key] !== savedForm[key]),
-    [form, savedForm],
-  )
+  const dirty = useMemo(() => Object.keys(form).some((key) => form[key] !== savedForm[key]), [form, savedForm])
+
+  // How far through the current billing period we are, from the server's days-remaining count.
+  const periodProgress = useMemo(() => {
+    if (!billing.periodEnd) return null
+    const totalDays = billing.isTrial ? 15 : billing.billingInterval === 'year' ? 365 : 30
+    return Math.min(1, Math.max(0, 1 - billing.daysRemaining / totalDays))
+  }, [billing.periodEnd, billing.isTrial, billing.billingInterval, billing.daysRemaining])
 
   const set = (key) => (value) => setForm((current) => ({ ...current, [key]: value }))
 
@@ -360,8 +327,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
     setUploading(false)
 
     if (result?.ok) {
-      // The suite caches avatars in CacheStorage keyed by user id — drop it or
-      // every surface keeps showing the old picture.
+      // The suite caches avatars in CacheStorage keyed by user id — drop it or every surface keeps the old picture.
       await clearProfileImageCache()
       setAvatarRemoved(false)
       setAvatarOverride(result.url || '')
@@ -458,570 +424,570 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-6">
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleAvatarFile}
-      />
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-14">
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
 
-      <ProfileHeader
+      <Rail
         profile={profile}
         avatarSrc={avatarSrc}
-        uploading={uploading}
-        onPickAvatar={() => fileRef.current?.click()}
-        onRemoveAvatar={handleRemoveAvatar}
-        workspaceCount={workspaces.length}
-        projectCount={projectCount}
+        tab={tab}
+        onTab={setTab}
+        counts={{ organizations: workspaces.length }}
+        hasInvites={invites.length > 0}
       />
 
-      {loadError ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {loadError}
+      <div className="min-w-0">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold tracking-tight">{section.label}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
         </div>
-      ) : null}
 
-      {billing.phase === 'grace' ? (
-        <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium">
-              Your plan ended. Your data will be deleted in {billing.deletionDaysRemaining}{' '}
-              {billing.deletionDaysRemaining === 1 ? 'day' : 'days'} (
-              {formatDate(billing.deletionDate)}) unless you renew.
-            </p>
-            <Button asChild size="sm" variant="destructive" className="mt-3">
-              <Link href="/pricing">Renew Plan</Link>
-            </Button>
-          </div>
-        </div>
-      ) : null}
-
-      {/* Invitations expire, so they get a line above the tabs that jumps to them. */}
-      {invites.length ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-4 py-3">
-          <p className="text-sm text-text-secondary">
-            {invites.length === 1
-              ? `${invites[0].organizationName} invited you to join.`
-              : `You have ${invites.length} pending invitations.`}
-          </p>
-          <Button size="sm" variant="outline" className="border-border bg-surface-card" onClick={() => setTab('organizations')}>
-            Review
-          </Button>
-        </div>
-      ) : null}
-
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList variant="line" className="w-full justify-start gap-2 border-b border-border pb-0">
-          <TabsTrigger value="general" className={TAB_TRIGGER}>
-            General
-          </TabsTrigger>
-          <TabsTrigger value="organizations" className={TAB_TRIGGER}>
-            Organizations
-            <span className="ml-1.5 text-xs text-text-tertiary">{workspaces.length}</span>
-          </TabsTrigger>
-          <TabsTrigger value="billing" className={TAB_TRIGGER}>
-            Billing
-          </TabsTrigger>
-          <TabsTrigger value="security" className={TAB_TRIGGER}>
-            Security
-          </TabsTrigger>
-        </TabsList>
-
-        {/* ---------------------------------------------------------------- */}
-        <TabsContent value="general" className="flex flex-col gap-8 pt-4">
-          <Section title="Profile">
-            <Card>
-              <form onSubmit={handleSaveProfile}>
-                <div className="divide-y divide-border">
-                  <FieldRow
-                    htmlFor="displayName"
-                    label="Display Name"
-                    hint="Shown to teammates across every Geiger product."
-                  >
-                    <Input
-                      id="displayName"
-                      value={form.displayName}
-                      onChange={(event) => set('displayName')(event.target.value)}
-                      placeholder="Your name"
-                      className={QUIET_FIELD}
-                    />
-                  </FieldRow>
-
-                  <FieldRow htmlFor="jobTitle" label="Job Title">
-                    <Input
-                      id="jobTitle"
-                      value={form.jobTitle}
-                      onChange={(event) => set('jobTitle')(event.target.value)}
-                      placeholder="Product designer"
-                      className={QUIET_FIELD}
-                    />
-                  </FieldRow>
-
-                  <FieldRow htmlFor="company" label="Company">
-                    <Input
-                      id="company"
-                      value={form.company}
-                      onChange={(event) => set('company')(event.target.value)}
-                      placeholder="Acme Studio"
-                      className={QUIET_FIELD}
-                    />
-                  </FieldRow>
-
-                  <FieldRow htmlFor="location" label="Location">
-                    <Input
-                      id="location"
-                      value={form.location}
-                      onChange={(event) => set('location')(event.target.value)}
-                      placeholder="Berlin, Germany"
-                      className={QUIET_FIELD}
-                    />
-                  </FieldRow>
-
-                  <FieldRow htmlFor="website" label="Website">
-                    <Input
-                      id="website"
-                      value={form.website}
-                      onChange={(event) => set('website')(event.target.value)}
-                      placeholder="https://example.com"
-                      className={QUIET_FIELD}
-                    />
-                  </FieldRow>
-
-                  <FieldRow
-                    htmlFor="bio"
-                    label="About"
-                    hint={`${form.bio.length}/400 characters`}
-                    align="start"
-                  >
-                    <Textarea
-                      id="bio"
-                      value={form.bio}
-                      onChange={(event) => set('bio')(event.target.value)}
-                      placeholder="A short line about what you work on."
-                      className={cn(QUIET_FIELD, 'min-h-24 resize-none py-2')}
-                    />
-                  </FieldRow>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 border-t border-border px-5 py-3">
-                  {dirty ? (
-                    <Button type="button" variant="ghost" onClick={() => setForm(savedForm)}>
-                      Discard
-                    </Button>
-                  ) : null}
-                  <Button type="submit" disabled={!dirty || savingProfile}>
-                    {savingProfile ? <Loader2 className="size-4 animate-spin" /> : null}
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          </Section>
-
-          <Section title="Preferences">
-            <Card className="divide-y divide-border">
-              <div className="flex items-center justify-between gap-4 px-5 py-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">Theme</p>
-                  <p className="text-xs text-muted-foreground">
-                    Applies to every Geiger surface in this browser.
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="shrink-0 border-border bg-surface-subtle"
-                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                >
-                  {isDark ? <Moon className="size-4" /> : <Sun className="size-4" />}
-                  {isDark ? 'Dark' : 'Light'}
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 px-5 py-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">Product Emails</p>
-                  <p className="text-xs text-muted-foreground">
-                    Invitations, billing receipts, and account notices.
-                  </p>
-                </div>
-                <Switch
-                  checked={prefs.productEmails}
-                  onCheckedChange={(value) => handleTogglePref('productEmails', value)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between gap-4 px-5 py-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">Product Updates</p>
-                  <p className="text-xs text-muted-foreground">
-                    Occasional news about new features across the suite.
-                  </p>
-                </div>
-                <Switch
-                  checked={prefs.marketingEmails}
-                  onCheckedChange={(value) => handleTogglePref('marketingEmails', value)}
-                />
-              </div>
-            </Card>
-          </Section>
-        </TabsContent>
-
-        {/* ---------------------------------------------------------------- */}
-        <TabsContent value="organizations" className="flex flex-col gap-8 pt-4">
-          {invites.length ? (
-            <Section title="Pending Invitations">
-              <Card className="divide-y divide-border">
-                {invites.map((invite) => (
-                  <div key={invite.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                    <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-subtle text-muted-foreground">
-                      {invite.organizationAvatar ? (
-                        <Image src={invite.organizationAvatar} alt="" fill unoptimized className="object-cover" />
-                      ) : (
-                        <Building2 className="size-4" />
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {invite.organizationName}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        Invited as {invite.role} · {formatRelative(invite.createdAt)}
-                      </p>
-                    </div>
-                    <Button asChild size="sm">
-                      <Link href={`/invite/${invite.token}`}>Accept</Link>
-                    </Button>
-                  </div>
-                ))}
-              </Card>
-            </Section>
+        <div className="flex flex-col gap-6">
+          {loadError ? (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{loadError}</div>
           ) : null}
 
-          <Section
-            title="Organizations"
-            action={
-              <Button asChild size="sm" variant="outline" className="border-border bg-surface-card">
-                <Link href="/org">
-                  <Plus className="size-4" />
-                  New Organization
-                </Link>
-              </Button>
-            }
-          >
-            {workspaces.length ? (
-              <Card className="divide-y divide-border">
-                {workspaces.map((workspace) => {
-                  const privileged = workspace.role === 'Owner' || workspace.role === 'Creator'
-                  return (
-                    <div key={workspace.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-                      <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-subtle text-muted-foreground">
-                        {workspace.avatarUrl ? (
-                          <Image src={workspace.avatarUrl} alt="" fill unoptimized className="object-cover" />
-                        ) : (
-                          <Building2 className="size-4" />
-                        )}
+          {billing.phase === 'grace' ? (
+            <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium">
+                  Your plan ended. Your data will be deleted in {billing.deletionDaysRemaining}{' '}
+                  {billing.deletionDaysRemaining === 1 ? 'day' : 'days'} ({formatDate(billing.deletionDate)}) unless you renew.
+                </p>
+                <Button asChild size="sm" variant="destructive" className="mt-3">
+                  <Link href="/pricing">Renew plan</Link>
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          {invites.length && tab !== 'organizations' ? (
+            <button
+              type="button"
+              onClick={() => setTab('organizations')}
+              className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface-subtle px-4 py-3 text-left transition-colors hover:border-border-strong"
+            >
+              <span className="size-1.5 shrink-0 rounded-full bg-foreground" />
+              <span className="min-w-0 flex-1 truncate text-sm text-text-secondary">
+                {invites.length === 1
+                  ? `${invites[0].organizationName} invited you to join.`
+                  : `You have ${invites.length} pending invitations.`}
+              </span>
+              <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-foreground">
+                Review
+                <ArrowRight className="size-3.5" />
+              </span>
+            </button>
+          ) : null}
+
+          {tab === 'general' ? (
+            <>
+              <form onSubmit={handleSaveProfile}>
+                <SettingsBlock
+                  title="Profile"
+                  description="Your name, picture and role are shown to teammates in every organization."
+                  footer={
+                    <>
+                      <span>{dirty ? 'You have unsaved changes.' : 'Changes apply across the whole suite.'}</span>
+                      <span className="flex items-center gap-2">
+                        {dirty ? (
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setForm(savedForm)}>
+                            Discard
+                          </Button>
+                        ) : null}
+                        <Button type="submit" size="sm" disabled={!dirty || savingProfile}>
+                          {savingProfile ? <Loader2 className="size-4 animate-spin" /> : null}
+                          Save changes
+                        </Button>
                       </span>
+                    </>
+                  }
+                >
+                  <div className="flex flex-wrap items-center gap-4 border-b border-border pb-5">
+                    <div className="relative">
+                      <Avatar src={avatarSrc} name={form.displayName} email={profile.email} size={64} />
+                      {uploading ? (
+                        <span className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
+                          <Loader2 className="size-5 animate-spin text-foreground" />
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground">Profile picture</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">A square JPG or PNG, up to 2 MB.</p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        size="icon-sm"
+                        variant="outline"
+                        aria-label={avatarSrc ? 'Replace picture' : 'Upload picture'}
+                        title={avatarSrc ? 'Replace picture' : 'Upload picture'}
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        <Camera className="size-4" />
+                      </Button>
+                      {avatarSrc ? (
+                        <Button
+                          type="button"
+                          size="icon-sm"
+                          variant="ghost"
+                          aria-label="Remove picture"
+                          title="Remove picture"
+                          className="text-muted-foreground hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
+                          onClick={handleRemoveAvatar}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                    <Field label="Display name" htmlFor="displayName" className="sm:col-span-2">
+                      <Input
+                        id="displayName"
+                        value={form.displayName}
+                        onChange={(event) => set('displayName')(event.target.value)}
+                        placeholder="Your name"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                    <Field label="Job title" htmlFor="jobTitle">
+                      <Input
+                        id="jobTitle"
+                        value={form.jobTitle}
+                        onChange={(event) => set('jobTitle')(event.target.value)}
+                        placeholder="Product designer"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                    <Field label="Company" htmlFor="company">
+                      <Input
+                        id="company"
+                        value={form.company}
+                        onChange={(event) => set('company')(event.target.value)}
+                        placeholder="Acme Studio"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                    <Field label="Location" htmlFor="location">
+                      <Input
+                        id="location"
+                        value={form.location}
+                        onChange={(event) => set('location')(event.target.value)}
+                        placeholder="Berlin, Germany"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                    <Field label="Website" htmlFor="website">
+                      <div className="relative">
+                        <Globe className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-text-tertiary" />
+                        <Input
+                          id="website"
+                          value={form.website}
+                          onChange={(event) => set('website')(event.target.value)}
+                          placeholder="https://example.com"
+                          className="bg-surface-subtle pl-8"
+                        />
+                      </div>
+                    </Field>
+                    <Field label="About" htmlFor="bio" className="sm:col-span-2">
+                      <Textarea
+                        id="bio"
+                        value={form.bio}
+                        onChange={(event) => set('bio')(event.target.value)}
+                        maxLength={BIO_LIMIT}
+                        placeholder="A short line about what you work on."
+                        className="min-h-20 resize-none bg-surface-subtle"
+                      />
+                      <p className="mt-1.5 text-right text-xs tabular-nums text-text-tertiary">
+                        {form.bio.length}/{BIO_LIMIT}
+                      </p>
+                    </Field>
+                  </div>
+                </SettingsBlock>
+              </form>
+
+              <SettingsBlock title="Preferences" description="Saved as soon as you change them." flush>
+                <ToggleRow title="Theme" description="Applies to every Geiger product in this browser.">
+                  <div role="radiogroup" aria-label="Theme" className="flex shrink-0 rounded-lg border border-border bg-surface-subtle p-0.5">
+                    {THEMES.map((option) => {
+                      const Icon = option.icon
+                      const active = hydrated && (theme ?? 'system') === option.value
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          aria-label={option.label}
+                          title={option.label}
+                          onClick={() => setTheme(option.value)}
+                          className={cn(
+                            'flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                          )}
+                        >
+                          <Icon className="size-3.5" />
+                          <span className="hidden sm:inline">{option.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </ToggleRow>
+                <ToggleRow title="Account emails" description="Invitations, billing receipts and account notices.">
+                  <Switch checked={prefs.productEmails} onCheckedChange={(value) => handleTogglePref('productEmails', value)} />
+                </ToggleRow>
+                <ToggleRow title="Product news" description="Occasional news about new features across the suite.">
+                  <Switch checked={prefs.marketingEmails} onCheckedChange={(value) => handleTogglePref('marketingEmails', value)} />
+                </ToggleRow>
+              </SettingsBlock>
+            </>
+          ) : null}
+
+          {tab === 'organizations' ? (
+            <>
+              {invites.length ? (
+                <SettingsBlock title="Invitations" description="Accept to join the organization with the role you were invited as." flush>
+                  {invites.map((invite) => (
+                    <div key={invite.id} className="flex items-center gap-3 px-5 py-3.5 sm:px-6">
+                      <OrgTile src={invite.organizationAvatar} name={invite.organizationName} />
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-medium text-foreground">{workspace.name}</p>
-                          <span className="inline-flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-[11px] font-medium text-text-secondary">
-                            {privileged ? <Crown className="size-3" /> : null}
-                            {workspace.role}
-                          </span>
-                          {!workspace.isActive ? (
-                            <Badge variant="secondary">Inactive</Badge>
-                          ) : null}
-                        </div>
+                        <p className="truncate text-sm font-medium text-foreground">{invite.organizationName}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {workspace.memberCount} {workspace.memberCount === 1 ? 'member' : 'members'}{' '}
-                          · Created {formatDate(workspace.createdAt)}
+                          Invited as {invite.role} · {formatRelative(invite.createdAt)}
                         </p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <Button asChild size="sm" variant="outline" className="border-border bg-surface-subtle">
+                      <Button asChild size="sm">
+                        <Link href={`/invite/${invite.token}`}>Accept</Link>
+                      </Button>
+                    </div>
+                  ))}
+                </SettingsBlock>
+              ) : null}
+
+              <SettingsBlock
+                title="Your organizations"
+                description={`${workspaces.length} ${workspaces.length === 1 ? 'organization' : 'organizations'} · ${projectCount} ${projectCount === 1 ? 'project' : 'projects'} across them.`}
+                action={
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/org">
+                      <Plus className="size-4" />
+                      New organization
+                    </Link>
+                  </Button>
+                }
+                flush
+              >
+                {workspaces.length ? (
+                  workspaces.map((workspace) => {
+                    const privileged = workspace.role === 'Owner' || workspace.role === 'Creator'
+                    return (
+                      <div key={workspace.id} className="flex items-center gap-3 px-5 py-3.5 sm:px-6">
+                        <OrgTile src={workspace.avatarUrl} name={workspace.name} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <Link href={`/org/${workspace.id}`} className="truncate text-sm font-medium text-foreground hover:underline">
+                              {workspace.name}
+                            </Link>
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-2 py-px text-[11px] font-medium text-text-secondary">
+                              {privileged ? <Crown className="size-3" /> : null}
+                              {workspace.role}
+                            </span>
+                            {!workspace.isActive ? <Badge variant="secondary">Inactive</Badge> : null}
+                          </div>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {workspace.memberCount} {workspace.memberCount === 1 ? 'member' : 'members'} · Created {formatDate(workspace.createdAt)}
+                          </p>
+                        </div>
+                        <Button asChild size="sm" variant="outline" className="shrink-0">
                           <Link href={`/org/${workspace.id}`}>Open</Link>
                         </Button>
-                        <Button
-                          asChild
-                          size="icon-sm"
-                          variant="outline"
-                          aria-label={`Usage for ${workspace.name}`}
-                          className="border-border bg-surface-subtle"
-                        >
-                          <Link href={`/org/${workspace.id}/usage`}>
-                            <Gauge className="size-4" />
-                          </Link>
-                        </Button>
-                        <CopyButton value={workspace.id} label="Organization ID" />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button type="button" size="icon-sm" variant="ghost" aria-label={`More for ${workspace.name}`} className="shrink-0 text-muted-foreground">
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/org/${workspace.id}/usage`}>
+                                <Gauge className="size-4" />
+                                View usage
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={() => copyText(workspace.id, 'Organization ID')}>
+                              <Copy className="size-4" />
+                              Copy organization ID
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </div>
-                  )
-                })}
-              </Card>
-            ) : (
-              <Card className="flex flex-col items-center px-5 py-12 text-center">
-                <h3 className="text-base font-semibold">No Organizations Yet</h3>
-                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                  Create your first organization, or join one with an ID from your team.
-                </p>
-                <Button asChild className="mt-5">
-                  <Link href="/org">
-                    Go to Organizations
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-              </Card>
-            )}
-          </Section>
-        </TabsContent>
-
-        {/* ---------------------------------------------------------------- */}
-        <TabsContent value="billing" className="flex flex-col gap-8 pt-4">
-          <Section
-            title="Plan"
-            action={
-              <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <Link href="/billing">
-                  Manage Billing
-                  <ArrowUpRight className="size-4" />
-                </Link>
-              </Button>
-            }
-          >
-            {billing.planName ? (
-              <Card>
-                <div className="flex flex-wrap items-start justify-between gap-4 p-5">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-lg font-semibold">{billing.planName}</p>
-                      <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {billing.periodEnd
-                        ? `${billing.isTrial ? 'Trial ends' : 'Renews'} ${formatDate(billing.periodEnd)} · ${billing.daysRemaining} ${billing.daysRemaining === 1 ? 'day' : 'days'} left`
-                        : `Member since ${formatDate(billing.startedAt)}`}
+                    )
+                  })
+                ) : (
+                  <div className="flex flex-col items-center px-6 py-10 text-center">
+                    <span className="flex size-10 items-center justify-center rounded-xl border border-border bg-surface-subtle">
+                      <Building2 className="size-4 text-muted-foreground" />
+                    </span>
+                    <p className="mt-3 text-sm font-medium text-foreground">No organizations yet</p>
+                    <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                      Create your first organization, or join one with an ID from your team.
                     </p>
+                    <Button asChild size="sm" className="mt-4">
+                      <Link href="/org">
+                        Go to organizations
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold tabular-nums tracking-tight">
-                      {billing.isTrial ? 'Free' : formatUsd(billing.amountTotal, billing.currency)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {billing.isTrial
-                        ? 'during trial'
-                        : billing.billingInterval
-                          ? `per ${billing.billingInterval}`
-                          : ''}
-                    </p>
-                  </div>
-                </div>
-                <dl className="grid grid-cols-2 divide-x divide-y divide-border border-t border-border sm:grid-cols-3 sm:divide-y-0">
-                  <Fact label="Total Spent" value={formatUsd(billing.totalSpent)} />
-                  <Fact
-                    label="Payments"
-                    value={`${billing.paymentCount} ${billing.paymentCount === 1 ? 'payment' : 'payments'}`}
-                  />
-                  <Fact label="Member Since" value={formatDate(billing.startedAt)} />
-                </dl>
-              </Card>
-            ) : (
-              <Card className="flex flex-col items-center px-5 py-12 text-center">
-                <h3 className="text-base font-semibold">No Plan Yet</h3>
-                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                  Pick a foundation and choose the products your team works in.
-                </p>
-                <Button asChild className="mt-5">
-                  <Link href="/pricing">
-                    View Plans
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-              </Card>
-            )}
-          </Section>
-
-          {billing.productIds.length ? (
-            <Section title="Product Access">
-              <ProductAccess productIds={billing.productIds} />
-            </Section>
+                )}
+              </SettingsBlock>
+            </>
           ) : null}
 
-          <Section title="Recent Payments">
-            <Card className="divide-y divide-border">
-              {billing.recentPurchases.length ? (
-                billing.recentPurchases.map((purchase) => {
-                  const status = PURCHASE_STATUS[purchase.status] || PURCHASE_STATUS.pending
-                  return (
-                    <div key={purchase.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {purchase.planName}
-                          <span className="ml-1 text-xs font-normal text-muted-foreground">
-                            /{purchase.billingInterval}
+          {tab === 'billing' ? (
+            <>
+              {billing.planName ? (
+                <SettingsBlock
+                  title="Current plan"
+                  action={
+                    <Button asChild size="sm" variant="outline">
+                      <Link href="/billing">
+                        Manage billing
+                        <ArrowUpRight className="size-4" />
+                      </Link>
+                    </Button>
+                  }
+                  flush
+                >
+                  <div className="px-5 py-5 sm:px-6">
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                      <div className="flex items-center gap-2.5">
+                        <p className="text-3xl font-semibold tracking-tight">{billing.planName}</p>
+                        <Badge variant={phaseBadge.variant}>{phaseBadge.label}</Badge>
+                      </div>
+                      <p className="text-right">
+                        <span className="text-2xl font-semibold tabular-nums tracking-tight">
+                          {billing.isTrial ? 'Free' : formatUsd(billing.amountTotal, billing.currency)}
+                        </span>
+                        <span className="ml-1 text-sm text-muted-foreground">
+                          {billing.isTrial ? 'during trial' : billing.billingInterval ? `/ ${billing.billingInterval}` : ''}
+                        </span>
+                      </p>
+                    </div>
+
+                    {periodProgress != null ? (
+                      <div className="mt-5">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-surface-hover">
+                          <div className="h-full rounded-full bg-foreground/70" style={{ width: `${Math.round(periodProgress * 100)}%` }} />
+                        </div>
+                        <p className="mt-2 flex justify-between text-xs text-muted-foreground">
+                          <span>
+                            {billing.isTrial ? 'Trial ends' : 'Renews'} {formatDate(billing.periodEnd)}
+                          </span>
+                          <span className="tabular-nums">
+                            {billing.daysRemaining} {billing.daysRemaining === 1 ? 'day' : 'days'} left
                           </span>
                         </p>
-                        <p className="text-xs text-muted-foreground">{formatDate(purchase.createdAt)}</p>
                       </div>
-                      <span className="text-sm font-medium tabular-nums">
-                        {formatUsd(purchase.amountTotal, purchase.currency)}
-                      </span>
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </div>
-                  )
-                })
+                    ) : null}
+                  </div>
+                  <dl className="grid grid-cols-3 divide-x divide-border">
+                    {[
+                      ['Total spent', formatUsd(billing.totalSpent)],
+                      ['Payments', billing.paymentCount],
+                      ['Member since', formatDate(billing.startedAt)],
+                    ].map(([label, value]) => (
+                      <div key={label} className="px-5 py-3 sm:px-6">
+                        <dt className="text-xs text-text-tertiary">{label}</dt>
+                        <dd className="mt-0.5 truncate text-sm font-medium tabular-nums text-foreground">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </SettingsBlock>
               ) : (
-                <p className="px-5 py-4 text-sm text-muted-foreground">
-                  No payments yet. Anything you buy shows up here and on the billing page.
-                </p>
-              )}
-            </Card>
-          </Section>
-        </TabsContent>
-
-        {/* ---------------------------------------------------------------- */}
-        <TabsContent value="security" className="flex flex-col gap-8 pt-4">
-          <Section title="Email Address">
-            <Card className="p-5">
-              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-subtle px-3 py-2.5">
-                <span className="min-w-0 flex-1 truncate text-sm text-foreground">{profile.email}</span>
-                {profile.emailVerified ? (
-                  <Badge variant="success" className="gap-1">
-                    <ShieldCheck className="size-3" />
-                    Verified
-                  </Badge>
-                ) : (
-                  <Badge variant="warning">Unverified</Badge>
-                )}
-              </div>
-
-              <form onSubmit={handleChangeEmail} className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <Input
-                  type="email"
-                  value={emailDraft}
-                  onChange={(event) => setEmailDraft(event.target.value)}
-                  placeholder="new@company.com"
-                  className="flex-1 bg-surface-subtle"
-                />
-                <Button type="submit" disabled={changingEmail || !emailDraft.trim()}>
-                  {changingEmail ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Change Email
-                </Button>
-              </form>
-              <p className="mt-2 text-xs text-muted-foreground">
-                We send a confirmation link to the new address. The change takes effect once you
-                open it.
-              </p>
-            </Card>
-          </Section>
-
-          <Section title="Password">
-            <Card className="p-5">
-              <form onSubmit={handleChangePassword} className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="password">New Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    autoComplete="new-password"
-                    className="bg-surface-subtle"
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="passwordConfirm">Confirm Password</Label>
-                  <Input
-                    id="passwordConfirm"
-                    type="password"
-                    value={passwordConfirm}
-                    onChange={(event) => setPasswordConfirm(event.target.value)}
-                    autoComplete="new-password"
-                    className="bg-surface-subtle"
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3 sm:col-span-2">
-                  <p className="text-xs text-muted-foreground">At least 8 characters.</p>
-                  <Button type="submit" disabled={changingPassword || password.length < 8}>
-                    {changingPassword ? <Loader2 className="size-4 animate-spin" /> : null}
-                    Update Password
+                <SettingsBlock title="No plan yet" description="Pick a foundation and choose the products your team works in.">
+                  <Button asChild size="sm">
+                    <Link href="/pricing">
+                      View plans
+                      <ArrowRight className="size-4" />
+                    </Link>
                   </Button>
-                </div>
+                </SettingsBlock>
+              )}
+
+              {billing.productIds.length ? (
+                <SettingsBlock title="Products" description="Every product your plan unlocks.">
+                  <ProductAccess productIds={billing.productIds} />
+                </SettingsBlock>
+              ) : null}
+
+              <SettingsBlock title="Recent payments" description="Your last four payments. The billing page has the full history." flush>
+                {billing.recentPurchases.length ? (
+                  billing.recentPurchases.map((purchase) => {
+                    const status = PURCHASE_STATUS[purchase.status] || PURCHASE_STATUS.pending
+                    return (
+                      <div key={purchase.id} className="grid grid-cols-[minmax(0,1fr)_auto_5.5rem] items-center gap-4 px-5 py-3 sm:grid-cols-[7rem_minmax(0,1fr)_auto_5.5rem] sm:px-6">
+                        <span className="hidden text-sm tabular-nums text-muted-foreground sm:block">{formatDate(purchase.createdAt)}</span>
+                        <span className="min-w-0 truncate text-sm text-foreground">
+                          {purchase.planName}
+                          <span className="ml-1 text-xs text-muted-foreground">/ {purchase.billingInterval}</span>
+                        </span>
+                        <span className="text-right text-sm font-medium tabular-nums">{formatUsd(purchase.amountTotal, purchase.currency)}</span>
+                        <span className="flex justify-end">
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </span>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <p className="px-5 py-4 text-sm text-muted-foreground sm:px-6">No payments yet. Anything you buy shows up here.</p>
+                )}
+              </SettingsBlock>
+            </>
+          ) : null}
+
+          {tab === 'security' ? (
+            <>
+              <form onSubmit={handleChangeEmail}>
+                <SettingsBlock
+                  title="Email address"
+                  description="Where we send sign-in links, invitations and receipts."
+                  footer={
+                    <>
+                      <span>We send a confirmation link to the new address first.</span>
+                      <Button type="submit" size="sm" disabled={changingEmail || !emailDraft.trim()}>
+                        {changingEmail ? <Loader2 className="size-4 animate-spin" /> : null}
+                        Change email
+                      </Button>
+                    </>
+                  }
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Current">
+                      <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-surface-subtle px-3">
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{profile.email}</span>
+                        {profile.emailVerified ? (
+                          <span className="inline-flex shrink-0 items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                            <ShieldCheck className="size-3.5" />
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-xs text-amber-600 dark:text-amber-400">Unverified</span>
+                        )}
+                      </div>
+                    </Field>
+                    <Field label="New email" htmlFor="newEmail">
+                      <Input
+                        id="newEmail"
+                        type="email"
+                        value={emailDraft}
+                        onChange={(event) => setEmailDraft(event.target.value)}
+                        placeholder="new@company.com"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                  </div>
+                </SettingsBlock>
               </form>
-            </Card>
-          </Section>
 
-          <PasskeyManager />
+              <form onSubmit={handleChangePassword}>
+                <SettingsBlock
+                  title="Password"
+                  description="Set a password to sign in with your email address."
+                  footer={
+                    <>
+                      <span>At least 8 characters.</span>
+                      <Button type="submit" size="sm" disabled={changingPassword || password.length < 8}>
+                        {changingPassword ? <Loader2 className="size-4 animate-spin" /> : null}
+                        Update password
+                      </Button>
+                    </>
+                  }
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="New password" htmlFor="password">
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        autoComplete="new-password"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                    <Field label="Confirm password" htmlFor="passwordConfirm">
+                      <Input
+                        id="passwordConfirm"
+                        type="password"
+                        value={passwordConfirm}
+                        onChange={(event) => setPasswordConfirm(event.target.value)}
+                        autoComplete="new-password"
+                        className="bg-surface-subtle"
+                      />
+                    </Field>
+                  </div>
+                </SettingsBlock>
+              </form>
 
-          <Section title="Account">
-            <Card className="divide-y divide-border">
-              <Row label="Sign-in Method">
-                <span className="text-sm text-foreground">
-                  {profile.providers.map(providerLabel).join(', ')}
-                </span>
-              </Row>
-              <Row label="Account Created">
-                <span className="text-sm text-foreground">{formatDate(profile.createdAt)}</span>
-              </Row>
-              <Row label="Last Sign-in">
-                <span className="text-sm text-foreground">{formatRelative(profile.lastSignInAt)}</span>
-              </Row>
-              <Row label="User ID">
-                <span className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-foreground">{profile.id}</span>
-                  <CopyButton value={profile.id} label="User ID" />
-                </span>
-              </Row>
-            </Card>
-          </Section>
+              <PasskeyManager />
 
-          <Section title="Sessions">
-            <Card className="flex flex-wrap items-center justify-between gap-3 p-5">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">Sign Out Everywhere</p>
-                <p className="text-xs text-muted-foreground">
-                  Ends every active session, on every device — including this one.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="shrink-0 border-border bg-surface-subtle"
-                onClick={handleSignOutEverywhere}
-                disabled={signingOut}
-              >
-                {signingOut ? <Loader2 className="size-4 animate-spin" /> : <LogOut className="size-4" />}
-                Sign Out Everywhere
-              </Button>
-            </Card>
-          </Section>
+              <SettingsBlock title="Sign-in details" flush>
+                <DetailRow label="Sign-in methods">{profile.providers.map(providerLabel).join(', ')}</DetailRow>
+                <DetailRow label="Account created">{formatDate(profile.createdAt)}</DetailRow>
+                <DetailRow label="Last sign-in">{formatRelative(profile.lastSignInAt)}</DetailRow>
+                <DetailRow label="User ID">
+                  <span className="flex items-center gap-1">
+                    <span className="truncate font-mono text-xs">{profile.id}</span>
+                    <CopyButton value={profile.id} label="User ID" />
+                  </span>
+                </DetailRow>
+              </SettingsBlock>
 
-          <Section title="Delete Account">
-            <Card className="flex flex-wrap items-center justify-between gap-3 border-red-500/25 p-5">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">Delete This Account</p>
-                <p className="max-w-xl text-xs text-muted-foreground">
-                  Removes your profile and access to every workspace. Owned organizations have to be
-                  transferred first, so we handle deletions by request.
-                </p>
-              </div>
-              <Button
-                asChild
-                variant="ghost"
-                className="shrink-0 bg-red-900/15 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
-              >
-                <Link href="/contact">
-                  <Trash2 className="size-4" />
-                  Request Deletion
-                </Link>
-              </Button>
-            </Card>
-          </Section>
-        </TabsContent>
-      </Tabs>
+              <SettingsBlock
+                title="Sessions"
+                description="Signed in somewhere you don't recognise? End every session, on every device, including this one."
+                footer={
+                  <>
+                    <span>You&apos;ll need to sign in again afterwards.</span>
+                    <Button type="button" size="sm" variant="outline" onClick={handleSignOutEverywhere} disabled={signingOut}>
+                      {signingOut ? <Loader2 className="size-4 animate-spin" /> : <LogOut className="size-4" />}
+                      Sign out everywhere
+                    </Button>
+                  </>
+                }
+              />
+
+              <SettingsBlock
+                tone="danger"
+                title="Delete account"
+                description="Removes your profile and your access to every organization. Owned organizations have to be transferred first, so deletions are handled by request."
+                footer={
+                  <>
+                    <span>This can&apos;t be undone.</span>
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
+                    >
+                      <Link href="/contact">
+                        <Trash2 className="size-4" />
+                        Request deletion
+                      </Link>
+                    </Button>
+                  </>
+                }
+              />
+            </>
+          ) : null}
+        </div>
+      </div>
     </div>
   )
 }

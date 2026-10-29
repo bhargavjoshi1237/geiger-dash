@@ -7,7 +7,7 @@ import { BETA_APPS } from "@/lib/pricing/beta";
 
 const BETA_APP_IDS = new Set(BETA_APPS.map((app) => app.id));
 
-// Signs the chosen org up for the free Beta Tester plan with the picked apps; returns { ok } or { error } for the dialog.
+// Signs the chosen org up for the free Alpha tester plan with the picked apps; returns { ok } or { error } for the dialog.
 export async function joinBetaAction({ organizationId, apps } = {}) {
   const supabase = await createClient();
   const user = await getUser(supabase);

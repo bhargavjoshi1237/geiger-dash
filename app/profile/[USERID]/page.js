@@ -1,10 +1,7 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
 import { Header } from '@/components/header'
 import Footer from '@/components/footer'
 import { GridBackdrop } from '@/components/grid-backdrop'
-import { Button } from "@geiger/ui";
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { requireUser } from '@/supabase/user/getUser'
@@ -174,21 +171,7 @@ export default async function ProfilePage({ params }) {
     <div className="flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground">
       <GridBackdrop variant="subtle" />
       <Header />
-      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Your account, organizations, and plan.
-            </p>
-          </div>
-          <Button asChild variant="outline" className="shrink-0">
-            <Link href="/org">
-              Open Workspace
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </header>
+      <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-20 pt-24 sm:px-6 sm:pt-28 lg:px-8">
 
         <ProfileClient
           profile={profile}

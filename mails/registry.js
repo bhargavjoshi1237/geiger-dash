@@ -551,7 +551,7 @@ export const TEMPLATES = [
     project: "geiger",
     category: "Internal",
     name: "Beta request",
-    description: "Sent to info@geiger.studio when someone asks to join the beta from the pricing page.",
+    description: "Sent to info@geiger.studio when someone asks to Join the Alpha from the pricing page.",
     subject: "Beta request: {{name}}",
     content: {
       heading: "New beta request",

@@ -1,4 +1,4 @@
-// Internal notice: someone asked to join the beta from the pricing page.
+// Internal notice: someone asked to Join the Alpha from the pricing page.
 import { Layout } from "../../components/Layout.jsx";
 import {
   EmailHeading,

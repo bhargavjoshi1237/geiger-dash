@@ -32,7 +32,7 @@ const faqs = [
     answer: "Yes. Basic is free for 15 days with no card required. The trial ends on its own and nothing is charged.",
   },
   {
-    question: "What is the Beta Tester plan?",
+    question: "What is the Alpha tester plan?",
     answer:
       "While Geiger is in beta, testers get every app for $0 with 1 active project, 3 people, 5 GB storage, 25 GB transfer and 50 AI credits.",
   },

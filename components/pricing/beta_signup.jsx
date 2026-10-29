@@ -29,13 +29,13 @@ const LOGIN_URL = `/login?next=${encodeURIComponent("/pricing")}`;
 const ERRORS = {
   no_apps: "Pick at least one app.",
   invalid_org: "You don't have access to that organization.",
-  already_subscribed: "This organization already has a plan, so it can't join the beta.",
+  already_subscribed: "This organization already has a plan, so it can't Join the Alpha.",
 };
 
 // An org already on the beta reopens with the apps it has.
 const betaAppsFor = (entitlements) => (entitlements?.isBeta ? entitlements.unlockedProducts : []);
 
-// The pricing page's beta strip; "Join the beta" opens an app picker that puts the org on the free Beta Tester plan.
+// The pricing page's beta strip; "Join the Alpha" opens an app picker that puts the org on the free Alpha tester plan.
 export function BetaSignup({ isAuthed = false, organizations = [], entitlementsByOrg = {} }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -54,7 +54,7 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
       return;
     }
     if (!organizations.length) {
-      toast.error("Create an organization first to join the beta.");
+      toast.error("Create an organization first to Join the Alpha.");
       router.push("/org");
       return;
     }
@@ -88,9 +88,9 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
         router.push(LOGIN_URL);
         return;
       }
-      toast.error(ERRORS[result?.error] ?? "Couldn't join the beta. Please try again.");
+      toast.error(ERRORS[result?.error] ?? "Couldn't Join the Alpha. Please try again.");
     } catch {
-      toast.error("Couldn't join the beta. Please try again.");
+      toast.error("Couldn't Join the Alpha. Please try again.");
     } finally {
       setJoining(false);
     }
@@ -100,15 +100,15 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
     <>
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-dashed border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <p className="flex flex-col gap-1 text-sm sm:flex-row sm:items-baseline sm:gap-3.5">
-          <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">Beta tester</span>
-          Every app for $0 while the beta runs — 1 project, 3 people, 5 GB storage, 50 AI credits.
+          <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">Alpha tester</span>
+          Every app for $0 while the beta runs 1 project, 3 people, 5 GB storage, 50 AI credits.
         </p>
         <button
           type="button"
           onClick={openDialog}
           className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm text-sm font-semibold transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Join the beta
+          Join the Alpha
           <ArrowRight className="size-4" />
         </button>
       </div>
@@ -143,7 +143,7 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
 
             {hasPaidPlan ? (
               <p className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs text-muted-foreground">
-                {entitlements.planName} is already active on this organization, so it can&apos;t join the beta.
+                {entitlements.planName} is already active on this organization, so it can&apos;t Join the Alpha.
               </p>
             ) : (
               <div className="grid gap-2.5">
