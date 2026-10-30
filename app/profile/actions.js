@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { requireUser } from '@/supabase/user/getUser'
 import { userAvatarUrl } from '@/lib/avatar-url'
+import { revokeConnection } from '@/lib/mcp/connections'
 
 // Profile server actions — everything the /profile hub can change about the
 // signed-in user. All identity data lives on the Supabase auth user (email,
@@ -34,6 +35,21 @@ function avatarPath(userId) {
 
 export async function avatarPublicUrl(userId, version = 0) {
   return userAvatarUrl(userId, version)
+}
+
+// Disconnects an AI client: the connection ends access now, and revoking the grant forces consent next time.
+export async function revokeMcpConnectionAction(connectionId) {
+  const supabase = await createClient()
+  const user = await requireUser(supabase, '/login?next=/profile')
+
+  const connection = await revokeConnection(supabase, user.id, cleanText(connectionId, 64))
+  if (!connection) return { ok: false, error: "Couldn't disconnect that app. Please try again." }
+
+  const { error } = await supabase.auth.oauth.revokeGrant({ clientId: connection.clientId })
+  if (error) console.error('[profile.revokeMcpGrant]', error.message)
+
+  revalidatePath(`/profile/${user.id}`)
+  return { ok: true }
 }
 
 // Saves the editable profile fields. `name`/`full_name` are kept in sync because

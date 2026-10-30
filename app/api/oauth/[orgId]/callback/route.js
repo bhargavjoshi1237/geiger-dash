@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getProvider } from '@/lib/oauth/providers'
 import { decodeJwtPayload } from '@/lib/oauth/pkce'
-import { findOrCreateUser, ensureOrgMembership, buildSessionCallbackUrl } from '@/lib/oauth/session'
+import { canSignInViaOrgProvider, isEmailOnOrgDomain } from '@/lib/oauth/email-policy'
+import {
+  findOrCreateUser,
+  ensureOrgMembership,
+  buildSessionCallbackUrl,
+  isOrgMember,
+  orgHasOAuthAddon,
+} from '@/lib/oauth/session'
 
 export const runtime = 'nodejs'
 
@@ -79,8 +86,22 @@ export async function GET(request, { params }) {
       return fail(origin, 'oauth_no_email')
     }
 
-    const user = await findOrCreateUser({ email, name, avatar })
-    if (!user) return fail(origin)
+    // An org's provider is only trusted for its own domains, and only while the org holds the add-on.
+    if (claims.email_verified === false || !isEmailOnOrgDomain(email, provider.emailDomains)) {
+      console.error('[oauth.callback]', 'email rejected for this provider')
+      return fail(origin, 'oauth_email_domain')
+    }
+    if (!(await orgHasOAuthAddon(orgId))) return fail(origin, 'oauth_unavailable')
+
+    const result = await findOrCreateUser({ email, name, avatar })
+    if (!result) return fail(origin)
+    const { user, created } = result
+
+    // Domains aren't ownership-verified, so a provider can't take over an account from outside its org.
+    if (!canSignInViaOrgProvider({ created, isMember: await isOrgMember(orgId, user.id) })) {
+      console.error('[oauth.callback]', 'existing account is not a member of this org')
+      return fail(origin, 'oauth_not_member')
+    }
 
     await ensureOrgMembership(orgId, user.id)
 

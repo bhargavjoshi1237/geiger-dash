@@ -10,6 +10,7 @@ import { avatarUrlForUser } from '@/lib/avatar-url'
 import { getUserPlan, listPurchases } from '@/lib/billing/store'
 import { derivePlanState } from '@/lib/billing/plan_state'
 import { getPlan, planPrice } from '@/lib/pricing/plans'
+import { lastUsedByClient, listConnections } from '@/lib/mcp/connections'
 import { ProfileClient } from './profile-client'
 
 export const dynamic = 'force-dynamic'
@@ -85,12 +86,19 @@ export default async function ProfilePage({ params }) {
   const { organizations, error: orgError } = await getUserOrganizations(supabase, user.id)
   const organizationIds = organizations.map((organization) => organization.id)
 
-  const [projectCount, plan, purchases, invites] = await Promise.all([
+  const [projectCount, plan, purchases, invites, mcpConnections, mcpLastUsed] = await Promise.all([
     countProjects(supabase, organizationIds),
     getUserPlan(user.id),
     listPurchases(user.id),
     listPendingInvites(user.email),
+    listConnections(supabase, user.id),
+    lastUsedByClient(supabase, user.id),
   ])
+
+  const connections = mcpConnections.map((connection) => ({
+    ...connection,
+    lastUsedAt: mcpLastUsed[connection.clientId] || null,
+  }))
 
   const planState = derivePlanState(plan)
   const meta = user.user_metadata || {}
@@ -179,6 +187,7 @@ export default async function ProfilePage({ params }) {
           workspaces={workspaces}
           invites={invites}
           projectCount={projectCount}
+          connections={connections}
           loadError={orgError}
         />
       </main>

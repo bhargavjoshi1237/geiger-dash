@@ -41,6 +41,8 @@ const ERROR_MESSAGES = {
   oauth_state: "SSO sign-in failed. Please try again.",
   oauth_unavailable: "SSO isn't available for that organization right now.",
   oauth_no_email: "Your provider didn't return an email address.",
+  oauth_email_domain: "That email isn't on a domain this organization's SSO covers.",
+  oauth_not_member: "That account isn't part of this organization yet. Ask for an invite, then sign in again.",
   auth_callback_failed: "That sign-in link was invalid or expired.",
   provider_failed: "Couldn't start that sign-in. Please try again.",
 };

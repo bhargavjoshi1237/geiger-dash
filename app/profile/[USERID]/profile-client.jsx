@@ -32,6 +32,7 @@ import { toast } from 'sonner'
 import { SettingsBlock } from '@/components/account/panel'
 import { ProductAccess } from '@/components/billing/product-access'
 import { PasskeyManager } from '@/components/auth/passkey-manager'
+import { ConnectedApps } from '@/components/account/connected-apps'
 import {
   Badge,
   Button,
@@ -259,7 +260,7 @@ function Rail({ profile, avatarSrc, tab, onTab, counts, hasInvites }) {
   )
 }
 
-export function ProfileClient({ profile, billing, workspaces, invites, projectCount, loadError }) {
+export function ProfileClient({ profile, billing, workspaces, invites, projectCount, connections, loadError }) {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   // The stored theme is only known in the browser, so highlight it after hydration to keep server and client markup equal.
@@ -936,6 +937,8 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
               </form>
 
               <PasskeyManager />
+
+              <ConnectedApps connections={connections} />
 
               <SettingsBlock title="Sign-in details" flush>
                 <DetailRow label="Sign-in methods">{profile.providers.map(providerLabel).join(', ')}</DetailRow>
