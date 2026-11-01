@@ -67,14 +67,6 @@ export const SUITE_APPS = [
     available: true,
   }),
   app({
-    id: "office",
-    name: "Office",
-    hue: "teal",
-    tagline: "Run the back office.",
-    features: ["HR records", "Invoices", "Time and leave"],
-    available: false,
-  }),
-  app({
     id: "content",
     name: "Content",
     hue: "cyan",

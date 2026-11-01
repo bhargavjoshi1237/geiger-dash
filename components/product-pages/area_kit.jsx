@@ -15,7 +15,7 @@ const HAIRLINE = "border-foreground/[0.08] dark:border-foreground/[0.09]";
 
 // Links into another suite app are rewrites to a different deployment, so they must be full page loads.
 function SmartLink({ href, className, children }) {
-  if (href.startsWith("/") && !/^\/(flow|notes|forms|form|events|campaign|content|grey|comms|assets|pods|office|property)(\/|$)/.test(href)) {
+  if (href.startsWith("/") && !/^\/(flow|notes|forms|form|events|campaign|content|grey|comms|assets|pods|property)(\/|$)/.test(href)) {
     return (
       <Link href={href} className={className}>
         {children}

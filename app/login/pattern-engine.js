@@ -689,7 +689,7 @@ export const PATTERNS = {
     // Word widths are measured in init, so it re-runs once the web font has loaded.
     usesFonts: true,
     init(w, h, env) {
-      const words = ["Flow", "Notes", "Assets", "Grey", "Office", "Forms", "Events", "Content", "Campaign", "Pods", "Comms", "Docs", "Property"];
+      const words = ["Flow", "Notes", "Assets", "Grey", "Forms", "Events", "Content", "Campaign", "Pods", "Comms", "Docs", "Property"];
       const lh = 78, gap = 30, font = `500 60px ${env.fontFamily}`;
       const m = document.createElement("canvas").getContext("2d");
       m.font = font;

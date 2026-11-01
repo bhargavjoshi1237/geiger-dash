@@ -39,7 +39,7 @@ name); everywhere this doc writes `<schema>`, substitute that value.
 | Geiger Flow | `flow` | | Geiger Campaign | `campaign` |
 | Geiger Assets | `assets` | | Geiger Pods | `pods` |
 | Geiger Grey | `grey` | | Geiger Comms | `comms` |
-| Geiger Office | `office` | | Geiger Docs | `docs` |
+| Geiger Docs | `docs` | | | |
 | Geiger Forms | `forms` | | Geiger Events | `events` |
 
 **Only genuinely cross-product tables stay in `public`** — the shared entities every

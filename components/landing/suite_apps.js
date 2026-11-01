@@ -27,7 +27,6 @@ export const SUITE_APPS = [
   app({ id: "notes", name: "Notes", hue: "amber", available: true, href: "/notes", tagline: "Think out loud on an infinite canvas.", features: ["Docs, sketches and tables on one board", "Live cursors for the whole team", "A video stage inside the board"] }),
   app({ id: "docs", name: "Docs", hue: "yellow", available: false, tagline: "Send it, sign it, file it.", features: ["E-signatures", "Signing order", "Audit trail"] }),
   app({ id: "forms", name: "Forms", hue: "emerald", available: true, href: "/forms", tagline: "Build forms people actually finish.", features: ["Conditions and formulas", "Conversational mode", "Funnel and drop-off analytics"] }),
-  app({ id: "office", name: "Office", hue: "teal", available: false, tagline: "Run the back office.", features: ["HR records", "Invoices", "Time and leave"] }),
   app({ id: "content", name: "Content", hue: "cyan", available: true, href: "/content", tagline: "Model, publish and personalise content.", features: ["Structured content types", "Releases and edge delivery", "Feeds that learn taste"] }),
   app({ id: "grey", name: "Grey", hue: "sky", available: true, href: "/grey", tagline: "Put your knowledge to work with AI.", features: ["Knowledge bases and ingestion", "A 3D knowledge graph", "API, MCP and embeddable widgets"] }),
   app({ id: "comms", name: "Comms", hue: "blue", available: false, tagline: "Talk to your customers.", features: ["Live chat", "Shared inbox", "Help center"] }),

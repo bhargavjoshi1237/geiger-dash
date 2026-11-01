@@ -18,7 +18,7 @@ Geiger Dash is the parent application of the Geiger suite. It owns everything th
 
 - the **public site** — home, product and feature pages, solutions, pricing, blog, changelog, docs, tools, and legal;
 - the **account layer** — login, signup, onboarding, invites, organisations, roles, usage, and Stripe billing;
-- the **routing hub** — rewrites that serve every product app under a path on the same origin (`/flow`, `/notes`, `/events`, `/forms`, `/content`, `/campaign`, `/assets`, `/office`, `/property`, `/audio`), so the suite shares one domain and one session.
+- the **routing hub** — rewrites that serve every product app under a path on the same origin (`/flow`, `/notes`, `/events`, `/forms`, `/content`, `/campaign`, `/assets`, `/property`, `/audio`), so the suite shares one domain and one session.
 
 Because every product is proxied through Dash and every product app runs under its own base path on that origin, a user signs in once and moves between applications without another handshake.
 

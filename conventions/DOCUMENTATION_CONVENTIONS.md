@@ -318,7 +318,7 @@ changelog, or from what the feature "probably" does.**
 | Grey | `grey` | `C:\Pro\geiger-grey` | no | no |
 | Comms | `comms` | `C:\Pro\geiger-comms` | no | no |
 | Property | `property` | `C:\Pro\geiger-property` | no | no |
-| Office, Docs | `office`, `docs` | not checked out here | no | no |
+| Docs | `docs` | not checked out here | no | no |
 
 "Whole-app sandbox" means the app id is in `SANDBOX_APP_IDS`. Property serves a
 `/property/playground` page but isn't in that list, so a help page can't use it

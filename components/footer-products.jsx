@@ -17,11 +17,10 @@ export default function FooterProducts() {
         <Accordion type="single" collapsible>
           <AccordionItem value="more" className="border-none">
             <AccordionTrigger className="py-0 text-sm font-normal text-muted-foreground hover:text-foreground hover:no-underline [&>svg]:size-3.5">
-              & 9 More
+              & 8 More
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-3">
               <ul className="space-y-3">
-                <li><Link href="/office" className={linkCls}>Geiger Office</Link></li>
                 <li><Link href="/forms" className={linkCls}>Geiger Forms</Link></li>
                 <li><Link href="/events" className={linkCls}>Geiger Events</Link></li>
                 <li><Link href="/content" className={linkCls}>Geiger Content</Link></li>

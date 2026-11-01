@@ -29,7 +29,6 @@ const PRODUCT_COLORS = {
   comms: { icon: "text-cyan-600 dark:text-cyan-400", tile: "bg-cyan-500/10 border-cyan-500/20", hover: "group-hover/row:text-cyan-600 dark:group-hover/row:text-cyan-400" },
   forms: { icon: "text-teal-600 dark:text-teal-400", tile: "bg-teal-500/10 border-teal-500/20", hover: "group-hover/row:text-teal-600 dark:group-hover/row:text-teal-400" },
   grey: { icon: "text-indigo-600 dark:text-indigo-400", tile: "bg-indigo-500/10 border-indigo-500/20", hover: "group-hover/row:text-indigo-600 dark:group-hover/row:text-indigo-400" },
-  office: { icon: "text-amber-600 dark:text-amber-400", tile: "bg-amber-500/10 border-amber-500/20", hover: "group-hover/row:text-amber-600 dark:group-hover/row:text-amber-400" },
   docs: { icon: "text-sky-600 dark:text-sky-400", tile: "bg-sky-500/10 border-sky-500/20", hover: "group-hover/row:text-sky-600 dark:group-hover/row:text-sky-400" },
   content: { icon: "text-rose-600 dark:text-rose-400", tile: "bg-rose-500/10 border-rose-500/20", hover: "group-hover/row:text-rose-600 dark:group-hover/row:text-rose-400" },
   pods: { icon: "text-purple-600 dark:text-purple-400", tile: "bg-purple-500/10 border-purple-500/20", hover: "group-hover/row:text-purple-600 dark:group-hover/row:text-purple-400" },

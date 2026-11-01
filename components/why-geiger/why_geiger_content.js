@@ -21,7 +21,6 @@ export const APP_DETAILS = {
   notes: { does: "An infinite canvas with docs, sketches, tables and live collaboration", highlights: "Live cursors, a video stage on the board" },
   docs: { does: "E-signatures, signing order and an audit trail", highlights: "On the way" },
   forms: { does: "Form builder, conversational forms and a response inbox", highlights: "Logic, formulas, funnel analytics" },
-  office: { does: "HR records, invoices, time and leave", highlights: "On the way" },
   content: { does: "A headless CMS with personalisation and recommendations", highlights: "A feed you can steer" },
   grey: { does: "Managed AI search over your knowledge: knowledge bases, graph, API and MCP", highlights: "3D knowledge graph" },
   comms: { does: "Live chat, a shared inbox and a help center", highlights: "On the way" },

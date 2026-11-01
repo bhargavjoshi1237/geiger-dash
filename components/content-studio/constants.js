@@ -34,7 +34,6 @@ export const RELEASE_PRODUCTS = [
   { value: 'geiger-forms', label: 'Geiger Forms' },
   { value: 'geiger-grey', label: 'Geiger Grey' },
   { value: 'geiger-notes', label: 'Geiger Notes' },
-  { value: 'geiger-office', label: 'Geiger Office' },
   { value: 'geiger-pods', label: 'Geiger Pods' },
   { value: 'geiger-property', label: 'Geiger Property' },
 ]
