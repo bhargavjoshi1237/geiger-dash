@@ -19,7 +19,8 @@ export function HelpMobileNav({ navigation, activeSlug }) {
         <Menu className="size-4" />
       </button>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-[300px] gap-0 overflow-y-auto p-0">
+        {/* Starts under the global notice banner, which sits above sheets and would otherwise cover the top of the menu. */}
+        <SheetContent side="left" className="top-[var(--geiger-banner-h,0px)] h-auto w-[300px] gap-0 overflow-y-auto p-0">
           <SheetHeader className="border-b border-border px-5 py-4">
             <SheetTitle>Help Center</SheetTitle>
             <SheetDescription className="sr-only">Browse help pages</SheetDescription>

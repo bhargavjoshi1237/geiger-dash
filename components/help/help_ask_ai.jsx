@@ -218,7 +218,8 @@ export function HelpAskAi({ pageSlug }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-md">
+      {/* Starts under the global notice banner, which sits above sheets and would otherwise cover the title and close button. */}
+      <SheetContent side="right" className="top-[var(--geiger-banner-h,0px)] h-auto w-full gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b border-border px-5 py-4">
           <SheetTitle className="flex items-center gap-2">
             <Sparkles className="size-4" />

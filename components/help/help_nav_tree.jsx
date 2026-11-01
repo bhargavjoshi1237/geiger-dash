@@ -8,8 +8,10 @@ function NavLink({ link, isActive, onNavigate, children }) {
       href={link.href}
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
-      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm leading-5 transition-colors hover:bg-surface-hover hover:text-foreground ${
-        isActive ? "font-semibold text-foreground" : "font-medium text-muted-foreground"
+      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm leading-5 transition-colors ${
+        isActive
+          ? "bg-surface-strong font-semibold text-foreground"
+          : "font-medium text-muted-foreground hover:bg-surface-hover hover:text-foreground"
       }`}
     >
       <span className="flex min-w-0 items-center gap-2">

@@ -11,7 +11,7 @@ import { HelpNavTree } from "@/components/help/help_nav_tree";
 import { HelpSidebar } from "@/components/help/help_sidebar";
 import { HelpToc } from "@/components/help/help_toc";
 import { ExplainMoreButton, HelpAskAi } from "@/components/help/help_ask_ai";
-import { CopyPageButton } from "@/components/help/help_copy_page";
+import { BackToTopButton, CopyPageButton } from "@/components/help/help_copy_page";
 
 // Fixed panels sit under the header, which itself sits under the global notice banner when one is shown.
 const belowHeader = "top-[calc(var(--geiger-banner-h,0px)_+_3.5rem)]";
@@ -39,7 +39,10 @@ function RightSidebar({ page }) {
       ) : null}
 
       <div className="space-y-3">
-        <CopyPageButton />
+        <div className="flex items-center justify-between gap-2">
+          <CopyPageButton />
+          <BackToTopButton />
+        </div>
         <ExplainMoreButton pageTitle={page.title} />
       </div>
     </aside>
@@ -227,9 +230,12 @@ export default function HelpCenter({ navigation, page }) {
               ))}
             </article>
 
-            <div className="mt-12 flex gap-6 border-t border-border pt-6 xl:hidden">
+            <div className="mt-12 flex items-center gap-6 border-t border-border pt-6 xl:hidden">
               <CopyPageButton />
               <ExplainMoreButton pageTitle={page.title} />
+              <div className="ml-auto">
+                <BackToTopButton />
+              </div>
             </div>
           </div>
 

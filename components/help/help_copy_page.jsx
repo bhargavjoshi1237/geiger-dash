@@ -2,7 +2,31 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, Clipboard } from "lucide-react";
+import { ArrowUp, Check, Clipboard } from "lucide-react";
+import { Button } from "@geiger/ui/button";
+
+// Back to the top of the page; drops the section hash so a reload stays there too.
+export function BackToTopButton() {
+  const toTop = () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      onClick={toTop}
+      aria-label="Back to top"
+      title="Back to top"
+      className="text-text-secondary hover:text-foreground"
+    >
+      <ArrowUp className="size-3.5" />
+    </Button>
+  );
+}
 
 // Copies the rendered article as plain text (e.g. to paste into an AI chat), with its URL.
 export function CopyPageButton() {
