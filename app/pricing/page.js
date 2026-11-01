@@ -10,42 +10,13 @@ import { displayFont } from "@/components/suite-landing/display_font";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from "@geiger/ui";
 import { getOrgEntitlements } from "@/lib/billing/entitlements";
 import { getUserPlan } from "@/lib/billing/store";
-
-const faqs = [
-  {
-    question: "What are main apps and tools?",
-    answer:
-      "Main apps run a whole area of work: Flow, Campaign, Events, Assets, Comms and Property. Tools are smaller apps that work alongside them: Forms, Grey, Docs, Office, Content and Pods. Every plan includes a set number of each, plus Notes. Extra main apps are $10/mo and extra tools $5/mo.",
-  },
-  {
-    question: "What do Light, Medium and Heavy mean?",
-    answer:
-      "They are presets for storage, AI credits, email and edge delivery. Light is what your plan already includes. Medium and Heavy add a fixed amount, and each one shows its price before you pick it.",
-  },
-  {
-    question: "Can I change my plan or apps later?",
-    answer:
-      "Yes. Add apps, people or usage at any time. When you upgrade, you only pay the difference from what you already pay. To move to a smaller plan, cancel your current plan first.",
-  },
-  {
-    question: "Is there a free trial?",
-    answer: "Yes. Basic is free for 15 days with no card required. The trial ends on its own and nothing is charged.",
-  },
-  {
-    question: "What is the Alpha tester plan?",
-    answer:
-      "While Geiger is in beta, testers get every app for $0 with 1 active project, 3 people, 5 GB storage, 25 GB transfer and 50 AI credits.",
-  },
-  {
-    question: "How does yearly billing work?",
-    answer: "Yearly costs 10 times the monthly price, so two months are free. Your whole setup is billed once a year.",
-  },
-];
+import { getPricing } from "@/lib/pricing/queries";
 
 export default async function PricingPage() {
   const supabase = await createClient();
-  const user = await getUser(supabase);
+  const [user, pricing] = await Promise.all([getUser(supabase), getPricing()]);
   const isAuthed = Boolean(user);
+  const { page } = pricing;
 
   // RLS-scoped orgs feed the checkout org picker; metadata gives each org's current-plan entitlements for the no-downgrade UI.
   let organizations = [];
@@ -79,9 +50,9 @@ export default async function PricingPage() {
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-20">
             <PublicPageHero
-              title="One suite, priced around your team."
+              title={page.heroTitle}
               titleClassName="[font-family:var(--font-display)]"
-              description="Choose a plan, then shape the apps, people and usage around your work. Every allowance and overage stays visible as you configure."
+              description={page.heroDescription}
             />
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -98,46 +69,59 @@ export default async function PricingPage() {
           </div>
 
           <PlanConfigurator
+            pricingConfig={pricing.config}
+            pricingVersionId={pricing.versionId}
             isAuthed={isAuthed}
             organizations={organizations}
             entitlementsByOrg={entitlementsByOrg}
             canStartTrial={canStartTrial}
           />
 
-          <BetaSignup isAuthed={isAuthed} organizations={organizations} entitlementsByOrg={entitlementsByOrg} />
+          {page.showBeta ? (
+            <BetaSignup
+              betaPlan={pricing.betaPlan}
+              isAuthed={isAuthed}
+              organizations={organizations}
+              entitlementsByOrg={entitlementsByOrg}
+            />
+          ) : null}
 
-          <section className="mt-24 grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16" aria-labelledby="faq-heading">
-            <div>
-              <h2 id="faq-heading" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] [font-family:var(--font-display)]">
-                How pricing works, in plain terms.
-              </h2>
-            </div>
-            <Accordion type="single" collapsible defaultValue="faq-0" className="border-t border-border">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={faq.question} value={`faq-${index}`} className="border-border last:border-b">
-                  <AccordionTrigger className="items-center gap-6 py-[18px] text-[15px] font-semibold hover:no-underline">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="max-w-[640px] pb-5 text-pretty text-sm leading-6 text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </section>
+          {page.showFaq && page.faqs.length ? (
+            <section className="mt-24 grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16" aria-labelledby="faq-heading">
+              <div>
+                <h2 id="faq-heading" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] [font-family:var(--font-display)]">
+                  {page.faqHeading}
+                </h2>
+              </div>
+              <Accordion type="single" collapsible defaultValue="faq-0" className="border-t border-border">
+                {page.faqs.map((faq, index) => (
+                  <AccordionItem key={faq.question} value={`faq-${index}`} className="border-border last:border-b">
+                    <AccordionTrigger className="items-center gap-6 py-[18px] text-[15px] font-semibold hover:no-underline">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="max-w-[640px] pb-5 text-pretty text-sm leading-6 text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </section>
+          ) : null}
 
-          <div className="mt-16 flex flex-col items-start justify-between gap-6 rounded-2xl border border-border bg-surface-subtle px-6 py-6 sm:flex-row sm:items-center sm:px-7">
-            <div>
-              <p className="text-[15px] font-semibold">Need more than Pro?</p>
-              <p className="mt-1 text-sm text-muted-foreground">Custom limits, security reviews, data residency and dedicated support.</p>
+          {page.showContact ? (
+            <div className="mt-16 flex flex-col items-start justify-between gap-6 rounded-2xl border border-border bg-surface-subtle px-6 py-6 sm:flex-row sm:items-center sm:px-7">
+              <div>
+                <p className="text-[15px] font-semibold">{page.contactTitle}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{page.contactDescription}</p>
+              </div>
+              <Button asChild variant="outline" className="shrink-0">
+                <a href={`mailto:${page.contactEmail}`}>
+                  Talk to us
+                  <ArrowRight className="size-4" />
+                </a>
+              </Button>
             </div>
-            <Button asChild variant="outline" className="shrink-0">
-              <a href="mailto:support@geiger.studio">
-                Talk to us
-                <ArrowRight className="size-4" />
-              </a>
-            </Button>
-          </div>
+          ) : null}
         </div>
       </main>
 

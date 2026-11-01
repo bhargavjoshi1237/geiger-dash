@@ -7,6 +7,7 @@ import { Badge, Button } from "@geiger/ui";
 import { getOrganizationProjects } from '@/lib/org/projects'
 import { getOrgEntitlements } from '@/lib/billing/entitlements'
 import { products as PRODUCT_CATALOG } from '@/lib/pricing/plans'
+import { getPricing } from '@/lib/pricing/queries'
 import { UsageScreen } from './usage-client'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,7 @@ const PRODUCT_BY_ID = new Map(PRODUCT_CATALOG.map((p) => [p.id, p]))
 
 export default async function OrganizationUsagePage({ params }) {
   const { ORGID } = await params
-  const { organization, projects, error } = await getOrganizationProjects(ORGID)
+  const [{ organization, projects, error }, pricing] = await Promise.all([getOrganizationProjects(ORGID), getPricing()])
 
   const entitlements = organization ? getOrgEntitlements(organization) : null
   const projectCount = projects?.length || 0
@@ -94,7 +95,10 @@ export default async function OrganizationUsagePage({ params }) {
             {error || 'Organization not found.'}
           </div>
         ) : (
-          <UsageScreen usage={usage} />
+          <UsageScreen
+            usage={usage}
+            pricing={{ products: pricing.products, productCategories: pricing.productCategories, usageRates: pricing.usageRates }}
+          />
         )}
       </main>
       <Footer />

@@ -7,7 +7,8 @@ import { PaymentHistory } from "@/components/billing/payment-history";
 import { Button, ScreenHeader, SectionCard, cn } from "@geiger/ui";
 import { createClient } from "@/utils/supabase/server";
 import { requireUser } from "@/supabase/user/getUser";
-import { getPlan, planPrice, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { getPricing, getPricingForVersion } from "@/lib/pricing/queries";
 import { getUserPlan, listPurchases } from "@/lib/billing/store";
 import { derivePlanState } from "@/lib/billing/plan_state";
 
@@ -44,9 +45,9 @@ function formatDate(value) {
   );
 }
 
-function planLabel(planKey) {
+function planLabel(pricing, planKey) {
   if (!planKey) return "—";
-  const plan = getPlan(planKey);
+  const plan = pricing.getPlan(planKey);
   return plan?.id === planKey ? plan.name : planKey.charAt(0).toUpperCase() + planKey.slice(1);
 }
 
@@ -156,7 +157,7 @@ function RenewButton({ label = "Renew plan" }) {
 }
 
 // The page's focal point: plan and price set large, with a footer that changes with the plan's phase.
-function PlanPanel({ plan, planState, phase, progress, date, price, productNames: names }) {
+function PlanPanel({ plan, planName, planState, phase, progress, date, price, productNames: names }) {
   const needsRenewal = planState.phase === "grace" || planState.phase === "expired";
   const isGrace = planState.phase === "grace";
   const tint = planTint(planState, progress);
@@ -196,7 +197,7 @@ function PlanPanel({ plan, planState, phase, progress, date, price, productNames
             {phase.label} plan
           </p>
           <h2 className="mt-3 text-5xl font-semibold leading-none tracking-[-0.045em] sm:text-6xl">
-            {planLabel(plan.planKey)}
+            {planName}
           </h2>
           {names.length ? (
             <p className="mt-4 max-w-md text-sm text-muted-foreground">
@@ -209,7 +210,7 @@ function PlanPanel({ plan, planState, phase, progress, date, price, productNames
           <PriceFigure cents={price.totalCents} currency={plan.currency} interval={plan.billingInterval} />
           <PriceBreakdown
             price={price}
-            planName={planLabel(plan.planKey)}
+            planName={planName}
             productCount={names.length}
             currency={plan.currency}
           />
@@ -280,7 +281,7 @@ export default async function BillingPage() {
   const supabase = await createClient();
   const user = await requireUser(supabase, "/login?next=/billing");
 
-  const [plan, purchases] = await Promise.all([getUserPlan(user.id), listPurchases(user.id)]);
+  const [plan, purchases, livePricing] = await Promise.all([getUserPlan(user.id), listPurchases(user.id), getPricing()]);
   const planState = derivePlanState(plan);
   const phase = PHASE[planState.phase] || PHASE.none;
 
@@ -294,8 +295,10 @@ export default async function BillingPage() {
   const totalSpent = completed.reduce((sum, p) => sum + (p.amountTotal || 0), 0);
   // Priced from the plan's configuration: user_plan.amount_total can hold the last upgrade delta, not the plan price.
   const currentPurchase = purchases.find((p) => p.id === plan?.currentPurchaseId);
+  // A plan stays priced and named by the version it was bought under; a trial or beta has no purchase, so it reads the live one.
+  const boughtUnder = (currentPurchase && (await getPricingForVersion(currentPurchase.pricingVersionId))) || livePricing;
   const price = plan
-    ? planPrice({
+    ? boughtUnder.planPrice({
         planId: plan.planKey,
         billingInterval: plan.billingInterval,
         selectedProducts: planProducts,
@@ -308,7 +311,7 @@ export default async function BillingPage() {
     return {
       id: purchase.id,
       date: formatDate(purchase.createdAt),
-      plan: planLabel(purchase.planKey),
+      plan: planLabel(livePricing, purchase.planKey),
       interval: purchase.billingInterval,
       products: productNames(purchase.products),
       amount: formatUsd(purchase.amountTotal, purchase.currency),
@@ -339,6 +342,7 @@ export default async function BillingPage() {
         <div className="mt-10">
           <PlanPanel
             plan={plan}
+            planName={planLabel(boughtUnder, plan.planKey)}
             planState={planState}
             phase={phase}
             progress={progress}

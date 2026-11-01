@@ -22,15 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@geiger/ui";
-import {
-  plans,
-  products,
-  productCategories,
-  metricConfig,
-  computeEstimate,
-  getPlanRank,
-  YEARLY_MULTIPLIER,
-} from "@/lib/pricing/plans";
+import { createPricing, metricConfig, products as CATALOG } from "@/lib/pricing/plans";
 // The catalog is icon-free so the server can import it; icons live beside it.
 import { PRODUCT_ICONS, FallbackProductIcon } from "@/lib/pricing/product-icons";
 import { AVAILABLE_PRODUCT_APPS } from "@/lib/org/product-apps";
@@ -38,47 +30,50 @@ import { createCheckoutAction } from "@/app/pricing/actions";
 import { startTrialAction } from "@/app/pricing/trial-actions";
 import { trackCheckoutStarted, trackTrialStarted } from "@/lib/analytics/funnel";
 
-const BILLING_TABS = [
-  { label: "Monthly", value: "month" },
-  { label: "Yearly · 2 months free", value: "year" },
-];
-
 // Main apps and tools are the app allowance categories; Notes (cherry) is always included.
 const APP_GROUPS = [
   { id: "core", name: "Main apps", blurb: "run a whole area of work", unit: "main apps", extra: ["extra main app", "extra main apps"] },
   { id: "addon", name: "Tools", blurb: "smaller apps that work alongside them", unit: "tools", extra: ["extra tool", "extra tools"] },
 ];
 const EXTRA_CATEGORIES = ["security", "domains", "email"];
-const APP_IDS = new Set(products.filter((p) => APP_GROUPS.some((g) => g.id === p.category)).map((p) => p.id));
-const EXTRA_PRODUCTS = products.filter((p) => EXTRA_CATEGORIES.includes(p.category));
-const EXTRA_IDS = new Set(EXTRA_PRODUCTS.map((p) => p.id));
+const APP_IDS = new Set(CATALOG.filter((p) => APP_GROUPS.some((g) => g.id === p.category)).map((p) => p.id));
+const EXTRA_IDS = new Set(CATALOG.filter((p) => EXTRA_CATEGORIES.includes(p.category)).map((p) => p.id));
 const AVAILABLE_APP_IDS = new Set(AVAILABLE_PRODUCT_APPS.map((app) => app.id));
-const CATEGORY_RATES = Object.fromEntries(productCategories.map((c) => [c.id, c.rate]));
 const METRIC_MAX = Object.fromEntries(metricConfig.map((m) => [m.id, m.max]));
 
 const TEAM = [
-  { id: "projects", label: "Active projects", help: "Projects running at the same time under seleted organization.", allowance: "projectAllowance", rate: 5, cost: "projectCost" },
-  { id: "seats", label: "People", help: "Everyone who signs in to your workspace.", allowance: "seatAllowance", rate: 1, cost: "seatCost" },
+  { id: "projects", label: "Active projects", help: "Projects running at the same time under seleted organization.", allowance: "projectAllowance", rate: "project", cost: "projectCost" },
+  { id: "seats", label: "People", help: "Everyone who signs in to your workspace.", allowance: "seatAllowance", rate: "collaborator", cost: "seatCost" },
 ];
 
-// Light/Medium/Heavy add a fixed amount on top of what the plan (or the org) already has.
+// Light/Medium/Heavy add a fixed amount on top of what the plan (or the org) already has; pricing.usageSteps holds the Medium and Heavy amounts.
 const USAGE_LEVELS = ["Light", "Medium", "Heavy"];
-const USAGE_PRESETS = [
-  { id: "storage", label: "Storage", help: "Files across every app. Transfer is included at 5× storage.", add: [0, 50, 250], allowance: "storageAllowance", cost: "storageCost" },
-  { id: "aiCredits", label: "AI credits", help: "Shared by AI features in every app.", add: [0, 1000, 5000], allowance: "aiAllowance", cost: "aiCost" },
-  { id: "emails", label: "Emails sent", help: "One monthly pool for every app that sends email.", add: [0, 10000, 100000], allowance: "emailAllowance", cost: "emailCost" },
-  { id: "edgeData", label: "Edge delivery", help: "Serve files from 119 locations worldwide.", add: [0, 100, 1000], allowance: null, cost: "edgeDataCost" },
+const USAGE_ROWS = [
+  { id: "storage", label: "Storage", help: "Files across every app. Transfer is included at 5× storage.", allowance: "storageAllowance", cost: "storageCost" },
+  { id: "aiCredits", label: "AI credits", help: "Shared by AI features in every app.", allowance: "aiAllowance", cost: "aiCost" },
+  { id: "emails", label: "Emails sent", help: "One monthly pool for every app that sends email.", allowance: "emailAllowance", cost: "emailCost" },
+  { id: "edgeData", label: "Edge delivery", help: "Serve files from 119 locations worldwide.", allowance: null, cost: "edgeDataCost" },
 ];
 const LIGHT_USAGE = { storage: 0, aiCredits: 0, emails: 0, edgeData: 0 };
 
 const NotesIcon = PRODUCT_ICONS.notes;
 
 // Starter selection when the org has no purchased plan yet.
-const DEFAULT_CONFIG = { planId: "plus", apps: ["flow", "campaign", "forms", "grey"], extras: [], projects: 3, seats: 12 };
+const STARTER_PLAN_ID = "plus";
+const STARTER_APPS = ["flow", "campaign", "forms", "grey"];
 
-// A subscribed org opens on what it already owns, so those selections act as floors.
-function configForEntitlements(entitlements) {
-  if (!entitlements?.hasSubscription || entitlements.isBeta) return DEFAULT_CONFIG;
+// A new buyer opens on the starter plan with nothing extra; a subscribed org opens on what it already owns, so those selections act as floors.
+function configForEntitlements(entitlements, plans) {
+  if (!entitlements?.hasSubscription || entitlements.isBeta) {
+    const starter = plans.find((p) => p.id === STARTER_PLAN_ID);
+    return {
+      planId: starter.id,
+      apps: appsForPlan(starter, STARTER_APPS, []),
+      extras: [],
+      projects: starter.projectAllowance,
+      seats: starter.seatAllowance,
+    };
+  }
   const owned = entitlements.unlockedProducts;
   return {
     planId: entitlements.planKey,
@@ -92,7 +87,7 @@ function configForEntitlements(entitlements) {
 // Fills each app group to exactly the plan's allowance: owned apps, then current picks, then launched apps in catalog order.
 function appsForPlan(plan, current, owned) {
   return APP_GROUPS.flatMap((group) => {
-    const groupIds = products.filter((p) => p.category === group.id).map((p) => p.id);
+    const groupIds = CATALOG.filter((p) => p.category === group.id).map((p) => p.id);
     const ownedInGroup = owned.filter((id) => groupIds.includes(id));
     const candidates = new Set([
       ...ownedInGroup,
@@ -204,13 +199,27 @@ function Stepper({ label, value, minimum, maximum, onChange }) {
 }
 
 export function PlanConfigurator({
+  pricingConfig,
+  pricingVersionId = null,
   isAuthed,
   organizations = [],
   entitlementsByOrg = {},
   canStartTrial = false,
 }) {
   const router = useRouter();
-  const initialConfig = configForEntitlements(entitlementsByOrg[organizations[0]?.id]);
+  const pricing = useMemo(() => createPricing(pricingConfig, pricingVersionId), [pricingConfig, pricingVersionId]);
+  const { plans, products, productCategories, usageRates, usageSteps, yearlyMultiplier, trialDays, page, computeEstimate, getPlan, getPlanRank } = pricing;
+  const usagePresets = useMemo(() => USAGE_ROWS.map((row) => ({ ...row, add: [0, ...usageSteps[row.id]] })), [usageSteps]);
+  const extraProducts = useMemo(() => products.filter((p) => EXTRA_CATEGORIES.includes(p.category)), [products]);
+  const categoryRates = useMemo(() => Object.fromEntries(productCategories.map((c) => [c.id, c.rate])), [productCategories]);
+  const monthsFree = 12 - yearlyMultiplier;
+  const monthsFreeLabel = monthsFree > 0 ? plural(monthsFree, "month", "months") : null;
+  const billingTabs = [
+    { label: "Monthly", value: "month" },
+    { label: monthsFreeLabel ? `Yearly · ${monthsFreeLabel} free` : "Yearly", value: "year" },
+  ];
+  const trialPlanName = getPlan("basic").name;
+  const initialConfig = configForEntitlements(entitlementsByOrg[organizations[0]?.id], plans);
   const [billing, setBilling] = useState("month");
   const [selectedOrgId, setSelectedOrgId] = useState(organizations[0]?.id || "");
   const [planId, setPlanId] = useState(initialConfig.planId);
@@ -229,7 +238,7 @@ export function PlanConfigurator({
   const ownedMetrics = hasSubscription ? entitlements.currentMetrics : null;
   const plan = plans.find((p) => p.id === planId) || plans[0];
   const isYearly = billing === "year";
-  const multiplier = isYearly ? YEARLY_MULTIPLIER : 1;
+  const multiplier = isYearly ? yearlyMultiplier : 1;
   const per = isYearly ? "/yr" : "/mo";
 
   const isDowngrade = (p) => hasSubscription && getPlanRank(p.id) < entitlements.planRank;
@@ -238,7 +247,7 @@ export function PlanConfigurator({
 
   // Switching organization re-opens the configurator on that org's own plan.
   function selectOrg(orgId) {
-    const config = configForEntitlements(entitlementsByOrg[orgId]);
+    const config = configForEntitlements(entitlementsByOrg[orgId], plans);
     setSelectedOrgId(orgId);
     setPlanId(config.planId);
     setApps(config.apps);
@@ -268,7 +277,7 @@ export function PlanConfigurator({
   // Projects/seats below the allowance are sent at the allowance so a purchase records the plan's full grant.
   const metrics = useMemo(() => {
     const usageMetrics = Object.fromEntries(
-      USAGE_PRESETS.map((preset) => [preset.id, usageMetric(preset, plan, ownedMetrics, usage[preset.id])]),
+      usagePresets.map((preset) => [preset.id, usageMetric(preset, plan, ownedMetrics, usage[preset.id])]),
     );
     return {
       projects: Math.max(team.projects, plan.projectAllowance),
@@ -276,7 +285,7 @@ export function PlanConfigurator({
       ...usageMetrics,
       bandwidth: Math.max(usageMetrics.storage * 5, ownedMetrics?.bandwidth ?? 0),
     };
-  }, [plan, ownedMetrics, team, usage]);
+  }, [plan, ownedMetrics, team, usage, usagePresets]);
 
   const selectedProducts = useMemo(
     () => Array.from(new Set([...ownedProducts, ...apps, ...extras, "notes"])),
@@ -285,13 +294,11 @@ export function PlanConfigurator({
 
   const estimate = useMemo(
     () => computeEstimate({ planId: plan.id, selectedProducts, metrics }),
-    [plan.id, selectedProducts, metrics],
+    [computeEstimate, plan.id, selectedProducts, metrics],
   );
 
   // "Due today" mirrors the server's delta charge: only the increase over what the org already pays is billed.
-  const currentMonthlyTotal = hasSubscription
-    ? entitlements.amountTotal / 100 / (entitlements.billingInterval === "year" ? YEARLY_MULTIPLIER : 1)
-    : 0;
+  const currentMonthlyTotal = hasSubscription ? entitlements.monthlyTotal : 0;
   const dueToday = Math.max(0, estimate.total - currentMonthlyTotal) * multiplier;
   const noChange = hasSubscription && dueToday <= 0;
 
@@ -309,19 +316,19 @@ export function PlanConfigurator({
     if (cherry) push(plural(cherry.billable, "extra app", "extra apps"), cherry.cost);
     push(plural(metrics.projects - plan.projectAllowance, "extra project", "extra projects"), estimate.projectCost);
     push(plural(metrics.seats - plan.seatAllowance, "extra person", "extra people"), estimate.seatCost);
-    for (const preset of USAGE_PRESETS) {
+    for (const preset of usagePresets) {
       const included = usageIncluded(preset, plan);
       const amount = usageAmount(preset.id, metrics[preset.id] - included);
       push(`${preset.label} ${included > 0 ? "+" : ""}${amount}`, estimate[preset.cost]);
     }
     push(`Transfer +${usageAmount("storage", metrics.bandwidth - metrics.storage * 5)}`, estimate.bandwidthCost);
     // Extras carry no plan allowance, so each selected one is billed at its own price.
-    for (const product of EXTRA_PRODUCTS) {
+    for (const product of extraProducts) {
       if (product.comingSoon || !selectedProducts.includes(product.id)) continue;
-      push(product.shortName ?? product.name, product.price ?? CATEGORY_RATES[product.category]);
+      push(product.shortName ?? product.name, product.price ?? categoryRates[product.category]);
     }
     return out;
-  }, [estimate, metrics, plan, selectedProducts]);
+  }, [estimate, metrics, plan, selectedProducts, usagePresets, extraProducts, categoryRates]);
 
   async function handleCheckout() {
     if (!isAuthed) {
@@ -345,6 +352,7 @@ export function PlanConfigurator({
         metrics,
         isYearly,
         organizationId: selectedOrgId,
+        pricingVersionId,
       });
       if (result?.url) {
         trackCheckoutStarted({ planId: plan.id, isYearly, productCount: selectedProducts.length });
@@ -353,6 +361,9 @@ export function PlanConfigurator({
       }
       if (result?.error === "auth") {
         router.push(`/login?next=${encodeURIComponent("/pricing")}`);
+      } else if (result?.error === "price_changed") {
+        toast.error("Our pricing was just updated. Check the new total, then continue.");
+        router.refresh();
       } else if (result?.error === "invalid_org") {
         toast.error("You don't have access to that organization.");
       } else if (result?.error === "stripe_unconfigured") {
@@ -397,7 +408,7 @@ export function PlanConfigurator({
       const result = await startTrialAction({ organizationId: trialOrgId });
       if (result?.ok) {
         trackTrialStarted();
-        toast.success("Your 15-day Basic trial has started.");
+        toast.success(`Your ${trialDays}-day ${trialPlanName} trial has started.`);
         router.push("/billing");
         return;
       }
@@ -419,7 +430,7 @@ export function PlanConfigurator({
     }
   }
 
-  const showTrial = !hasSubscription && (!isAuthed || canStartTrial);
+  const showTrial = page.showTrial && !hasSubscription && (!isAuthed || canStartTrial);
   const ctaLabel = hasSubscription
     ? noChange
       ? "No Balance Change"
@@ -435,18 +446,18 @@ export function PlanConfigurator({
     <>
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
         <div className="max-w-[680px]">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Choose a plan</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{page.plansEyebrow}</p>
           <h2
             id="plans-heading"
             className="mt-3 text-balance text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] [font-family:var(--font-display)]"
           >
-            Pick a plan. Add only what you need.
+            {page.plansHeading}
           </h2>
           <p className="mt-[18px] max-w-[600px] text-pretty text-base leading-[26px] text-muted-foreground">
-            Each plan includes a set of apps, people and storage. Anything past that has one fixed price, and the receipt shows exactly what checkout charges.
+            {page.plansDescription}
           </p>
         </div>
-        <SegmentedTabs tabs={BILLING_TABS} value={billing} onChange={setBilling} className="shrink-0" />
+        <SegmentedTabs tabs={billingTabs} value={billing} onChange={setBilling} className="shrink-0" />
       </div>
 
       <div id="plan-builder" className="mt-12 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_352px]">
@@ -516,7 +527,7 @@ export function PlanConfigurator({
                     onClick={openTrial}
                     className="rounded-sm font-medium text-foreground underline underline-offset-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    Try Basic free for 15 days
+                    Try {trialPlanName} free for {trialDays} days
                   </button>
                   — no card needed.
                 </p>
@@ -528,7 +539,7 @@ export function PlanConfigurator({
               <div className="flex flex-col gap-5">
                 {APP_GROUPS.map((group) => {
                   const allowance = plan.productAllowances[group.id] ?? 0;
-                  const rate = CATEGORY_RATES[group.id];
+                  const rate = categoryRates[group.id];
                   const chosen = apps.filter((id) => products.some((p) => p.id === id && p.category === group.id));
                   const used = chosen.length;
                   return (
@@ -625,7 +636,7 @@ export function PlanConfigurator({
                       </div>
                       <div className="flex items-center justify-between gap-3 border-t border-border pt-2.5 text-xs">
                         <span className="text-muted-foreground">
-                          {included} included, then ${item.rate}/mo each
+                          {included} included, then {money(usageRates[item.rate])}/mo each
                         </span>
                         <span className={cn("font-mono", cost > 0 ? "text-foreground" : "text-muted-foreground")}>
                           {cost > 0 ? `+${money(cost * multiplier)}${per}` : "Included"}
@@ -644,7 +655,7 @@ export function PlanConfigurator({
                 hint={hasSubscription ? "Light keeps what you have today. Prices are per month." : "Light is what your plan includes. Prices are per month."}
               />
               <div className="-mt-2.5">
-                {USAGE_PRESETS.map((preset, index) => {
+                {usagePresets.map((preset, index) => {
                   const included = usageIncluded(preset, plan);
                   return (
                     <div
@@ -697,12 +708,12 @@ export function PlanConfigurator({
             <section className="p-5 sm:p-6" aria-label="Extras">
               <SectionHeading step={5} title="Extras" hint="Optional. Not included in any plan." />
               <div className="grid gap-2 sm:grid-cols-2">
-                {EXTRA_PRODUCTS.map((product) => {
+                {extraProducts.map((product) => {
                   const Icon = PRODUCT_ICONS[product.id] ?? FallbackProductIcon;
                   const owned = isOwned(product.id);
                   const soon = Boolean(product.comingSoon) && !owned;
                   const on = owned || extras.includes(product.id);
-                  const price = product.price ?? CATEGORY_RATES[product.category];
+                  const price = product.price ?? categoryRates[product.category];
                   return (
                     <button
                       key={product.id}
@@ -785,7 +796,11 @@ export function PlanConfigurator({
               <span className="font-mono text-xs text-muted-foreground">{per}</span>
             </div>
             <p className="mt-2.5 text-xs leading-[18px] text-muted-foreground">
-              {isYearly ? "Yearly is 10× the monthly price — two months free." : "Switch to yearly and get two months free."}
+              {isYearly
+                ? `Yearly is ${yearlyMultiplier}× the monthly price${monthsFreeLabel ? ` — ${monthsFreeLabel} free` : ""}.`
+                : monthsFreeLabel
+                  ? `Switch to yearly and get ${monthsFreeLabel} free.`
+                  : "Switch to yearly to pay once a year."}
             </p>
           </div>
 
@@ -873,9 +888,9 @@ export function PlanConfigurator({
       <Dialog open={trialOpen} onOpenChange={setTrialOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Start your 15-day free trial</DialogTitle>
+            <DialogTitle>Start your {trialDays}-day free trial</DialogTitle>
             <DialogDescription>
-              Full Basic access for 15 days. No card required — we won&apos;t charge you.
+              Full {trialPlanName} access for {trialDays} days. No card required — we won&apos;t charge you.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
@@ -905,7 +920,7 @@ export function PlanConfigurator({
             )}
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
-                <Check className="size-3.5 text-foreground" /> 15 days of Basic access
+                <Check className="size-3.5 text-foreground" /> {trialDays} days of {trialPlanName} access
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-3.5 text-foreground" /> No credit card required

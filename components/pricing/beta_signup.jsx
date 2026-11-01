@@ -36,8 +36,13 @@ const ERRORS = {
 const betaAppsFor = (entitlements) => (entitlements?.isBeta ? entitlements.unlockedProducts : []);
 
 // The pricing page's beta strip; "Join the Alpha" opens an app picker that puts the org on the free Alpha tester plan.
-export function BetaSignup({ isAuthed = false, organizations = [], entitlementsByOrg = {} }) {
+export function BetaSignup({ betaPlan, isAuthed = false, organizations = [], entitlementsByOrg = {} }) {
   const router = useRouter();
+  const count = (value, one, many) => `${value} ${value === 1 ? one : many}`;
+  const projects = count(betaPlan.projectAllowance, "project", "projects");
+  const people = count(betaPlan.seatAllowance, "person", "people");
+  const storage = `${betaPlan.storageAllowance} GB storage`;
+  const aiCredits = `${betaPlan.aiAllowance} AI credits`;
   const [open, setOpen] = useState(false);
   const [orgId, setOrgId] = useState(organizations[0]?.id || "");
   const [apps, setApps] = useState(() => betaAppsFor(entitlementsByOrg[organizations[0]?.id]));
@@ -100,8 +105,8 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
     <>
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-dashed border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <p className="flex flex-col gap-1 text-sm sm:flex-row sm:items-baseline sm:gap-3.5">
-          <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">Alpha tester</span>
-          Every app for $0 while the beta runs 1 project, 3 people, 5 GB storage, 50 AI credits.
+          <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">{betaPlan.name}</span>
+          Every app for $0 while the beta runs: {projects}, {people}, {storage}, {aiCredits}.
         </p>
         <button
           type="button"
@@ -119,8 +124,8 @@ export function BetaSignup({ isAuthed = false, organizations = [], entitlementsB
             <DialogHeader>
               <DialogTitle>Join the Geiger beta</DialogTitle>
               <DialogDescription>
-                Pick the apps you want. They&apos;re free while the beta runs, with 1 project, 3 people, 5 GB storage
-                and 50 AI credits.
+                Pick the apps you want. They&apos;re free while the beta runs, with {projects}, {people}, {storage} and{" "}
+                {aiCredits}.
               </DialogDescription>
             </DialogHeader>
 

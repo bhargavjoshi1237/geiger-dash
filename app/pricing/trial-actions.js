@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { startTrial } from "@/lib/billing/store";
 
-// Starts a cardless 15-day Basic trial for the signed-in user, applied to the
+// Starts a cardless Basic trial for the signed-in user, applied to the
 // chosen organization. No Stripe involved. Returns { ok } on success or { error }
 // the client maps to a toast/redirect.
 export async function startTrialAction({ organizationId } = {}) {

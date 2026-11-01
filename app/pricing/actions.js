@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { getStripe, isStripeConfigured } from "@/lib/stripe/server";
-import { computeEstimate, getPlanRank, YEARLY_MULTIPLIER, products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { products as PRODUCT_CATALOG } from "@/lib/pricing/plans";
+import { getLivePricing } from "@/lib/pricing/queries";
 import { recordPendingCheckout } from "@/lib/billing/store";
 import { getOrgEntitlements } from "@/lib/billing/entitlements";
 
@@ -36,11 +37,17 @@ export async function createCheckoutAction(payload = {}) {
 
   if (!isStripeConfigured()) return { error: "stripe_unconfigured" };
 
-  const { planId, selectedProducts = [], metrics = {}, isYearly = false, organizationId = null } = payload;
+  const { planId, selectedProducts = [], metrics = {}, isYearly = false, organizationId = null, pricingVersionId = null } = payload;
+
+  // Never guess a price: an unreadable version refuses the checkout, and a buyer looking at an older version refreshes instead of being charged a total they didn't see.
+  const pricing = await getLivePricing();
+  if (!pricing) return { error: "session_failed" };
+  if (pricingVersionId !== pricing.versionId) return { error: "price_changed" };
+  const { computeEstimate, getPlanRank, yearlyMultiplier } = pricing;
 
   // Coming-soon catalog items aren't purchasable yet — drop them so a tampered
   // payload can't buy an unbuilt add-on (e.g. the "Own domain" product).
-  const COMING_SOON = new Set(PRODUCT_CATALOG.filter((p) => p.comingSoon).map((p) => p.id));
+  const COMING_SOON = new Set(pricing.products.filter((p) => p.comingSoon).map((p) => p.id));
   const purchasableProducts = (Array.isArray(selectedProducts) ? selectedProducts : []).filter(
     (id) => !COMING_SOON.has(id),
   );
@@ -75,14 +82,12 @@ export async function createCheckoutAction(payload = {}) {
   }
 
   const { selectedPlan, total } = computeEstimate({ planId, selectedProducts: purchasableProducts, metrics });
-  const multiplier = isYearly ? YEARLY_MULTIPLIER : 1;
+  const multiplier = isYearly ? yearlyMultiplier : 1;
 
   // Charge only the incremental difference over what the org already paid —
   // normalize both totals to a monthly figure before comparing so switching
   // billing interval (monthly <-> yearly) mid-upgrade can't skew the delta.
-  const currentMonthlyTotal = hasPaidPlan
-    ? entitlements.amountTotal / 100 / (entitlements.billingInterval === "year" ? YEARLY_MULTIPLIER : 1)
-    : 0;
+  const currentMonthlyTotal = hasPaidPlan ? entitlements.monthlyTotal : 0;
   const deltaMonthly = Math.max(0, total - currentMonthlyTotal);
   const amountCents = Math.round(deltaMonthly * multiplier * 100);
 
@@ -154,6 +159,7 @@ export async function createCheckoutAction(payload = {}) {
       metrics,
       organizationId,
       customerEmail: user.email || null,
+      pricingVersionId: pricing.versionId,
     });
 
     return { url: session.url };

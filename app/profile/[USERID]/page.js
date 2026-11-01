@@ -9,7 +9,7 @@ import { getUserOrganizations } from '@/lib/org/membership'
 import { avatarUrlForUser } from '@/lib/avatar-url'
 import { getUserPlan, listPurchases } from '@/lib/billing/store'
 import { derivePlanState } from '@/lib/billing/plan_state'
-import { getPlan, planPrice } from '@/lib/pricing/plans'
+import { getPricing, getPricingForVersion } from '@/lib/pricing/queries'
 import { lastUsedByClient, listConnections } from '@/lib/mcp/connections'
 import { ProfileClient } from './profile-client'
 
@@ -86,14 +86,18 @@ export default async function ProfilePage({ params }) {
   const { organizations, error: orgError } = await getUserOrganizations(supabase, user.id)
   const organizationIds = organizations.map((organization) => organization.id)
 
-  const [projectCount, plan, purchases, invites, mcpConnections, mcpLastUsed] = await Promise.all([
+  const [projectCount, plan, purchases, invites, mcpConnections, mcpLastUsed, livePricing] = await Promise.all([
     countProjects(supabase, organizationIds),
     getUserPlan(user.id),
     listPurchases(user.id),
     listPendingInvites(user.email),
     listConnections(supabase, user.id),
     lastUsedByClient(supabase, user.id),
+    getPricing(),
   ])
+  // A plan stays priced and named by the version it was bought under; a trial or beta has no purchase, so it reads the live one.
+  const currentPurchase = purchases.find((purchase) => purchase.id === plan?.currentPurchaseId)
+  const boughtUnder = (currentPurchase && (await getPricingForVersion(currentPurchase.pricingVersionId))) || livePricing
 
   const connections = mcpConnections.map((connection) => ({
     ...connection,
@@ -129,15 +133,15 @@ export default async function ProfilePage({ params }) {
 
   const billing = {
     planKey: plan?.planKey || null,
-    planName: plan?.planKey ? getPlan(plan.planKey)?.name || plan.planKey : null,
+    planName: plan?.planKey ? boughtUnder.getPlan(plan.planKey)?.name || plan.planKey : null,
     billingInterval: plan?.billingInterval || null,
     // The plan's real price, not user_plan.amount_total (which can hold the last upgrade delta).
     amountTotal: plan
-      ? planPrice({
+      ? boughtUnder.planPrice({
           planId: plan.planKey,
           billingInterval: plan.billingInterval,
           selectedProducts: plan.products,
-          metrics: purchases.find((purchase) => purchase.id === plan.currentPurchaseId)?.metrics || {},
+          metrics: currentPurchase?.metrics || {},
         }).totalCents
       : 0,
     currency: plan?.currency || 'usd',
@@ -155,7 +159,7 @@ export default async function ProfilePage({ params }) {
     recentPurchases: purchases.slice(0, 4).map((purchase) => ({
       id: purchase.id,
       planKey: purchase.planKey,
-      planName: purchase.planKey ? getPlan(purchase.planKey)?.name || purchase.planKey : '—',
+      planName: purchase.planKey ? livePricing.getPlan(purchase.planKey)?.name || purchase.planKey : '—',
       billingInterval: purchase.billingInterval,
       amountTotal: purchase.amountTotal,
       currency: purchase.currency,

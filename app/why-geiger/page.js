@@ -6,7 +6,7 @@ import Footer from "@/components/footer";
 import { GridBackdrop } from "@/components/grid-backdrop";
 import { displayFont } from "@/components/suite-landing/display_font";
 import { AVAILABLE_APP_COUNT, SUITE_APP_BY_ID, SUITE_APPS } from "@/components/suite-landing/suite_catalog";
-import { computeEstimate, plans } from "@/lib/pricing/plans";
+import { getPricing } from "@/lib/pricing/queries";
 import {
   AppChip,
   BodyNote,
@@ -44,11 +44,12 @@ export const metadata = {
 const money = (value) =>
   `$${value.toLocaleString("en-US", { minimumFractionDigits: value % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
 
-// Cheapest plan for the stack's apps, priced by the same function checkout charges with.
 const STACK_APP_IDS = [...new Set(STACK_TOOLS.map((tool) => tool.app))];
-const GEIGER = plans
-  .map((plan) => computeEstimate({ planId: plan.id, selectedProducts: STACK_APP_IDS, metrics: { seats: STACK_SEATS } }))
-  .reduce((best, estimate) => (best && best.total <= estimate.total ? best : estimate), null);
+// Cheapest plan for the stack's apps, priced by the same function checkout charges with.
+const cheapestStack = ({ plans, computeEstimate }) =>
+  plans
+    .map((plan) => computeEstimate({ planId: plan.id, selectedProducts: STACK_APP_IDS, metrics: { seats: STACK_SEATS } }))
+    .reduce((best, estimate) => (best && best.total <= estimate.total ? best : estimate), null);
 const STACK_TOTAL = STACK_TOOLS.reduce((sum, tool) => sum + tool.cost, 0);
 const COMING_COUNT = SUITE_APPS.length - AVAILABLE_APP_COUNT;
 const STACK_APP_NAMES = STACK_APP_IDS.map((id) => SUITE_APP_BY_ID[id].name).join(", ");
@@ -95,7 +96,7 @@ function Header() {
   );
 }
 
-function Reasons() {
+function Reasons({ geiger }) {
   return (
     <Section>
       <SectionHead title="Six Reasons Teams Switch" />
@@ -108,7 +109,7 @@ function Reasons() {
             <h3 className="mb-1.5 text-base leading-snug font-semibold text-foreground">{reason.title}</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
               {reason.body === "bill"
-                ? `Seven common tools cost a ${STACK_SEATS}-person team ${money(STACK_TOTAL)} a month. The same jobs on Geiger cost ${money(GEIGER.total)}.`
+                ? `Seven common tools cost a ${STACK_SEATS}-person team ${money(STACK_TOTAL)} a month. The same jobs on Geiger cost ${money(geiger.total)}.`
                 : reason.body}
             </p>
           </div>
@@ -217,7 +218,7 @@ function Audiences() {
   );
 }
 
-function Bill() {
+function Bill({ geiger }) {
   const ticks = [0, 40, 80, 120];
   return (
     <Section>
@@ -256,7 +257,7 @@ function Bill() {
         <div className={`${PANEL} flex min-w-0 flex-col gap-[18px] p-[22px]`}>
           {[
             { label: `${STACK_TOOLS.length} tools, monthly`, value: money(STACK_TOTAL) },
-            { label: `Same jobs on Geiger ${GEIGER.selectedPlan.name}`, sub: STACK_APP_NAMES, value: money(GEIGER.total) },
+            { label: `Same jobs on Geiger ${geiger.selectedPlan.name}`, sub: STACK_APP_NAMES, value: money(geiger.total) },
           ].map((line, index, lines) => (
             <div
               key={line.label}
@@ -273,9 +274,9 @@ function Bill() {
           ))}
           <div className="mt-auto flex flex-col gap-[18px]">
             <p className={`text-[12.5px] leading-relaxed ${FAINT}`}>
-              Geiger {GEIGER.selectedPlan.name} is {money(GEIGER.selectedPlan.price)} a month with{" "}
-              {GEIGER.selectedPlan.seatAllowance} collaborators included. This mix adds {money(GEIGER.productCost)} for extra
-              apps and {money(GEIGER.seatCost)} for extra collaborators. Other prices are US list prices with annual billing
+              Geiger {geiger.selectedPlan.name} is {money(geiger.selectedPlan.price)} a month with{" "}
+              {geiger.selectedPlan.seatAllowance} collaborators included. This mix adds {money(geiger.productCost)} for extra
+              apps and {money(geiger.seatCost)} for extra collaborators. Other prices are US list prices with annual billing
               where offered. Ticket fees are extra on every stack.
             </p>
             <Link
@@ -413,7 +414,9 @@ function GettingStarted() {
   );
 }
 
-export default function WhyGeigerPage() {
+export default async function WhyGeigerPage() {
+  const geiger = cheapestStack(await getPricing());
+
   return (
     <div className={`${displayFont.variable} flex min-h-screen w-full flex-col overflow-x-clip bg-background font-sans text-foreground`}>
       <GridBackdrop variant="subtle" />
@@ -422,10 +425,10 @@ export default function WhyGeigerPage() {
       <main className="relative z-10 px-4 pt-24 pb-20 sm:px-6 sm:pt-28">
         <div className="mx-auto w-full max-w-[1080px] text-[15px] leading-[1.65]">
           <Header />
-          <Reasons />
+          <Reasons geiger={geiger} />
           <Suite />
           <Audiences />
-          <Bill />
+          <Bill geiger={geiger} />
           <Alternatives />
           <Numbers />
           <Answers />

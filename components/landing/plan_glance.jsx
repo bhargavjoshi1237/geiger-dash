@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { plans } from "@/lib/pricing/plans";
+import { getPricing } from "@/lib/pricing/queries";
 import { DISPLAY } from "@/components/landing/landing_font";
 import { SectionHeading } from "@/components/landing/section_heading";
 import { SPECTRUM_GRADIENT } from "@/components/landing/suite_apps";
@@ -8,7 +8,8 @@ import { SPECTRUM_GRADIENT } from "@/components/landing/suite_apps";
 const appsIncluded = (plan) => Object.values(plan.productAllowances).reduce((sum, count) => sum + count, 0);
 
 // Plan summary read straight from the pricing catalog, so it can't drift from checkout.
-export function PlanGlance() {
+export async function PlanGlance() {
+  const { plans } = await getPricing();
   const startingPrice = Math.min(...plans.map((plan) => plan.price));
 
   return (

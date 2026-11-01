@@ -14,17 +14,6 @@ import { BarChart, Bar } from 'recharts'
 import { Card, Section } from '@/components/account/panel'
 import { FAMILY_TINT } from '@/components/billing/product-access'
 import { Badge, ChartContainer, ChartTooltip, ChartTooltipContent } from "@geiger/ui";
-import {
-  products as PRODUCT_CATALOG,
-  productCategories,
-  PROJECT_RATE,
-  COLLABORATOR_RATE,
-  STORAGE_RATE,
-  BANDWIDTH_RATE,
-  EDGE_DATA_RATE,
-  AI_RATE_PER_1000,
-  EMAIL_RATE_PER_1000,
-} from '@/lib/pricing/plans'
 import { FallbackProductIcon, PRODUCT_ICONS } from '@/lib/pricing/product-icons'
 import { cn } from '@/lib/utils'
 
@@ -77,9 +66,9 @@ function pct(used, allowance) {
 // Everything purchasable on the pricing screen, so the usage page doubles as a
 // catalog. Products carry their price (override or category rate); scale metrics
 // carry their per-unit rate.
-function purchasableItems(ownedIds) {
+function purchasableItems(ownedIds, { products, productCategories, usageRates: rates }) {
   const catRate = new Map(productCategories.map((c) => [c.id, c.rate]))
-  const productItems = PRODUCT_CATALOG.filter((p) => !p.comingSoon).map((p) => ({
+  const productItems = products.filter((p) => !p.comingSoon).map((p) => ({
     id: p.id,
     name: p.name,
     detail: p.detail,
@@ -88,13 +77,13 @@ function purchasableItems(ownedIds) {
     owned: ownedIds.includes(p.id),
   }))
   const scaleItems = [
-    { id: 'projects', name: 'Extra Active Projects', detail: 'Run more projects in parallel', price: `$${PROJECT_RATE} each` },
-    { id: 'seats', name: 'Extra Collaborators', detail: 'Add more teammates', price: `$${COLLABORATOR_RATE} each` },
-    { id: 'storage', name: 'Extra Storage', detail: 'More room for your files', price: `$${STORAGE_RATE}/GB` },
-    { id: 'bandwidth', name: 'Extra Bandwidth', detail: 'Serve more traffic', price: `$${BANDWIDTH_RATE}/GB` },
-    { id: 'edgeData', name: 'Edge / CDN Serving', detail: 'Global delivery across 119 PoPs', price: `$${EDGE_DATA_RATE}/GB` },
-    { id: 'aiCredits', name: 'AI Credits', detail: 'Power AI features', price: `$${AI_RATE_PER_1000}/1,000` },
-    { id: 'emails', name: 'Monthly Emails', detail: 'Global email purse for your org', price: `$${EMAIL_RATE_PER_1000}/1,000` },
+    { id: 'projects', name: 'Extra Active Projects', detail: 'Run more projects in parallel', price: `$${rates.project} each` },
+    { id: 'seats', name: 'Extra Collaborators', detail: 'Add more teammates', price: `$${rates.collaborator} each` },
+    { id: 'storage', name: 'Extra Storage', detail: 'More room for your files', price: `$${rates.storage}/GB` },
+    { id: 'bandwidth', name: 'Extra Bandwidth', detail: 'Serve more traffic', price: `$${rates.bandwidth}/GB` },
+    { id: 'edgeData', name: 'Edge / CDN Serving', detail: 'Global delivery across 119 PoPs', price: `$${rates.edgeData}/GB` },
+    { id: 'aiCredits', name: 'AI Credits', detail: 'Power AI features', price: `$${rates.aiPer1000}/1,000` },
+    { id: 'emails', name: 'Monthly Emails', detail: 'Global email purse for your org', price: `$${rates.emailPer1000}/1,000` },
   ]
   return { productItems, scaleItems }
 }
@@ -188,10 +177,10 @@ function ActivityChart({ title, used, allowance, suffix, faded }) {
   )
 }
 
-export function UsageScreen({ usage }) {
+export function UsageScreen({ usage, pricing }) {
   const metrics = buildMetrics(usage)
   const ownedIds = (usage.ownedProducts || []).map((p) => p.id)
-  const { productItems, scaleItems } = purchasableItems(ownedIds)
+  const { productItems, scaleItems } = purchasableItems(ownedIds, pricing)
 
   return (
     <div className="mt-8 flex flex-col gap-8">
