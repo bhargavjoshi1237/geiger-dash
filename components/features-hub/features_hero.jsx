@@ -55,7 +55,7 @@ export function FeaturesHero({ title, description }) {
         </div>
       </div>
 
-      <hgroup className="mx-auto mt- max-w-3xl px-4 text-center sm:mt-2">
+      <hgroup className="mx-auto max-w-3xl px-4 text-center">
         <h1 className="text-[2.6rem] leading-[1.05] font-semibold tracking-[-0.04em] text-balance text-foreground sm:text-[4rem] sm:leading-[1.06]">
           {words.map((word, index) => (
             <span key={index}>
@@ -66,7 +66,7 @@ export function FeaturesHero({ title, description }) {
             </span>
           ))}
         </h1>
-        <p className={`mx-auto mt-5 max-w-md text-base leading-7 text-balance text-muted-foreground sm:text-[1.0625rem] sm:leading-[1.6] ${styles.blurIn}`} style={{ "--delay": "1.6s" }}>
+        <p className={`mx-auto mt-5 max-w-md text-base sm:mt-[15px] leading-7 text-balance text-muted-foreground sm:text-[1.0625rem] sm:leading-[1.6] ${styles.blurIn}`} style={{ "--delay": "1.6s" }}>
           {description}
         </p>
       </hgroup>

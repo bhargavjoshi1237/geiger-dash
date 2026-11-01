@@ -25,8 +25,8 @@ export async function FeaturesHubPage({ product }) {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Header />
 
-      {/* pt-12 clears the fixed 48px header so the tile rows start flush under it, as on Linear. */}
-      <main className="flex-1 pt-12 pb-24">
+      {/* Clears the fixed 48px header: flush under it on mobile, 21px of air from sm up. */}
+      <main className="flex-1 pt-12 pb-24 sm:pt-[69px]">
         <FeaturesHero title={title} description={description} />
 
         <section aria-label="Features" className="mx-auto mt-20 w-full max-w-6xl px-4 sm:mt-32 sm:px-6">
