@@ -4,6 +4,7 @@
 import { SuiteHeader } from "@geiger/ui/suite-header";
 import { SUITE_PRODUCTS } from "@geiger/ui/suite-mega-menu";
 import { FileSignature, MessagesSquare } from "lucide-react";
+import { useProductBadges } from "@/lib/product-badges/client";
 
 // Dash lists Comms and Docs in the Products menu even though geiger-ui's default list dropped them; they slot in just before Property.
 const COMMS_AND_DOCS = [
@@ -19,5 +20,6 @@ const DASH_PRODUCTS = [...baseProducts.slice(0, insertAt), ...COMMS_AND_DOCS, ..
 
 // Client boundary for the shared header: product icons are components, so the list can't cross from the server <Header /> as a prop.
 export function DashSuiteHeader(props) {
-  return <SuiteHeader products={DASH_PRODUCTS} {...props} />;
+  const badges = useProductBadges();
+  return <SuiteHeader products={DASH_PRODUCTS} badges={badges} {...props} />;
 }
