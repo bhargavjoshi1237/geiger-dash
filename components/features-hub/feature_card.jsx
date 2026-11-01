@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { MOTIF_COMPONENTS } from "@/components/features-hub/motifs";
 import { useInView, useReducedMotion, useScramble } from "@/components/features-hub/motion";
 import styles from "@/components/features-hub/features_hub.module.css";
+import pageStyles from "@/components/product-pages/product_pages.module.css";
 
 // Linear's Security card trick: the tail of the line stays scrambled until the card is hovered.
 function ScrambledTail({ target, scrambled, decoded }) {
@@ -42,10 +43,7 @@ function Description({ text, scramble, decoded }) {
   );
 }
 
-// Motifs draw in the palette's primary text shade (--ink) and set text on it in the background shade.
-const INK = { "--ink": "var(--foreground)", "--ink-fg": "var(--background)", "--halo": "var(--surface-subtle)" };
-
-// One feature in the Linear-style grid: an animated motif behind, the eyebrow and line in front.
+// One feature in the Linear-style grid: a spotlit render of the product playing its moment, the eyebrow and line in front.
 export function FeatureCard({ href, title, description, motif, variant, seed, scramble, wide }) {
   const ref = useRef(null);
   const inView = useInView(ref);
@@ -63,33 +61,20 @@ export function FeatureCard({ href, title, description, motif, variant, seed, sc
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
       className={cn(
-        "group relative isolate flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-2xl bg-surface-subtle p-6 transition-[filter,scale] duration-200 ease-out hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.99] sm:p-8",
-        wide && "sm:col-span-2 sm:min-h-[23rem]",
+        "group relative isolate flex min-h-[22rem] flex-col justify-end overflow-hidden rounded-2xl bg-background p-6 transition-[filter,scale] min-[480px]:min-h-[26rem] sm:min-h-[29rem] duration-200 ease-out hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.99] sm:p-8",
+        wide && "md:col-span-2 md:min-h-[26rem]",
         styles.card,
       )}
-      style={INK}
     >
+      <div aria-hidden="true" className={cn("absolute inset-0 -z-20", pageStyles.spotlight)} />
       <div
         aria-hidden="true"
-        className={cn("absolute inset-x-0 top-0 -z-10 h-[17rem]", wide && "sm:inset-y-0 sm:right-0 sm:left-[34%] sm:h-auto")}
+        className={cn("absolute inset-x-0 top-0 -z-10 overflow-hidden px-5 pt-7 select-none sm:px-6", styles.artFade, wide ? "h-[23rem] md:inset-y-0 md:right-0 md:left-[36%] md:h-auto md:pr-8 md:pl-0" : "h-[23rem]")}
       >
-        <Motif
-          variant={variant}
-          seed={seed}
-          hovered={hovered}
-          inView={inView}
-          running={inView !== false && !reducedMotion}
-          reducedMotion={reducedMotion}
-          cardRef={ref}
-        />
+        <div className={pageStyles.reveal}>
+          <Motif variant={variant} seed={seed} inView={inView} running={inView === true && !reducedMotion} reducedMotion={reducedMotion} cardRef={ref} />
+        </div>
       </div>
-      <div
-        aria-hidden="true"
-        className={cn("pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-44 bg-linear-to-t from-surface-subtle via-surface-subtle/85 to-transparent", wide && "sm:hidden")}
-      />
-      {wide ? (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-[34%] -z-10 hidden w-44 bg-linear-to-r from-surface-subtle to-transparent sm:block" />
-      ) : null}
 
       <div className="flex items-end justify-between gap-5">
         <div className="max-w-sm">

@@ -8,6 +8,7 @@ import { FeatureCard } from "@/components/features-hub/feature_card";
 import { FeaturesHero } from "@/components/features-hub/features_hero";
 import { isWideCard, resolveFeatureMotif } from "@/components/features-hub/motif_map";
 import { scrambleText } from "@/components/features-hub/random";
+import pageStyles from "@/components/product-pages/product_pages.module.css";
 import { getPublishedSeoPagesByType } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";
 import { PAGE_TYPE_HUB, buildSeoPagePath } from "@/lib/pages-studio/skills";
@@ -22,7 +23,7 @@ export async function FeaturesHubPage({ product }) {
   const description = app ? `${app.detail}, explored one feature at a time.` : PAGE_TYPE_HUB.feature.description;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className={`${pageStyles.page} flex min-h-screen flex-col bg-background text-foreground`}>
       <Header />
 
       {/* Clears the fixed 48px header: flush under it on mobile, 21px of air from sm up. */}
@@ -31,7 +32,7 @@ export async function FeaturesHubPage({ product }) {
 
         <section aria-label="Features" className="mx-auto mt-20 w-full max-w-6xl px-4 sm:mt-32 sm:px-6">
           {ordered.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-6">
               {ordered.map((page, index) => {
                 const { motif, variant } = resolveFeatureMotif(page);
                 const line = page.hero_heading || page.excerpt || page.title;

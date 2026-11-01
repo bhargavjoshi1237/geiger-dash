@@ -30,7 +30,7 @@ export function useReducedMotion() {
   );
 }
 
-// Counts up every `ms` while `running`; drives the JS-timed motif loops (counters, feeds, toasts).
+// Counts up every `ms` while `running`; drives the open-ended loops (live counters, feeds).
 export function useTicker(ms, running) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -41,35 +41,25 @@ export function useTicker(ms, running) {
   return tick;
 }
 
-// Fits a fixed-size composition to its container (up to MAX_FIT), so every motif is drawn at one design size.
-const MAX_FIT = 1.3;
+// Walks a scripted scene while `running`, one duration per step. It rests on the last step, the finished frame, so a still,
+// paused or reduced-motion card still reads complete, and starts the story soon after the card first comes into view.
+const FIRST_HOLD = 900;
 
-export function Fit({ width, height, className = "", children }) {
-  const ref = useRef(null);
-  const [scale, setScale] = useState(null);
+export function useScene(durations, running) {
+  const last = durations.length - 1;
+  const [step, setStep] = useState(last);
+  const played = useRef(false);
 
   useEffect(() => {
-    const node = ref.current;
-    if (!node) return undefined;
-    const observer = new ResizeObserver(([entry]) => {
-      const { width: boxWidth, height: boxHeight } = entry.contentRect;
-      if (boxWidth && boxHeight) setScale(Math.min(MAX_FIT, (boxWidth - 24) / width, (boxHeight - 16) / height));
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [width, height]);
+    if (!running) return undefined;
+    const id = setTimeout(() => {
+      played.current = true;
+      setStep((value) => (value + 1) % durations.length);
+    }, played.current ? durations[step] : FIRST_HOLD);
+    return () => clearTimeout(id);
+  }, [durations, running, step]);
 
-  return (
-    <div ref={ref} className="absolute inset-0 flex items-center justify-center">
-      {/* Until measured, a breakpoint guess keeps server-rendered motifs inside phone-width cards. */}
-      <div
-        className={`relative shrink-0 [--fit:0.74] sm:[--fit:1] ${className}`}
-        style={{ width, height, transform: scale === null ? "scale(var(--fit))" : `scale(${scale})` }}
-      >
-        {children}
-      </div>
-    </div>
-  );
+  return step;
 }
 
 const randomGlyph = () => SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)];

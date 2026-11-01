@@ -1,64 +1,94 @@
 "use client";
 
-import { Heart, Mic, Users } from "lucide-react";
-import { Fit, useTicker } from "@/components/features-hub/motion";
-import { Lines } from "@/components/features-hub/motifs/motif_kit";
-import styles from "@/components/features-hub/features_hub.module.css";
+import { ExternalLink, Plus, Radio, Wifi } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LINE, Window } from "@/components/product-pages/mock_kit";
+import { Button, StatStrip, Status } from "@/components/product-pages/apps/events/events_kit";
+import { useScene } from "@/components/features-hub/motion";
+import { Cursor, Fit } from "@/components/features-hub/motifs/motif_kit";
+import pageStyles from "@/components/product-pages/product_pages.module.css";
 
-const BARS = [0.1, 0.5, 0.25, 0.8, 0.35, 0.65, 0.15, 0.9, 0.45, 0.3, 0.7, 0.2, 0.55, 0.05];
-const HEARTS = [
-  { x: 0, d: 0 },
-  { x: 14, d: 0.9 },
-  { x: -10, d: 1.7 },
-  { x: 8, d: 2.4 },
+const COLUMNS = "grid-cols-[minmax(0,1fr)_92px_72px_36px]";
+
+const OTHER_ROOMS = [
+  { name: "Studio 2 breakout", access: "Membership", status: "Scheduled" },
+  { name: "Remote keynote replay", access: "Free", status: "Offline" },
 ];
 
-// A webinar room on air: the speaker's audio pulses, reactions float up and the audience keeps growing.
+// Watching and unique viewers at each step, presence counts from the room going live.
+const WATCHING = [0, 0, 0, 38, 126, 342];
+const UNIQUE = [0, 0, 0, 41, 158, 518];
+
+const SCENE = [600, 800, 280, 900, 1000, 3400];
+
+function LiveSwitch({ on }) {
+  return (
+    <span className={cn("flex h-[18px] w-8 items-center rounded-full p-0.5 transition-colors duration-300", on ? "bg-foreground" : "bg-foreground/15")}>
+      <span className="size-[14px] rounded-full bg-background transition-[translate] duration-300" style={{ translate: on ? "14px 0" : "0 0" }} />
+    </span>
+  );
+}
+
+// Livestream Rooms: a room flips to Live and presence climbs; the picture itself comes from the provider link it holds.
 export function LiveMotif({ running }) {
-  const tick = useTicker(1300, running);
+  const step = useScene(SCENE, running);
+  const live = step >= 3;
 
   return (
-    <Fit width={440} height={250}>
-      <div className="absolute top-[30px] left-[16px] h-[180px] w-[300px] overflow-hidden rounded-xl border border-border bg-linear-to-b from-surface-strong to-background shadow-2xl shadow-black/20">
-        <span className="absolute inset-0 bg-[radial-gradient(60%_80%_at_50%_0%,var(--ink),transparent_70%)] opacity-15" />
-        <span className="absolute top-[46px] left-1/2 size-12 -translate-x-1/2 rounded-full bg-foreground/25" />
-        <span className="absolute top-[100px] left-1/2 h-24 w-28 -translate-x-1/2 rounded-t-[48px] bg-foreground/15" />
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-          <span className="flex items-center gap-1 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.12em] text-white">
-            <span className={`size-1.5 rounded-full bg-white ${styles.blink}`} /> LIVE
-          </span>
-          <span className="flex items-center gap-1 rounded-md bg-background/70 px-1.5 py-0.5 font-mono text-[10px] text-foreground tabular-nums">
-            <Users className="size-2.5" /> {(1284 + tick * 7).toLocaleString("en-US")}
-          </span>
-        </div>
-        <div className="absolute right-2.5 bottom-2.5 left-2.5 flex items-end justify-between">
-          <span className="flex items-center gap-1 rounded-md bg-background/70 px-1.5 py-1 text-[10px] text-foreground">
-            <Mic className="size-2.5" /> Dr. Ana Lima
-          </span>
-          <span className="flex h-6 items-end gap-[3px]">
-            {BARS.map((delay, index) => (
-              <span key={index} className={`w-[3px] rounded-full bg-foreground/80 ${styles.eq}`} style={{ "--d": `${-delay}s`, height: "100%" }} />
-            ))}
-          </span>
-        </div>
-        {HEARTS.map((heart) => (
-          <Heart
-            key={heart.d}
-            className={`absolute right-6 bottom-10 size-4 fill-(--ink) text-(--ink) ${styles.floatUp}`}
-            style={{ "--x": `${heart.x}px`, "--d": `${heart.d}s` }}
-          />
-        ))}
-      </div>
-      <div className="absolute top-[30px] right-[12px] flex h-[180px] w-[104px] flex-col justify-end gap-2 overflow-hidden">
-        {[0, 1, 2].map((row) => (
-          <div key={`${tick}-${row}`} className={`rounded-lg border border-border bg-surface-card p-2 ${row === 2 ? styles.popIn : ""}`}>
-            <span className="mb-1.5 flex items-center gap-1">
-              <span className="size-3 rounded-full bg-(--ink)/40" />
-              <span className="h-1 w-8 rounded-full bg-foreground/20" />
-            </span>
-            <Lines widths={[`${70 + ((tick + row) % 3) * 10}%`]} />
+    <Fit>
+      <div className="relative h-[330px] w-[480px]">
+        <Window title="Livestream Rooms" icon={Radio} className="h-[330px] w-[480px]" actions={<Button variant="ghost" icon={Plus} className="h-7 text-[11px]">Add room</Button>}>
+          <div className="px-3.5 pt-3">
+            <StatStrip
+              stats={[
+                { label: "Live now", value: live ? "1" : "0" },
+                { label: "Watching", value: WATCHING[step] },
+                { label: "Unique viewers", value: UNIQUE[step] },
+              ]}
+            />
           </div>
-        ))}
+          <div className={cn("mt-3 grid h-7 items-center gap-3 border-y px-4 text-[11px] text-muted-foreground", COLUMNS, LINE)}>
+            <span>Room</span>
+            <span>Access</span>
+            <span>Status</span>
+            <span className="text-right">Live</span>
+          </div>
+          <div className={cn("border-b bg-foreground/[0.025]", LINE)}>
+            <div className={cn("grid h-10 items-center gap-3 px-4 text-[12px]", COLUMNS)}>
+              <span className="truncate font-medium">Main Stage</span>
+              <span className="truncate text-foreground/80">Purchase</span>
+              <span className="inline-flex items-center gap-1.5 text-foreground/85">
+                <span className={cn("size-1.5 rounded-full text-emerald-500 transition-colors", live ? cn("bg-emerald-500", pageStyles.pulse) : "bg-amber-500")} />
+                {live ? "Live" : "Scheduled"}
+              </span>
+              <span className="flex justify-end">
+                <LiveSwitch on={live} />
+              </span>
+            </div>
+            <div className="mx-4 mb-3 grid grid-cols-[92px_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-lg border border-foreground/[0.08] px-3 py-2 text-[11px]">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Wifi className="size-3" /> Provider
+              </span>
+              <span className="truncate text-foreground/90">YouTube Live</span>
+              <span className="text-muted-foreground">Watch link</span>
+              <span className="flex min-w-0 items-center gap-1.5 text-foreground/90">
+                <span className="truncate font-mono text-[10.5px]">youtube.com/live/nsdw-main</span>
+                <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+              </span>
+            </div>
+          </div>
+          {OTHER_ROOMS.map((room) => (
+            <div key={room.name} className={cn("grid h-10 items-center gap-3 border-b px-4 text-[12px]", COLUMNS, LINE)}>
+              <span className="truncate text-foreground/90">{room.name}</span>
+              <span className="truncate text-foreground/80">{room.access}</span>
+              <Status status={room.status} className="text-[12px]" />
+              <span className="flex justify-end">
+                <LiveSwitch on={false} />
+              </span>
+            </div>
+          ))}
+        </Window>
+        <Cursor at={[440, 176]} down={step === 2} hidden={step === 0 || step >= 4} />
       </div>
     </Fit>
   );
