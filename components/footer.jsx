@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import FooterProducts from "@/components/footer-products";
+import { GlassWordmark } from "@/components/glass-backdrop/glass_wordmark";
 
 export default function Footer() {
   return (
@@ -32,7 +33,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
               <li><Link href="/why-geiger" className="hover:text-foreground transition-colors">Why Geiger</Link></li>
               <li><Link href="/help" className="hover:text-foreground transition-colors">Help Center</Link></li>
-              <li><a href="mailto:support@geiger.studio" className="hover:text-foreground transition-colors">Contact Support</a></li>
+              <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact Support</Link></li>
             </ul>
           </div>
 
@@ -55,7 +56,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-    <div className="mt-10 flex justify-center bg-background relative z-0"><h1 className="text-[13vw] font-bold text-foreground/5 dark:text-foreground/5 leading-none tracking-tighter select-none pointer-events-none">GEIGER STUDIO</h1></div>
+    <div className="mt-10 flex justify-center bg-background py-[1.7vw] relative z-0"><GlassWordmark /></div>
     </div>
   );
 }

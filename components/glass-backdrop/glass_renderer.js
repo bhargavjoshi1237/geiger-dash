@@ -18,13 +18,17 @@ export const GLASS_SCENE = {
   distortionMax: 1.2,
   distortionRate: 0.1,
   distortionScale: 0.08,
-  temporalDistortion: 0.025,
-  patternSpeed: 0.1,
+  temporalDistortion: 0.1,
+  patternSpeed: 0.4,
   patternSize: 0.99,
   rotationInfluence: 0.3,
 };
 
+// Fill mode drops the cube's silhouette and repeats the glass forever so the effect covers a wide strip; this frames it closer.
+const GLASS_FILL = { tanHalf: 0.09, patternSize: 3 };
+
 // Cube ramps as [low, mid, high] RGB with an output gamma; light variants stay pale so dark text reads over them.
+// `chroma` overrides the scene's chromatic aberration, which splits channels and would tint a neutral ramp.
 export const GLASS_PALETTES = {
   ember: {
     dark: { low: [184, 2, 50], mid: [255, 122, 152], high: [244, 254, 255], gamma: 3 },
@@ -35,8 +39,8 @@ export const GLASS_PALETTES = {
     light: { low: [224, 231, 255], mid: [129, 140, 248], high: [245, 247, 255], gamma: 1 },
   },
   mono: {
-    dark: { low: [70, 70, 74], mid: [178, 178, 184], high: [255, 255, 255], gamma: 3 },
-    light: { low: [236, 236, 238], mid: [168, 168, 174], high: [250, 250, 251], gamma: 1 },
+    dark: { low: [71, 71, 71], mid: [178, 178, 178], high: [255, 255, 255], gamma: 3, chroma: 0 },
+    light: { low: [236, 236, 236], mid: [168, 168, 168], high: [250, 250, 250], gamma: 1, chroma: 0 },
   },
 };
 
@@ -45,7 +49,7 @@ attribute vec2 aPosition;
 void main() { gl_Position = vec4(aPosition, 0.0, 1.0); }
 `;
 
-const fragmentShader = (samples) => `
+const fragmentShader = (samples, fill) => `
 precision highp float;
 
 uniform vec2 uResolution;
@@ -72,7 +76,7 @@ uniform float uDrift;
 
 #define SAMPLES ${samples}
 #define CYL_RADIUS 0.5
-#define CYL_HALF_HEIGHT 7.5
+#define CYL_HALF_HEIGHT ${fill ? "1000000.0" : "7.5"}
 
 // Ashima 3D simplex noise (MIT) for the slow liquid warp of the glass normals.
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -169,7 +173,7 @@ void main() {
   float cx = 0.0;
   for (int j = -1; j <= 1; j++) {
     float k = k0 + float(j);
-    if (k < 0.0 || k > 15.0) continue;
+    ${fill ? "" : "if (k < 0.0 || k > 15.0) continue;"}
     float c = k - 7.0;
     vec2 o = vec2(-c, uCamZ);
     vec2 d = rl.xz;
@@ -220,8 +224,14 @@ void main() {
   }
 
   // Sub-LSB dither keeps the dark gradients from banding.
-  color += (hash(vec3(gl_FragCoord.xy, 97.0)) - 0.5) / 255.0;
-  gl_FragColor = vec4(color, 1.0);
+  color = clamp(color + (hash(vec3(gl_FragCoord.xy, 97.0)) - 0.5) / 255.0, 0.0, 1.0);
+
+  // Un-mattes uBg to the smallest alpha that composites back to this colour, so whatever sits behind the canvas shows through.
+  vec3 above = (color - uBg) / max(1.0 - uBg, vec3(0.001));
+  vec3 below = (uBg - color) / max(uBg, vec3(0.001));
+  vec3 needed = max(above, below);
+  float alpha = clamp(max(needed.r, max(needed.g, needed.b)), 0.0, 1.0);
+  gl_FragColor = vec4(color - (1.0 - alpha) * uBg, alpha);
 }
 `;
 
@@ -286,6 +296,9 @@ function cubeSilhouette({ rx, ry, scale }, tanHalf) {
   return edges;
 }
 
+// Hull edges that keep every point inside, so the pattern shows across the whole canvas.
+const FULL_COVERAGE = new Float32Array(24).map((_, i) => (i % 3 === 2 ? -1e3 : 0));
+
 function compile(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -303,14 +316,14 @@ const toUnit = (rgb) => rgb.map((v) => v / 255);
 // Mounts the scene on a canvas; returns null when WebGL is unavailable so the caller can keep its fallback.
 export function createGlassRenderer(
   canvas,
-  { palette = GLASS_PALETTES.ember.dark, background = [0, 0, 0], reducedMotion = false, onFirstFrame } = {},
+  { palette = GLASS_PALETTES.ember.dark, background = [0, 0, 0], reducedMotion = false, fill = false, onFirstFrame } = {},
 ) {
-  const gl = canvas.getContext("webgl", { antialias: false, alpha: false, premultipliedAlpha: false, powerPreference: "high-performance" });
+  const gl = canvas.getContext("webgl", { antialias: false, alpha: true, premultipliedAlpha: true, powerPreference: "high-performance" });
   if (!gl) return null;
 
   const samples = window.innerWidth < 768 ? 4 : 6;
   const vs = compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  const fs = compile(gl, gl.FRAGMENT_SHADER, fragmentShader(samples));
+  const fs = compile(gl, gl.FRAGMENT_SHADER, fragmentShader(samples, fill));
   if (!vs || !fs) return null;
   const program = gl.createProgram();
   gl.attachShader(program, vs);
@@ -330,16 +343,15 @@ export function createGlassRenderer(
   gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
   const u = Object.fromEntries(UNIFORMS.map((name) => [name, gl.getUniformLocation(program, name)]));
-  const tanHalf = Math.tan((GLASS_SCENE.fov * Math.PI) / 360);
+  const tanHalf = fill ? GLASS_FILL.tanHalf : Math.tan((GLASS_SCENE.fov * Math.PI) / 360);
   gl.uniform1f(u.uTanHalf, tanHalf);
   gl.uniform1f(u.uCamZ, GLASS_SCENE.cameraZ);
-  gl.uniform1f(u.uSize, GLASS_SCENE.patternSize);
+  gl.uniform1f(u.uSize, fill ? GLASS_FILL.patternSize : GLASS_SCENE.patternSize);
   gl.uniform1f(u.uGlassAngle, GLASS_SCENE.glassAngle);
   gl.uniform1f(u.uIor, GLASS_SCENE.ior);
   gl.uniform1f(u.uThickness, GLASS_SCENE.thickness);
   gl.uniform1f(u.uSmear, GLASS_SCENE.thickness * Math.max(GLASS_SCENE.roughness ** 0.33, GLASS_SCENE.anisotropicBlur));
   gl.uniform1f(u.uRoughness, GLASS_SCENE.roughness);
-  gl.uniform1f(u.uChroma, GLASS_SCENE.chromaticAberration);
   gl.uniform1f(u.uDistortionScale, GLASS_SCENE.distortionScale);
   gl.uniform1f(u.uSoft, 0.035);
 
@@ -363,6 +375,7 @@ export function createGlassRenderer(
     gl.uniform3fv(u.uMid, toUnit(ramp.mid));
     gl.uniform3fv(u.uHigh, toUnit(ramp.high));
     gl.uniform1f(u.uGamma, ramp.gamma);
+    gl.uniform1f(u.uChroma, ramp.chroma ?? GLASS_SCENE.chromaticAberration);
   };
   const setBackground = (rgb) => gl.uniform3fv(u.uBg, toUnit(rgb));
   setPalette(palette);
@@ -371,7 +384,8 @@ export function createGlassRenderer(
   const draw = (dt) => {
     if (gl.isContextLost()) return;
     if (!reducedMotion) {
-      elapsed += dt;
+      // The page clock rather than a per-instance timer, so every glass on the page stays in phase.
+      elapsed = performance.now() / 1000;
       damp(cube, "scale", 1, 1, dt);
       damp(cube, "rx", pointer.x * GLASS_SCENE.rotationInfluence, 0.5, dt);
       damp(cube, "ry", -pointer.y * GLASS_SCENE.rotationInfluence, 0.5, dt);
@@ -383,7 +397,7 @@ export function createGlassRenderer(
 
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(u.uResolution, canvas.width, canvas.height);
-    gl.uniform3fv(u.uHull, cubeSilhouette(cube, tanHalf));
+    gl.uniform3fv(u.uHull, fill ? FULL_COVERAGE : cubeSilhouette(cube, tanHalf));
     gl.uniform1f(u.uPhase, phase);
     gl.uniform1f(u.uDistortion, distortion);
     gl.uniform1f(u.uDrift, elapsed * GLASS_SCENE.temporalDistortion);

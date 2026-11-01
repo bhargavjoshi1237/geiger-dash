@@ -18,8 +18,8 @@ function resolveRgb(color) {
 
 // Fluted-glass hero artifact, the animated alternative to GridBackdrop. Position it behind the hero (`absolute inset-0 -z-10`
 // inside an `isolate` parent); it stays invisible until WebGL paints and simply never appears without it.
-// `?glass=<palette>` previews another palette without a deploy.
-export function GlassBackdrop({ palette = "ember", className = "" }) {
+// `?glass=<palette>` previews another palette without a deploy. `fill` covers the whole box with no edge fade, for use behind a mask.
+export function GlassBackdrop({ palette = "ember", fill = false, className = "" }) {
   const canvasRef = useRef(null);
   const [ready, setReady] = useState(false);
 
@@ -27,7 +27,7 @@ export function GlassBackdrop({ palette = "ember", className = "" }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const renderer = createGlassRenderer(canvas, { reducedMotion, onFirstFrame: () => setReady(true) });
+    const renderer = createGlassRenderer(canvas, { reducedMotion, fill, onFirstFrame: () => setReady(true) });
     if (!renderer) return;
 
     // Follows next-themes by watching the <html> class, so the scene re-reads --background after the swap, not before.
@@ -70,13 +70,13 @@ export function GlassBackdrop({ palette = "ember", className = "" }) {
       window.removeEventListener("pointermove", onPointerMove);
       renderer.destroy();
     };
-  }, [palette]);
+  }, [palette, fill]);
 
   return (
     <div
       aria-hidden="true"
       className={`pointer-events-none ${className}`}
-      style={{ maskImage: EDGE_FADE, WebkitMaskImage: EDGE_FADE, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
+      style={fill ? undefined : { maskImage: EDGE_FADE, WebkitMaskImage: EDGE_FADE, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
     >
       <canvas
         ref={canvasRef}
