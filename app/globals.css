@@ -138,29 +138,15 @@
     }
   }
 
-  /* Login showcase: slides enter from the right and exit left as the panel rotates apps. */
-  --animate-showcase-in: showcase-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-showcase-out: showcase-out 0.5s cubic-bezier(0.4, 0, 1, 1) both;
+  /* Login suite grid: tiles light up in rings spreading from the Geiger tile. */
+  --animate-login-tile-tint: login-tile-tint 5.6s linear infinite both;
 
-  @keyframes showcase-in {
-    from {
+  @keyframes login-tile-tint {
+    0%, 26%, 100% {
       opacity: 0;
-      transform: translateX(24px);
     }
-    to {
+    5%, 13% {
       opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes showcase-out {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(-24px);
     }
   }
 

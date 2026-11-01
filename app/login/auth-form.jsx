@@ -10,7 +10,7 @@ import { resolveLoginRedirectPath } from "@/lib/product-routes.mjs";
 import { getPasskeyPromptUser, signInWithPasskey } from "@/lib/auth/passkeys";
 import { PasskeySetupDialog } from "@/components/auth/passkey-setup-dialog";
 import { trackLoginCompleted, trackLoginStarted } from "@/lib/analytics/funnel";
-import { AppShowcase } from "./app-showcase";
+import { PatternShowcase } from "./pattern-showcase";
 
 // Mock Google Icon since it's not in Lucide
 const GoogleIcon = ({ className }) => (
@@ -50,7 +50,7 @@ const ERROR_MESSAGES = {
 const INPUT =
   "flex h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-muted-foreground placeholder:text-text-tertiary transition-colors focus-visible:border-zinc-600 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50";
 
-export function AuthForm({ next, initialError = "" }) {
+export function AuthForm({ next, initialError = "", pattern }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
@@ -376,9 +376,8 @@ export function AuthForm({ next, initialError = "" }) {
         </div>
       </div>
 
-      {/* Rotating tour of the suite — hidden on small screens where it would
-          push the form below the fold. */}
-      <AppShowcase className="m-3 ml-0 hidden lg:block" />
+      {/* Looping pattern, hidden on small screens where it would push the form below the fold. */}
+      <PatternShowcase kind={pattern} className="m-3 ml-0 hidden lg:block" />
 
       {/* Portalled outside the dark wrapper, so it re-applies the dark palette. */}
       <PasskeySetupDialog

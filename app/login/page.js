@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { AuthForm } from './auth-form'
+import { pickLoginPattern } from './pattern-catalog'
 import { resolveLoginRedirectPath } from '@/lib/product-routes.mjs'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
@@ -17,5 +18,5 @@ export default async function LoginPage({ searchParams }) {
     redirect(redirectPath)
   }
 
-  return <AuthForm next={safeNext} initialError={error} />
+  return <AuthForm next={safeNext} initialError={error} pattern={pickLoginPattern()} />
 }
