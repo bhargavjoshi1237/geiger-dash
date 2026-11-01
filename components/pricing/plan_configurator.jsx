@@ -30,19 +30,20 @@ import { createCheckoutAction } from "@/app/pricing/actions";
 import { startTrialAction } from "@/app/pricing/trial-actions";
 import { trackCheckoutStarted, trackTrialStarted } from "@/lib/analytics/funnel";
 
-// Main apps and tools are the app allowance categories; Notes (cherry) is always included.
+// Main apps and tools are the app allowance categories; Notes (cherry) is always included and shows among the tools.
 const APP_GROUPS = [
-  { id: "core", name: "Main apps", blurb: "run a whole area of work", unit: "main apps", extra: ["extra main app", "extra main apps"] },
-  { id: "addon", name: "Tools", blurb: "smaller apps that work alongside them", unit: "tools", extra: ["extra tool", "extra tools"] },
+  { id: "core", name: "Main Apps", blurb: "Run a Whole Area of Work", unit: "Main Apps", extra: ["Extra Main App", "Extra Main Apps"] },
+  { id: "addon", name: "Tools", blurb: "Smaller Apps That Work Alongside Them", unit: "Tools", extra: ["Extra Tool", "Extra Tools"] },
 ];
 const EXTRA_CATEGORIES = ["security", "domains", "email"];
 const APP_IDS = new Set(CATALOG.filter((p) => APP_GROUPS.some((g) => g.id === p.category)).map((p) => p.id));
 const EXTRA_IDS = new Set(CATALOG.filter((p) => EXTRA_CATEGORIES.includes(p.category)).map((p) => p.id));
 const AVAILABLE_APP_IDS = new Set(AVAILABLE_PRODUCT_APPS.map((app) => app.id));
 const METRIC_MAX = Object.fromEntries(metricConfig.map((m) => [m.id, m.max]));
+const METRIC_STEP = Object.fromEntries(metricConfig.map((m) => [m.id, m.step]));
 
 const TEAM = [
-  { id: "projects", label: "Active projects", help: "Projects running at the same time under seleted organization.", allowance: "projectAllowance", rate: "project", cost: "projectCost" },
+  { id: "projects", label: "Active Projects", help: "Projects running at the same time under seleted organization.", allowance: "projectAllowance", rate: "project", cost: "projectCost" },
   { id: "seats", label: "People", help: "Everyone who signs in to your workspace.", allowance: "seatAllowance", rate: "collaborator", cost: "seatCost" },
 ];
 
@@ -50,13 +51,11 @@ const TEAM = [
 const USAGE_LEVELS = ["Light", "Medium", "Heavy"];
 const USAGE_ROWS = [
   { id: "storage", label: "Storage", help: "Files across every app. Transfer is included at 5× storage.", allowance: "storageAllowance", cost: "storageCost" },
-  { id: "aiCredits", label: "AI credits", help: "Shared by AI features in every app.", allowance: "aiAllowance", cost: "aiCost" },
-  { id: "emails", label: "Emails sent", help: "One monthly pool for every app that sends email.", allowance: "emailAllowance", cost: "emailCost" },
-  { id: "edgeData", label: "Edge delivery", help: "Serve files from 119 locations worldwide.", allowance: null, cost: "edgeDataCost" },
+  { id: "aiCredits", label: "AI Credits", help: "Shared by AI features in every app.", allowance: "aiAllowance", cost: "aiCost" },
+  { id: "emails", label: "Emails Sent", help: "One monthly pool for every app that sends email.", allowance: "emailAllowance", cost: "emailCost" },
+  { id: "edgeData", label: "Edge Delivery", help: "Serve files from 119 locations worldwide.", allowance: null, cost: "edgeDataCost" },
 ];
 const LIGHT_USAGE = { storage: 0, aiCredits: 0, emails: 0, edgeData: 0 };
-
-const NotesIcon = PRODUCT_ICONS.notes;
 
 // Starter selection when the org has no purchased plan yet.
 const STARTER_PLAN_ID = "plus";
@@ -168,14 +167,14 @@ function SectionHeading({ step, title, hint }) {
   );
 }
 
-function Stepper({ label, value, minimum, maximum, onChange }) {
+function Stepper({ label, value, minimum, maximum, step = 1, onChange }) {
   const stepButton =
     "flex size-[30px] items-center justify-center rounded-md text-foreground transition hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-35";
   return (
     <div className="flex shrink-0 items-center gap-1 rounded-[9px] border border-border bg-surface-subtle p-[3px]">
       <button
         type="button"
-        onClick={() => onChange(Math.max(minimum, value - 1))}
+        onClick={() => onChange(Math.max(minimum, value - step))}
         disabled={value <= minimum}
         aria-label={`Decrease ${label}`}
         className={stepButton}
@@ -187,7 +186,7 @@ function Stepper({ label, value, minimum, maximum, onChange }) {
       </span>
       <button
         type="button"
-        onClick={() => onChange(Math.min(maximum, value + 1))}
+        onClick={() => onChange(Math.min(maximum, value + step))}
         disabled={value >= maximum}
         aria-label={`Increase ${label}`}
         className={stepButton}
@@ -313,9 +312,9 @@ export function PlanConfigurator({
       if (cost) push(plural(cost.billable, ...group.extra), cost.cost);
     }
     const cherry = estimate.productCosts.cherry;
-    if (cherry) push(plural(cherry.billable, "extra app", "extra apps"), cherry.cost);
-    push(plural(metrics.projects - plan.projectAllowance, "extra project", "extra projects"), estimate.projectCost);
-    push(plural(metrics.seats - plan.seatAllowance, "extra person", "extra people"), estimate.seatCost);
+    if (cherry) push(plural(cherry.billable, "Extra App", "Extra Apps"), cherry.cost);
+    push(plural(metrics.projects - plan.projectAllowance, "Extra Project", "Extra Projects"), estimate.projectCost);
+    push(plural(metrics.seats - plan.seatAllowance, "Extra Person", "Extra People"), estimate.seatCost);
     for (const preset of usagePresets) {
       const included = usageIncluded(preset, plan);
       const amount = usageAmount(preset.id, metrics[preset.id] - included);
@@ -464,7 +463,7 @@ export function PlanConfigurator({
         <div className="min-w-0">
           <div className="rounded-2xl border border-border bg-surface-subtle">
             <section className="border-b border-border p-5 sm:p-6" aria-label="Plan">
-              <SectionHeading step={1} title="Plan" hint="Upgrade any time — you only pay the difference." />
+              <SectionHeading step={1} title="Plan" hint="Upgrade any time - Only bill the difference." />
               <div className="grid gap-2 sm:grid-cols-3">
                 {plans.map((p) => {
                   const selected = p.id === plan.id;
@@ -478,7 +477,8 @@ export function PlanConfigurator({
                       type="button"
                       aria-pressed={selected}
                       disabled={downgrade}
-                      title={downgrade ? "Downgrading isn't available — cancel your current plan first." : undefined}
+                      aria-disabled={downgrade}
+                      title={downgrade ? "Downgrading isn't available - cancel your current plan first." : undefined}
                       onClick={() => selectPlan(p)}
                       className={cn(
                         "flex flex-col gap-2.5 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -511,8 +511,8 @@ export function PlanConfigurator({
                       </span>
                       <span className="text-pretty text-[13px] leading-[19px] text-muted-foreground">{p.tagline}</span>
                       <span className="border-t border-border pt-2.5 text-xs leading-[17px] text-foreground">
-                        {p.productAllowances.core} main · {plural(p.productAllowances.addon, "tool", "tools")} ·{" "}
-                        {plural(p.projectAllowance, "project", "projects")} · {p.seatAllowance} people
+                        {p.productAllowances.core} Main · {plural(p.productAllowances.addon, "Tool", "Tools")} ·{" "}
+                        {plural(p.projectAllowance, "Project", "Projects")} · {p.seatAllowance} People
                       </span>
                     </button>
                   );
@@ -535,7 +535,7 @@ export function PlanConfigurator({
             </section>
 
             <section className="border-b border-border p-5 sm:p-6" aria-label="Apps">
-              <SectionHeading step={2} title="Apps" hint="Pick the apps your team uses. Swap them any time." />
+              <SectionHeading step={2} title="Apps" hint="Pick the apps your team uses." />
               <div className="flex flex-col gap-5">
                 {APP_GROUPS.map((group) => {
                   const allowance = plan.productAllowances[group.id] ?? 0;
@@ -551,32 +551,34 @@ export function PlanConfigurator({
                         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
                           <AllowanceMeter used={used} allowance={allowance} />
                           <span className="font-medium text-foreground">
-                            {used <= allowance ? `${used} of ${allowance} included` : `${allowance} Included + ${used - allowance} Extra`}
+                            {used <= allowance ? `${used} of ${allowance} Included` : `${allowance} Included + ${used - allowance} Extra`}
                           </span>
-                          <span>Extra {group.unit} ${rate}/mo each</span>
+                          <span>Extra {group.unit} ${rate}/mo Each</span>
                         </div>
                       </div>
                       <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
                         {products
-                          .filter((product) => product.category === group.id)
+                          .filter((product) => product.showWith === group.id || (product.category === group.id && (!product.retired || isOwned(product.id))))
                           .map((product) => {
                             const Icon = PRODUCT_ICONS[product.id] ?? FallbackProductIcon;
-                            const on = chosen.includes(product.id);
+                            const always = product.showWith === group.id;
+                            const on = always || chosen.includes(product.id);
                             const owned = isOwned(product.id);
-                            const paid = on && chosen.indexOf(product.id) >= allowance;
-                            const tag = owned ? "Owned" : paid ? `+$${rate}/mo` : on ? "Included" : "";
+                            const paid = !always && on && chosen.indexOf(product.id) >= allowance;
+                            const tag = always ? "Included" : owned ? "Owned" : paid ? `+$${rate}/mo` : on ? "Included" : "";
                             return (
                               <button
                                 key={product.id}
                                 type="button"
                                 aria-pressed={on}
-                                disabled={owned}
-                                title={owned ? `${product.name} is already on your plan` : undefined}
+                                disabled={owned || always}
+                                title={always ? `${product.name} is included on every plan` : owned ? `${product.name} is already on your plan` : undefined}
                                 onClick={() => toggleIn(setApps, product.id)}
                                 className={cn(
                                   "flex items-start gap-2.5 rounded-[10px] border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                   on ? "border-foreground bg-surface-active" : "border-border bg-background hover:border-border-strong",
-                                  owned && "cursor-not-allowed",
+                                  owned && !always && "cursor-not-allowed",
+                                  always && "cursor-default",
                                 )}
                               >
                                 <span
@@ -603,12 +605,6 @@ export function PlanConfigurator({
                     </div>
                   );
                 })}
-                <div className="flex items-center gap-2.5 rounded-[10px] border border-dashed border-border px-3 py-2.5 text-[13px] text-muted-foreground">
-                  <NotesIcon className="size-4 shrink-0" />
-                  <span>
-                    <span className="font-semibold text-foreground">Notes</span> is included on every plan.
-                  </span>
-                </div>
               </div>
             </section>
 
@@ -631,12 +627,13 @@ export function PlanConfigurator({
                           value={team[item.id]}
                           minimum={minimum}
                           maximum={Math.max(METRIC_MAX[item.id], minimum)}
+                          step={METRIC_STEP[item.id]}
                           onChange={(value) => setTeam((current) => ({ ...current, [item.id]: value }))}
                         />
                       </div>
                       <div className="flex items-center justify-between gap-3 border-t border-border pt-2.5 text-xs">
                         <span className="text-muted-foreground">
-                          {included} included, then {money(usageRates[item.rate])}/mo each
+                          {included} Included, Then {money(usageRates[item.rate])}/mo Each
                         </span>
                         <span className={cn("font-mono", cost > 0 ? "text-foreground" : "text-muted-foreground")}>
                           {cost > 0 ? `+${money(cost * multiplier)}${per}` : "Included"}
@@ -834,9 +831,9 @@ export function PlanConfigurator({
           <div className="px-6 pb-5">
             <p className="text-xs font-semibold">Included with {plan.name}</p>
             <p className="mt-1 text-xs leading-[18px] text-muted-foreground">
-              {plan.productAllowances.core} main + {plural(plan.productAllowances.addon, "tool", "tools")} + Notes ·{" "}
-              {plural(plan.projectAllowance, "project", "projects")} · {plan.seatAllowance} People · {plan.storageAllowance} GB
-              Storage · {wholeNumber.format(plan.aiAllowance)} AI credits
+              {plan.productAllowances.core} Main + {plural(plan.productAllowances.addon, "Tool", "Tools")} + Notes ·{" "}
+              {plural(plan.projectAllowance, "Project", "Projects")} · {plan.seatAllowance} People · {plan.storageAllowance} GB
+              Storage · {wholeNumber.format(plan.aiAllowance)} AI Credits
             </p>
           </div>
 
