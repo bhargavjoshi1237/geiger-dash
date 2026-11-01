@@ -31,6 +31,7 @@ import DocumentExpiring from "./templates/geiger-property/document-expiring.jsx"
 import ScheduledReport from "./templates/geiger-property/scheduled-report.jsx";
 import TextOnly from "./templates/geiger/text-only.jsx";
 import BetaRequest from "./templates/geiger/beta-request.jsx";
+import ContactRequest from "./templates/geiger/contact-request.jsx";
 
 export const COMPONENTS = {
   "account.welcome": Welcome,
@@ -60,6 +61,7 @@ export const COMPONENTS = {
   "property.scheduled_report": ScheduledReport,
   "geiger.text_only": TextOnly,
   "geiger.beta_request": BetaRequest,
+  "geiger.contact_request": ContactRequest,
 };
 
 export function getComponent(key) {

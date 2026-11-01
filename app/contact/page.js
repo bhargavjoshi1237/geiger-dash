@@ -1,113 +1,112 @@
 import Link from "next/link";
-import { Mail, Clock, ArrowRight } from "lucide-react";
-import { Header } from "@/components/header";
-import Footer from "@/components/footer";
-import { PublicPageHero } from "@/components/public-page-hero";
-import { Button } from "@geiger/ui";
-import ContactForm from "./contact-form";
+import { ArrowRight } from "lucide-react";
+import { CONTACT_EMAIL } from "@/lib/contact";
+import { CONTACT_HEADING } from "./contact-split";
 
 export const metadata = {
-  title: "Contact Sales — Geiger Studios",
-  description:
-    "Get in touch with our sales team to learn how Geiger Studios can work for your organization.",
+  title: "Contact — Geiger Studios",
+  description: "Talk to sales, get product support, or reach the Geiger Studios team about anything else.",
   alternates: {
     canonical: "/contact",
   },
 };
 
-const contactDetails = [
+const CHANNELS = [
   {
-    icon: Mail,
-    label: "Email us directly",
-    value: "info@geiger.studio",
-    href: "mailto:info@geiger.studio",
+    title: "Sales",
+    description: "Speak to our sales team about plans, pricing, larger teams, or request a demo.",
+    label: "Talk to sales",
+    href: "/contact/sales",
   },
   {
-    icon: Clock,
-    label: "Response time",
-    value: "Within one business day",
-    href: null,
+    title: "Support",
+    description: "We are here to help. Ask product questions, report problems, or leave feedback.",
+    label: "Contact support",
+    href: "/contact/support",
+  },
+  {
+    title: "Other inquiries",
+    description: "Get in touch with our team for press inquiries, partnerships, or other questions.",
+    label: CONTACT_EMAIL,
+    href: `mailto:${CONTACT_EMAIL}`,
+  },
+];
+
+const RESOURCES = [
+  {
+    title: "Help Center",
+    description: "Learn how every Geiger app works",
+    label: "Open the Help Center",
+    href: "/help",
+  },
+  {
+    title: "Changelog",
+    description: "See what shipped across the suite",
+    label: "Read the changelog",
+    href: "/changelog",
+  },
+  {
+    title: "Pricing",
+    description: "Compare plans and estimate your cost",
+    label: "View pricing",
+    href: "/pricing",
+  },
+  {
+    title: "Why Geiger",
+    description: "What each app does and who it suits",
+    label: "Read why Geiger",
+    href: "/why-geiger",
   },
 ];
 
 export default function ContactPage() {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808024_1px,transparent_1px),linear-gradient(to_bottom,#80808024_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_70%_45%_at_50%_0%,#000_55%,transparent_100%)]" />
-      <Header />
+    <>
+      <h1 className={CONTACT_HEADING}>How can we help?</h1>
 
-      <main className="relative z-10 px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
-        <div className="mx-auto w-full max-w-6xl">
-          <div className="mb-16">
-            <PublicPageHero
-              title="Let's talk about your team."
-              description="Tell us about your organisation and what you're trying to accomplish. We'll find the right plan and get you set up."
-            />
-          </div>
+      <div className="mt-12 grid gap-4 md:grid-cols-3">
+        {CHANNELS.map(({ title, description, label, href }) => {
+          const isMail = href.startsWith("mailto:");
+          const Anchor = isMail ? "a" : Link;
+          return (
+            <div
+              key={title}
+              className="relative flex min-h-[230px] flex-col rounded-[14px] border border-border bg-surface-subtle p-6 transition-colors hover:bg-surface-hover"
+            >
+              <h2 className="text-xl font-semibold tracking-[-0.01em] text-foreground">{title}</h2>
+              <p className="mt-auto pt-10 text-sm leading-6 text-muted-foreground">{description}</p>
+              <Anchor
+                href={href}
+                className="mt-5 inline-flex items-center gap-2 text-sm text-foreground/85 after:absolute after:inset-0 after:rounded-[14px] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-ring"
+              >
+                {label}
+                {isMail ? null : <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden="true" />}
+              </Anchor>
+            </div>
+          );
+        })}
+      </div>
 
-          <div className="grid gap-16 lg:grid-cols-[1fr_340px]">
-            <ContactForm />
-
-            <aside className="flex flex-col gap-6">
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <p className="mb-5 text-sm font-semibold">Contact details</p>
-                <ul className="space-y-5">
-                  {contactDetails.map(({ icon: Icon, label, value, href }) => (
-                    <li key={label} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
-                        <Icon className="size-3.5 text-muted-foreground" />
-                      </span>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{label}</p>
-                        {href ? (
-                          <a
-                            href={href}
-                            className="mt-0.5 text-sm font-medium hover:text-muted-foreground transition-colors"
-                          >
-                            {value}
-                          </a>
-                        ) : (
-                          <p className="mt-0.5 text-sm font-medium">{value}</p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <p className="text-sm font-semibold">Need help instead?</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  For product support, billing questions, or account issues, our
-                  support team is the fastest route.
-                </p>
-                <Button asChild variant="outline" size="sm" className="mt-4">
-                  <a href="mailto:support@geiger.studio">
-                    Contact support
-                    <ArrowRight className="size-3.5" />
-                  </a>
-                </Button>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <p className="text-sm font-semibold">Explore pricing first?</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  See how plans are structured and estimate your cost before
-                  reaching out.
-                </p>
-                <Button asChild variant="outline" size="sm" className="mt-4">
-                  <Link href="/pricing">
-                    View pricing
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                </Button>
-              </div>
-            </aside>
-          </div>
+      <section className="mt-20 grid gap-10 md:grid-cols-3 md:gap-4" aria-labelledby="contact-resources">
+        <h2 id="contact-resources" className="text-[15px] font-medium text-foreground">
+          Resources
+        </h2>
+        <div className="grid gap-10 sm:grid-cols-2 md:col-span-2 md:gap-x-4 md:gap-y-12">
+          {RESOURCES.map(({ title, description, label, href }) => (
+            <div key={title} className="sm:border-l sm:border-border sm:pl-6">
+              <h3 className="text-[15px] font-medium text-foreground">{title}</h3>
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{description}</p>
+              <Link
+                href={href}
+                className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {label}
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+          ))}
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </section>
+    </>
   );
 }

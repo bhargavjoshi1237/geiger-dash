@@ -22,6 +22,12 @@ const nextConfig = {
   },
   // PostHog's endpoints end in "/" (/e/, /flags/); proxy.js restores the /path/ → /path redirect for everything else.
   skipTrailingSlashRedirect: true,
+  // Room for the support form's 4 MB of attachments, under Vercel's 4.5 MB request limit.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "4.2mb",
+    },
+  },
   async rewrites() {
     return [
       ...posthogRelayRewrites(process.env.NEXT_PUBLIC_GEIGER_POSTHOG_HOST),

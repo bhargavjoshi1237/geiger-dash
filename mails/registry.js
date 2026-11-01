@@ -575,6 +575,35 @@ export const TEMPLATES = [
     },
     variables: ["name", "email", "company", "teamSize", "apps", "useCase", "account", "submittedAt"],
   },
+  {
+    key: "geiger.contact_request",
+    project: "geiger",
+    category: "Internal",
+    name: "Contact request",
+    description: "Sent to contact@geiger.studio when someone sends the sales or support form.",
+    subject: "{{kind}} request: {{name}}",
+    content: {
+      heading: "New {{kind}} request",
+      intro: "{{name}} sent a message through the {{kind}} contact form.",
+      cta_label: "Reply to {{name}}",
+    },
+    fields: [
+      text("heading", "Heading"),
+      area("intro", "Intro paragraph"),
+      text("cta_label", "Button label"),
+    ],
+    sampleData: {
+      kind: "Sales",
+      name: "Alex Johnson",
+      email: "alex@company.com",
+      teamSize: "2–10",
+      message: "We run client projects and events and want one place for both.",
+      account: "Signed in as alex@company.com",
+      attachments: "screenshot.png",
+      submittedAt: "Mon, 02 Nov 2026 10:30:00 GMT",
+    },
+    variables: ["kind", "name", "email", "teamSize", "message", "account", "attachments", "submittedAt"],
+  },
   // ---- Geiger Property ----------------------------------------------------
   {
     key: "property.rent_reminder",

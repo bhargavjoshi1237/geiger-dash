@@ -979,7 +979,7 @@ export function ProfileClient({ profile, billing, workspaces, invites, projectCo
                       variant="ghost"
                       className="text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
                     >
-                      <Link href="/contact">
+                      <Link href="/contact/support">
                         <Trash2 className="size-4" />
                         Request deletion
                       </Link>
