@@ -6,7 +6,7 @@ Read and write blog posts (`dash_blog_posts`) from an AI app or script. Both sur
 
 Content editors create `gp_live_` keys at `/studio/api-keys`. A key is shown once and only its hash is stored. Send it as `Authorization: Bearer <key>`. The REST API also accepts `x-api-key`.
 
-A key stops working when it is revoked or when its owner leaves `content_editors`. New posts are credited to the key's owner.
+A key stops working when it is revoked or when its owner leaves `content_editors`. New posts are credited to the key's owner unless `authorSlug` names an author profile.
 
 | Access | Allows |
 |---|---|
@@ -31,12 +31,13 @@ Clients that only support OAuth, such as claude.ai connectors, can't connect yet
 | `list_posts` | `GET /api/posts?status=&query=&limit=&offset=` | read |
 | `get_post` | `GET /api/posts/:id` | read |
 | `list_categories` | `GET /api/posts/categories` | read |
+| `list_authors` | `GET /api/posts/authors` | read |
 | `create_draft` | `POST /api/posts` | draft |
 | `update_post` | `PATCH /api/posts/:id` | draft (publish if the post is live) |
 | `publish_post` | `POST /api/posts/:id/publish` | publish |
 | `unpublish_post` | `POST /api/posts/:id/unpublish` | publish |
 
-Post fields: `title`, `excerpt`, `content`, `category`, and optionally `slug`, `tags` and `featuredImage`. Deleting and featuring posts stay in Studio.
+Post fields: `title`, `excerpt`, `content`, `category`, and optionally `slug`, `tags`, `featuredImage` and `authorSlug`. Deleting and featuring posts stay in Studio, and author profiles are managed at `/studio/authors`.
 
 REST returns `{ "data": ... }`, or `{ "error": { "code", "message" } }` with one of these statuses:
 

@@ -17,13 +17,15 @@ export default async function StudioPostsPage({ searchParams }) {
   await requireUser(supabase, '/login?next=/studio/posts')
   if (!(await isContentEditor(supabase))) return <StudioNoAccess />
 
-  const [{ data: categories }, { data: posts }] = await Promise.all([
+  const [{ data: categories }, { data: posts }, { data: authors }] = await Promise.all([
     supabase.from('dash_blog_categories').select('*').order('name'),
     supabase.from('dash_blog_posts').select('*').order('updated_at', { ascending: false }),
+    supabase.from('dash_blog_authors').select('id,name').is('deleted_at', null).order('name'),
   ])
 
   return (
     <PostsStudio
+      authors={authors || []}
       categories={categories || []}
       posts={posts || []}
       selectedId={searchParam(params, 'post')}

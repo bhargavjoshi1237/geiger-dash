@@ -6,9 +6,11 @@ import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { Badge } from "@geiger/ui";
 import {
+  getBlogAuthorById,
   getPublishedBlogPostBySlug,
   getRelatedBlogPosts,
 } from "@/lib/public-content/queries";
+import { authorSameAs } from "@/lib/posts/authors";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
@@ -84,7 +86,11 @@ export default async function BlogPostPage({ params }) {
 
   if (!post) notFound();
 
-  const relatedPosts = await getRelatedBlogPosts(post);
+  const [relatedPosts, author] = await Promise.all([
+    getRelatedBlogPosts(post),
+    post.author_profile_id ? getBlogAuthorById(post.author_profile_id) : null,
+  ]);
+  const authorHref = author ? `/blog/authors/${author.slug}` : null;
 
   const publishedDate = formatDate(post.published_at);
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
@@ -102,7 +108,9 @@ export default async function BlogPostPage({ params }) {
       dateModified: post.updated_at || post.published_at || undefined,
       image: post.featured_image || undefined,
       keywords: post.tags?.length ? post.tags.join(", ") : undefined,
-      author: { "@type": "Organization", name: post.author_name || "Geiger Studios", url: SITE_URL },
+      author: author
+        ? { "@type": "Person", name: author.name, url: `${SITE_URL}${authorHref}`, jobTitle: author.role || undefined, sameAs: authorSameAs(author) }
+        : { "@type": "Organization", name: post.author_name || "Geiger Studios", url: SITE_URL },
       publisher: { "@type": "Organization", name: "Geiger Studios", url: SITE_URL },
     },
     {
@@ -148,7 +156,13 @@ export default async function BlogPostPage({ params }) {
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <User className="size-3.5" />
-                {post.author_name || "Geiger Studios"}
+                {author ? (
+                  <Link href={authorHref} rel="author" className="underline-offset-4 hover:text-foreground hover:underline">
+                    {author.name}
+                  </Link>
+                ) : (
+                  post.author_name || "Geiger Studios"
+                )}
               </span>
               {publishedDate ? (
                 <time className="inline-flex items-center gap-2" dateTime={post.published_at}>
@@ -182,6 +196,23 @@ export default async function BlogPostPage({ params }) {
             className="mx-auto mt-12 max-w-3xl text-[1rem] leading-8 text-muted-foreground [&_a]:break-words [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:my-8 [&_blockquote]:border-l-2 [&_blockquote]:border-foreground/30 [&_blockquote]:pl-6 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.875em] [&_h1]:mt-12 [&_h1]:text-3xl [&_h1]:font-semibold [&_h1]:tracking-tight [&_h1]:text-foreground [&_h2]:mt-12 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-foreground [&_h3]:mt-10 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-foreground [&_hr]:my-12 [&_hr]:border-border [&_img]:my-10 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border [&_li]:mt-2 [&_ol]:my-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mt-6 [&_pre]:my-8 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted [&_pre]:p-5 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_strong]:text-foreground [&_table]:my-8 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_td]:border-b [&_td]:border-border/60 [&_td]:py-3 [&_td]:pr-4 [&_td]:align-top [&_th]:border-b [&_th]:border-border [&_th]:py-3 [&_th]:pr-4 [&_th]:text-left [&_th]:font-semibold [&_th]:text-foreground [&_ul]:my-6 [&_ul]:list-disc [&_ul]:pl-6"
             dangerouslySetInnerHTML={{ __html: formatPostContent(post.content) }}
           />
+
+          {author ? (
+            <aside className="mx-auto mt-14 flex max-w-3xl gap-4 border-t border-border/70 pt-8">
+              {author.avatar_url ? (
+                <Image src={author.avatar_url} alt="" width={56} height={56} className="size-14 shrink-0 rounded-full border border-border object-cover" />
+              ) : null}
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  <Link href={authorHref} rel="author" className="underline-offset-4 hover:underline">
+                    {author.name}
+                  </Link>
+                </p>
+                {author.role ? <p className="mt-0.5 text-xs text-muted-foreground">{author.role}</p> : null}
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{author.bio}</p>
+              </div>
+            </aside>
+          ) : null}
         </article>
 
         {relatedPosts?.length ? (

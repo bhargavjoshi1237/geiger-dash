@@ -93,8 +93,11 @@ function whenLabel(post, status) {
   return `Edited ${formatRelative(post.updated_at)}`
 }
 
-function PostEditor({ post, categories, onCategoryCreated, onDirtyChange, onDelete, onOpenList }) {
+const CURRENT_BYLINE = 'current-byline'
+
+function PostEditor({ post, authors, categories, onCategoryCreated, onDirtyChange, onDelete, onOpenList }) {
   const [initial] = useState(() => toDraft(post))
+  const [authorId, setAuthorId] = useState(post?.author_profile_id || CURRENT_BYLINE)
   const [title, setTitle] = useState(initial.title)
   const [slug, setSlug] = useState(initial.slug)
   const [excerpt, setExcerpt] = useState(initial.excerpt)
@@ -168,6 +171,7 @@ function PostEditor({ post, categories, onCategoryCreated, onDirtyChange, onDele
       >
         <input type="hidden" name="id" value={post?.id || ''} />
         <input type="hidden" name="category" value={category} />
+        <input type="hidden" name="author_profile_id" value={authorId === CURRENT_BYLINE ? '' : authorId} />
         <input type="hidden" name="is_published" value={isPublished ? 'on' : ''} />
         <input type="hidden" name="is_featured" value={isFeatured ? 'on' : ''} />
         <input type="hidden" name="reading_time_auto" value={autoReading ? 'on' : ''} />
@@ -263,6 +267,21 @@ function PostEditor({ post, categories, onCategoryCreated, onDirtyChange, onDele
             </InspectorSection>
 
             <InspectorSection title="Organisation">
+              <Field label="Author" hint="Links the byline to a public profile" className="gap-1.5">
+                <Select value={authorId} onValueChange={edit(setAuthorId)}>
+                  <SelectTrigger className="w-full min-w-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={CURRENT_BYLINE}>{post?.author_name ? `${post.author_name} (no profile)` : 'You (no profile)'}</SelectItem>
+                    {authors.map((author) => (
+                      <SelectItem key={author.id} value={author.id}>
+                        {author.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field label={<>Category<Req /></>} className="gap-1.5">
                 <div className="flex gap-1.5">
                   <Select value={category} onValueChange={edit(setCategory)}>
@@ -320,7 +339,7 @@ function PostEditor({ post, categories, onCategoryCreated, onDirtyChange, onDele
   )
 }
 
-export function PostsStudio({ categories, posts, selectedId, saved = false, error = '' }) {
+export function PostsStudio({ authors = [], categories, posts, selectedId, saved = false, error = '' }) {
   const router = useRouter()
   const { openId, open, formKey } = useStudioRecord({
     basePath: '/studio/posts',
@@ -445,6 +464,7 @@ export function PostsStudio({ categories, posts, selectedId, saved = false, erro
       <PostEditor
         key={formKey}
         post={editing}
+        authors={authors}
         categories={categoryList}
         onCategoryCreated={(category) => category?.name && setAddedCategories((prev) => [...prev, category])}
         onDirtyChange={handleDirtyChange}

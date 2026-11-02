@@ -1,4 +1,4 @@
-import { BellRing, CreditCard, FileText, Flag, GitBranch, HardDrive, KeyRound, LifeBuoy, Mail, Megaphone, PanelsTopLeft } from 'lucide-react'
+import { BellRing, CreditCard, FileText, Flag, GitBranch, HardDrive, KeyRound, LifeBuoy, Mail, Megaphone, PanelsTopLeft, UserRound } from 'lucide-react'
 
 // Studio and Admin share one Console sidebar; `count` keys read from the layout's counts, `subs` deep-link via ?section=.
 export const CONSOLE_NAV = [
@@ -7,6 +7,7 @@ export const CONSOLE_NAV = [
     label: 'Studio',
     items: [
       { key: 'posts', label: 'Posts', icon: FileText, href: '/studio/posts', count: 'posts' },
+      { key: 'authors', label: 'Authors', icon: UserRound, href: '/studio/authors' },
       { key: 'releases', label: 'Releases', icon: Megaphone, href: '/studio/releases', count: 'releases' },
       { key: 'pages', label: 'Pages', icon: PanelsTopLeft, href: '/studio/pages', count: 'pages' },
       { key: 'help', label: 'Help Center', icon: LifeBuoy, href: '/studio/help', count: 'help' },

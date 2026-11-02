@@ -460,6 +460,22 @@ export async function createImportedBlogPostAction(input) {
   return { ok: true, id: data.id, slug: data.slug }
 }
 
+// A chosen profile sets the byline; otherwise an existing post keeps its byline and a new one credits the editor, so editing never takes over a post.
+async function resolvePostByline(supabase, user, { postId, profileId }) {
+  const creator = postId ? {} : { author_id: user.id }
+  if (profileId) {
+    const { data: author } = await supabase.from('dash_blog_authors').select('id,name,avatar_url').eq('id', profileId).is('deleted_at', null).maybeSingle()
+    if (author) return { ...creator, author_profile_id: author.id, author_name: author.name, author_avatar: author.avatar_url }
+  }
+  if (postId) return { author_profile_id: null }
+  return {
+    ...creator,
+    author_profile_id: null,
+    author_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Geiger Author',
+    author_avatar: buildPublicObjectUrl('pfp', `${user.id}/latest.jpg`),
+  }
+}
+
 export async function saveBlogPostAction(formData) {
   const supabase = await createClient()
   const user = await getUser(supabase)
@@ -509,13 +525,6 @@ export async function saveBlogPostAction(formData) {
     back({ error: toActionErrorMessage(error, 'Unable to process blog image') })
   }
 
-  const displayName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.email?.split('@')[0] ||
-    'Geiger Author'
-  const authorAvatar = buildPublicObjectUrl('pfp', `${user.id}/latest.jpg`)
-
   const payload = {
     title,
     slug: normalizedSlug,
@@ -523,9 +532,7 @@ export async function saveBlogPostAction(formData) {
     content,
     category,
     tags,
-    author_id: user.id,
-    author_name: displayName,
-    author_avatar: authorAvatar,
+    ...(await resolvePostByline(supabase, user, { postId, profileId: String(formData.get('author_profile_id') || '').trim() })),
     featured_image: featuredImage,
     is_published: isPublished,
     is_featured: isFeatured,
