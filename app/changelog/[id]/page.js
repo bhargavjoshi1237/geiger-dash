@@ -101,6 +101,8 @@ export async function generateMetadata({ params }) {
     title: `${release.title} - v${release.version}`,
     description: release.description,
     alternates: { canonical: `/changelog/${release.id}` },
+    // Release notes are short and near-identical in search; the /changelog feed is the page to rank.
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${release.title} - v${release.version}`,
       description: release.description,
