@@ -28,6 +28,7 @@
     "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
     "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#1e33dcdb1c62f35d1be6675fc95c9f6612d7d950",
+    "@modelcontextprotocol/server": "^2.4.0",
     "@next/third-parties": "^16.3.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -66,6 +67,7 @@
     "date-fns": "^4.1.0",
     "input-otp": "^1.5.0",
     "lucide-react": "^0.564.0",
+    "mcp-handler": "^2.3.0",
     "mermaid": "^11.15.0",
     "next": "^16.3.1",
     "next-themes": "^0.4.6",
@@ -79,10 +81,12 @@
     "react-icons": "^5.6.0",
     "recharts": "^2.15.4",
     "resend": "^6.14.0",
+    "sanitize-html": "^2.18.1",
     "sonner": "^2.0.7",
     "stripe": "^22.3.0",
     "tailwind-merge": "^3.4.0",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
