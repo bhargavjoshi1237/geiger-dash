@@ -43,7 +43,7 @@ Because every product is proxied through Dash and every product app runs under i
 - **Framework** — Next.js 16 (App Router, SSR/SSG) and React 19
 - **Styling** — Tailwind CSS v4 and shadcn/ui, with the shared [`@geiger/ui`](https://github.com/bhargavjoshi1237/geiger-ui) component library
 - **Icons** — Lucide
-- **Data** — Supabase (Postgres, Auth) and Prisma (`@prisma/adapter-pg`)
+- **Data** — Supabase (Postgres, Auth), with migrations run by [`@geiger/orm`](https://github.com/bhargavjoshi1237/geiger-orm)
 - **Payments** — Stripe
 - **Email** — React Email and Resend
 - **Storage** — Vercel Blob
@@ -78,7 +78,7 @@ NEXT_PUBLIC_COOKIE_DOMAIN=.geiger.studio
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-# Postgres (Prisma)
+# Postgres (scripts and migrations)
 DATABASE_URL=your-pooled-postgres-url
 DIRECT_URL=your-direct-postgres-url
 
@@ -118,15 +118,6 @@ npm run db:seed                       # re-runnable data
 ```
 
 See [`MIGRATION_CONVENTIONS.md`](MIGRATION_CONVENTIONS.md) before writing any DDL.
-
-Part of Dash's data is Prisma-managed; Prisma owns those tables and `@geiger/orm`
-owns the rest:
-
-```bash
-npm run db:generate      # generate the Prisma client
-npm run db:migrate       # apply Prisma migrations
-npm run db:studio        # open Prisma Studio
-```
 
 Email templates have their own commands:
 
@@ -177,8 +168,6 @@ lib/
   oauth/               PKCE, providers, session
   email/, blog-*/      Email delivery and blog automation
   sitemap/, seo        SEO generation
-  prisma.js            Prisma client
-prisma/                Prisma schema and migrations
 supabase/migrations/   Timestamped @up/@down migrations (npm run db:push)
 scripts/               Sitemap and email seed runners
 docs/                  Automation and pricing documentation

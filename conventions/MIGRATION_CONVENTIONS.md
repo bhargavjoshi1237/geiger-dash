@@ -13,9 +13,7 @@ run by **`@geiger/orm`**. There is no other route to the database.
 > OAuth), so its schema *is* `public`. Where this doc says "never put product
 > tables in `public`", that rule is aimed at the product apps — for Dash it is
 > the job, and the discipline is instead to keep anything Dash-only out of the
-> other products' way. Dash also carries a **Prisma** schema for part of its
-> data: Prisma-managed tables are migrated by Prisma (`npm run db:migrate`),
-> `@geiger/orm` owns the rest, and neither may write the other's tables.
+> other products' way.
 
 This doc is the **migration** playbook. For the JS data-access layer that reads
 those tables see `SUPABASE_CONVENTIONS.md`; for screens and UI see
@@ -537,7 +535,7 @@ database.
 
 - [ ] Scaffolded with `npm run db:new -- <name>` (never hand-named)
 - [ ] Header comment says what it changes and which tables/functions it owns
-- [ ] Every object is `public`-qualified; no `flow_` prefix; not a Prisma-owned table
+- [ ] Every object is `public`-qualified; no `flow_` prefix
 - [ ] `@up` is idempotent and self-contained (extensions, schema, trigger fn included)
 - [ ] Standard columns present; `created_by` is a plain `uuid`; `deleted_at` for soft delete
 - [ ] RLS enabled and a policy created
