@@ -21,16 +21,52 @@ export const dynamic = "error";
 // ISR window: matches the notice cache so scheduled notices, new posts and the showcase shuffle refresh in the background.
 export const revalidate = 60;
 
+const SITE_TITLE = "Geiger Studios: events, forms, projects and notes in one suite";
+const SITE_DESCRIPTION =
+  "One account for the apps a team runs on: Events for ticketing, Forms for intake, Flow for projects, Notes for shared canvases, and Grey for answers from your files.";
+
 const websiteJsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "Geiger Studios",
-  url: "https://geiger.studio/",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://geiger.studio/#website",
+      name: "Geiger Studios",
+      url: "https://geiger.studio/",
+      publisher: { "@id": "https://geiger.studio/#organization" },
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://geiger.studio/#organization",
+      name: "Geiger Studios",
+      url: "https://geiger.studio/",
+      logo: "https://geiger.studio/logo.png",
+      description: SITE_DESCRIPTION,
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "Geiger Studios",
+      url: "https://geiger.studio/",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description: SITE_DESCRIPTION,
+      publisher: { "@id": "https://geiger.studio/#organization" },
+    },
+  ],
 };
 
 export const metadata = {
+  title: { absolute: SITE_TITLE },
+  description: SITE_DESCRIPTION,
   alternates: {
     canonical: "/",
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "Geiger Studios",
+    type: "website",
   },
 };
 
