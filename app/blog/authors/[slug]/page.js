@@ -96,7 +96,7 @@ export default async function BlogAuthorPage({ params }) {
         <section className="mt-12">
           <h2 className="text-2xl font-semibold tracking-tight">Articles</h2>
           {posts.length ? (
-            <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2">
+            <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2 md:[&>*:last-child:nth-child(odd)]:col-span-2">
               {posts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`} className="group flex min-h-48 flex-col bg-background p-6 transition-colors hover:bg-muted/50">
                   <span className="text-xs text-muted-foreground">{post.category}</span>

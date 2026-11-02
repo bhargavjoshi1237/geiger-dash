@@ -289,7 +289,8 @@ export function CountedLabel({ label, required, count, limit }) {
   )
 }
 
-export function InspectorPane({ tabs, value, onChange, open, onClose, children }) {
+// Pass `title` instead of `tabs` for a single-panel inspector.
+export function InspectorPane({ tabs, title, value, onChange, open, onClose, children }) {
   return (
     <>
       {open ? <PaneBackdrop onClose={onClose} className="xl:hidden" /> : null}
@@ -300,7 +301,11 @@ export function InspectorPane({ tabs, value, onChange, open, onClose, children }
         )}
       >
         <div className={cn(PANE_HEADER, 'gap-2 px-3')}>
-          <SegmentedTabs fullWidth tabs={tabs} value={value} onChange={onChange} buttonClassName="h-7 text-xs" />
+          {tabs ? (
+            <SegmentedTabs fullWidth tabs={tabs} value={value} onChange={onChange} buttonClassName="h-7 text-xs" />
+          ) : (
+            <span className="min-w-0 flex-1 truncate px-1 text-sm font-semibold text-foreground">{title}</span>
+          )}
           {open ? (
             <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close settings" className="shrink-0 text-muted-foreground xl:hidden">
               <X className="size-4" />

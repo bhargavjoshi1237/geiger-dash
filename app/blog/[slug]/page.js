@@ -209,7 +209,7 @@ export default async function BlogPostPage({ params }) {
                   </Link>
                 </p>
                 {author.role ? <p className="mt-0.5 text-xs text-muted-foreground">{author.role}</p> : null}
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{author.bio}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{author.bio}</p>
               </div>
             </aside>
           ) : null}
@@ -218,7 +218,7 @@ export default async function BlogPostPage({ params }) {
         {relatedPosts?.length ? (
           <section className="mt-20 border-t border-border/70 pt-10">
             <h2 className="text-2xl font-semibold tracking-tight">Related articles</h2>
-            <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+            <div className={`mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border ${relatedPosts.length >= 3 ? "md:grid-cols-3" : relatedPosts.length === 2 ? "md:grid-cols-2" : ""}`}>
               {relatedPosts.map((relatedPost) => (
                 <Link
                   key={relatedPost.id}
