@@ -40,8 +40,9 @@ export default function Footer() {
           <div>
             <h2 className="font-bold text-foreground mb-4">Company</h2>
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
               <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
-              <li><Link href="/blog" className="hover:text-foreground transition-colors">Change Log</Link></li>
+              <li><Link href="/changelog" className="hover:text-foreground transition-colors">Change Log</Link></li>
               <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
               <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
             </ul>
