@@ -5,6 +5,11 @@ import { resolveLoginRedirectPath } from '@/lib/product-routes.mjs'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 
+export const metadata = {
+  title: "Log in",
+  robots: { index: false, follow: true },
+}
+
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams
   const next = params?.next

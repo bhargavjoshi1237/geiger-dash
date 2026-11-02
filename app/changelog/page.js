@@ -7,6 +7,15 @@ import { PublicPageHero } from "@/components/public-page-hero";
 import { ChangelogFeed } from "@/components/changelog/changelog_feed";
 import { getChangelogPage } from "@/lib/public-content/queries";
 
+const CHANGELOG_DESCRIPTION = "A running ledger of every meaningful change across Geiger, why it matters, and where the product is heading.";
+
+export const metadata = {
+  title: "Changelog",
+  description: CHANGELOG_DESCRIPTION,
+  alternates: { canonical: "/changelog" },
+  openGraph: { title: "Changelog | Geiger Studios", description: CHANGELOG_DESCRIPTION, url: "/changelog", type: "website" },
+};
+
 function FallbackRelease() {
   return {
     id: "fallback-release",

@@ -12,6 +12,15 @@ import { getOrgEntitlements } from "@/lib/billing/entitlements";
 import { getUserPlan } from "@/lib/billing/store";
 import { getPricing } from "@/lib/pricing/queries";
 
+const PRICING_DESCRIPTION = "Plans and prices for Geiger Studios. Choose the apps your team needs, and see what each plan includes before you start.";
+
+export const metadata = {
+  title: "Pricing",
+  description: PRICING_DESCRIPTION,
+  alternates: { canonical: "/pricing" },
+  openGraph: { title: "Pricing | Geiger Studios", description: PRICING_DESCRIPTION, url: "/pricing", type: "website" },
+};
+
 export default async function PricingPage() {
   const supabase = await createClient();
   const [user, pricing] = await Promise.all([getUser(supabase), getPricing()]);

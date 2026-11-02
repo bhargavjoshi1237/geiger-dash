@@ -3,6 +3,11 @@ import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 import { SignupForm } from './signup-form'
 
+export const metadata = {
+  title: "Sign up",
+  robots: { index: false, follow: true },
+}
+
 export default async function SignupPage() {
   const supabase = await createClient()
   const user = await getUser(supabase)

@@ -1,7 +1,7 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import HelpCenter from "@/components/help/help_center";
 import { getDocsPage, getDocsPageWithNavigation, normalizeSlug } from "@/lib/docs/queries";
-import { HELP_HOME_SLUG, helpHref } from "@/lib/docs/paths";
+import { HELP_HOME_SLUG, helpHref, helpPageTitle } from "@/lib/docs/paths";
 
 async function readRoute({ params, searchParams }) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
@@ -14,7 +14,7 @@ export async function generateMetadata(props) {
   if (!page) return { title: "Page not found" };
 
   return {
-    title: { absolute: `${page.title} - Geiger Help Center` },
+    title: { absolute: helpPageTitle(page) },
     description: page.description,
     alternates: { canonical: helpHref(page.slug) },
     robots: preview || page.status !== "published" ? { index: false, follow: false } : undefined,

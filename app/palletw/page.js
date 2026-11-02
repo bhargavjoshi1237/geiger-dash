@@ -1,6 +1,8 @@
 import React from 'react';
 import { Input } from "@geiger/ui";
 
+export const metadata = { title: "Light palette", robots: { index: false, follow: false } };
+
 export default function LightPallet() {
   const surfaceColors = [
     { name: 'Background App', hex: '#ffffff', desc: 'Main application background' },

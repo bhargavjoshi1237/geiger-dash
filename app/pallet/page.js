@@ -1,6 +1,8 @@
 import React from 'react';
 import { Input } from "@geiger/ui";
 
+export const metadata = { title: "Palette", robots: { index: false, follow: false } };
+
 export default function Pallet() {
   const surfaceColors = [
     { name: 'Background App', hex: '#0a0a0a', desc: 'Main application background' },
