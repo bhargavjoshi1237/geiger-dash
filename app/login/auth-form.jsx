@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Github, Loader2, AlertCircle, Apple, KeyRound, ArrowLeft, Fingerprint } from "lucide-react";
 import Logo from "@geiger/ui/logo";
@@ -50,11 +50,11 @@ const ERROR_MESSAGES = {
 const INPUT =
   "flex h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-muted-foreground placeholder:text-text-tertiary transition-colors focus-visible:border-zinc-600 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50";
 
-export function AuthForm({ next, initialError = "", pattern }) {
+export function AuthForm({ next, initialError = "", autoProvider = "", pattern }) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState("");
+  const [oauthLoading, setOauthLoading] = useState(autoProvider);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   // Set after a password sign-in when the user should be offered a passkey.
   const [passkeyPrompt, setPasskeyPrompt] = useState(null);
@@ -147,6 +147,15 @@ export function AuthForm({ next, initialError = "", pattern }) {
       setError(oauthError.message || ERROR_MESSAGES.provider_failed);
     }
   }
+
+  // The Events desktop app already picked a provider, so start it once on arrival.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!autoProvider || autoStarted.current) return;
+    autoStarted.current = true;
+    handleOAuth(autoProvider);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoProvider]);
 
   // Enterprise SSO: resolve the email domain to the org's provider (discover
   // route), which redirects into that provider's auth-code flow.

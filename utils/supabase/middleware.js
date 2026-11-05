@@ -27,6 +27,7 @@ const PUBLIC_PREFIXES = [
   '/events/display/', // venue display boards
   '/events/operations/', // operations portal for invited staff (members-portal sign-in + invite tokens)
   '/events/api/nfc/', // on-site NFC gateway (key-gated)
+  '/events/desktop', // desktop app sign-in, org picker and browser→app handoff (each checks the session itself)
   '/events/api/mcp', // MCP endpoint, must answer a 401 challenge rather than redirect to login
   '/events/.well-known/', // OAuth metadata MCP clients read before they have a token
   '/assets/d/', // public asset delivery — <img src> targets, never a suite user

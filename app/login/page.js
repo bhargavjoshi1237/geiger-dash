@@ -5,6 +5,8 @@ import { resolveLoginRedirectPath } from '@/lib/product-routes.mjs'
 import { createClient } from '@/utils/supabase/server'
 import { getUser } from '@/supabase/user/getUser'
 
+const AUTO_PROVIDERS = new Set(['google', 'github'])
+
 export const metadata = {
   title: "Log in",
   robots: { index: false, follow: true },
@@ -15,6 +17,8 @@ export default async function LoginPage({ searchParams }) {
   const next = params?.next
   const safeNext = typeof next === 'string' ? next : ''
   const error = typeof params?.error === 'string' ? params.error : ''
+  // The Events desktop app opens login with ?provider= so Google/GitHub start without a second click.
+  const autoProvider = AUTO_PROVIDERS.has(params?.provider) ? params.provider : ''
   const redirectPath = resolveLoginRedirectPath(next)
   const supabase = await createClient()
   const user = await getUser(supabase)
@@ -23,5 +27,12 @@ export default async function LoginPage({ searchParams }) {
     redirect(redirectPath)
   }
 
-  return <AuthForm next={safeNext} initialError={error} pattern={pickLoginPattern()} />
+  return (
+    <AuthForm
+      next={safeNext}
+      initialError={error}
+      autoProvider={autoProvider}
+      pattern={pickLoginPattern()}
+    />
+  )
 }
