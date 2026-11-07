@@ -25,8 +25,19 @@ const PUBLIC_PREFIXES = [
   '/events/api/checkout', // ticket checkout, verify and ticket email, called from the public event page
   '/events/api/stripe/webhook', // Stripe's signed server-to-server callback
   '/events/display/', // venue display boards
+  '/events/checkin/', // staff scanner, gated by the event's staff access code
+  '/events/door/', // door sales, gated by a staff access code
+  '/events/kiosk/', // self check-in kiosk, gated by a kiosk access code
+  '/events/issue/', // merch and badge pickup desk, gated by a staff access code
   '/events/operations/', // operations portal for invited staff (members-portal sign-in + invite tokens)
   '/events/api/nfc/', // on-site NFC gateway (key-gated)
+  '/events/rfp/', // venue proposal response page (token-gated)
+  '/events/api/rfp/', // its API (token-gated)
+  '/events/plan/', // shared floor plan links (token-gated)
+  '/events/api/plan-share/', // their API (token-gated)
+  '/events/api/venue-bookings/ics', // booking calendar files linked from emails (booking token)
+  '/events/api/v1/', // public REST API (API-key auth)
+  '/events/api/webhooks/dispatch', // webhook dispatcher cron (bearer CRON_SECRET)
   '/events/desktop', // desktop app sign-in, org picker and browser→app handoff (each checks the session itself)
   '/events/api/mcp', // MCP endpoint, must answer a 401 challenge rather than redirect to login
   '/events/.well-known/', // OAuth metadata MCP clients read before they have a token
