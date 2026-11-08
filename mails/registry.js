@@ -963,6 +963,42 @@ export const TEMPLATES = [
     },
     variables: ["recipientName", "period", "periodStart", "periodEnd", "opening", "charges", "payments", "closing", "amountDue", "dueDate", "credit", "propertyName", "unitLabel", "companyName", "portalUrl", "ctaUrl"],
   },
+  {
+    key: "property.move_out_statement",
+    project: "geiger-property",
+    category: "Rent & payments",
+    name: "Move-out statement",
+    description: "After move-out: the security deposit accounting (deposit held, move-out charges, what the deposit paid, the refund or the balance owed) with the itemized charges.",
+    subject: "Your security deposit accounting for {{premises}}",
+    content: {
+      heading: "Your security deposit accounting",
+      intro: "Hi {{recipientName}}, here's how your security deposit was settled after you moved out. {{result}}",
+      revised_note: "This replaces the statement we sent earlier.",
+      outro: "Your final statement and the itemized deposit letter are on file with us. Questions about a charge? Reply to this email or contact the office.",
+    },
+    fields: [text("heading", "Heading"), area("intro", "Intro paragraph"), area("revised_note", "Revised statement note"), area("outro", "Footer note")],
+    sampleData: {
+      recipientName: "Jordan",
+      premises: "Maple Court · Unit 4B",
+      moveOutDate: "Dec 10, 2026",
+      depositHeld: "$1,500.00",
+      charges: "$400.00",
+      applied: "$783.87",
+      refund: "$716.13",
+      balanceOwed: "",
+      refundMethod: "Check",
+      result: "Refund due to you: $716.13",
+      items: [
+        { label: "Carpet cleaning", amount: "$300.00" },
+        { label: "Key replacement", amount: "$100.00" },
+      ],
+      revised: false,
+      companyName: "Harbor & Pine",
+      companyEmail: "hello@harborpine.example",
+      companyPhone: "(206) 555-0100",
+    },
+    variables: ["recipientName", "premises", "moveOutDate", "depositHeld", "charges", "applied", "refund", "balanceOwed", "refundMethod", "result", "items", "revised", "companyName", "companyEmail", "companyPhone"],
+  },
 ];
 
 export function getTemplateMeta(key) {

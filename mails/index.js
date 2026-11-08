@@ -30,6 +30,7 @@ import OwnerStatement from "./templates/geiger-property/owner-statement.jsx";
 import DocumentExpiring from "./templates/geiger-property/document-expiring.jsx";
 import ScheduledReport from "./templates/geiger-property/scheduled-report.jsx";
 import ResidentStatement from "./templates/geiger-property/resident-statement.jsx";
+import MoveOutStatement from "./templates/geiger-property/move-out-statement.jsx";
 import TextOnly from "./templates/geiger/text-only.jsx";
 import BetaRequest from "./templates/geiger/beta-request.jsx";
 import ContactRequest from "./templates/geiger/contact-request.jsx";
@@ -61,6 +62,7 @@ export const COMPONENTS = {
   "property.document_expiring": DocumentExpiring,
   "property.scheduled_report": ScheduledReport,
   "property.resident_statement": ResidentStatement,
+  "property.move_out_statement": MoveOutStatement,
   "geiger.text_only": TextOnly,
   "geiger.beta_request": BetaRequest,
   "geiger.contact_request": ContactRequest,
