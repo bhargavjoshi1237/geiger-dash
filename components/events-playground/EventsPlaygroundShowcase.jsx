@@ -14,7 +14,9 @@ export default function EventsPlaygroundShowcase({ backgroundImage, ctaHref, cta
       <div className="relative z-10 flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
 
         <div className="w-full flex-1 lg:w-[70%]">
-          <div className="relative overflow-hidden rounded-2xl border border-[#313131] bg-surface-card p-1.5 shadow-2xl">
+          <p className="mb-3 text-xs font-medium tracking-wide text-[#9a9a9a] uppercase">Example event · sample data</p>
+          {/* Sample venue and prices were being quoted in search answers as our address and pricing. */}
+          <div data-nosnippet="" className="relative overflow-hidden rounded-2xl border border-[#313131] bg-surface-card p-1.5 shadow-2xl">
             <div className="h-[520px] overflow-hidden rounded-xl border border-[#313131] bg-background sm:h-[560px] lg:h-[600px]">
               <EventBookingFlow />
             </div>
@@ -29,6 +31,7 @@ export default function EventsPlaygroundShowcase({ backgroundImage, ctaHref, cta
             <p className="text-base text-[#bcbcbc] sm:text-lg">
               Your event gets its own page, and that page takes the money. Pick a tier,
               choose a seat, pay. The ticket is in their inbox before they close the tab.
+              Geiger adds no platform fee, so you pay only Stripe&apos;s processing fee.
             </p>
           </div>
 

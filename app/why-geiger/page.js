@@ -37,7 +37,7 @@ import {
 export const metadata = {
   title: "Why Geiger",
   description:
-    "What each Geiger Studio app does, who it suits, and what it costs next to the tools your team pays for today.",
+    "What each Geiger Studios app does, who it suits, and what it costs next to the tools your team pays for today.",
   alternates: { canonical: "/why-geiger" },
 };
 
@@ -75,7 +75,7 @@ function Header() {
         Why Teams Run Their Work on Geiger
       </h1>
       <p className="mt-[18px] max-w-[62ch] text-[1.08rem] leading-relaxed text-muted-foreground">
-        Geiger Studio is one suite of apps for events, projects, canvases, forms, media and more, on one login and one
+        Geiger Studios is one suite of apps for events, projects, canvases, forms, media and more, on one login and one
         bill. Here is what each app does, who it suits, and what it costs next to the tools you pay for now.
       </p>
       <div className={`mt-[22px] flex flex-wrap gap-x-[22px] gap-y-2 font-mono text-xs ${FAINT}`}>
@@ -277,7 +277,8 @@ function Bill({ geiger }) {
               Geiger {geiger.selectedPlan.name} is {money(geiger.selectedPlan.price)} a month with{" "}
               {geiger.selectedPlan.seatAllowance} collaborators included. This mix adds {money(geiger.productCost)} for extra
               apps and {money(geiger.seatCost)} for extra collaborators. Other prices are US list prices with annual billing
-              where offered. Ticket fees are extra on every stack.
+              where offered. Geiger Events adds no platform fee on tickets, so you pay only Stripe&apos;s processing fee,
+              straight to Stripe. Ticket fees on the other tools aren&apos;t included.
             </p>
             <Link
               href="/pricing"

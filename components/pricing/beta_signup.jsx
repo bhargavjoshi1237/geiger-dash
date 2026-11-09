@@ -106,14 +106,14 @@ export function BetaSignup({ betaPlan, isAuthed = false, organizations = [], ent
       <div className="mt-6 flex flex-col gap-3 rounded-xl border border-dashed border-border-strong px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <p className="flex flex-col gap-1 text-sm sm:flex-row sm:items-baseline sm:gap-3.5">
           <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">{betaPlan.name}</span>
-          Every app for $0 while the beta runs: {projects}, {people}, {storage}, {aiCredits}.
+          Every app for $0 during early access: {projects}, {people}, {storage}, {aiCredits}.
         </p>
         <button
           type="button"
           onClick={openDialog}
           className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm text-sm font-semibold transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Join the Alpha
+          Join early access
           <ArrowRight className="size-4" />
         </button>
       </div>
@@ -122,9 +122,9 @@ export function BetaSignup({ betaPlan, isAuthed = false, organizations = [], ent
         <DialogContent className="sm:max-w-xl">
           <form onSubmit={handleSubmit} className="grid gap-5">
             <DialogHeader>
-              <DialogTitle>Join the Geiger beta</DialogTitle>
+              <DialogTitle>Join Geiger early access</DialogTitle>
               <DialogDescription>
-                Pick the apps you want. They&apos;re free while the beta runs, with {projects}, {people}, {storage} and{" "}
+                Pick the apps you want. They&apos;re free during early access, with {projects}, {people}, {storage} and{" "}
                 {aiCredits}.
               </DialogDescription>
             </DialogHeader>

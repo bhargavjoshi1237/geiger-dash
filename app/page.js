@@ -39,9 +39,11 @@ const websiteJsonLd = {
       "@type": "Organization",
       "@id": "https://geiger.studio/#organization",
       name: "Geiger Studios",
+      alternateName: "Geiger",
       url: "https://geiger.studio/",
       logo: "https://geiger.studio/logo.png",
       description: SITE_DESCRIPTION,
+      founder: { "@type": "Person", name: "Bhargav Joshi", url: "https://geiger.studio/blog/authors/bhargav-joshi" },
     },
     {
       "@type": "SoftwareApplication",

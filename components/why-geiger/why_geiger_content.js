@@ -81,6 +81,7 @@ export const STATS = [
 export const ANSWERS = [
   { pill: "Yes", tone: "good", question: "Can I Try It Without Signing Up?", answer: "Flow, Notes, Events, Assets, Campaign, Content and Pods each have a sandbox. Nothing you do there is saved." },
   { pill: "By Plan", tone: "good", question: "Do I Pay for Every App?", answer: "Each plan includes a set of apps. You choose which ones, and add more for a fixed monthly price per app." },
+  { pill: "No", tone: "good", question: "Does Geiger Take a Cut of Ticket Sales?", answer: "No. Geiger Events adds no platform fee. Ticket money goes to your own Stripe account, and you pay only Stripe's processing fee." },
   { pill: "Weekly", tone: "good", question: "How Do I Know It's Still Moving?", answer: "Every change is published to the public changelog, written from the actual change." },
 ];
 

@@ -29,6 +29,7 @@ import PortalInvite from "./templates/geiger-property/portal-invite.jsx";
 import OwnerStatement from "./templates/geiger-property/owner-statement.jsx";
 import DocumentExpiring from "./templates/geiger-property/document-expiring.jsx";
 import ScheduledReport from "./templates/geiger-property/scheduled-report.jsx";
+import DailyBriefing from "./templates/geiger-property/daily-briefing.jsx";
 import TextOnly from "./templates/geiger/text-only.jsx";
 import BetaRequest from "./templates/geiger/beta-request.jsx";
 import ContactRequest from "./templates/geiger/contact-request.jsx";
@@ -59,6 +60,7 @@ export const COMPONENTS = {
   "property.owner_statement": OwnerStatement,
   "property.document_expiring": DocumentExpiring,
   "property.scheduled_report": ScheduledReport,
+  "property.daily_briefing": DailyBriefing,
   "geiger.text_only": TextOnly,
   "geiger.beta_request": BetaRequest,
   "geiger.contact_request": ContactRequest,

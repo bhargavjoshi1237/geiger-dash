@@ -929,6 +929,38 @@ export const TEMPLATES = [
     },
     variables: ["recipientName", "reportName", "reportTitle", "period", "subtitle", "generatedAt", "summary", "tableTitle", "tableColumns", "tableRows", "moreRows", "rowCount", "reportUrl"],
   },
+  {
+    key: "property.daily_briefing",
+    project: "geiger-property",
+    category: "Team",
+    name: "Daily briefing",
+    description: "A team member's morning briefing: what changed, the top signals for their role with why and money at stake, and open review items.",
+    subject: "Your briefing · {{headline}}",
+    content: {
+      heading: "Your daily briefing",
+      intro: "Good morning {{recipientName}} — here's what needs you today.",
+      cta_label: "Open your briefing",
+      outro: "Signals are rule-based checks across rent, leasing, maintenance and payables. Choose who gets this email in Geiger Property → Settings → Notifications.",
+    },
+    fields: [text("heading", "Heading"), area("intro", "Intro paragraph"), text("cta_label", "Button label"), area("outro", "Footer note")],
+    sampleData: {
+      recipientName: "Morgan",
+      headline: "21 signals for your attention · 3 new",
+      areas: "Collections, Leasing, Maintenance, Accounting",
+      counts: { open: 21, new: 3, worse: 1, resolved: 2, moneyAtStake: "$64,764.07", reviewOpen: 4, reviewAssigned: 1 },
+      signals: [
+        { title: "4 tenants behind on rent", why: "$7,045.00 is past due: Maya Patel, Sam Okafor and 2 more.", impact: "$7,045.00", area: "Collections", urgency: "urgent" },
+        { title: "8 bills past due", why: "$9,855.00 past due: Rainier Plumbing Co., Summit Appliance Repair and 6 more.", impact: "$9,855.00", area: "Accounting", urgency: "urgent" },
+        { title: "TH-4 at Alder Court Townhomes vacant 74 days", why: "Empty since Aug 25 at $3,350 a month — about $8,150 in lost rent so far.", impact: "$8,150.14", area: "Leasing", urgency: "urgent" },
+      ],
+      changes: [
+        { kind: "New", title: "Owen Pryce return is 14 days late" },
+        { kind: "Resolved", title: "Unit 4B lease ends Dec 1 with no offer" },
+      ],
+      briefingUrl: "https://geiger.studio/property",
+    },
+    variables: ["recipientName", "headline", "areas", "counts", "signals", "changes", "briefingUrl"],
+  },
 ];
 
 export function getTemplateMeta(key) {

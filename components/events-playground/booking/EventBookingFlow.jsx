@@ -311,7 +311,7 @@ export default function EventBookingFlow() {
                 </p>
               </div>
               <p className="mt-1 text-right text-[11px] text-text-tertiary tabular-nums">
-                {count} × {currency(tier.price)} plus {currency(totals.fee)} fee
+                {count} × {currency(tier.price)}
               </p>
               <Button
                 type="button"

@@ -35,7 +35,15 @@ const jsonLd = {
   url: `${SITE_URL}/about`,
   name: "About Geiger Studios",
   description: DESCRIPTION,
-  mainEntity: { "@id": `${SITE_URL}/#organization` },
+  mainEntity: {
+    "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
+    name: "Geiger Studios",
+    alternateName: "Geiger",
+    url: `${SITE_URL}/`,
+    logo: `${SITE_URL}/logo.png`,
+    founder: { "@type": "Person", name: "Bhargav Joshi", url: `${SITE_URL}/blog/authors/bhargav-joshi` },
+  },
 };
 
 export default function AboutPage() {
@@ -48,7 +56,7 @@ export default function AboutPage() {
       <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
         <h1 className="text-4xl font-semibold leading-[1.03] tracking-[-0.045em] sm:text-6xl">About Geiger Studios</h1>
         <p className="mt-6 text-base leading-7 text-muted-foreground sm:text-lg">
-          Geiger Studios is a suite of connected apps for teams, with one account across events, forms, projects, notes and AI answers from your own files. It&apos;s in open alpha, so expect it to change quickly.
+          Geiger Studios is a suite of connected apps for teams, with one account across events, forms, projects, notes and AI answers from your own files. It&apos;s in early access, so new features ship every week. Geiger Events takes no platform fee on ticket sales.
         </p>
 
         <section className="mt-14">
@@ -77,7 +85,7 @@ export default function AboutPage() {
             <Link href="/blog/authors/bhargav-joshi" className="font-medium text-foreground underline underline-offset-4">
               Bhargav Joshi
             </Link>{" "}
-            builds Geiger Studios and writes about it here, working across the apps, their shared backend and the AI systems behind them.
+            founded and builds Geiger Studios, and writes about it here, working across the apps, their shared backend and the AI systems behind them.
           </p>
         </section>
 
