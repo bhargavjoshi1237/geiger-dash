@@ -29,7 +29,6 @@ const PUBLIC_PREFIXES = [
   '/events/door/', // door sales, gated by a staff access code
   '/events/kiosk/', // self check-in kiosk, gated by a kiosk access code
   '/events/issue/', // merch and badge pickup desk, gated by a staff access code
-  '/events/operations/', // operations portal for invited staff (members-portal sign-in + invite tokens)
   '/events/api/nfc/', // on-site NFC gateway (key-gated)
   '/events/rfp/', // venue proposal response page (token-gated)
   '/events/api/rfp/', // its API (token-gated)
