@@ -3,13 +3,16 @@ import { CopilotRender, InboxStage, InboxWindow, MacroRender, SlaRender, Workflo
 import { ConversationalForm, FormsStage, FunnelRender, LogicRender, SpamRender } from "@/components/product-pages/intake/forms_renders";
 import { QuestionsRender, RegistrationsStage, WaitlistRender } from "@/components/product-pages/intake/events_renders";
 import { TriageStage } from "@/components/product-pages/intake/flow_renders";
+import { findArea } from "@/components/product-pages/areas";
+
+const PAGE = findArea("intake");
 
 // /intake: where conversations, responses, registrations and new issues land across the suite.
 export function IntakePage() {
   return (
-    <AreaPage area="intake">
+    <AreaPage area={PAGE.id}>
       <AreaHero
-        title="Every request has somewhere to land"
+        page={PAGE}
         art={
           <HeroArt focus={["66%", "44%"]} plane={{ "--plane-top": "-34%" }}>
             <InboxWindow typed="Thanks Maya, the updated invoice is on its way" />

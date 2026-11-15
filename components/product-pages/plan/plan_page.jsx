@@ -3,6 +3,9 @@ import { BoardRender, CommandRender, DisplayRender, TrackerStage, ViewsRender } 
 import { CycleStage, DivisionsRender, GoalRender, MilestoneRender, RoadmapRender, RoadmapWindow } from "@/components/product-pages/plan/roadmap_renders";
 import { AiCardRender, CanvasStage, ToolsRender, VideoStageRender } from "@/components/product-pages/plan/canvas_renders";
 import { CallRender, ChatStage, SlashRender } from "@/components/product-pages/plan/chat_renders";
+import { findArea } from "@/components/product-pages/areas";
+
+const PAGE = findArea("plan");
 
 const SESSION_TOOLS = [
   { title: "Live cursors", body: "See each other's cursors and follow anyone around the board" },
@@ -14,9 +17,9 @@ const SESSION_TOOLS = [
 // /plan: Flow's tracker and planning views, the Notes canvas and Flow's team chat.
 export function PlanPage() {
   return (
-    <AreaPage area="plan">
+    <AreaPage area={PAGE.id}>
       <AreaHero
-        title="Plan the work from first sketch to launch"
+        page={PAGE}
         art={
           <HeroArt focus={["66%", "46%"]} plane={{ "--plane-top": "-12%", "--plane-left": "24%" }}>
             <RoadmapWindow />

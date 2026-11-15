@@ -23,7 +23,7 @@ export function PropertyLeasingPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("property").pages} linksLabel="More from Geiger Property">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["66%", "46%"]} plane={{ "--plane-top": "-12%", "--plane-left": "26%" }}>
             <LeasesWindow />

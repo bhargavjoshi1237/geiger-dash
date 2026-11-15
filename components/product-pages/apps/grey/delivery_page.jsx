@@ -34,7 +34,7 @@ export function GreyDeliveryPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("grey").pages} linksLabel="More from Geiger Grey">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["54%", "32%"]} plane={{ "--plane-top": "-20%", "--plane-left": "8%" }}>
             <EndpointsWindow />

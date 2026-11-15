@@ -94,6 +94,8 @@ const tour = (app, name, pages) => ({
   name,
   pages: pages.map((page) => ({
     ...page,
+    app,
+    appName: name,
     href: `/apps/${app}/${page.id}`,
     title: `${page.label} · ${name}`,
   })),
@@ -104,9 +106,10 @@ export const APP_TOURS = [
     {
       id: "ticketing",
       label: "Tickets and checkout",
-      headline: "A box office that runs itself",
+      headline: "Event ticketing that runs itself",
+      metaTitle: "Event ticketing software with seat maps · Geiger Events",
       description:
-        "Publish an event page, sell tiered tickets, reserved seats and expo booths through Stripe, and let releases, codes and bundles price every order at checkout.",
+        "Sell tickets, reserved seats on your own seat map, time slots, add-ons and expo booths from one event page. Buyers pay through your own Stripe account, and Geiger adds no fee per ticket.",
     },
     {
       id: "check-in",
@@ -302,8 +305,10 @@ export function findTourPage(app, id) {
   return findTour(app)?.pages.find((page) => page.id === id) ?? null;
 }
 
+// `metaTitle` is a full search title for pages written for buyer queries; it skips the " | Geiger Studios" suffix.
 export function pageMetadata(page) {
-  return page ? { title: page.title, description: page.description, alternates: { canonical: page.href } } : {};
+  if (!page) return {};
+  return { title: page.metaTitle ? { absolute: page.metaTitle } : page.title, description: page.description, alternates: { canonical: page.href } };
 }
 
 export const ALL_TOUR_PAGES = [...AUDIENCE_PAGES, ...TEAM_PAGES, ...APP_TOURS.flatMap((entry) => entry.pages)];

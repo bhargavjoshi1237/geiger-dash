@@ -44,7 +44,7 @@ export function CreativePage() {
   return (
     <AreaPage area={PAGE.id} links={TEAM_PAGES} linksLabel="Teams on Geiger">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["64%", "38%"]} plane={{ "--plane-top": "6%", "--plane-left": "28%" }}>
             <CampaignHeroWindow />

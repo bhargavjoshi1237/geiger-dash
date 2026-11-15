@@ -4,6 +4,9 @@ import { DisplayBoardRender, DoorRender, EventsStage, ReleasesRender, SeatMapRen
 import { ContentStage, LocalesRender, WebhooksRender } from "@/components/product-pages/launch/content_renders";
 import { AssetDetail, ShareLinkRender, StorefrontRender } from "@/components/product-pages/launch/assets_renders";
 import { ApiMonitoringStage, GatewayDiagram, PortalRender, TerminalWindow, UsagePlansRender } from "@/components/product-pages/launch/pods_renders";
+import { findArea } from "@/components/product-pages/areas";
+
+const PAGE = findArea("launch");
 
 const ASSET_STEPS = [
   { title: "Versions", body: "Every upload keeps its history, from first grade to final retouch" },
@@ -25,9 +28,9 @@ const GATEWAY_RIGHT = [
 // /launch: what goes out the door — event pages and tickets, published content, approved media and APIs.
 export function LaunchPage() {
   return (
-    <AreaPage area="launch">
+    <AreaPage area={PAGE.id}>
       <AreaHero
-        title="Ship it to the people it's for"
+        page={PAGE}
         art={<HeroVideo name="events-hero" />}
       />
 

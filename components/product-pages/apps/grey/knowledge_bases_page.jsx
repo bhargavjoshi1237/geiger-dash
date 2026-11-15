@@ -24,7 +24,7 @@ export function GreyKnowledgeBasesPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("grey").pages} linksLabel="More from Geiger Grey">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["65%", "41%"]} plane={{ "--plane-top": "-8%", "--plane-left": "8%" }}>
             <KnowledgeBaseWindow />

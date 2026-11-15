@@ -23,7 +23,7 @@ export function FlowTeamPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("flow").pages} linksLabel="More from Geiger Flow">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["62%", "38%"]} plane={{ "--plane-top": "-2%", "--plane-left": "14%" }}>
             <ChatWindow />

@@ -23,6 +23,9 @@ import {
   SummaryRender,
   WorkflowCanvasRender,
 } from "@/components/product-pages/ai/assist_renders";
+import { findArea } from "@/components/product-pages/areas";
+
+const PAGE = findArea("ai");
 
 const AUTOMATIONS = [
   { title: "Workflows", body: "Ten triggers, eight conditions and the actions that follow" },
@@ -34,9 +37,9 @@ const AUTOMATIONS = [
 // /ai: Grey's knowledge bases and the ways out of them, AI inside Comms, Notes and Content, and rule-based automation.
 export function AiPage() {
   return (
-    <AreaPage area="ai">
+    <AreaPage area={PAGE.id}>
       <AreaHero
-        title="Put your team's knowledge to work"
+        page={PAGE}
         art={
           <HeroArt focus={["62%", "30%"]} plane={{ "--plane-top": "-2%" }}>
             <PlaygroundWindow typed="Which plans include priority support?" />

@@ -23,7 +23,7 @@ export function ContentPublishingPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("content").pages} linksLabel="More from Geiger Content">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["62%", "38%"]} plane={{ "--plane-top": "-8%", "--plane-left": "16%" }}>
             <QueueWindow />

@@ -23,7 +23,7 @@ export function NotesCanvasPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("notes").pages} linksLabel="More from Geiger Notes">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["68%", "40%"]} plane={{ "--plane-top": "-8%", "--plane-left": "26%" }}>
             <CanvasHeroWindow />

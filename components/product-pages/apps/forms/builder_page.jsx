@@ -29,7 +29,7 @@ export function FormsBuilderPage() {
   return (
     <AreaPage area={PAGE.id} links={findTour("forms").pages} linksLabel="More from Geiger Forms">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["68%", "48%"]} plane={{ "--plane-top": "-14%", "--plane-left": "30%" }}>
             <BuilderWindow />

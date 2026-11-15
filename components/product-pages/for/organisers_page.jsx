@@ -31,7 +31,7 @@ export function OrganisersPage() {
   return (
     <AreaPage area={PAGE.id} links={AUDIENCE_PAGES} linksLabel="Who Geiger is for">
       <AreaHero
-        title={PAGE.headline}
+        page={PAGE}
         art={
           <HeroArt focus={["64%", "33%"]} plane={{ "--plane-top": "-4%", "--plane-left": "8%" }}>
             <HarbourlightHeroWindow />
