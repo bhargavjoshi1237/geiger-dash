@@ -8,6 +8,7 @@ import { FeatureCard } from "@/components/features-hub/feature_card";
 import { FeaturesHero } from "@/components/features-hub/features_hero";
 import { isWideCard, resolveFeatureMotif } from "@/components/features-hub/motif_map";
 import { scrambleText } from "@/components/features-hub/random";
+import { getRandomShowcaseBackgrounds } from "@/lib/showcase-backgrounds";
 import pageStyles from "@/components/product-pages/product_pages.module.css";
 import { getPublishedSeoPagesByType } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";
@@ -18,6 +19,8 @@ export async function FeaturesHubPage({ product }) {
   const pages = await getPublishedSeoPagesByType("feature", product);
   const app = product ? resolveProductApp(product) : null;
   const ordered = [...pages].sort((a, b) => Number(Boolean(b.is_featured)) - Number(Boolean(a.is_featured)));
+  // Drawn once on the server so neighbouring cards differ and the client hydrates the same painting.
+  const backdrops = getRandomShowcaseBackgrounds(ordered.length);
 
   const title = app ? `Everything Geiger ${app.name} can do` : "The features behind every Geiger app";
   const description = app ? `${app.detail}, explored one feature at a time.` : PAGE_TYPE_HUB.feature.description;
@@ -48,6 +51,7 @@ export async function FeaturesHubPage({ product }) {
                     seed={page.slug}
                     scramble={motif === "cipher" ? scrambleText(lastWord, page.slug) : null}
                     wide={isWideCard(index)}
+                    backgroundImage={backdrops[index]}
                   />
                 );
               })}

@@ -44,7 +44,7 @@ function Description({ text, scramble, decoded }) {
 }
 
 // One feature in the Linear-style grid: a spotlit render of the product playing its moment, the eyebrow and line in front.
-export function FeatureCard({ href, title, description, motif, variant, seed, scramble, wide }) {
+export function FeatureCard({ href, title, description, motif, variant, seed, scramble, wide, backgroundImage }) {
   const ref = useRef(null);
   const inView = useInView(ref);
   const reducedMotion = useReducedMotion();
@@ -66,7 +66,14 @@ export function FeatureCard({ href, title, description, motif, variant, seed, sc
         styles.card,
       )}
     >
-      <div aria-hidden="true" className={cn("absolute inset-0 -z-20", pageStyles.spotlight)} />
+      {/* The landing page's painted backdrops, washed back so the render and caption stay legible; the spotlight is the fallback. */}
+      {backgroundImage ? (
+        <div aria-hidden="true" className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${backgroundImage}')` }}>
+          <div className="absolute inset-0 bg-background/75" />
+        </div>
+      ) : (
+        <div aria-hidden="true" className={cn("absolute inset-0 -z-20", pageStyles.spotlight)} />
+      )}
       <div
         aria-hidden="true"
         className={cn("absolute inset-x-0 top-0 -z-10 overflow-hidden px-5 pt-7 select-none sm:px-6", styles.artFade, wide ? "h-[23rem] md:inset-y-0 md:right-0 md:left-[36%] md:h-auto md:pr-8 md:pl-0" : "h-[23rem]")}
