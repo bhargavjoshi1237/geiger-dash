@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Calendar, Clock3, User } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { Badge } from "@geiger/ui";
 import {
   getBlogAuthorById,

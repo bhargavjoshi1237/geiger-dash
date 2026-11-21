@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { getBlogAuthorBySlug, getPublishedPostsByAuthor } from "@/lib/public-content/queries";
 import { authorSameAs } from "@/lib/posts/authors";
 

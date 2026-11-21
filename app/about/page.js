@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 
 const SITE_URL = "https://geiger.studio";
 const DESCRIPTION = "Who builds Geiger Studios, what is in the suite, and how we write and correct what we publish.";

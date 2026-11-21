@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { Header } from '@/components/header'
-import Footer from '@/components/footer'
+import Footer from "@geiger/ui/footer"
 import { GridBackdrop } from '@/components/grid-backdrop'
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'

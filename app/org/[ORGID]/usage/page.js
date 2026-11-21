@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Header } from '@/components/header'
-import Footer from '@/components/footer'
+import Footer from "@geiger/ui/footer"
 import { GridBackdrop } from '@/components/grid-backdrop'
 import { Badge, Button } from "@geiger/ui";
 import { getOrganizationProjects } from '@/lib/org/projects'

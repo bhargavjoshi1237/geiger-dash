@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Badge, cn } from "@geiger/ui";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { getAdjacentChangelogReleases, getChangelogRelease } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";
 

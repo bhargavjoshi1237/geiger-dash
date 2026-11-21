@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { resolveProductApp } from "@/lib/pages-studio/products";
 import {
   PAGE_TYPE_HUB,

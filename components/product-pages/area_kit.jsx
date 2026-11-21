@@ -3,7 +3,7 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@geiger/ui/table";
 import { cn } from "@/lib/utils";
 import { SessionHeader } from "@/components/session-header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { SessionLink } from "@/components/session-link";
 import { PRIMARY_CTA, SECONDARY_CTA } from "@/components/landing/hero";
 import { AREAS } from "@/components/product-pages/areas";

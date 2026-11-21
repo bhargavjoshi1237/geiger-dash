@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SessionHeader } from "@/components/session-header";
 import { SessionLink } from "@/components/session-link";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { GridBackdrop } from "@/components/grid-backdrop";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";

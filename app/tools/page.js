@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { tools, toolsIndexFeatures } from "@/lib/tools/tool-content";
 import { CALCULATOR_HUB_HREF, FEE_PLATFORMS, calculatorHref } from "@/lib/resources/ticket-fees";
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { SessionLink } from "@/components/session-link";
 import { PRIMARY_CTA, SECONDARY_CTA } from "@/components/landing/hero";
 import { FeatureCard } from "@/components/features-hub/feature_card";

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, Clock3 } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { Badge, Button } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { getPublishedBlogPosts } from "@/lib/public-content/queries";

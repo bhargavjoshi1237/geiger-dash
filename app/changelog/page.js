@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { Button } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { ChangelogFeed } from "@/components/changelog/changelog_feed";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Button } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { SHOWCASE_BACKGROUND_IMAGES } from "@/lib/showcase-backgrounds";

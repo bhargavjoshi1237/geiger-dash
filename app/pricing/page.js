@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/supabase/user/getUser";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { PlanConfigurator } from "@/components/pricing/plan_configurator";
 import { BetaSignup } from "@/components/pricing/beta_signup";
 import { PublicPageHero } from "@/components/public-page-hero";

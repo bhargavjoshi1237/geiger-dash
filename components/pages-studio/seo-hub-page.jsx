@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { Badge } from "@geiger/ui";
 import { PublicPageHero } from "@/components/public-page-hero";
 import { getPublishedSeoPagesByType } from "@/lib/public-content/queries";

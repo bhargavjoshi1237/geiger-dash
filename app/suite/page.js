@@ -1,5 +1,5 @@
 import { SessionHeader } from "@/components/session-header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { landingFont } from "@/components/landing/landing_font";
 import { LandingHero } from "@/components/landing/hero";
 import { LaunchSequence } from "@/components/landing/launch_sequence";

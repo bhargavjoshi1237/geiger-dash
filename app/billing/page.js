@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { ProductAccess, titleCaseId } from "@/components/billing/product-access";
 import { PaymentHistory } from "@/components/billing/payment-history";
 import { Button, ScreenHeader, SectionCard, cn } from "@geiger/ui";

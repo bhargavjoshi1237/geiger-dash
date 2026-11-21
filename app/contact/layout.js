@@ -1,5 +1,5 @@
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@geiger/ui/footer";
 import { displayFont } from "@/components/suite-landing/display_font";
 
 export default function ContactLayout({ children }) {

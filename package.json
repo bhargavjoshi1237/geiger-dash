@@ -24,7 +24,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@geiger/notify": "github:bhargavjoshi1237/geiger-notify#9c99355bb1f3cde790da6f835d8a5fc942d1cb18",
     "@geiger/orm": "github:bhargavjoshi1237/geiger-orm#master",
-    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#d08898d7ecfecef486cfdb9d1f71b657271b23d1",
+    "@geiger/ui": "github:bhargavjoshi1237/geiger-ui#46be6719c79cee01d0fcbafdf76990cdad32b788",
     "@modelcontextprotocol/server": "^2.4.0",
     "@next/third-parties": "^16.3.1",
     "@radix-ui/react-accordion": "^1.2.2",
