@@ -32,6 +32,9 @@ export default function Footer() {
             <h2 className="font-bold text-foreground mb-4">Resources</h2>
             <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
               <li><Link href="/why-geiger" className="hover:text-foreground transition-colors">Why Geiger</Link></li>
+              <li><Link href="/tools/ticket-fee-calculator" className="hover:text-foreground transition-colors">Ticket Fee Calculator</Link></li>
+              <li><Link href="/compare" className="hover:text-foreground transition-colors">Platform Comparisons</Link></li>
+              <li><Link href="/templates" className="hover:text-foreground transition-colors">Form Templates</Link></li>
               <li><Link href="/help" className="hover:text-foreground transition-colors">Help Center</Link></li>
               <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact Support</Link></li>
             </ul>

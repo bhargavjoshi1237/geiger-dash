@@ -28,6 +28,10 @@ const nextConfig = {
       bodySizeLimit: "4.2mb",
     },
   },
+  async redirects() {
+    // US spelling of the audience page, which is what most searches and links use.
+    return [{ source: "/for/event-organizers", destination: "/for/event-organisers", permanent: true }];
+  },
   async rewrites() {
     return [
       ...posthogRelayRewrites(process.env.NEXT_PUBLIC_GEIGER_POSTHOG_HOST),

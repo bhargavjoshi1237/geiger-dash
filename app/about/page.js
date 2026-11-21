@@ -82,10 +82,10 @@ export default function AboutPage() {
         <section className="mt-14">
           <h2 className="text-2xl font-semibold tracking-tight">Who builds it</h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            <Link href="/blog/authors/bhargav-joshi" className="font-medium text-foreground underline underline-offset-4">
-              Bhargav Joshi
+            <Link href="/blog/authors/jack" className="font-medium text-foreground underline underline-offset-4">
+              Jack
             </Link>{" "}
-            founded and builds Geiger Studios, and writes about it here, working across the apps, their shared backend and the AI systems behind them.
+            started and builds Geiger Studios, and writes about it here, working across the apps, their shared backend and the AI systems behind them.
           </p>
         </section>
 

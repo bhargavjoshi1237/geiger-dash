@@ -10,6 +10,10 @@ export const AUDIENCE_PAGES = [
     short: "Event organisers",
     headline: "Fill the room, then run the door",
     title: "Geiger for event organisers",
+    // Most searches use the US spelling, so the search title carries "organizers" while the page keeps "organisers".
+    metaTitle: "Event Software for Event Organizers & Organisers | Geiger Studios",
+    metaDescription:
+      "Event software for event organizers: plan the event, take speaker and vendor applications with forms, sell tickets through Stripe with no Geiger fee per ticket and check guests in with QR codes.",
     description:
       "Plan the event, take speaker and vendor applications with forms, sell tickets through Stripe, check guests in with QR codes and keep every guest in one contact book, all on one Geiger account.",
   },
@@ -305,10 +309,10 @@ export function findTourPage(app, id) {
   return findTour(app)?.pages.find((page) => page.id === id) ?? null;
 }
 
-// `metaTitle` is a full search title for pages written for buyer queries; it skips the " | Geiger Studios" suffix.
+// `metaTitle` is a full search title for pages written for buyer queries; it skips the " | Geiger Studios" suffix. `metaDescription` overrides the on-page lead in search results.
 export function pageMetadata(page) {
   if (!page) return {};
-  return { title: page.metaTitle ? { absolute: page.metaTitle } : page.title, description: page.description, alternates: { canonical: page.href } };
+  return { title: page.metaTitle ? { absolute: page.metaTitle } : page.title, description: page.metaDescription ?? page.description, alternates: { canonical: page.href } };
 }
 
 export const ALL_TOUR_PAGES = [...AUDIENCE_PAGES, ...TEAM_PAGES, ...APP_TOURS.flatMap((entry) => entry.pages)];

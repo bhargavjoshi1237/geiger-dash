@@ -6,6 +6,7 @@ import {
   getPublishedSeoPagesByType,
 } from "@/lib/public-content/queries";
 import { resolveProductApp } from "@/lib/pages-studio/products";
+import { resourcesForPost } from "@/lib/resources/related";
 
 const SIBLING_COUNT = 6;
 const CROSS_COUNT = 3;
@@ -53,6 +54,7 @@ export async function SeoDetailPage({ pageType, product, slug }) {
       siblingPages={rotateFrom(siblings, page.slug, SIBLING_COUNT)}
       crossPages={rotateFrom(crossPages, page.slug, CROSS_COUNT)}
       crossType={crossType}
+      resources={resourcesForPost(page, 5).filter((resource) => !resource.href.endsWith(`/${page.slug}`)).slice(0, 4)}
     />
   );
 }

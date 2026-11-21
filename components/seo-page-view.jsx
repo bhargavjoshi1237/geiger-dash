@@ -82,6 +82,7 @@ export function SeoPageView({
   siblingPages = [],
   crossPages = [],
   crossType,
+  resources = [],
 }) {
   const hub = PAGE_TYPE_HUB[pageType] || PAGE_TYPE_HUB.solution;
   const productApp = resolveProductApp(page.product);
@@ -199,6 +200,23 @@ export function SeoPageView({
                   <time className="mt-auto pt-6 text-xs text-muted-foreground">
                     {formatDate(post.published_at)}
                   </time>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {resources.length ? (
+          <section className="mt-20">
+            <h2 className="text-2xl font-semibold tracking-tight">Tools for this</h2>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {resources.map((resource) => (
+                <Link key={resource.href} href={resource.href} className="group flex flex-col rounded-xl border border-border bg-card/70 p-5 transition-colors hover:bg-muted/50">
+                  <span className="inline-flex items-start justify-between gap-3 text-sm font-medium">
+                    {resource.label}
+                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
+                  <span className="mt-2 text-xs leading-5 text-muted-foreground">{resource.description}</span>
                 </Link>
               ))}
             </div>

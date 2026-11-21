@@ -35,6 +35,8 @@ export const metadata = {
     siteName: "Geiger Studios",
     type: "website",
   },
+  // Google Search Console ownership tag; set GOOGLE_SITE_VERIFICATION to the token from the HTML-tag method.
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 export default async function RootLayout({ children }) {

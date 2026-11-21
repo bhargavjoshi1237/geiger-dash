@@ -3,11 +3,12 @@ import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { tools, toolsIndexFeatures } from "@/lib/tools/tool-content";
+import { CALCULATOR_HUB_HREF, FEE_PLATFORMS, calculatorHref } from "@/lib/resources/ticket-fees";
 
 export const metadata = {
-  title: "Free Image Tools",
+  title: "Free Image Tools & Ticket Fee Calculators",
   description:
-    "Crop, resize, compress, and convert PNG, JPG, and WebP images with free browser-based tools. No uploads, account, or watermark.",
+    "Crop, resize, compress, and convert PNG, JPG, and WebP images with free browser-based tools, and compare ticket fees on Eventbrite, Luma, Posh, DICE and more.",
   alternates: { canonical: "/tools" },
   openGraph: {
     title: "Free Image Tools | Geiger Studios",
@@ -81,6 +82,22 @@ export default function ToolsPage() {
                 </Link>
               );
             })}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 sm:pb-20">
+          <h2 className="text-2xl font-semibold tracking-tight">Ticket fee calculators</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">See what each ticketing platform takes from a sale and what you keep, with sources for every fee.</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[{ href: CALCULATOR_HUB_HREF, name: "Compare all platforms", tagline: "Every platform's fees for one ticket price." }, ...FEE_PLATFORMS.map((platform) => ({ href: calculatorHref(platform), name: `${platform.name} fee calculator`, tagline: platform.tagline }))].map((item) => (
+              <Link key={item.href} href={item.href} className="group rounded-xl border border-border bg-surface-subtle p-5 transition-colors hover:border-border-strong hover:bg-surface-card">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-sm font-medium">{item.name}</h3>
+                  <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                </div>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.tagline}</p>
+              </Link>
+            ))}
           </div>
         </section>
 

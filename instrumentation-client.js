@@ -17,7 +17,21 @@ export function onRouterTransitionStart(url) {
   muteGoogleAnalyticsOutsidePublicSite(new URL(url, window.location.href).pathname);
 }
 
-if (token && host) {
+const INTERNAL_KEY = "geiger_internal_traffic";
+
+// Visiting any page with ?internal=on marks this browser as the team's own and stops PostHog on it; ?internal=off undoes it.
+function isInternalBrowser() {
+  try {
+    const flag = new URLSearchParams(window.location.search).get("internal");
+    if (flag === "on") window.localStorage.setItem(INTERNAL_KEY, "1");
+    if (flag === "off") window.localStorage.removeItem(INTERNAL_KEY);
+    return window.localStorage.getItem(INTERNAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+if (token && host && !isInternalBrowser()) {
   posthog.init(token, {
     api_host: POSTHOG_RELAY_PATH,
     ui_host: host,

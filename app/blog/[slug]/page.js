@@ -11,6 +11,7 @@ import {
   getRelatedBlogPosts,
 } from "@/lib/public-content/queries";
 import { authorSameAs } from "@/lib/posts/authors";
+import { resourcesForPost } from "@/lib/resources/related";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
@@ -91,6 +92,7 @@ export default async function BlogPostPage({ params }) {
     post.author_profile_id ? getBlogAuthorById(post.author_profile_id) : null,
   ]);
   const authorHref = author ? `/blog/authors/${author.slug}` : null;
+  const resources = resourcesForPost(post);
 
   const publishedDate = formatDate(post.published_at);
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
@@ -214,6 +216,25 @@ export default async function BlogPostPage({ params }) {
             </aside>
           ) : null}
         </article>
+
+        {resources.length ? (
+          <aside className="mx-auto mt-14 max-w-3xl rounded-xl border border-border bg-surface-subtle p-6">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">Tools for this</h2>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {resources.map((resource) => (
+                <li key={resource.href}>
+                  <Link href={resource.href} className="group flex h-full flex-col rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/50">
+                    <span className="inline-flex items-center justify-between gap-3 text-sm font-medium text-foreground">
+                      {resource.label}
+                      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </span>
+                    <span className="mt-1.5 text-xs leading-5 text-muted-foreground">{resource.description}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        ) : null}
 
         {relatedPosts?.length ? (
           <section className="mt-20 border-t border-border/70 pt-10">
