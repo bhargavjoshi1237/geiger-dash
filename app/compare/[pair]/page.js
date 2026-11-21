@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
-import { ResourcePage } from "@/components/resources/resource-page";
+import { Calendar, ExternalLink, ShieldCheck, Ticket } from "lucide-react";
+import { ResourcePage, ResourceSection, Showcase, backdropFor } from "@/components/resources/resource-page";
 import { describePlan, formatMoney, ticketBreakdown } from "@/lib/resources/fee-math";
 import { COMPARE_SECTION, COMPARISONS, comparisonSlug, findComparison } from "@/lib/resources/comparisons";
-import { FEES_CHECKED, GEIGER, calculatorHref, defaultPlan, findFeePlatform } from "@/lib/resources/ticket-fees";
+import { FEES_CHECKED, GEIGER, STRIPE_ONLY_NOTE, calculatorHref, defaultPlan, findFeePlatform } from "@/lib/resources/ticket-fees";
 
 export const dynamicParams = false;
 
@@ -33,6 +33,8 @@ const GEIGER_PROFILE = {
   payouts: "Your own Stripe account, on Stripe's schedule",
   limits: "No discovery marketplace; a monthly plan from $29",
 };
+
+const PRICES = [10, 25, 50, 100];
 
 function resolve(slug) {
   const comparison = findComparison(slug);
@@ -78,7 +80,6 @@ export default async function ComparisonPage({ params }) {
   const { comparison, a, b } = resolved;
   const { title, description } = copyFor(a, b);
   const path = `/compare/${pair}`;
-  const prices = [10, 25, 50, 100];
   const columns = [
     { name: a.name, plan: defaultPlan(a), pass: defaultPlan(a).defaultPass },
     { name: b.name, plan: defaultPlan(b), pass: defaultPlan(b).defaultPass },
@@ -89,14 +90,14 @@ export default async function ComparisonPage({ params }) {
     { question: `Which is cheaper, ${a.name} or ${b.name}?`, answer: `On ${defaultPlan(a).label}: ${describePlan(defaultPlan(a))}. On ${defaultPlan(b).label}: ${describePlan(defaultPlan(b))}. On a $25 ticket you keep ${formatMoney(ticketBreakdown(defaultPlan(a), 25, defaultPlan(a).defaultPass).organiserGets)} on ${a.name} and ${formatMoney(ticketBreakdown(defaultPlan(b), 25, defaultPlan(b).defaultPass).organiserGets)} on ${b.name}, using each platform's default for who pays.` },
     { question: `Who pays the fees on ${a.name} and ${b.name}?`, answer: `${a.name}: ${a.whoPays} ${b.name}: ${b.whoPays}` },
     { question: `How fast do ${a.name} and ${b.name} pay out?`, answer: `${a.name}: ${a.payouts} ${b.name}: ${b.payouts}` },
-    { question: `Is there an alternative to ${a.name} and ${b.name} with no ticket fee?`, answer: `Geiger Events adds no fee per ticket. Sales are charged on your own Stripe account, so you pay only Stripe's processing fee (2.9% + 30¢ for a standard US card) plus a Geiger plan from $${GEIGER.monthly} a month. It has no discovery marketplace, so it suits organisers who bring their own audience.` },
+    { question: `Is there an alternative to ${a.name} and ${b.name} with no platform fee?`, answer: `Geiger Events takes no platform fee on tickets. ${STRIPE_ONLY_NOTE} Plans start at $${GEIGER.monthly} a month. It has no discovery marketplace, so it suits organisers who bring their own audience.` },
   ];
 
-  const others = COMPARISONS.filter((entry) => comparisonSlug(entry) !== pair).map((entry) => ({ href: `/compare/${comparisonSlug(entry)}`, label: `${findFeePlatform(entry.a)?.name} vs ${findFeePlatform(entry.b)?.name}`, description: "Fees, payouts and features side by side." }));
+  const others = COMPARISONS.filter((entry) => comparisonSlug(entry) !== pair).map((entry) => ({ href: `/compare/${comparisonSlug(entry)}`, kind: "Comparison", label: `${findFeePlatform(entry.a)?.name} vs ${findFeePlatform(entry.b)?.name}`, description: "Fees, payouts and features side by side." }));
   const related = [
-    { href: calculatorHref(a), label: `${a.name} fee calculator`, description: `Work out ${a.name} fees for your own ticket price.` },
-    { href: calculatorHref(b), label: `${b.name} fee calculator`, description: `Work out ${b.name} fees for your own ticket price.` },
-    ...[a, b].filter((platform) => platform.alternativeHref).map((platform) => ({ href: platform.alternativeHref, label: `${platform.name} alternative`, description: `How Geiger Events compares with ${platform.name}.` })),
+    { href: calculatorHref(a), kind: "Fee calculator", label: `${a.name} fee calculator`, description: `Work out ${a.name} fees for your own ticket price.` },
+    { href: calculatorHref(b), kind: "Fee calculator", label: `${b.name} fee calculator`, description: `Work out ${b.name} fees for your own ticket price.` },
+    ...[a, b].filter((platform) => platform.alternativeHref).map((platform) => ({ href: platform.alternativeHref, kind: "Alternative", label: `${platform.name} alternative`, description: `How Geiger Events compares with ${platform.name}.` })),
     ...others,
   ].slice(0, 9);
 
@@ -104,14 +105,63 @@ export default async function ComparisonPage({ params }) {
     <ResourcePage
       section={COMPARE_SECTION}
       path={path}
+      kind="Comparison"
       title={title}
       description={description}
-      highlights={["Fees on real ticket prices", "Payouts and refunds", "Features side by side"]}
-      checked={FEES_CHECKED}
+      meta={[
+        { icon: Calendar, label: `Checked ${FEES_CHECKED}` },
+        { icon: ShieldCheck, label: "From each platform's own pages" },
+        { icon: Ticket, label: "US organisers, USD" },
+      ]}
+      showcase={
+        <Showcase backdrop={backdropFor(path)} label={`${title}: buyer pays / you keep`}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                  <th className="px-4 py-3 font-medium">Ticket price</th>
+                  {columns.map((column) => (
+                    <th key={column.name} className="px-4 py-3 text-right font-medium">
+                      {column.name}
+                      {column.isGeiger ? <span className="block font-normal">Stripe fee only</span> : null}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PRICES.map((price) => (
+                  <tr key={price} className="border-b border-border/70">
+                    <td className="px-4 py-3.5 font-medium">{formatMoney(price)}</td>
+                    {columns.map((column) => {
+                      const ticket = ticketBreakdown(column.plan, price, column.pass);
+                      return (
+                        <td key={column.name} className={`px-4 py-3.5 text-right tabular-nums ${column.isGeiger ? "bg-muted/40" : ""}`}>
+                          <span className="text-muted-foreground">{formatMoney(ticket.buyerPays)}</span> / <span className="font-semibold">{formatMoney(ticket.organiserGets)}</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+                <tr>
+                  <td className="px-4 py-3.5 align-top text-xs text-muted-foreground">Fee model</td>
+                  {columns.map((column) => (
+                    <td key={column.name} className={`px-4 py-3.5 text-right align-top text-xs leading-5 text-muted-foreground ${column.isGeiger ? "bg-muted/40" : ""}`}>
+                      {describePlan(column.plan)}{column.plan.estimate ? " (estimate)" : ""}{column.isGeiger ? `; plan from $${GEIGER.monthly}/month` : ""}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="px-4 pt-4 text-xs leading-5 text-muted-foreground">
+            Each platform&apos;s default for who pays. Geiger Events takes no platform fee: the gap between its two figures is Stripe&apos;s card fee only. Standard US card rates, taxes excluded.
+          </p>
+        </Showcase>
+      }
       faqs={faqs}
       related={related}
-      relatedTitle="Fee calculators and more comparisons"
-      cta={{ title: `A third option: no fee per ticket`, body: GEIGER.summary, href: GEIGER.href, label: "See Geiger Events ticketing" }}
+      relatedTitle="Calculators and more comparisons"
+      cta={{ title: "A third option: no platform fee", body: GEIGER.summary, href: GEIGER.href, label: "See Geiger Events ticketing" }}
       jsonLd={[
         {
           "@context": "https://schema.org",
@@ -124,104 +174,64 @@ export default async function ComparisonPage({ params }) {
         },
       ]}
     >
-      <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        <div className="grid gap-4 md:grid-cols-2">
+      <ResourceSection title="Which one fits">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2">
           {[
             [a, comparison.chooseA],
             [b, comparison.chooseB],
           ].map(([platform, reason]) => (
-            <div key={platform.id} className="rounded-xl border border-border bg-background p-6">
+            <div key={platform.id} className="bg-background p-6 sm:p-8">
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Choose {platform.name} if</p>
-              <p className="mt-3 text-sm leading-6 text-foreground">{reason}</p>
+              <p className="mt-4 text-lg leading-8 tracking-tight text-foreground">{reason}</p>
             </div>
           ))}
         </div>
-      </section>
+      </ResourceSection>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6">
-        <h2 className="text-3xl font-semibold tracking-[-0.035em]">Fees on common ticket prices</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Each platform&apos;s default for who pays: buyer pays / you keep. Standard US card rates, taxes excluded.
-        </p>
-        <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-background">
-          <table className="w-full min-w-[640px] text-sm">
+      <ResourceSection title="Features side by side" note={String(PROFILE_ROWS.length).padStart(2, "0")}>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card/70">
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="px-4 py-3 font-medium">Ticket price</th>
-                {columns.map((column) => <th key={column.name} className="px-4 py-3 text-right font-medium">{column.name}</th>)}
+                <th className="w-44 px-5 py-3 font-medium" />
+                <th className="px-5 py-3 font-medium">{a.name}</th>
+                <th className="px-5 py-3 font-medium">{b.name}</th>
+                <th className="px-5 py-3 font-medium">{GEIGER.name}</th>
               </tr>
             </thead>
             <tbody>
-              {prices.map((price) => (
-                <tr key={price} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3 font-medium">{formatMoney(price)}</td>
-                  {columns.map((column) => {
-                    const ticket = ticketBreakdown(column.plan, price, column.pass);
-                    return (
-                      <td key={column.name} className={`px-4 py-3 text-right tabular-nums ${column.isGeiger ? "bg-surface-subtle" : ""}`}>
-                        <span className="text-muted-foreground">{formatMoney(ticket.buyerPays)}</span> / <span className="font-medium">{formatMoney(ticket.organiserGets)}</span>
-                      </td>
-                    );
-                  })}
+              {PROFILE_ROWS.map(([key, label]) => (
+                <tr key={key} className="border-b border-border/70 align-top last:border-0">
+                  <th scope="row" className="px-5 py-4 text-left text-xs font-medium text-muted-foreground">{label}</th>
+                  <td className="px-5 py-4 leading-6">{a.profile[key]}</td>
+                  <td className="px-5 py-4 leading-6">{b.profile[key]}</td>
+                  <td className="bg-muted/40 px-5 py-4 leading-6">{GEIGER_PROFILE[key]}</td>
                 </tr>
               ))}
-              <tr>
-                <td className="px-4 py-3 text-xs text-muted-foreground">Fee model</td>
-                {columns.map((column) => (
-                  <td key={column.name} className={`px-4 py-3 text-right text-xs text-muted-foreground ${column.isGeiger ? "bg-surface-subtle" : ""}`}>
-                    {describePlan(column.plan)}{column.plan.estimate ? " (estimate)" : ""}{column.isGeiger ? `; plan from $${GEIGER.monthly}/month` : ""}
-                  </td>
-                ))}
-              </tr>
             </tbody>
           </table>
         </div>
-      </section>
+      </ResourceSection>
 
-      <section className="border-y border-border bg-surface-subtle/50">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <h2 className="text-3xl font-semibold tracking-[-0.035em]">Features side by side</h2>
-          <div className="mt-8 overflow-x-auto rounded-xl border border-border bg-background">
-            <table className="w-full min-w-[760px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="w-44 px-4 py-3 font-medium" />
-                  <th className="px-4 py-3 font-medium">{a.name}</th>
-                  <th className="px-4 py-3 font-medium">{b.name}</th>
-                  <th className="px-4 py-3 font-medium">{GEIGER.name}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PROFILE_ROWS.map(([key, label]) => (
-                  <tr key={key} className="border-b border-border align-top last:border-0">
-                    <th scope="row" className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{label}</th>
-                    <td className="px-4 py-3 leading-6">{a.profile[key]}</td>
-                    <td className="px-4 py-3 leading-6">{b.profile[key]}</td>
-                    <td className="bg-surface-subtle px-4 py-3 leading-6">{GEIGER_PROFILE[key]}</td>
-                  </tr>
+      <ResourceSection title="Refunds and sources">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2">
+          {[a, b].map((platform) => (
+            <div key={platform.id} className="bg-background p-6">
+              <h3 className="text-base font-semibold tracking-tight">{platform.name}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{platform.refunds}</p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {platform.sources.slice(0, 2).map((source) => (
+                  <li key={source.url}>
+                    <Link href={source.url} rel="nofollow noopener" target="_blank" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                      {source.label} <ExternalLink className="size-3" />
+                    </Link>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            {[a, b].map((platform) => (
-              <div key={platform.id}>
-                <h3 className="text-base font-medium">{platform.name} refunds</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{platform.refunds}</p>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {platform.sources.slice(0, 2).map((source) => (
-                    <li key={source.url}>
-                      <Link href={source.url} rel="nofollow noopener" target="_blank" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
-                        {source.label} <ExternalLink className="size-3" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+              </ul>
+            </div>
+          ))}
         </div>
-      </section>
+      </ResourceSection>
     </ResourcePage>
   );
 }

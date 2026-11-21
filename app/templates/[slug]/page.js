@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { ResourcePage } from "@/components/resources/resource-page";
+import { GitBranch, Layers, ListChecks } from "lucide-react";
+import { ResourcePage, ResourceSection, Showcase, backdropFor } from "@/components/resources/resource-page";
 import { FormTemplatePreview } from "@/components/resources/form-template-preview";
 import { FORM_TEMPLATES, TEMPLATES_SECTION, findTemplate } from "@/lib/resources/form-templates";
 
@@ -29,24 +30,37 @@ export default async function FormTemplatePage({ params }) {
   if (!template) notFound();
 
   const path = `/templates/${template.slug}`;
-  const questionCount = template.fields.filter((field) => !field.section).length;
+  const questions = template.fields.filter((field) => !field.section);
+  const required = questions.filter((field) => field.required).length;
+  const conditional = questions.filter((field) => field.logic).length;
   const related = [
-    ...template.related.map((postSlug) => ({ href: `/blog/${postSlug}`, label: postTitle(postSlug), description: "From the Geiger blog" })),
-    ...FORM_TEMPLATES.filter((other) => other.slug !== template.slug).slice(0, 5 - Math.min(template.related.length, 2)).map((other) => ({ href: `/templates/${other.slug}`, label: `${other.name} template`, description: other.useFor })),
+    ...template.related.map((postSlug) => ({ href: `/blog/${postSlug}`, kind: "Blog", label: postTitle(postSlug), description: "From the Geiger blog" })),
+    ...FORM_TEMPLATES.filter((other) => other.slug !== template.slug).map((other) => ({ href: `/templates/${other.slug}`, kind: "Form template", label: `${other.name} template`, description: other.useFor })),
   ].slice(0, 6);
 
   return (
     <ResourcePage
       section={TEMPLATES_SECTION}
       path={path}
+      kind="Form template"
       title={template.title}
       description={template.description}
-      highlights={[`${questionCount} questions`, ...template.highlights]}
+      meta={[
+        { icon: ListChecks, label: `${questions.length} questions, ${required} required` },
+        conditional ? { icon: GitBranch, label: `${conditional} shown only when they apply` } : null,
+        { icon: Layers, label: "Built from Geiger Forms field types" },
+      ].filter(Boolean)}
+      showcase={
+        <Showcase backdrop={backdropFor(path)} label={`${template.name} · Geiger Forms`}>
+          <FormTemplatePreview template={template} />
+        </Showcase>
+      }
       faqs={template.faqs}
       related={related}
+      relatedTitle="Related templates and guides"
       cta={{
         title: "Build this form in Geiger Forms",
-        body: "Recreate it in minutes with the same field types and show-when logic, then share a link or embed it. Sell tickets with the same questions in Geiger Events, with no Geiger fee per ticket.",
+        body: "Recreate it in minutes with the same field types and show-when logic, then share a link or embed it. Or ask the same questions at checkout in Geiger Events, which takes no platform fee on tickets; the only per-ticket fee is Stripe's card processing fee.",
         href: "/forms",
         label: "See Geiger Forms",
       }}
@@ -60,26 +74,21 @@ export default async function FormTemplatePage({ params }) {
         },
       ]}
     >
-      <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="mx-auto mb-6 max-w-3xl text-sm leading-6 text-muted-foreground">
-          <span className="font-medium text-foreground">Use it for:</span> {template.useFor} {questionCount} questions, required ones marked with *.
-        </p>
-        <FormTemplatePreview template={template} />
-      </section>
+      <ResourceSection title="Use it for">
+        <p className="max-w-3xl text-lg leading-8 tracking-tight text-foreground/85">{template.useFor}</p>
+      </ResourceSection>
 
-      <section className="border-y border-border bg-surface-subtle/50">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <h2 className="text-3xl font-semibold tracking-[-0.035em]">Why these questions work</h2>
-          <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
-            {template.tips.map((tip) => (
-              <div key={tip.title} className="bg-background p-6">
-                <h3 className="text-base font-medium">{tip.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{tip.body}</p>
-              </div>
-            ))}
-          </div>
+      <ResourceSection title="Why these questions work" note={String(template.tips.length).padStart(2, "0")}>
+        <div className="grid overflow-hidden rounded-xl border-l border-t border-border sm:grid-cols-2">
+          {template.tips.map((tip, index) => (
+            <div key={tip.title} className="border-b border-r border-border bg-background p-6">
+              <span className="font-mono text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
+              <h3 className="mt-6 text-lg font-semibold tracking-tight">{tip.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{tip.body}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </ResourceSection>
     </ResourcePage>
   );
 }

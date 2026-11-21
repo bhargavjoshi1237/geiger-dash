@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
-import { ResourcePage } from "@/components/resources/resource-page";
+import { Calendar, ExternalLink, ShieldCheck, Ticket } from "lucide-react";
+import { ResourcePage, ResourceSection, Showcase, backdropFor } from "@/components/resources/resource-page";
 import { FeeCalculator } from "@/components/resources/fee-calculator";
 import { describePlan, formatMoney, ticketBreakdown } from "@/lib/resources/fee-math";
-import { CALCULATOR_HUB_HREF, FEES_CHECKED, FEE_PLATFORMS, GEIGER, calculatorHref, calculatorSlug, defaultPlan } from "@/lib/resources/ticket-fees";
+import { CALCULATOR_HUB_HREF, FEES_CHECKED, FEE_PLATFORMS, GEIGER, STRIPE_ONLY_NOTE, calculatorHref, calculatorSlug, defaultPlan } from "@/lib/resources/ticket-fees";
 import { comparisonsFor } from "@/lib/resources/comparisons";
 
 export const dynamicParams = false;
@@ -62,32 +62,41 @@ export default async function FeeCalculatorPage({ params }) {
       question: `How much does ${platform.name} charge per ticket?`,
       answer: `${platform.plans.map((entry) => `${entry.label}: ${describePlan(entry)}`).join(". ")}.${estimate ? ` ${platform.name} doesn't publish this fee, so it is an estimate.` : ""}`,
     },
-    { question: `What do I keep from a $25 ticket on ${platform.name}?`, answer: `About ${formatMoney(sample.organiserGets)} on ${plan.label} when you absorb the fees: ${formatMoney(sample.platformFee)} goes to ${platform.name} and ${formatMoney(sample.processing)} to card processing. On Geiger Events you keep ${formatMoney(onGeiger.organiserGets)}, because Geiger adds no fee per ticket.` },
+    { question: `What do I keep from a $25 ticket on ${platform.name}?`, answer: `About ${formatMoney(sample.organiserGets)} on ${plan.label} when you absorb the fees: ${formatMoney(sample.platformFee)} goes to ${platform.name} and ${formatMoney(sample.processing)} to card processing. On Geiger Events you keep ${formatMoney(onGeiger.organiserGets)}: Geiger takes no platform fee, and the ${formatMoney(onGeiger.processing)} is Stripe's card fee only.` },
     { question: `Who pays ${platform.name}'s fees, the organiser or the buyer?`, answer: platform.whoPays },
     { question: `Does ${platform.name} charge for free events?`, answer: platform.freeEvents },
     { question: `When does ${platform.name} pay out ticket money?`, answer: platform.payouts },
     { question: `Are ${platform.name} fees refunded?`, answer: platform.refunds },
-    { question: `Is there a ${platform.name} alternative with no ticket fees?`, answer: `Geiger Events adds no fee per ticket. Sales are charged on your own Stripe account, so you pay only Stripe's processing fee (2.9% + 30¢ for a standard US card) plus a Geiger plan from $${GEIGER.monthly} a month.` },
+    { question: `Is there a ${platform.name} alternative with no platform fee?`, answer: `Geiger Events takes no platform fee on tickets. ${STRIPE_ONLY_NOTE} You also pay for a Geiger plan, from $${GEIGER.monthly} a month.` },
   ];
 
   const related = [
-    { href: CALCULATOR_HUB_HREF, label: "Compare every platform's fees", description: "One ticket price, every platform side by side." },
-    platform.alternativeHref ? { href: platform.alternativeHref, label: `${platform.name} alternative`, description: `How Geiger Events compares with ${platform.name} for organisers.` } : null,
-    ...comparisonsFor(platform.id).map((comparison) => ({ href: comparison.href, label: comparison.title, description: comparison.description })),
-    ...FEE_PLATFORMS.filter((other) => other.id !== platform.id).map((other) => ({ href: calculatorHref(other), label: `${other.name} fee calculator`, description: other.tagline })),
+    { href: CALCULATOR_HUB_HREF, kind: "Fee calculator", label: "Compare every platform's fees", description: "One ticket price, every platform side by side." },
+    platform.alternativeHref ? { href: platform.alternativeHref, kind: "Alternative", label: `${platform.name} alternative`, description: `How Geiger Events compares with ${platform.name} for organisers.` } : null,
+    ...comparisonsFor(platform.id).map((comparison) => ({ href: comparison.href, kind: "Comparison", label: comparison.title, description: comparison.description })),
+    ...FEE_PLATFORMS.filter((other) => other.id !== platform.id).map((other) => ({ href: calculatorHref(other), kind: "Fee calculator", label: `${other.name} fee calculator`, description: other.tagline })),
   ].filter(Boolean).slice(0, 9);
 
   return (
     <ResourcePage
       section={TOOLS_SECTION}
       path={path}
+      kind="Fee calculator"
       title={`${platform.name} fee calculator`}
       description={description}
-      highlights={[`${platform.name} fee + card processing`, "What buyers pay", "Price to hit your target"]}
-      checked={FEES_CHECKED}
+      meta={[
+        { icon: Calendar, label: `Checked ${FEES_CHECKED}` },
+        { icon: ShieldCheck, label: estimate ? "Estimated; fee not published" : `From ${platform.name}'s own pages` },
+        { icon: Ticket, label: "US organisers, USD" },
+      ]}
+      showcase={
+        <Showcase backdrop={backdropFor(path)} label={`${platform.name} fee calculator`}>
+          <FeeCalculator platform={platform} geiger={GEIGER} />
+        </Showcase>
+      }
       faqs={faqs}
       related={related}
-      relatedTitle="More fee calculators and comparisons"
+      relatedTitle="More calculators and comparisons"
       cta={{
         title: "Keep the platform fee",
         body: GEIGER.summary,
@@ -107,77 +116,67 @@ export default async function FeeCalculatorPage({ params }) {
         },
       ]}
     >
-      <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="rounded-2xl border border-border bg-card/65 p-3 shadow-[0_24px_80px_rgb(0_0_0/0.08)] sm:p-5">
-          <FeeCalculator platform={platform} geiger={GEIGER} />
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-surface-subtle/50">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:py-20">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-[-0.035em]">{platform.name} fees explained</h2>
-            <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">US organisers selling in US dollars, checked against {platform.name}&apos;s own pages on {FEES_CHECKED}.</p>
-          </div>
-          <div className="grid gap-6">
-            <div className="overflow-x-auto rounded-xl border border-border bg-background">
-              <table className="w-full min-w-[520px] text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    <th className="px-4 py-3 font-medium">Plan</th>
-                    <th className="px-4 py-3 font-medium">Fee per ticket</th>
-                    <th className="px-4 py-3 text-right font-medium">On a $25 ticket you keep</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {platform.plans.map((entry) => (
-                    <tr key={entry.id} className="border-b border-border last:border-0">
-                      <td className="px-4 py-3 font-medium">{entry.label}{entry.estimate ? <span className="ml-2 text-xs font-normal text-muted-foreground">estimate</span> : null}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{describePlan(entry)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{formatMoney(ticketBreakdown(entry, 25).organiserGets)}</td>
-                    </tr>
-                  ))}
-                  <tr className="bg-surface-subtle">
-                    <td className="px-4 py-3 font-medium">{GEIGER.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{describePlan(GEIGER.plan)}, plan from ${GEIGER.monthly}/month</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{formatMoney(onGeiger.organiserGets)}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <dl className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
-              {[
-                ["Who pays the fees", platform.whoPays],
-                ["Free events", platform.freeEvents],
-                ["Payouts", platform.payouts],
-                ["Refunds", platform.refunds],
-              ].map(([term, detail]) => (
-                <div key={term} className="bg-background p-5">
-                  <dt className="text-sm font-medium">{term}</dt>
-                  <dd className="mt-2 text-sm leading-6 text-muted-foreground">{detail}</dd>
-                </div>
+      <ResourceSection title={`${platform.name} fees explained`} note={`Checked ${FEES_CHECKED}`}>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card/70">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                <th className="px-5 py-3 font-medium">Plan</th>
+                <th className="px-5 py-3 font-medium">Fee per ticket</th>
+                <th className="px-5 py-3 text-right font-medium">You keep from $25</th>
+              </tr>
+            </thead>
+            <tbody>
+              {platform.plans.map((entry) => (
+                <tr key={entry.id} className="border-b border-border/70">
+                  <td className="px-5 py-4 font-medium">{entry.label}{entry.estimate ? <span className="ml-2 text-xs font-normal text-muted-foreground">estimate</span> : null}</td>
+                  <td className="px-5 py-4 text-muted-foreground">{describePlan(entry)}</td>
+                  <td className="px-5 py-4 text-right tabular-nums">{formatMoney(ticketBreakdown(entry, 25).organiserGets)}</td>
+                </tr>
               ))}
-            </dl>
-            {platform.notes.length ? (
-              <ul className="grid gap-2 text-sm leading-6 text-muted-foreground">
-                {platform.notes.map((note) => <li key={note} className="border-l-2 border-border pl-4">{note}</li>)}
-              </ul>
-            ) : null}
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Sources</p>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {platform.sources.map((source) => (
-                  <li key={source.url}>
-                    <Link href={source.url} rel="nofollow noopener" target="_blank" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
-                      {source.label} <ExternalLink className="size-3" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              <tr className="bg-muted/40">
+                <td className="px-5 py-4 font-medium">{GEIGER.name}</td>
+                <td className="px-5 py-4 text-muted-foreground">{describePlan(GEIGER.plan)}; plan from ${GEIGER.monthly}/month</td>
+                <td className="px-5 py-4 text-right tabular-nums">{formatMoney(onGeiger.organiserGets)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </section>
+
+        <dl className="mt-6 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
+          {[
+            ["Who pays the fees", platform.whoPays],
+            ["Free events", platform.freeEvents],
+            ["Payouts", platform.payouts],
+            ["Refunds", platform.refunds],
+          ].map(([term, detail]) => (
+            <div key={term} className="bg-background p-6">
+              <dt className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{term}</dt>
+              <dd className="mt-3 text-sm leading-7 text-foreground/85">{detail}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {platform.notes.length ? (
+          <div className="mt-8 grid gap-4">
+            {platform.notes.map((note) => (
+              <p key={note} className="border-l-2 border-foreground/30 pl-5 text-sm leading-7 text-muted-foreground">{note}</p>
+            ))}
+          </div>
+        ) : null}
+      </ResourceSection>
+
+      <ResourceSection title="Sources" note={String(platform.sources.length).padStart(2, "0")}>
+        <ul className="flex flex-wrap gap-2">
+          {platform.sources.map((source) => (
+            <li key={source.url}>
+              <Link href={source.url} rel="nofollow noopener" target="_blank" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                {source.label} <ExternalLink className="size-3" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </ResourceSection>
     </ResourcePage>
   );
 }

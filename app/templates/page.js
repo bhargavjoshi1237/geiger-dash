@@ -15,11 +15,25 @@ export const metadata = {
 };
 
 export default function TemplatesPage() {
+  const items = FORM_TEMPLATES.map((template) => {
+    const questions = template.fields.filter((field) => !field.section);
+    return {
+      href: `/templates/${template.slug}`,
+      label: `${template.name} template`,
+      badge: "Form template",
+      meta: `${questions.length} questions · ${template.highlights.join(" · ")}`,
+      description: template.description,
+      previewTitle: template.name,
+      preview: questions.slice(0, 4).map((field) => ({ label: field.label, value: field.type })),
+    };
+  });
+
   return (
     <ResourceIndex
-      title="Free form templates for events"
+      title="Form templates for events"
       description="Copy the questions, or build any of these in Geiger Forms with the same field types and show-when logic. Every template lists exactly what to ask and why."
-      items={FORM_TEMPLATES.map((template) => ({ href: `/templates/${template.slug}`, label: template.name, description: template.useFor }))}
+      listTitle="All templates"
+      items={items}
     />
   );
 }

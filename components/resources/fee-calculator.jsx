@@ -128,14 +128,14 @@ export function FeeCalculator({ platform, geiger }) {
         <div className="rounded-xl border border-border bg-surface-subtle p-5">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">The same sale on {geiger.name}</p>
           <div className="mt-3 divide-y divide-border">
-            <Row label="Geiger fee per ticket" value={formatMoney(0)} muted />
-            <Row label="Stripe processing (2.9% + 30¢)" value={`−${formatMoney(result.onGeiger.processing)}`} muted />
+            <Row label="Geiger platform fee" value={`${formatMoney(0)} (none)`} muted />
+            <Row label="Stripe card fee (2.9% + 30¢), charged by Stripe" value={`−${formatMoney(result.onGeiger.processing)}`} muted />
             <Row label="You receive per ticket" value={formatMoney(result.onGeiger.organiserGets)} />
             <Row label={`You receive on ${tickets.toLocaleString("en-US")} tickets`} value={formatMoney(result.geigerTotal)} strong />
           </div>
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {passToBuyer && result.ticket.buyerPays > result.onGeiger.buyerPays
-              ? `Here your buyers pay ${formatMoney(result.ticket.buyerPays)} a ticket. On Geiger they pay the ${formatMoney(result.onGeiger.buyerPays)} ticket price with no fee added, ${formatMoney(result.ticket.buyerPays - result.onGeiger.buyerPays)} less each, and you keep ${formatMoney(result.onGeiger.organiserGets)} after Stripe.`
+              ? `Here your buyers pay ${formatMoney(result.ticket.buyerPays)} a ticket. On Geiger they pay the ${formatMoney(result.onGeiger.buyerPays)} ticket price with no fee added, ${formatMoney(result.ticket.buyerPays - result.onGeiger.buyerPays)} less each, and you keep ${formatMoney(result.onGeiger.organiserGets)} after Stripe's card fee. Geiger itself takes nothing per ticket.`
               : result.gainAfterPlan > 0
               ? `Counting the ${formatMoney(geiger.monthly)} Geiger Basic plan${plan.monthly ? ` and the ${formatMoney(plan.monthly)} ${platform.name} plan` : ""}, that's ${formatMoney(result.gainAfterPlan)} more than ${plan.label} for this sale.`
               : result.breakEven
@@ -199,7 +199,10 @@ export function FeeComparisonTable({ platforms, geiger }) {
                   <Link href={row.href} className="font-medium text-foreground underline-offset-4 hover:underline">{row.name}</Link>
                   {row.estimate ? <span className="ml-2 text-xs text-muted-foreground">estimate</span> : null}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{formatMoney(row.ticket.platformFee + row.ticket.processing)}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                  {formatMoney(row.ticket.platformFee + row.ticket.processing)}
+                  {row.isGeiger ? <span className="block text-[11px]">Stripe fee only</span> : null}
+                </td>
                 <td className="px-4 py-3 text-right tabular-nums">{formatMoney(row.ticket.organiserGets)}</td>
                 <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{row.monthly ? formatMoney(row.monthly) : "—"}</td>
                 <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatMoney(row.total)}</td>
@@ -208,7 +211,7 @@ export function FeeComparisonTable({ platforms, geiger }) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs leading-5 text-muted-foreground">Organiser absorbs all fees. Standard US card rates; taxes, international cards and currency conversion are excluded. Monthly plan prices are subtracted once from the total.</p>
+      <p className="text-xs leading-5 text-muted-foreground">Organiser absorbs all fees. Geiger Events takes no platform fee; its row is Stripe&apos;s card processing fee only. Standard US card rates; taxes, international cards and currency conversion are excluded. Monthly plan prices are subtracted once from the total.</p>
     </div>
   );
 }

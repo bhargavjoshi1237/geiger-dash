@@ -9,12 +9,12 @@ export function FormTemplatePreview({ template }) {
   const numbers = template.fields.reduce((list, field) => [...list, field.section ? null : list.filter(Boolean).length + 1], []);
 
   return (
-    <div className="mx-auto max-w-3xl rounded-xl border border-border bg-background">
-      <div className="border-b border-border px-5 py-4 sm:px-7">
+    <div className="mx-auto max-w-3xl">
+      <div className="px-5 pb-4 pt-2 sm:px-7">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Form preview</p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight">{template.name}</h2>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">{template.name}</h2>
       </div>
-      <ol className="divide-y divide-border">
+      <ol className="divide-y divide-border overflow-hidden rounded-lg border border-border">
         {template.fields.map((field, index) => {
           if (field.section) {
             return (
