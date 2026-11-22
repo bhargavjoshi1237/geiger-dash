@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SessionHeader } from "@/components/session-header";
 import { SessionLink } from "@/components/session-link";
 import Footer from "@geiger/ui/footer";
-import { GlassBackdrop } from "@geiger/ui/glass-backdrop";
+import { EclipseHero } from "@/components/eclipse-hero/eclipse_hero";
 import Section from "@/components/section";
 import LandingBoardShowcase from "@/components/notes-playground/LandingBoardShowcase";
 import EventsPlaygroundShowcase from "@/components/events-playground/EventsPlaygroundShowcase";
@@ -21,7 +21,7 @@ export const dynamic = "error";
 // ISR window: matches the notice cache so scheduled notices, new posts and the showcase shuffle refresh in the background.
 export const revalidate = 60;
 
-// Experimental duplicate of the home page with the fluted-glass hero in place of the grid; kept out of search until it replaces "/".
+// Experimental duplicate of the home page with the backlit-mark hero in place of the grid; kept out of search until it replaces "/".
 export const metadata = {
   title: "Landing preview",
   robots: {
@@ -39,33 +39,7 @@ export default function LandingV2() {
       <SessionHeader />
 
       <main className="relative z-10 flex flex-1 flex-col">
-        <section className="relative isolate mb-10 flex w-full flex-col items-center px-4 text-center sm:px-6">
-          <GlassBackdrop className="absolute inset-0 -z-10 mx-auto w-full max-w-[1200px]" />
-          <div className="flex max-w-3xl flex-col items-center pt-[220px] pb-[130px] sm:pt-[330px] sm:pb-[210px]">
-            <h1 className="text-4xl leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-foreground [font-family:var(--font-display)] [font-stretch:112%] sm:text-6xl dark:[text-shadow:0_4px_4px_rgb(0_0_0/0.15)]">
-              Built to Manage. Designed to Create
-            </h1>
-            <p className="mt-6 max-w-xl text-sm text-balance text-foreground/85 sm:text-lg dark:[text-shadow:0_4px_4px_rgb(0_0_0/0.25)]">
-              Turn your ideas into something real with a single suite that combines solid management tools and
-              easy-to-use creative features.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <SessionLink
-                label="Log in to Start"
-                signedInLabel="Get in Your Workspace"
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:text-base"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </SessionLink>
-              <Link
-                href="/why-geiger"
-                className="inline-flex h-10 items-center rounded-full border border-border-strong bg-background/40 px-6 text-sm font-medium text-foreground backdrop-blur-md transition-colors hover:bg-surface-hover/70 sm:text-base"
-              >
-                Why Geiger
-              </Link>
-            </div>
-          </div>
-        </section>
+        <EclipseHero />
 
         <Section />
 
